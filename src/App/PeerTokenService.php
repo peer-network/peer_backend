@@ -92,10 +92,10 @@ class PeerTokenService
                 return self::respondWithError(30201);
             }
 
+            $userConfig  = ConstantsConfig::user();
+            $inputConfig = ConstantsConfig::input();
             $message = isset($args['message']) ? (string) $args['message'] : null;
             if ($message !== null) {
-                $userConfig  = ConstantsConfig::user();
-                $inputConfig = ConstantsConfig::input();
                 $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
                 $maxLength      = (int) $messageConfig['MAX_LENGTH'];

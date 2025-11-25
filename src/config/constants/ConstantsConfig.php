@@ -122,8 +122,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     SLUG: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     LIQUIDITY: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     AVATAR: array{MAX_SIZE_MB: int},
-     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, FORBID_CONTROL_CHARS: string, PATTERN_URL: string},
-     *     TRANSACTION: array{MIN_TOKENS: float, MAX_DECIMALS: int}
+     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN_URL: string},
+     *     TRANSACTION: array{MIN_AMOUNT: float, MAX_DECIMALS: int}
      * }
      */
     public static function user()
