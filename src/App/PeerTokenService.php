@@ -93,29 +93,28 @@ class PeerTokenService
             }
 
             $message = isset($args['message']) ? (string) $args['message'] : null;
-            // NOTE for QA: previously we used the wrong response code 30210 here;
-            // a new unified response code should be introduced for transfer-token message validation.
             if ($message !== null) {
                 $userConfig  = ConstantsConfig::user();
+                $inputConfig = ConstantsConfig::input();
                 $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
                 $maxLength      = (int) $messageConfig['MAX_LENGTH'];
-                $controlPattern = '/'.$messageConfig['FORBID_CONTROL_CHARS'].'/';
-                $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/i';
+                $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
+                $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/iu';
 
                 if (strlen($message) > $maxLength) {
                     $this->logger->warning('Transfer message length is too high', [
                         'maxLength' => $maxLength,
                     ]);
-                    return self::respondWithError(00000);
+                    return self::respondWithError(30270);
                 }
                 if (preg_match($controlPattern, $message) === 1) {
                     $this->logger->warning('Transfer message contains control characters');
-                    return self::respondWithError(00000);
+                    return self::respondWithError(30271);
                 }
                 if (preg_match($urlPattern, $message) === 1) {
                     $this->logger->warning('Transfer message contains URL/link');
-                    return self::respondWithError(00000);
+                    return self::respondWithError(30271);
                 }
             }
             $transferConfig = $userConfig['TRANSACTION'];

@@ -39,6 +39,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             "DAILY_FREE" => self::dailyFree(),
             "TOKENOMICS" => self::tokenomics(),
             "MINTING" => self::minting(),
+            "INPUT" => self::input(),
         ];
     }
     /**
@@ -234,6 +235,15 @@ class ConstantsConfig implements ConstantsConfigInterface
     public static function minting(): array
     {
         return ConstantsConfig::MINTING;
+    }
+    /**
+     * @return array{
+     *     FORBID_CONTROL_CHARS_PATTERN: string
+     * }
+     */
+    public static function input(): array
+    {
+        return ConstantsConfig::INPUT;
     }
 
     private const ONBOARDING = [
@@ -462,6 +472,10 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
+    private const INPUT = [
+        'FORBID_CONTROL_CHARS_PATTERN' => '[\x00-\x08\x0B-\x1F\x7F]',
+    ];
+
     private const USER = [
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
@@ -500,7 +514,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TRANSFER_MESSAGE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 500,
-            'FORBID_CONTROL_CHARS' => '[\x00-\x08\x0B-\x1F\x7F]',
             'PATTERN_URL' => '(https?:\/\/|www\.)',
         ],
         'TRANSACTION' => [
