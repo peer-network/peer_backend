@@ -748,8 +748,8 @@
         "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
-    "comment": "The numberoftokens field must be a number, greater than or equal to {USER.TRANSACTION.MIN_AMOUNT}, and less than the account balance",
-    "userFriendlyComment": "Token amount must be at least {USER.TRANSACTION.MIN_AMOUNT} PT and within your balance."
+        "comment": "The 'amount' field must be at least {USER.TRANSACTION.MIN_AMOUNT} and contain no more than {USER.TRANSACTION.MAX_DECIMALS} decimal places.",
+        "userFriendlyComment": "Amount must be at least {USER.TRANSACTION.MIN_AMOUNT} and include a maximum of {USER.TRANSACTION.MAX_DECIMALS} decimal places."
     },
     "30265": {
         "comment": "The 'content' field must be between {COMMENT.CONTENT.MIN_LENGTH} and {COMMENT.CONTENT.MAX_LENGTH} characters long",
