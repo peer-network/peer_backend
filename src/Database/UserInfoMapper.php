@@ -7,6 +7,7 @@ namespace Fawaz\Database;
 use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
@@ -365,7 +366,7 @@ class UserInfoMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         // Build WHERE/params from specs, targeting users as alias `u`
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(\Fawaz\Services\ContentFiltering\Types\ContentType::user), $specifications);
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
 
         // BlockedBy: who blocked me -> select blocker user as `u`

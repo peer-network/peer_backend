@@ -770,12 +770,10 @@ class UserMapper
     public function fetchFriends(
         string $userId,
         array $specifications,
+        int $offset = 0,
+        int $limit = 10,
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-
 
         $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
@@ -837,12 +835,14 @@ class UserMapper
     public function fetchFollowers(
         string $userId,
         string $currentUserId,
-        array $specifications
+        array $specifications,
+        int $offset = 0,
+        int $limit = 10,
     ): array {
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int)$offset, 0);
+        $limit = min(max((int)$limit, 1), 20);
 
         $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
@@ -911,12 +911,11 @@ class UserMapper
     public function fetchFollowing(
         string $userId,
         string $currentUserId,
-        array $specifications
+        array $specifications,
+        int $offset = 0,
+        int $limit = 10,
     ): array {
         $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);

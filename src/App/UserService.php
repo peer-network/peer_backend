@@ -770,6 +770,8 @@ class UserService
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
@@ -811,12 +813,16 @@ class UserService
             $followers = $this->userMapper->fetchFollowers(
                 $userId,
                 $this->currentUserId,
-                $specs
+                $specs,
+                $offset,
+                $limit
             );
             $following = $this->userMapper->fetchFollowing(
                 $userId,
                 $this->currentUserId,
-                $specs
+                $specs,
+                $offset,
+                $limit
             );
 
             foreach ($followers as $profile) {
@@ -865,6 +871,8 @@ class UserService
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
@@ -910,7 +918,7 @@ class UserService
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs);
+            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {
