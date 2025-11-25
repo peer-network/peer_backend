@@ -769,8 +769,6 @@ class UserService
         $this->logger->debug('UserService.Follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         if (!$this->userMapper->isUserExistById($userId)) {
@@ -813,16 +811,12 @@ class UserService
             $followers = $this->userMapper->fetchFollowers(
                 $userId,
                 $this->currentUserId,
-                $specs,
-                $offset,
-                $limit
+                $specs
             );
             $following = $this->userMapper->fetchFollowing(
                 $userId,
                 $this->currentUserId,
-                $specs,
-                $offset,
-                $limit,
+                $specs
             );
 
             foreach ($followers as $profile) {
@@ -870,8 +864,6 @@ class UserService
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
@@ -907,10 +899,6 @@ class UserService
             $normalVisibilityStatusSpec
         ];
 
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(30201);
-        }
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
             return self::respondWithError(31007);
@@ -918,13 +906,11 @@ class UserService
 
         $this->logger->info('Fetching friends list', [
             'currentUserId' => $this->currentUserId,
-            'targetUserId'  => $userId,
-            'offset' => $offset,
-            'limit' => $limit
+            'targetUserId'  => $userId
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {

@@ -12,6 +12,9 @@ use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -212,25 +215,67 @@ class UserInfoService
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec
+        ];
 
         try {
-            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
-            if (isset($results['status']) && $results['status'] === 'error') {
-                $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $results;
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs);
+
+            $blockedBy = $lists['blockedBy'] ?? [];
+            $iBlocked = $lists['iBlocked'] ?? [];
+
+            foreach ($blockedBy as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
+            foreach ($iBlocked as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
             }
 
-            $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);
+            $affected = [
+                'blockedBy' => array_map(fn (Profile $p) => $p->getArrayCopy(), $blockedBy),
+                'iBlocked' => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
+            ];
 
-            return $results;
+            $counter = count($affected['blockedBy']) + count($affected['iBlocked']);
 
-        } catch (\Exception $e) {
+            $this->logger->info("UserInfoService.loadBlocklist found", ['counter' => $counter]);
+
+            return [
+                'status' => 'success',
+                'counter' => $counter,
+                'ResponseCode' => '11107',
+                'affectedRows' => $affected,
+            ];
+
+        } catch (\Throwable $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
             return $this::respondWithError(41008);
         }
     }
+    
     /* ----- unused function --------
         public function toggleProfilePrivacy(): array
         {

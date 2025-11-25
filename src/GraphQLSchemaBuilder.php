@@ -678,7 +678,7 @@ class GraphQLSchemaBuilder
             'BlockedUser' => [
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.BlockedUser Resolvers');
-                    return $root['userid'] ?? '';
+                    return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -688,6 +688,13 @@ class GraphQLSchemaBuilder
                 },
                 'slug' => function (array $root): int {
                     return $root['slug'] ?? 0;
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
             ],
             'BlockedUsers' => [
@@ -2558,9 +2565,12 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
+        $validation = RequestValidator::validate($args, []);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
         $this->logger->debug('Query.resolveBlocklist started');
@@ -3510,14 +3520,17 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
+        $validation = RequestValidator::validate($args, []);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
         $this->logger->debug('Query.resolveFriends started');
 
-        $results = $this->userService->getFriends($args);
+        $results = $this->userService->getFriends($validation);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveFriends successful');
 
