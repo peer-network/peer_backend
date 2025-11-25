@@ -472,8 +472,10 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
+    private const CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F]';
+
     private const INPUT = [
-        'FORBID_CONTROL_CHARS_PATTERN' => '[\x00-\x08\x0B-\x1F\x7F\x{FFFD}]',
+        'FORBID_CONTROL_CHARS_PATTERN' => self::CONTROL_CHARS_PATTERN,
     ];
 
     private const USER = [
@@ -518,7 +520,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.00000001,
-            'MAX_DECIMALS' =>8, 
+            'MAX_DECIMALS' => 8, 
         ]
     ];
 }
