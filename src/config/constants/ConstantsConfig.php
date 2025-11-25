@@ -473,7 +473,7 @@ class ConstantsConfig implements ConstantsConfigInterface
     ];
 
     private const INPUT = [
-        'FORBID_CONTROL_CHARS_PATTERN' => '[\x00-\x08\x0B-\x1F\x7F]',
+        'FORBID_CONTROL_CHARS_PATTERN' => '[\x00-\x08\x0B-\x1F\x7F\x{FFFD}]',
     ];
 
     private const USER = [
