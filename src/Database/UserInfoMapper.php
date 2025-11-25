@@ -357,13 +357,12 @@ class UserInfoMapper
     public function getBlockRelations(
         string $myUserId,
         array $specifications,
+        int $offset = 0,
+        int $limit = 10
     ): array {
         $this->logger->info('Fetching block relationships', [
             'myUserId' => $myUserId,
         ]);
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         // Build WHERE/params from specs, targeting users as alias `u`
         $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);

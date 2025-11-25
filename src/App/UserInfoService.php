@@ -213,6 +213,8 @@ class UserInfoService
     public function loadBlocklist(?array $args = []): array
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
+        $offset = max((int)($args['offset'] ?? 0), 0);
+        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
@@ -237,7 +239,7 @@ class UserInfoService
         ];
 
         try {
-            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs);
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
 
             $blockedBy = $lists['blockedBy'] ?? [];
             $iBlocked = $lists['iBlocked'] ?? [];
