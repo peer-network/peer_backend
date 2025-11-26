@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\ContentFiltering\Replacers;
 
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
@@ -73,8 +74,11 @@ class ContentReplacer
         if ($pattern->postMedia()) {
             $post->setMedia($pattern->postMedia());
         }
-        if (method_exists($pattern, 'postCover') && $pattern->postCover() !== null) {
+        if ($pattern->postCover()) {
             $post->setCover($pattern->postCover());
+        }
+        if ($pattern->postContentType()) {
+            $post->setContentType($pattern->postContentType());
         }
         if ($post->visibilityStatus() !== "illegal") {
             $post->setVisibilityStatus($pattern->visibilityStatus());

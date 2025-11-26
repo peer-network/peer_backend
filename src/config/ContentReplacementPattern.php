@@ -47,7 +47,26 @@ enum ContentReplacementPattern: string
             self::normal   => null,
             self::hidden   => null,
             self::deleted => null,
-            self::illegal => "/image/00000000-0000-0000-0000-000000000000.jpeg",
+            self::illegal => "[{\"path\":\"\\/image\\/default.jpg\",\"options\":{\"size\":\"69.89 KB\",\"resolution\":\"1500x1500\"}}]",
+        };
+    }
+
+    public function postCover(): ?string
+    {
+        return match ($this) {
+            self::normal   => null,
+            self::hidden   => null,
+            self::deleted => null,
+            self::illegal => "[{\"path\":\"\\/image\\/default.jpg\",\"options\":{\"size\":\"69.89 KB\",\"resolution\":\"1500x1500\"}}]",
+        };
+    }
+    public function postContentType(): ?string
+    {
+        return match ($this) {
+            self::normal   => null,
+            self::hidden   => null,
+            self::deleted => null,
+            self::illegal => "image",
         };
     }
 
@@ -96,8 +115,8 @@ enum ContentReplacementPattern: string
         return match ($this) {
             self::normal   => null,
             self::hidden   => null,
-            self::deleted => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
-            self::illegal => "/profile/00000000-0000-0000-0000-000000000000.jpeg",
+            self::deleted => "[{\"path\":\"\\/image\\/default.jpg\",\"options\":{\"size\":\"69.89 KB\",\"resolution\":\"1500x1500\"}}]",
+            self::illegal => "[{\"path\":\"\\/image\\/default.jpg\",\"options\":{\"size\":\"69.89 KB\",\"resolution\":\"1500x1500\"}}]",
         };
     }
 }

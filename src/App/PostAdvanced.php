@@ -186,6 +186,10 @@ class PostAdvanced implements PostReplaceable
     {
         $this->media = $media;
     }
+    public function setCover(string $media): void
+    {
+        $this->cover = $media;
+    }
 
     public function getCover(): ?string
     {
@@ -200,6 +204,10 @@ class PostAdvanced implements PostReplaceable
     public function getContentType(): string
     {
         return $this->contenttype;
+    }
+    public function setContentType(string $contentType): void
+    {
+        $this->contenttype = $contentType;
     }
     // Capabilities for content filtering
     public function visibilityStatus(): string
