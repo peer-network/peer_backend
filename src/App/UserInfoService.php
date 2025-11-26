@@ -12,6 +12,10 @@ use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -211,26 +215,82 @@ class UserInfoService
     public function loadBlocklist(?array $args = []): array
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
-
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringCases::searchById,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentFilterSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $usersHiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
 
         try {
-            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
-            if (isset($results['status']) && $results['status'] === 'error') {
-                $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $results;
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
+
+            $blockedBy = $lists['blockedBy'] ?? [];
+            $iBlocked = $lists['iBlocked'] ?? [];
+
+            foreach ($blockedBy as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
+            foreach ($iBlocked as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
             }
 
-            $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);
+            $affected = [
+                'blockedBy' => array_map(fn (Profile $p) => $p->getArrayCopy(), $blockedBy),
+                'iBlocked' => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
+            ];
 
-            return $results;
+            $counter = count($affected['blockedBy']) + count($affected['iBlocked']);
 
-        } catch (\Exception $e) {
+            $this->logger->info("UserInfoService.loadBlocklist found", ['counter' => $counter]);
+
+            return [
+                'status' => 'success',
+                'counter' => $counter,
+                'ResponseCode' => '11107',
+                'affectedRows' => $affected,
+            ];
+
+        } catch (\Throwable $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
             return $this::respondWithError(41008);
         }
     }
+    
     /* ----- unused function --------
         public function toggleProfilePrivacy(): array
         {
