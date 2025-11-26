@@ -6344,7 +6344,7 @@
 			"response": []
 		},
 		{
-			"name": "getTransactionHistory(discount)",
+			"name": "getTransactionHistory(pinned)",
 			"event": [
 				{
 					"listen": "test",
@@ -6388,7 +6388,7 @@
 							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
 							"",
 							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
-							"    const expectedTotal = 160;",
+							"    const expectedTotal = 200;",
 							"    const epsilon = 1e-6;",
 							"",
 							"    pm.expect(",
