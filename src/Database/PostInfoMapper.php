@@ -76,7 +76,7 @@ class PostInfoMapper
                 $this->logger->info("Inserted new post info into database", ['postid' => $data['postid']]);
                 return true;
             } else {
-                $this->logger->warning("Failed to insert new post info into database", ['postid' => $data['postid']]);
+                $this->logger->error("Failed to insert new post info into database", ['postid' => $data['postid']]);
                 return false;
             }
         } catch (\PDOException $e) {
@@ -222,7 +222,7 @@ class PostInfoMapper
                 }
             }
 
-            $this->logger->warning("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
+            $this->logger->error("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
             return false;
         } catch (\Exception $e) {
             $this->logger->error("PostInfoMapper.addUserActivity: Exception occurred", ['exception' => $e->getMessage()]);

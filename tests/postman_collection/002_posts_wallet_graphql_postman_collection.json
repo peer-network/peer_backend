@@ -8769,7 +8769,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            }\n        }\n    }\n}\n",
+						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n          visibilityStatus\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8938,7 +8938,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            }\n        }\n    }\n}\n",
+						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

@@ -62,7 +62,7 @@ class CommentInfoMapper
         if ($stmt->execute($data)) {
             $this->logger->info("Updated comment info successfully", ['commentid' => $data['commentid']]);
         } else {
-            $this->logger->warning("Failed to update comment info", ['commentid' => $data['commentid']]);
+            $this->logger->error("Failed to update comment info", ['commentid' => $data['commentid']]);
         }
     }
 
@@ -77,7 +77,7 @@ class CommentInfoMapper
         };
 
         if (!$table) {
-            $this->logger->warning("Invalid action provided", ['action' => $action]);
+            $this->logger->error("Invalid action provided", ['action' => $action]);
             return false;
         }
 
