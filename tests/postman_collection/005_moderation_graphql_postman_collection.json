@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "da52247c-9488-4141-80db-51bca47441b1",
+		"_postman_id": "2cd68c3b-7fd6-4fc6-864e-87f29331177d",
 		"name": "005_moderation_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-da52247c-9488-4141-80db-51bca47441b1?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-2cd68c3b-7fd6-4fc6-864e-87f29331177d?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -1341,6 +1341,116 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t5}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block t4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{userid_t4}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block t5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{userid_t5}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6067,6 +6177,194 @@
 			"response": []
 		},
 		{
+			"name": "Block tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listBlockedUsers still shows",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11107\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from w_userid_t2 has correct blocked-user properties\", function () {",
+							"    const res = pm.response.json();",
+							"",
+							"    const affected = res.data?.listBlockedUsers?.affectedRows || {};",
+							"    const list = [",
+							"        ...(affected.iBlocked || []),",
+							"        ...(affected.blockedBy || [])",
+							"    ];",
+							"",
+							"    const expectedUserId = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'w_userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    const user = list.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in blocked lists.`);",
+							"    }",
+							"",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports = true`).to.eql(true);",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus = \"NORMAL\"`).to.eql(\"NORMAL\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unblock tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Login t5",
 			"event": [
 				{
@@ -6129,64 +6427,6 @@
 			"response": []
 		},
 		{
-			"name": "Follow tester 2",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"11104\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});",
-							"",
-							"pm.test(\"Account is not followed\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"true\");",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
-					"host": [
-						"peer-network",
-						"eu"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Follow t6",
 			"event": [
 				{
@@ -6227,6 +6467,64 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t6}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Follow tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11104\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Account is not followed\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"true\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{w_userid_t2}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6820,6 +7118,194 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListFriends {\n    listFriends(contentFilterBy: MYGRANDMALIKES) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            visibilityStatus\n          isHiddenForUsers\n            hasActiveReports\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listBlockedUsers is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11107\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from w_userid_t2 has correct blocked-user properties\", function () {",
+							"    const res = pm.response.json();",
+							"",
+							"    const affected = res.data?.listBlockedUsers?.affectedRows || {};",
+							"    const list = [",
+							"        ...(affected.iBlocked || []),",
+							"        ...(affected.blockedBy || [])",
+							"    ];",
+							"",
+							"    const expectedUserId = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'w_userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    const user = list.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in blocked lists.`);",
+							"    }",
+							"",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports = true`).to.eql(true);",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus = \"HIDDEN\"`).to.eql(\"HIDDEN\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unblock tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7924,6 +8410,61 @@
 			"response": []
 		},
 		{
+			"name": "Block tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t3}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Login tester 3",
 			"event": [
 				{
@@ -8539,6 +9080,194 @@
 			"response": []
 		},
 		{
+			"name": "Block tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listBlockedUsers is hidden",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11107\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from w_userid_t2 has correct blocked-user properties\", function () {",
+							"    const res = pm.response.json();",
+							"",
+							"    const affected = res.data?.listBlockedUsers?.affectedRows || {};",
+							"    const list = [",
+							"        ...(affected.iBlocked || []),",
+							"        ...(affected.blockedBy || [])",
+							"    ];",
+							"",
+							"    const expectedUserId = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'w_userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    const user = list.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in blocked lists.`);",
+							"    }",
+							"",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports = true`).to.eql(true);",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus = \"HIDDEN\"`).to.eql(\"HIDDEN\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unblock tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Confirm listPosts shows without filter",
 			"event": [
 				{
@@ -9067,6 +9796,194 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListFriends {\n    listFriends {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            visibilityStatus\n          isHiddenForUsers\n            hasActiveReports\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listBlockedUsers shows without filter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11107\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from w_userid_t2 has correct blocked-user properties\", function () {",
+							"    const res = pm.response.json();",
+							"",
+							"    const affected = res.data?.listBlockedUsers?.affectedRows || {};",
+							"    const list = [",
+							"        ...(affected.iBlocked || []),",
+							"        ...(affected.blockedBy || [])",
+							"    ];",
+							"",
+							"    const expectedUserId = pm.environment.get(\"w_userid_t2\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'w_userid_t2' is not set.\");",
+							"    }",
+							"",
+							"    const user = list.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in blocked lists.`);",
+							"    }",
+							"",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports = true`).to.eql(true);",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus = \"NORMAL\"`).to.eql(\"NORMAL\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMAHATES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unblock tester 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10756,6 +11673,61 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation UserFollow {\n    toggleUserFollowStatus(userid: \"{{userid_t5}}\") {\n        isfollowing\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block t5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{userid_t5}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -13575,6 +14547,61 @@
 			"response": []
 		},
 		{
+			"name": "Unblock tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{w_userid_t3}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Confirm listAdPost (postid) shows urself",
 			"event": [
 				{
@@ -14820,6 +15847,8 @@
 							"    }",
 							"",
 							"    pm.expect(commentFound.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"    pm.expect(commentFound.visibilityStatus, `Comment ${expectedCommentId} visibilityStatus`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(commentFound.hasActiveReports, `Comment ${expectedCommentId} hasActiveReports`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -14948,6 +15977,8 @@
 							"    }",
 							"",
 							"    pm.expect(commentFound.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"    pm.expect(commentFound.visibilityStatus, `Comment ${expectedCommentId} visibilityStatus`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(commentFound.hasActiveReports, `Comment ${expectedCommentId} hasActiveReports`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16431,6 +17462,8 @@
 							"    }",
 							"",
 							"    pm.expect(user.username, `User ${user.id} should be hidden`).to.eql(\"illegal_account\");",
+							"    pm.expect(user.visibilityStatus, `User ${user.id} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(user.hasActiveReports, `User ${user.id} should have hasActiveReports false`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16561,6 +17594,8 @@
 							"    }",
 							"",
 							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"    pm.expect(profile.visibilityStatus, `User ${profile.id} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(profile.hasActiveReports, `User ${profile.id} should have hasActiveReports false`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -16636,6 +17671,8 @@
 							"        }",
 							"",
 							"        pm.expect(user.username, `User ${user.id} in ${listName} should be 'illegal_account'`).to.eql(\"illegal_account\");",
+							"        pm.expect(user.visibilityStatus, `User ${user.id} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"        pm.expect(user.hasActiveReports, `User ${user.id} should have hasActiveReports false`).to.eql(false);",
 							"    };",
 							"",
 							"    checkList(\"followers\");",
@@ -16714,6 +17751,8 @@
 							"    }",
 							"",
 							"    pm.expect(user.username, `Friend ${user.userid} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports false`).to.eql(false);",
 							"});",
 							""
 						],
@@ -16740,6 +17779,195 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListFriends {\n    listFriends(contentFilterBy: MYGRANDMALIKES) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            userid\n            img\n            username\n            slug\n            biography\n            visibilityStatus\n          isHiddenForUsers\n            hasActiveReports\n            updatedat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11105\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{userid_t6}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm listBlockedUsers is illegal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11107\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User from userid_t6 has correct blocked-user properties\", function () {",
+							"    const res = pm.response.json();",
+							"",
+							"    const affected = res.data?.listBlockedUsers?.affectedRows || {};",
+							"    const list = [",
+							"        ...(affected.iBlocked || []),",
+							"        ...(affected.blockedBy || [])",
+							"    ];",
+							"",
+							"    const expectedUserId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!expectedUserId) {",
+							"        throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"    }",
+							"",
+							"    const user = list.find(u => u.userid === expectedUserId);",
+							"",
+							"    if (!user) {",
+							"        throw new Error(`User with ID ${expectedUserId} not found in blocked lists.`);",
+							"    }",
+							"",
+							"    pm.expect(user.hasActiveReports, `User ${user.userid} should have hasActiveReports = false`).to.eql(false);",
+							"    pm.expect(user.visibilityStatus, `User ${user.userid} should have visibilityStatus = \"ILLEGAL\"`).to.eql(\"ILLEGAL\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListBlockedUsers {\n    listBlockedUsers {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unblock t6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11106\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{userid_t6}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -16997,6 +18225,8 @@
 							"    if (!post) throw new Error(`Post with ID ${expectedPostId} not found.`);",
 							"",
 							"    pm.expect(post.title, `Post ${expectedPostId} title`).to.eql(\"this post is illegal\");",
+							"    pm.expect(post.visibilityStatus, `Post ${expectedPostId} visibilityStatus`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(post.hasActiveReports, `Post ${expectedPostId} hasActiveReports`).to.eql(false);",
 							"});",
 							"",
 							"pm.test(\"Comment content for commentid from env is 'this comment is illegal'\", function () {",
@@ -17015,6 +18245,8 @@
 							"    if (!foundComment) throw new Error(`Comment with ID ${expectedCommentId} not found in response.`);",
 							"",
 							"    pm.expect(foundComment.content, `Comment ${expectedCommentId} content`).to.eql(\"this comment is illegal\");",
+							"    pm.expect(foundComment.visibilityStatus, `Comment ${expectedCommentId} visibilityStatus`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(foundComment.hasActiveReports, `Comment ${expectedCommentId} hasActiveReports`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -17206,6 +18438,8 @@
 							"    }",
 							"",
 							"    pm.expect(user.username, `User ${user.id} should be illegal`).to.eql(\"illegal_account\");",
+							"    pm.expect(user.visibilityStatus, `User ${user.id} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(user.hasActiveReports, `User ${user.id} should have hasActiveReports false`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
@@ -17336,6 +18570,8 @@
 							"    }",
 							"",
 							"    pm.expect(profile.username, `User ${profile.id} should have username 'illegal_account'`).to.eql(\"illegal_account\");",
+							"    pm.expect(profile.visibilityStatus, `User ${profile.id} should have visibilityStatus 'ILLEGAL'`).to.eql(\"ILLEGAL\");",
+							"    pm.expect(profile.hasActiveReports, `User ${profile.id} should have hasActiveReports false`).to.eql(false);",
 							"});"
 						],
 						"type": "text/javascript",
