@@ -75,7 +75,7 @@ jobs:
     name: Early Static Analysis (PHPStan)
     runs-on: ubuntu-latest
     needs: [check_branch_sync]
-    if: needs.check_branch_sync.outputs.is_behind == 'false'
+    if: needs.check_branch_sync.outputs.is_behind == 'false' && github.event.pull_request.user.login != 'dependabot[bot]'
     env:
       IMAGE_TAG: local
     steps:
