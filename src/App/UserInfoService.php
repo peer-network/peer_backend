@@ -14,6 +14,8 @@ use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -215,27 +217,39 @@ class UserInfoService
         $this->logger->debug('UserInfoService.loadBlocklist started');
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
         $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterCase,
+            ContentFilteringCases::searchById,
             ContentType::user
         );
         $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
+            ContentFilteringCases::searchById,
             ContentType::user
         );
 
-        $illegalContentSpec = new IllegalContentFilterSpec(
-            $contentFilterCase,
+
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringCases::searchById,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
             ContentType::user
         );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
-            $illegalContentSpec,
+            $illegalContentFilterSpec,
             $systemUserSpec,
-            $deletedUserSpec
+            $deletedUserSpec,
+            $usersHiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
         ];
 
         try {
