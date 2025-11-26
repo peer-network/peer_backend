@@ -124,7 +124,7 @@ class PeerTokenService
             $parts = explode('.', (string) $numberOfTokens);
 
             if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
-                return self::respondWithError(00000);
+                return self::respondWithError(30264);
             }
 
             if ((float) $numberOfTokens < $minAmount) {
