@@ -678,7 +678,7 @@ class GraphQLSchemaBuilder
             'BlockedUser' => [
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.BlockedUser Resolvers');
-                    return $root['userid'] ?? '';
+                    return $root['uid'] ?? '';
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -688,6 +688,13 @@ class GraphQLSchemaBuilder
                 },
                 'slug' => function (array $root): int {
                     return $root['slug'] ?? 0;
+                },
+                'visibilityStatus' => function (array $root): string {
+                    return strtoupper($root['visibility_status'] ?? 'NORMAL');
+                },
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
                 },
             ],
             'BlockedUsers' => [
@@ -2548,7 +2555,7 @@ class GraphQLSchemaBuilder
             return $response;
         }
 
-        $this->logger->warning('Query.createUser No data found');
+        $this->logger->error('Query.createUser No data found');
         return $this::respondWithError(41105);
     }
 
@@ -2558,9 +2565,12 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
+        $validation = RequestValidator::validate($args, []);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
         $this->logger->debug('Query.resolveBlocklist started');
@@ -2578,7 +2588,7 @@ class GraphQLSchemaBuilder
             return $response;
         }
 
-        $this->logger->warning('Query.resolveBlocklist No data found');
+        $this->logger->error('Query.resolveBlocklist No data found');
         return $this::respondWithError(41105);
     }
 
@@ -3283,7 +3293,7 @@ class GraphQLSchemaBuilder
             return $results;
         }
 
-        $this->logger->warning('Query.resolveLiquidity Failed to find liquidity');
+        $this->logger->error('Query.resolveLiquidity Failed to find liquidity');
         return $this::respondWithError(41201);
     }
 
@@ -3306,7 +3316,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('Query.resolveUserInfo Failed to find INFO');
+        $this->logger->error('Query.resolveUserInfo Failed to find INFO');
         return $this::respondWithError(41001);
     }
 
@@ -3510,14 +3520,17 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(60501);
         }
 
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
+        $validation = RequestValidator::validate($args, []);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
         }
 
         $this->logger->debug('Query.resolveFriends started');
 
-        $results = $this->userService->getFriends($args);
+        $results = $this->userService->getFriends($validation);
         if (isset($results['status']) && $results['status'] === 'success') {
             $this->logger->info('Query.resolveFriends successful');
 

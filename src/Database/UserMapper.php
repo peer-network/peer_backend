@@ -771,7 +771,7 @@ class UserMapper
         string $userId,
         array $specifications,
         int $offset = 0,
-        int $limit = 10
+        int $limit = 10,
     ): ?array {
         $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
 
@@ -838,9 +838,11 @@ class UserMapper
         array $specifications,
         int $offset = 0,
         int $limit = 10,
-        ?string $contentFilterBy = null
     ): array {
         $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
+
+        $offset = max((int)$offset, 0);
+        $limit = min(max((int)$limit, 1), 20);
 
         $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
         $allSpecs = SpecificationSQLData::merge($specsSQL);
