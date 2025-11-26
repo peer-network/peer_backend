@@ -15,5 +15,6 @@ interface PostReplaceable extends HasVisibilityStatus, HasActiveReports, HasUser
 {
     public function setTitle(string $titleConfig);
     public function setMedia(string $mediaPath);
+    public function setCover(string $coverPath);
     public function setDescription(string $descriptionConfig);
 }

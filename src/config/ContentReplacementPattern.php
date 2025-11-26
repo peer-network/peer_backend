@@ -51,6 +51,16 @@ enum ContentReplacementPattern: string
         };
     }
 
+    public function postCover(): ?string
+    {
+        return match ($this) {
+            self::normal  => null,
+            self::hidden  => null,
+            self::deleted => null,
+            self::illegal => "",
+        };
+    }
+
     public function commentContent(): ?string
     {
         return match ($this) {

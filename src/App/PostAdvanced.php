@@ -187,6 +187,16 @@ class PostAdvanced implements PostReplaceable
         $this->media = $media;
     }
 
+    public function getCover(): ?string
+    {
+        return $this->cover;
+    }
+
+    public function setCover(string $coverPath): void
+    {
+        $this->cover = $coverPath;
+    }
+
     public function getContentType(): string
     {
         return $this->contenttype;

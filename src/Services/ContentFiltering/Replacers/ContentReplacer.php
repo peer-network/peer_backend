@@ -73,6 +73,9 @@ class ContentReplacer
         if ($pattern->postMedia()) {
             $post->setMedia($pattern->postMedia());
         }
+        if (method_exists($pattern, 'postCover') && $pattern->postCover() !== null) {
+            $post->setCover($pattern->postCover());
+        }
         if ($post->visibilityStatus() !== "illegal") {
             $post->setVisibilityStatus($pattern->visibilityStatus());
         }

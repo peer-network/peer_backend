@@ -450,6 +450,40 @@ class ModerationMapper
                     $this->logger->error("Failed to move file: $filePath");
                 }
             }
+
+            $coverPath = $mediaRecord['cover'] ?? null;
+
+            if (!empty($coverPath)) {
+                $fullCoverPath = $directoryPath . $coverPath;
+
+                if (!file_exists($fullCoverPath)) {
+                    $this->logger->error("Cover file does not exist for Post ID: $targetId, path: $fullCoverPath");
+                    return;
+                }
+
+                if (fopen($fullCoverPath, 'r') === false) {
+                    $this->logger->error("Unable to open cover file for Post ID: $targetId, path: $fullCoverPath");
+                    return;
+                }
+
+                $coverStream = new \Slim\Psr7\Stream(fopen($fullCoverPath, 'r'));
+
+                $uploadedCover = new \Slim\Psr7\UploadedFile(
+                    $coverStream,
+                    null,
+                    null
+                );
+
+                $coverDetails = explode('/', $coverPath);
+                $coverFileName = end($coverDetails);
+                $destinationCoverPath = $illegalDirectoryPath . '/' . $coverFileName;
+
+                try {
+                    $uploadedCover->moveTo($destinationCoverPath);
+                } catch (\RuntimeException $e) {
+                    $this->logger->error("Failed to move cover file: $destinationCoverPath");
+                }
+            }
         }
     }
 
