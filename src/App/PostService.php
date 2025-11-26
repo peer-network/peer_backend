@@ -421,6 +421,10 @@ class PostService
     {
         $maxTags = 10;
         $tagNameConfig = ConstantsConfig::post()['TAG'];
+        $minLength = (int) $tagNameConfig['MIN_LENGTH'];
+        $maxLength = (int) $tagNameConfig['MAX_LENGTH'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
@@ -428,7 +432,7 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
 
-            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
+            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || preg_match($controlPattern, $tagName) === 1) {
                 throw new \Exception('Invalid tag name');
             }
 
@@ -533,6 +537,8 @@ class PostService
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
@@ -558,7 +564,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+            if (preg_match($controlPattern, $tag) === 1) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }

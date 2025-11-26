@@ -733,6 +733,8 @@ class PeerInputFilter
     protected function validateTagName(string $value, array $options = []): bool
     {
         $tagConfig = ConstantsConfig::post()['TAG'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
 
         if ($value === '') {
             $this->errors['tag'][] = "30101";
@@ -747,7 +749,7 @@ class PeerInputFilter
             return false;
         }
 
-        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
+        if (preg_match($controlPattern, $value) === 1) {
             $this->errors['tag'][] = "30103";
             return false;
         }

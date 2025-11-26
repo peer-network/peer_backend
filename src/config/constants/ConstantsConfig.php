@@ -471,8 +471,8 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX' => 20,
         ],
     ];
-
-    private const CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F]';
+    // ASCII control chars + zero-width Unicode chars
+    private const CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F\x{200B}\x{200C}\x{200D}\x{FEFF}]';
 
     private const INPUT = [
         'FORBID_CONTROL_CHARS_PATTERN' => self::CONTROL_CHARS_PATTERN,

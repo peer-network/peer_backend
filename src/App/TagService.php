@@ -56,12 +56,14 @@ class TagService
         }
 
         $tagNameConfig = ConstantsConfig::post()['TAG'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
 
         $length = strlen($tagName);
         return $length >= $tagNameConfig['MIN_LENGTH']
             && $length <= $tagNameConfig['MAX_LENGTH']
-            && preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
+            &&  preg_match($controlPattern, $tagName) === 0;
     }
 
     public function createTag(string $tagName): array

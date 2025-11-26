@@ -414,6 +414,8 @@ class PeerInputGenericValidator
     {
         $fieldKey = $options['field'] ?? 'tag';
         $tagConfig = ConstantsConfig::post()['TAG'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
 
         if ($value === '') {
             $this->pushError($options, $fieldKey, '30101');
@@ -425,7 +427,7 @@ class PeerInputGenericValidator
             return false;
         }
 
-        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
+        if (preg_match($controlPattern, $value) === 1) {
             $this->pushError($options, $fieldKey, '30103');
             return false;
         }
