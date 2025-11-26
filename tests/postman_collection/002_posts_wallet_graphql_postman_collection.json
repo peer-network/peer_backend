@@ -7314,7 +7314,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"A�B\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"A\\u00A0B\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7370,6 +7370,123 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"https://frontend.getpeer.eu/login.php\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer more than 8 decimals (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30264\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 1.123456789, message: \"\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer less than MIN_AMOUNT (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30264\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 0.000000001, message: \"\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
