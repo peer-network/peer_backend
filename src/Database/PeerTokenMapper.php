@@ -15,7 +15,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 class PeerTokenMapper
