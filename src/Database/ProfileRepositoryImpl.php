@@ -92,12 +92,14 @@ class ProfileRepositoryImpl implements ProfileRepository
 
         // Build positional placeholders for the IN clause
         $params = $allSpecs->paramsToPrepare;
-        $userIdsForInStatement = array_map(fn ($id) => "'$id'", $userIds);
+        $inPlaceholders = [];
+        foreach ($userIds as $i => $id) {
+            $paramName = ":uid_$i";              // e.g. :uid_0, :uid_1, ...
+            $inPlaceholders[] = $paramName;
+            $params[$paramName] = $id;           // bind each userId
+        }
 
-        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $whereClauses[] = "u.uid IN ($placeholders)";
-
-
+        $whereClauses[] = 'u.uid IN (' . implode(',', $inPlaceholders) . ')';
         $whereClausesString = implode(' AND ', $whereClauses);
         $sql = sprintf(
             "
