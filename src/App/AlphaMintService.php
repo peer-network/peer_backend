@@ -5,9 +5,10 @@ namespace Fawaz\App;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Mailer;
+use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
-use Psr\Log\LoggerInterface;
 use Fawaz\Database\PeerTokenMapper;
 
 class AlphaMintService
@@ -16,7 +17,7 @@ class AlphaMintService
     protected ?string $currentUserId = null;
 
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected UserService $userService,
         protected WalletMapper $walletMapper,
@@ -109,7 +110,7 @@ class AlphaMintService
                                 $mintUserId, 
                                 $receipientUserId,
                                 $usr['alpha_user_tokens'],
-                                new UserToUserTransferStrategy()
+                                new DefaultTransferStrategy()
                             );
 
                             $totalAlphaUserMinted++;
