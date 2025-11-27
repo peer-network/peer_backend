@@ -24,6 +24,7 @@ class CommentAdvanced implements CommentReplaceable
     protected ?bool $isliked;
     protected ?int $activeReports = null;
     protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
     protected ?array $user = [];
 
 
@@ -47,6 +48,7 @@ class CommentAdvanced implements CommentReplaceable
         $this->isliked = $data['isliked'] ?? false;
         $this->activeReports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
     }
 
@@ -65,8 +67,10 @@ class CommentAdvanced implements CommentReplaceable
             'amountreports' => $this->amountreports,
             'isreported' => $this->isreported,
             'isliked' => $this->isliked,
-            'visibility_status' => $this->visibilityStatus,
+            'visibility_status' => $this->visibilityStatusForUser,
             'reports' => $this->activeReports,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
             'user' => $this->user,
         ];
         return $att;
@@ -129,17 +133,29 @@ class CommentAdvanced implements CommentReplaceable
     }
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus;
+        return $this->visibilityStatusForUser;
     }
 
     public function setVisibilityStatus(string $status): void
     {
-        $this->visibilityStatus = $status;
+        $this->visibilityStatusForUser = $status;
     }
 
     public function getActiveReports(): ?int
     {
         return $this->activeReports;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
     }
 
     // Validation and Array Filtering methods
