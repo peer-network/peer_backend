@@ -318,7 +318,7 @@ class WalletService
                 return self::respondWithError(51301);
             }
 
-            [$poolWallet, $burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
+            [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $fromId = $args['fromid'] ?? $peerWallet;
 
             $args = [
@@ -342,7 +342,7 @@ class WalletService
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
                 $this->transactionManager->rollBack();
-                $this->logger->warning("Error occurred in performPayment.insertWinToLog", [
+                $this->logger->error("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);

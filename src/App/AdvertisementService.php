@@ -159,7 +159,7 @@ class AdvertisementService
             }
 
             if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(42004);
             }
 
@@ -215,14 +215,14 @@ class AdvertisementService
         // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
         $args['eurocost'] = $CostPlan / 10;
         if (empty($CostPlan) || (int)$CostPlan === 0) {
-            $this->logger->warning('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
+            $this->logger->error('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(42005);
         }
 
         // // Euro in PeerTokens umrechnen
         // $results = $this->convertEuroToTokens($CostPlan, $rescode);
         // if (isset($results['status']) && $results['status'] === 'error') {
-        //     $this->logger->warning('Fehler bei convertEuroToTokens', ['results' => $results]);
+        //     $this->logger->error('Fehler bei convertEuroToTokens', ['results' => $results]);
         //     return $results;
         // }
         // if (isset($results['status']) && $results['status'] === 'success') {
@@ -235,7 +235,7 @@ class AdvertisementService
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
-                $this->logger->warning('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
 
@@ -446,7 +446,7 @@ class AdvertisementService
 
                 $this->logger->info('PLAN IS PINNED');
             } else {
-                $this->logger->warning('Fehler, Falsche CostPlan angegeben.', ['CostPlan' => $CostPlan]);
+                $this->logger->error('Fehler, Falsche CostPlan angegeben.', ['CostPlan' => $CostPlan]);
                 return self::respondWithError(42007); // Fehler, Falsche CostPlan angegeben
             }
 

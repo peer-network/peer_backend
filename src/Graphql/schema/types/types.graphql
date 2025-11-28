@@ -91,6 +91,7 @@ type Post {
   mediadescription: String!
   createdat: Date!
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   amountreports: Int!
   amountlikes: Int!
@@ -117,6 +118,7 @@ type Comment {
   content: String!
   createdat: Date!
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   amountlikes: Int!
   amountreplies: Int!
@@ -132,6 +134,7 @@ type ProfileUser {
   slug: Int
   img: String
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
@@ -234,6 +237,7 @@ type Profile {
   img: String
   biography: String
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   isfollowed: Boolean
   isfollowing: Boolean
@@ -268,7 +272,9 @@ type BlockedUser {
   img: String
   username: String
   slug: Int
+  hasActiveReports: Boolean!
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type BlockedUsers {
@@ -385,6 +391,7 @@ type ProfilePostMedia {
   media: String!
   createdat: String
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type PostCommentsData {
@@ -399,6 +406,7 @@ type PostCommentsData {
   user: BasicUserInfo
   subcomments: [PostSubCommentsData]
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type PostSubCommentsData {
@@ -413,6 +421,7 @@ type PostSubCommentsData {
   isliked: Boolean
   user: BasicUserInfo
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type BasicUserInfo {
@@ -422,6 +431,7 @@ type BasicUserInfo {
   slug: Int
   biography: String
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   updatedat: Date!
 }
@@ -434,6 +444,7 @@ type User {
   img: String
   biography: String
   visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
   createdat: Date
   updatedat: Date

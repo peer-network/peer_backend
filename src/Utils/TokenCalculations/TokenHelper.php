@@ -20,7 +20,6 @@ class TokenHelper
      *
      * @param string $numberOfTokens Base amount of tokens.
      * @param string $peerFee Percentage fee for Peer.
-     * @param string $poolFee Percentage fee for liquidity pool.
      * @param string $burnFee Percentage of tokens to be burned.
      * @param string $inviterFee Optional percentage for inviter reward.
      * @return string Total required tokens including all fees.
@@ -28,12 +27,10 @@ class TokenHelper
     public static function calculateTokenRequiredAmount(
         string $numberOfTokens,
         string $peerFee,
-        string $poolFee,
         string $burnFee,
         string $inviterFee = '0'
     ): string {
         $allFees1 = self::addRc('1', $peerFee);
-        $allFees1 = self::addRc($allFees1, $poolFee);
         $allFees1 = self::addRc($allFees1, $burnFee);
         $allFees = self::addRc($allFees1, $inviterFee);
 

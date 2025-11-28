@@ -18,7 +18,7 @@ jobs:
       is_behind: ${{ steps.check.outputs.is_behind }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
  
@@ -75,13 +75,19 @@ jobs:
     name: Early Static Analysis (PHPStan)
     runs-on: ubuntu-latest
     needs: [check_branch_sync]
-    if: needs.check_branch_sync.outputs.is_behind == 'false'
     env:
       IMAGE_TAG: local
     steps:
-      - uses: actions/checkout@v5
+      - name: Skip PHPStan for Dependabot
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
+        run: |
+          echo "Dependabot PR → Skipping PHPStan"
+          exit 0
+
+      - uses: actions/checkout@v6
 
       - name: Log in to GHCR (for base image access)
+        if: ${{ github.actor != 'dependabot[bot]' }}
         run: |
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
@@ -98,7 +104,7 @@ jobs:
     needs: [check_branch_sync]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
  
@@ -144,7 +150,7 @@ jobs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Fix log directory permissions
         run: sudo chown -R 33:33 runtime-data/logs
  
@@ -224,7 +230,7 @@ jobs:
           APP_ENV="${{ vars.APP_ENV }}"
           APP_NAME="${{ vars.APP_NAME }}"
           APP_URL="${{ vars.APP_URL }}"
-          BASE_URL="${{ vars.BASE_URL }}"
+          MEDIA_SERVER_URL="${{ vars.MEDIA_SERVER_URL }}"
           TIME_ZONE="${{ vars.TIME_ZONE }}"
           GRAPHQL_ENDPOINT="${{ vars.GRAPHQL_ENDPOINT }}"
           PRIVATE_KEY_PATH="${{ vars.PRIVATE_KEY_PATH }}"
@@ -422,7 +428,7 @@ jobs:
           fi
  
       - name: Upload Newman Failure Marker
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: newman-failed-${{ matrix.php-version }}
           path: newman_failed.txt
@@ -460,19 +466,19 @@ jobs:
           fi
  
       - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: backend-runtime-log-${{ matrix.php-version }}
           path: logs/runtime
  
       - name: Upload backend error log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: backend-error-log-${{ matrix.php-version }}
           path: logs/error/errorlog.txt
           
       - name: Upload Newman Report for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: docker_newman_report-${{ matrix.php-version }}
           path: ${{ github.workspace }}/newman/reports/report.html
@@ -510,7 +516,7 @@ jobs:
  
       - name: Upload build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: outcome-${{ matrix.php-version }}
           path: outcome.txt
@@ -518,11 +524,10 @@ jobs:
       - name: Save Docker image as artifact
         run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
  
-      - uses: actions/upload-artifact@v5
+      - uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: docker-image-${{ matrix.php-version }}
           path: peer-backend.tar
-          overwrite: true
  
   trivy_scan:
     name: Trivy Security Scan
@@ -534,7 +539,7 @@ jobs:
         php-version: ['8.3']
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
  
       - uses: actions/download-artifact@v6
         with:
@@ -577,7 +582,7 @@ jobs:
  
       - name: Upload Trivy build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: peer-network/.github/.github/actions/upload-artifact@main
         with:
           name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
@@ -590,7 +595,7 @@ jobs:
           trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
           trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
  
-      - uses: actions/upload-artifact@v5
+      - uses: peer-network/.github/.github/actions/upload-artifact@main
         if: always()
         with:
           name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
