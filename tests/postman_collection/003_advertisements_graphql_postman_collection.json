@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "f5d68823-10ed-401c-9daf-d127003457f2",
+		"_postman_id": "6ea22cc6-80f8-4b36-b15e-aaf4d3706382",
 		"name": "003_advertisements_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-f5d68823-10ed-401c-9daf-d127003457f2?action=share&source=collection_link&creator=43606001"
+		"_exporter_id": "32542010",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-6ea22cc6-80f8-4b36-b15e-aaf4d3706382?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -783,7 +783,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -919,7 +919,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1001,7 +1001,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1876,7 +1876,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1950,6 +1950,112 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{startday}}\"\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 50): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по строковому createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 50;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2121,7 +2227,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2193,7 +2299,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2274,6 +2380,112 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 50): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по строковому createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 50;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2450,7 +2662,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2522,7 +2734,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2726,7 +2938,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2802,6 +3014,111 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{postidadd}}\"\n        advertisePlan: PINNED\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory(pinned)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 200): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 200;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2983,7 +3300,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3055,7 +3372,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3143,7 +3460,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3369,6 +3686,112 @@
 			"response": []
 		},
 		{
+			"name": "getTransactionHistory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 50): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по строковому createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 50;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -3539,7 +3962,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3611,7 +4034,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3692,6 +4115,111 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: SEVEN_DAYS\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory(7days)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 350): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 350;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3885,7 +4413,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -3957,7 +4485,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4183,6 +4711,111 @@
 			"response": []
 		},
 		{
+			"name": "getTransactionHistory(pinned)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 200): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 200;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Check current liquidity",
 			"event": [
 				{
@@ -4363,7 +4996,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4435,7 +5068,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4521,7 +5154,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4602,6 +5235,112 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostBasic {\n    advertisePostBasic(\n        postid: \"{{postidadd1}}\"\n        durationInDays: ONE_DAY\n        advertisePlan: BASIC\n        startday: \"{{diffstartday}}\"\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 50): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по строковому createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 50;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4805,7 +5544,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4877,7 +5616,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -4963,7 +5702,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5039,6 +5778,112 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid}}\"\n        advertisePlan: PINNED\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory(discount)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 160): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 160;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5247,7 +6092,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5319,7 +6164,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5405,7 +6250,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5481,6 +6326,112 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{existing_postid_2}}\"\n        advertisePlan: PINNED\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "https://peer-network.eu/graphql",
+					"protocol": "https",
+					"host": [
+						"peer-network",
+						"eu"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getTransactionHistory(pinned)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Latest operation (total 160): CREDIT + PEER_FEE + BURN_FEE are present and sum up correctly\", function () {",
+							"    const res = pm.response.json();",
+							"    const rows = res?.data?.getTransactionHistory?.affectedRows || [];",
+							"",
+							"    pm.expect(rows.length, \"No transactions returned\").to.be.above(0);",
+							"",
+							"    // newest first по createdat",
+							"    const sorted = [...rows].sort((a, b) => (a.createdat < b.createdat ? 1 : -1));",
+							"    const latest = sorted[0];",
+							"    pm.expect(latest, \"Latest transaction not found\").to.exist;",
+							"",
+							"    const latestOperationId = latest.operationid;",
+							"    pm.expect(latestOperationId, \"Latest operationid is missing\").to.exist;",
+							"",
+							"    const latestOpTxs = rows.filter(t => t.operationid === latestOperationId);",
+							"    pm.expect(latestOpTxs.length, \"No transactions found for latest operationid\").to.be.above(0);",
+							"",
+							"    const creditTxs   = latestOpTxs.filter(t => t.transferaction === \"CREDIT\");",
+							"    const peerFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"PEER_FEE\");",
+							"    const burnFeeTxs  = latestOpTxs.filter(t => t.transferaction === \"BURN_FEE\");",
+							"",
+							"    pm.expect(creditTxs.length,  \"CREDIT transaction missing for latest operation\").to.be.above(0);",
+							"    pm.expect(peerFeeTxs.length, \"PEER_FEE missing for latest operation\").to.be.above(0);",
+							"    pm.expect(burnFeeTxs.length, \"BURN_FEE missing for latest operation\").to.be.above(0);",
+							"",
+							"    const creditTotal  = creditTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const peerFeeTotal = peerFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"    const burnFeeTotal = burnFeeTxs.reduce((sum, t) => sum + Number(t.tokenamount), 0);",
+							"",
+							"    const total = creditTotal + peerFeeTotal + burnFeeTotal;",
+							"    const expectedTotal = 200;",
+							"    const epsilon = 1e-6;",
+							"",
+							"    pm.expect(",
+							"        Math.abs(total - expectedTotal) < epsilon,",
+							"        `Total (CREDIT + fees) expected ${expectedTotal}, got ${total}`",
+							"    ).to.be.true;",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetTransactionHistory {\n    getTransactionHistory {\n        status\n        ResponseCode\n        affectedRows {\n            transactionid\n            operationid\n            transactiontype\n            senderid\n            recipientid\n            tokenamount\n            transferaction\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                hasActiveReports\n                updatedat\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5694,7 +6645,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5766,7 +6717,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -5855,7 +6806,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query ListAdvertisementPosts {\n    listAdvertisementPosts {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6045,7 +6996,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6466,7 +7417,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
+						"query": "query AdvertisementHistory {\n    advertisementHistory(limit: 20) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    url\n                    tags\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

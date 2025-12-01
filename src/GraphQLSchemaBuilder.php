@@ -415,6 +415,9 @@ class GraphQLSchemaBuilder
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
                 },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
+                },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
                     return $this->getStatusNameByID($status) ?? '';
@@ -513,6 +516,9 @@ class GraphQLSchemaBuilder
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
                 },
                 'situation' => function (array $root): string {
                     $status = $root['status'] ?? 0;
@@ -626,6 +632,9 @@ class GraphQLSchemaBuilder
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
                 },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
+                },
                 'username' => function (array $root): string {
                     return $root['username'] ?? '';
                 },
@@ -659,6 +668,9 @@ class GraphQLSchemaBuilder
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
                 },
                 'img' => function (array $root): string {
                     return $root['img'] ?? '';
@@ -696,6 +708,9 @@ class GraphQLSchemaBuilder
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
                 },
             ],
             'BlockedUsers' => [
@@ -836,6 +851,9 @@ class GraphQLSchemaBuilder
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
                 },
                 'contenttype' => function (array $root): string {
                     return $root['contenttype'] ?? '';
@@ -1022,6 +1040,9 @@ class GraphQLSchemaBuilder
                 'hasActiveReports' => function (array $root): bool {
                     $reports = $root['reports'] ?? 0;
                     return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => function (array $root): bool {
+                    return isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false;
                 },
                 'userid' => function (array $root): string {
                     return $root['userid'] ?? '';
