@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
@@ -9,21 +10,20 @@ use Tests\utils\ConfigGeneration\JSONHandler;
 use Tests\utils\ConfigGeneration\ConfigUrl;
 use Tests\utils\ConfigGeneration\ConfigGenerationConstants;
 
-interface DataGeneratable {
-    public function getData(): array;
-}
-
 try {
     $files = ConfigGenerationConstants::cases();
 
-    foreach($files as $file) {
+    foreach ($files as $file) {
         JSONHandler::generateJSONtoFile(Constants::$pathToAssets . $file->outputFileName(), $file->getData(), $file->getName());
     }
 
     $pathsConfig = new ConfigUrl();
     JSONHandler::generateJSONtoFile(Constants::$pathToAssets . "config.json", $pathsConfig->getData(), "config", false);
-    
+
+    // generateSchema();
     echo("ConfigGeneration: Done! \n");
+    exit(0);
 } catch (\Exception $e) {
-    echo "ConfigGeneration: Erorr: " . $e->getMessage();
+    echo "ConfigGeneration: Error: " . $e->getMessage();
+    exit(1);
 }

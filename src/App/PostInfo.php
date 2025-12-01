@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
-class PostInfo
+class PostInfo extends Model
 {
     protected string $postid;
     protected string $userid;
     protected int $likes;
     protected int $dislikes;
-    protected int $reports;
+    protected int $activeReports;
+    protected int $totalreports;
     protected int $views;
     protected int $saves;
     protected int $shares;
@@ -28,7 +32,8 @@ class PostInfo
         $this->userid = $data['userid'] ?? '';
         $this->likes = $data['likes'] ?? 0;
         $this->dislikes = $data['dislikes'] ?? 0;
-        $this->reports = $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->views = $data['views'] ?? 0;
         $this->saves = $data['saves'] ?? 0;
         $this->shares = $data['shares'] ?? 0;
@@ -43,7 +48,8 @@ class PostInfo
             'userid' => $this->userid,
             'likes' => $this->likes,
             'dislikes' => $this->dislikes,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
+            'totalreports' => $this->totalreports,
             'views' => $this->views,
             'saves' => $this->saves,
             'shares' => $this->shares,
@@ -93,15 +99,26 @@ class PostInfo
         $this->dislikes = $dislikes;
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports = $reports;
     }
+
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
+
 
     public function getViews(): int
     {
@@ -155,13 +172,13 @@ class PostInfo
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -216,9 +233,16 @@ class PostInfo
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+
+    // Table name
+    public static function table(): string
+    {
+        return 'post_info';
     }
 }

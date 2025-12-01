@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Services;
 
+use Fawaz\App\ValidationException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use DateTime;
 
 class JWTService
@@ -16,7 +19,7 @@ class JWTService
     private string $refreshPublicKey;
     private int $accessTokenValidity;
     private int $refreshTokenValidity;
-    private LoggerInterface $logger;
+    private PeerLoggerInterface $logger;
 
     public function __construct(
         string $privateKey,
@@ -25,7 +28,7 @@ class JWTService
         string $refreshPublicKey,
         int $accessTokenValidity,
         int $refreshTokenValidity,
-        LoggerInterface $logger
+        PeerLoggerInterface $logger
     ) {
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
@@ -45,7 +48,7 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating access token', ['data' => $data]);
+        $this->logger->info('Creating access token', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->privateKey, 'RS256');
     }
@@ -59,52 +62,52 @@ class JWTService
             'exp' => $expirationTime
         ]);
 
-        $this->logger->info('Creating refresh token.', ['data' => $data]);
+        $this->logger->info('Creating refresh token.', ['uid' => $data['uid']]);
 
         return JWT::encode($payload, $this->refreshPrivateKey, 'RS256');
     }
 
-    public function validateToken(string $token, bool $isRefreshToken = false): ?object
+    public function validateToken(string $token, bool $isRefreshToken = false): object
     {
         try {
             $key = $isRefreshToken ? $this->refreshPublicKey : $this->publicKey;
             $decodedToken = JWT::decode($token, new Key($key, 'RS256'));
 
             if (isset($decodedToken->iss) && $decodedToken->iss !== 'peerapp.de') {
-                $this->logger->warning('Invalid token issuer', ['token' => $token]);
+                $this->logger->warning('Invalid token issuer');
                 throw new \Exception('Invalid token issuer');
             }
 
             if (isset($decodedToken->aud) && $decodedToken->aud !== 'peerapp.de') {
-                $this->logger->warning('Invalid token audience', ['token' => $token]);
+                $this->logger->warning('Invalid token audience');
                 throw new \Exception('Invalid token audience');
             }
 
             return $decodedToken;
 
         } catch (ExpiredException $e) {
-            //$this->logger->info('Token has expired', ['exception' => $e->getMessage(), 'token' => $token]);
-            return null;
+            $this->logger->info('Token has expired', ['exception' => $e->getMessage()]);
+            throw new ValidationException('Token validation failed');
 
         } catch (\Exception $e) {
-            $this->logger->error('Token validation failed', ['exception' => $e->getMessage(), 'token' => $token]);
-            return null;
+            $this->logger->error('Token validation failed', ['exception' => $e->getMessage()]);
+            throw new ValidationException('Token validation failed');
         }
     }
 
 
     /**
      * generate UUID
-     * 
+     *
      * @param $expiryAfter in seconds
-     * 
+     *
      * @returns JWR decoded token with provided expiry time
      */
     public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
     {
         $issuedAt = time();
         $expirationTime = $issuedAt + $expiryAfter;
-        
+
         $payload = [
             'iss' => 'peerapp.de',
             'aud' => 'peerapp.de',
@@ -115,9 +118,10 @@ class JWTService
             'exp' => $expirationTime
         ];
 
-        $this->logger->info('Creating access token', ['data' => $payload]);
+        $this->logger->info('Creating access token', ['uid' => $userId]);
 
-        return JWT::encode($payload, $this->privateKey, 'RS256');
+        $token = JWT::encode($payload, $this->privateKey, 'RS256');
+        return $token;
     }
 
 }

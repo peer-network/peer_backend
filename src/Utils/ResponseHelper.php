@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Utils;
 
 trait ResponseHelper
 {
-    private function argsToJsString($args) {
+    private function argsToJsString($args)
+    {
         return json_encode($args);
     }
 
-    private function argsToString($args) {
+    private function argsToString($args)
+    {
         return serialize($args);
     }
 
@@ -22,24 +26,78 @@ trait ResponseHelper
         return [];
     }
 
-    private function respondWithError(int $responseCode): array
+    private static function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
     {
-        return ['status' => 'error', 'ResponseCode' => $responseCode];
+        return self::createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            false
+        );
     }
 
-    private function createSuccessResponse(int $message, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array 
+    private static function createSuccessResponseObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): SuccessResponse
     {
+        return new SuccessResponse(
+            self::createResponse(
+                $responseCode,
+                $data,
+                $countEnabled,
+                $countKey,
+                true
+            )
+        );
+    }
+
+    private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    {
+        return self::createResponse(
+            $responseCode,
+            $data,
+            $countEnabled,
+            $countKey,
+            true
+        );
+    }
+
+    private static function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): ErrorResponse
+    {
+        return new ErrorResponse(
+            self::createResponse(
+                $responseCode,
+                $data,
+                $countEnabled,
+                $countKey,
+                true
+            )
+        );
+    }
+
+    private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
+    {
+        // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
+        $firstDigit = (int)substr((string)$responseCode, 0, 1);
+        $isSuccess = $firstDigit === 1 || $firstDigit === 2;
+
+        if ($isError !== null) {
+            $isSuccess = !$isError;
+        }
+
         $response = [
-            'status' => 'success',
-            'ResponseCode' => $message,
-            'affectedRows' => $data,
+            'status' => $isSuccess ? 'success' : 'error',
+            'ResponseCode' => (string)$responseCode
         ];
 
-        if ($countEnabled && is_array($data)) {
-            if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                $response['counter'] = count($data[$countKey]);
-            } else {
-                $response['counter'] = count($data);
+        if ($isSuccess) {
+            $response['affectedRows'] = $data;
+
+            if ($countEnabled && is_array($data)) {
+                if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
+                    $response['counter'] = count($data[$countKey]);
+                } else {
+                    $response['counter'] = count($data);
+                }
             }
         }
 
@@ -50,11 +108,14 @@ trait ResponseHelper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 
@@ -74,4 +135,9 @@ trait ResponseHelper
         return true;
     }
 
+    private static function validateDate(string $date, string $format = 'Y-m-d'): bool
+    {
+        $d = \DateTime::createFromFormat($format, $date);
+        return $d && $d->format($format) === $date;
+    }
 }

@@ -1,24 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\UserPreferences;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\JsonHelper;
 
 class UserPreferencesMapper
 {
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
     }
 
     public function loadPreferencesById(string $id): UserPreferences|false
     {
-        $this->logger->info('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
+        $this->logger->debug('UserPreferencesMapper.loadPreferencesById started', ['id' => $id]);
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, content_filtering_severity_level, updatedat
+                'SELECT userid, content_filtering_severity_level, updatedat, onboardingswereshown
                  FROM user_preferences 
                  WHERE userid = :id'
             );
@@ -27,10 +30,11 @@ class UserPreferencesMapper
             $stmt->execute();
 
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-            
+
             if ($data) {
                 $this->logger->info('User preferences loaded successfully', ['id' => $id, 'data' => $data]);
                 $data['contentFilteringSeverityLevel'] = $data['content_filtering_severity_level'];
+                $data['onboardingsWereShown'] = JsonHelper::decode($data['onboardingswereshown'] ?? '[]') ?? [];
                 return new UserPreferences($data);
             } else {
                 $this->logger->warning("No user found with given ID", ['id' => $id]);
@@ -53,21 +57,21 @@ class UserPreferencesMapper
 
     public function insert(UserPreferences $user): UserPreferences
     {
-        $this->logger->info("UserPreferencesMapper.insert started");
+        $this->logger->debug("UserPreferencesMapper.insert started");
 
         $data = $user->getArrayCopy();
 
         $query = "INSERT INTO user_preferences
-                  (userid, content_filtering_severity_level, updatedat)
+                  (userid, content_filtering_severity_level, updatedat, onboardingswereshown)
                   VALUES 
-                  (:userid, :content_filtering_severity_level , :updatedat)";
-
+                  (:userid, :content_filtering_severity_level , :updatedat, :onboardings::jsonb)";
         try {
             $stmt = $this->db->prepare($query);
 
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
             $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR); 
+            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':onboardings', json_encode($data['onboardingsWereShown'] ?? [], JSON_UNESCAPED_UNICODE), \PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -85,21 +89,23 @@ class UserPreferencesMapper
 
     public function update(UserPreferences $userPreferences): UserPreferences
     {
-        $this->logger->info('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
+        $this->logger->debug('UserPreferences.update started', ['userid' => $userPreferences->getUserId()]);
 
         $userPreferences->setUpdatedAt();
         $data = $userPreferences->getArrayCopy();
-        
+
         try {
             $query = "UPDATE user_preferences 
                       SET content_filtering_severity_level = :content_filtering_severity_level, 
-                          updatedat = :updatedat 
+                          updatedat = :updatedat,
+                          onboardingswereshown = :onboardings::jsonb
                       WHERE userid = :userid";
 
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':content_filtering_severity_level', $data['contentFilteringSeverityLevel'], \PDO::PARAM_INT);
             $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
             $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':onboardings', json_encode($data['onboardingsWereShown'] ?? [], JSON_UNESCAPED_UNICODE), \PDO::PARAM_STR);
 
             $stmt->execute();
 

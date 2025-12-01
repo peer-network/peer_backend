@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 
-class UserInfo
+class UserInfo extends Model
 {
     protected string $userid;
     protected float $liquidity;
@@ -16,7 +19,8 @@ class UserInfo
     protected int $amountfriends;
     protected int $amountblocked;
     protected int $isprivate;
-    protected int $reports;
+    protected int $activeReports;
+    protected int $totalreports;
     protected ?string $invited;
     protected ?string $phone;
     protected ?string $pkey;
@@ -37,7 +41,8 @@ class UserInfo
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->amountblocked = $data['amountblocked'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
-        $this->reports = $data['reports'] ?? 0;
+        $this->activeReports = $data['reports'] ?? 0;
+        $this->totalreports = $data['totalreports'] ?? 0;
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->pkey = $data['pkey'] ?? null;
@@ -56,7 +61,8 @@ class UserInfo
             'amountfriends' => $this->amountfriends,
             'amountblocked' => $this->amountblocked,
             'isprivate' => $this->isprivate,
-            'reports' => $this->reports,
+            'reports' => $this->activeReports,
+            'totalreports' => $this->totalreports,
             'invited' => $this->invited,
             'phone' => $this->phone,
             'pkey' => $this->pkey,
@@ -180,16 +186,25 @@ class UserInfo
         $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
     }
 
-    public function getReports(): int
+    public function getActiveReports(): int
     {
-        return $this->reports;
+        return $this->activeReports;
     }
 
     public function setReports(int $reports): void
     {
-        $this->reports = $reports;
+        $this->activeReports = $reports;
     }
-    
+
+    public function getTotalReports(): int
+    {
+        return $this->totalreports;
+    }
+    public function setTotalReports(int $totalreports): void
+    {
+        $this->totalreports = $totalreports;
+    }
+
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array|false
     {
@@ -202,13 +217,13 @@ class UserInfo
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -227,7 +242,7 @@ class UserInfo
                 'filters' => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => [
-                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'], 
+                        'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'],
                         'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
                         ]],
                 ],
@@ -296,9 +311,17 @@ class UserInfo
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
+    }
+
+    /**
+     * Table Name
+     */
+    public static function table(): string
+    {
+        return 'users_info';
     }
 }

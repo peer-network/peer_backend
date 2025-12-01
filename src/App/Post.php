@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Post implements Hashable
+class Post extends Model implements Hashable
 {
     use HashObject;
 
@@ -22,14 +25,14 @@ class Post implements Hashable
     protected ?string $cover;
     protected string $mediadescription;
     protected string $createdat;
+    protected string $visibilityStatus;
 
     // Constructor
     public function __construct(
-        array $data = [], 
-        array $elements = [], 
+        array $data = [],
+        array $elements = [],
         bool $validate = true
-    )
-    {
+    ) {
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
@@ -44,6 +47,7 @@ class Post implements Hashable
         $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -60,6 +64,7 @@ class Post implements Hashable
             'url' => $this->url,
             'mediadescription' => $this->mediadescription,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
         ];
         return $att;
     }
@@ -107,7 +112,7 @@ class Post implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
@@ -194,16 +199,26 @@ class Post implements Hashable
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         return implode('|', [
             $this->title,
             $this->contenttype,
@@ -213,15 +228,23 @@ class Post implements Hashable
         ]);
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
     }
 
     public function getPostUrl(): string
     {
-        if(empty($this->postid)) {
+        if (empty($this->postid)) {
             return '';
         }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
+        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
+
+    // Table name
+    public static function table(): string
+    {
+        return 'posts';
+    }
+
 }

@@ -1,28 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Database;
 
 use PDO;
 use Fawaz\App\CommentInfo;
-use Psr\Log\LoggerInterface;
-use Fawaz\App\Status;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class CommentInfoMapper
 {
-    const STATUS_DELETED = 6;
-
-    public function __construct(protected LoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
-    }
-
-    public function isSameUser(string $userid, string $currentUserId): bool
-    {
-        return $userid === $currentUserId;
     }
 
     public function loadById(string $commentid): CommentInfo|false
     {
-        $this->logger->info("CommentInfoMapper.loadById started");
+        $this->logger->debug("CommentInfoMapper.loadById started");
 
         $sql = "SELECT * FROM comment_info WHERE commentid = :commentid";
         $stmt = $this->db->prepare($sql);
@@ -36,30 +30,17 @@ class CommentInfoMapper
         return false;
     }
 
-    public function isUserExistById(string $id): bool
-    {
-        $this->logger->info("CommentInfoMapper.isUserExistById started");
-
-        $status = Status::DELETED;                        
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE status != :status AND uid = :id");
-        $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':status', $status, \PDO::PARAM_INT );
-        $stmt->execute();
-
-        return $stmt->fetchColumn() > 0;
-    }
-
     public function insert(CommentInfo $commentInfo): bool
     {
-        $this->logger->info("CommentInfoMapper.insert started");
+        $this->logger->debug("CommentInfoMapper.insert started");
 
         $data = $commentInfo->getArrayCopy();
-        
-        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, comments) 
-                  VALUES (:commentid, :userid, :likes, :reports, :comments)";
-        
+
+        $query = "INSERT INTO comment_info (commentid, userid, likes, reports, totalreports, comments) 
+                  VALUES (:commentid, :userid, :likes, :reports, :totalreports, :comments)";
+
         $stmt = $this->db->prepare($query);
-        
+
         if ($stmt->execute($data)) {
             $this->logger->info("Inserted new comment info into database", ['commentid' => $data['commentid']]);
             return true;
@@ -71,27 +52,27 @@ class CommentInfoMapper
 
     public function update(CommentInfo $commentInfo): void
     {
-        $this->logger->info("CommentInfoMapper.update started");
+        $this->logger->debug("CommentInfoMapper.update started");
 
         $data = $commentInfo->getArrayCopy();
 
-        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
+        $sql = "UPDATE comment_info SET likes = :likes, reports = :reports, totalreports = :totalreports, comments = :comments WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);
 
         if ($stmt->execute($data)) {
             $this->logger->info("Updated comment info successfully", ['commentid' => $data['commentid']]);
         } else {
-            $this->logger->warning("Failed to update comment info", ['commentid' => $data['commentid']]);
+            $this->logger->error("Failed to update comment info", ['commentid' => $data['commentid']]);
         }
     }
 
     public function addUserActivity(string $action, string $userid, string $commentid): bool
     {
-        $this->logger->info("CommentInfoMapper.addUserActivity started");
+        $this->logger->debug("CommentInfoMapper.addUserActivity started");
 
         $table = match ($action) {
             'likeComment' => 'user_comment_likes',
-            'reportComment' => 'user_comment_reports',
+            'reportComment' => 'user_reports',
             default => null,
         };
 
@@ -116,7 +97,7 @@ class CommentInfoMapper
 
     public function countLikes(string $commentid): int
     {
-        $this->logger->info("CommentMapper.countLikes started");
+        $this->logger->debug("CommentMapper.countLikes started");
 
         $sql = "SELECT COUNT(*) FROM user_comment_likes WHERE commentid = :commentid";
         $stmt = $this->db->prepare($sql);
@@ -126,7 +107,7 @@ class CommentInfoMapper
 
     public function isLiked(string $commentid, string $userid): bool
     {
-        $this->logger->info("CommentMapper.isLiked started");
+        $this->logger->debug("CommentMapper.isLiked started");
 
         $sql = "SELECT COUNT(*) FROM user_comment_likes WHERE commentid = :commentid AND userid = :userid";
         $stmt = $this->db->prepare($sql);

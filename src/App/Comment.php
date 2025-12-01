@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Comment implements Hashable
+class Comment extends Model implements Hashable
 {
     use HashObject;
 
@@ -19,6 +22,7 @@ class Comment implements Hashable
     protected string $content;
     protected string $createdat;
     protected ?int $userstatus;
+    protected string $visibilityStatus;
 
 
     // Constructor
@@ -35,11 +39,7 @@ class Comment implements Hashable
         $this->content = $data['content'] ?? '';
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
-
-        if($this->userstatus == 6){
-            $this->content = "Comment by deleted Account";
-        }
-
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -52,6 +52,7 @@ class Comment implements Hashable
             'parentid' => $this->parentid,
             'content' => $this->content,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
         ];
         return $att;
     }
@@ -124,13 +125,13 @@ class Comment implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -161,7 +162,7 @@ class Comment implements Hashable
                 'filters' => [['name' => 'StringTrim']],
                 'validators' => [
                     [
-                        'name' => 'StringLength', 
+                        'name' => 'StringLength',
                         'options' => [
                             'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
                             'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
@@ -178,22 +179,41 @@ class Comment implements Hashable
                     ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         return implode('|', [
             $this->content
         ]);
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
+    }
+
+    /**
+     * Table name in the database
+     */
+    public static function table(): string
+    {
+        return 'comments';
     }
 }

@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class User implements Hashable
+class User extends Model implements Hashable, ProfileReplaceable
 {
     use HashObject;
 
@@ -26,6 +30,9 @@ class User implements Hashable
     protected string $biography;
     protected string $createdat;
     protected string $updatedat;
+    protected ?int $activeReports = null;
+    protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -48,12 +55,9 @@ class User implements Hashable
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-
-        if($this->status == 6){
-            $this->username = 'Deleted Account';
-            $this->img = '/profile/2e855a7b-2b88-47bc-b4dd-e110c14e9acf.jpeg';
-            $this->biography = '/userData/fb08b055-511a-4f92-8bb4-eb8da9ddf746.txt';
-        }
+        $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -73,6 +77,9 @@ class User implements Hashable
             'biography' => $this->biography,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -99,6 +106,9 @@ class User implements Hashable
             'slug' => $this->slug,
             'img' => $this->img,
             'biography' => $this->biography,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -142,7 +152,7 @@ class User implements Hashable
     {
         $this->referral_uuid = $referral_uuid;
     }
-    
+
     public function getSlug(): int
     {
         return $this->slug;
@@ -203,6 +213,12 @@ class User implements Hashable
         $this->verified = $verified;
     }
 
+    // ProfileReplaceable: roles mask accessor with expected name
+    public function getRolesmask(): int
+    {
+        return (int)$this->roles_mask;
+    }
+
     public function getRoles(): int|null
     {
         return $this->roles_mask;
@@ -243,6 +259,34 @@ class User implements Hashable
         $this->biography = $biography;
     }
 
+    // ContentFiltering capabilities
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatusForUser;
+    }
+
+    public function setVisibilityStatus(string $status): void
+    {
+        $this->visibilityStatusForUser = $status;
+    }
+
     public function updateBio(string $biography): void
     {
         $this->biography = $biography;
@@ -277,11 +321,11 @@ class User implements Hashable
     public function verifyPassword(string $password): bool
     {
         if (\password_verify($password, $this->password)) {
-            
+
             if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-                
+
                 $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
-                
+
                 $this->password = $newHash;
             }
 
@@ -311,13 +355,13 @@ class User implements Hashable
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -371,7 +415,7 @@ class User implements Hashable
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -423,16 +467,26 @@ class User implements Hashable
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));
     }
 
-    public function getHashableContent(): string {
+    public function getHashableContent(): string
+    {
         $content = implode('|', [
             $this->email,
             $this->img,
@@ -442,7 +496,15 @@ class User implements Hashable
         return $content;
     }
 
-    public function hashValue(): string {
+    public function hashValue(): string
+    {
         return $this->hashObject($this);
     }
+
+    // Table name for the model
+    protected static function table(): string
+    {
+        return 'users';
+    }
+
 }

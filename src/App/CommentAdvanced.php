@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
-class CommentAdvanced
+class CommentAdvanced implements CommentReplaceable
 {
     protected string $commentid;
     protected string $userid;
@@ -15,11 +18,15 @@ class CommentAdvanced
     protected string $content;
     protected string $createdat;
     protected ?int $amountlikes;
+    protected ?int $amountreports;
     protected ?int $amountreplies;
+    protected ?bool $isreported;
     protected ?bool $isliked;
-    protected ?int $userstatus;
+    protected ?int $activeReports = null;
+    protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
     protected ?array $user = [];
-    
+
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -36,13 +43,13 @@ class CommentAdvanced
         $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->amountreplies = $data['amountreplies'] ?? 0;
+        $this->amountreports = $data['amountreports'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
-        $this->userstatus = $data['userstatus'] ?? 0;
+        $this->activeReports = $data['reports'] ?? null;
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
-
-        if($this->userstatus == 6){
-            $this->content = "Comment by deleted Account";
-        }
     }
 
     // Array Copy methods
@@ -57,7 +64,13 @@ class CommentAdvanced
             'createdat' => $this->createdat,
             'amountlikes' => $this->amountlikes,
             'amountreplies' => $this->amountreplies,
+            'amountreports' => $this->amountreports,
+            'isreported' => $this->isreported,
             'isliked' => $this->isliked,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'reports' => $this->activeReports,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
             'user' => $this->user,
         ];
         return $att;
@@ -118,6 +131,32 @@ class CommentAdvanced
     {
         $this->content = $content;
     }
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatusForUser;
+    }
+
+    public function setVisibilityStatus(string $status): void
+    {
+        $this->visibilityStatusForUser = $status;
+    }
+
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
 
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array|false
@@ -131,13 +170,13 @@ class CommentAdvanced
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -191,7 +230,34 @@ class CommentAdvanced
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
+            'amountreports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
             'isliked' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'isreported' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
+            'reports' => [
+                'required' => false,
+                'filters' => [['name' => 'ToInt']],
+                'validators' => [['name' => 'IsInt']],
+            ],
+            'hasActiveReports' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
@@ -202,7 +268,7 @@ class CommentAdvanced
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

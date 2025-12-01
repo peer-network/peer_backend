@@ -1,0 +1,150 @@
+enum AdvertisementType {
+  PINNED
+  BASIC
+}
+
+enum AdvertisementSort {
+  NEWEST
+  OLDEST
+  BIGGEST_COST
+  SMALLEST_COST
+}
+
+enum AdDuration {
+  ONE_DAY
+  TWO_DAYS
+  THREE_DAYS
+  FOUR_DAYS
+  FIVE_DAYS
+  SIX_DAYS
+  SEVEN_DAYS
+}
+
+enum AdvertisementBasicPlan {
+  BASIC
+}
+
+enum AdvertisementPinnedPlan {
+  PINNED
+}
+
+enum TokenMovementFilterType {
+  TRANSACTION
+  AIRDROP
+  MINT
+  PAYMENT
+  BURN
+}
+
+enum GetOnly {
+  VIEW
+  LIKE
+  DISLIKE
+  COMMENTLIKE
+}
+
+enum DirectionFilterType {
+  INCOME
+  DEDUCTION
+}
+
+enum SortFilterType {
+  NEWEST
+  OLDEST
+}
+
+enum PostActionType {
+  LIKE
+  DISLIKE
+  REPORT
+  VIEW
+  SHARE
+  SAVE
+}
+
+enum PostType {
+  POST
+}
+
+enum CommentType {
+  COMMENT
+}
+
+enum ContentFilterType {
+  MYGRANDMALIKES
+  MYGRANDMAHATES
+}
+
+enum ContentType {
+  image
+  audio
+  video
+  text
+}
+
+enum PostFilterType {
+  IMAGE
+  AUDIO
+  VIDEO
+  TEXT
+  FOLLOWED
+  FOLLOWER
+  VIEWED
+}
+
+enum IgnoreOption {
+  YES
+  NO
+}
+
+enum PostSortType {
+  NEWEST
+  TRENDING
+  LIKES
+  DISLIKES
+  VIEWS
+  COMMENTS
+  FOR_ME
+  OLDEST
+  FOLLOWER
+  FOLLOWED
+  RELEVANT
+  FRIENDS
+}
+
+enum DayFilterType {
+  D0
+  D1
+  D2
+  D3
+  D4
+  D5
+  D6
+  D7
+  W0
+  M0
+  Y0
+}
+
+enum OnboardingType {
+  INTROONBOARDING
+}
+
+enum ModerationStatus {
+  waiting_for_review
+  hidden
+  restored
+  illegal
+}
+
+enum ModerationContentType {
+  post
+  comment
+  user
+}
+
+enum ContentVisibilityStatus {
+  NORMAL
+  HIDDEN
+  ILLEGAL
+}

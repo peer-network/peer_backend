@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\Handler;
 
 use Fawaz\App\MultipartPostService;
@@ -7,21 +9,21 @@ use Fawaz\App\PostService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 use Slim\Psr7\UploadedFile;
 
 class MultipartPostHandler implements RequestHandlerInterface
 {
     public function __construct(
-        protected LoggerInterface $logger,
+        protected PeerLoggerInterface $logger,
         protected MultipartPostService $multipartPostService
     ) {
     }
 
     /**
      * Handle Requests
-     * 
+     *
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -34,7 +36,7 @@ class MultipartPostHandler implements RequestHandlerInterface
         $responseBody = $this->multipartPostService->checkForBasicValidation(['contentType' => $contentType, 'contentLength' => $contentLength]);
 
         $bearerToken = null;
-        if(isset($responseBody['status']) && $responseBody['status'] != 'error'){
+        if (isset($responseBody['status']) && $responseBody['status'] != 'error') {
             if (!empty($authorizationHeader)) {
                 $parts = explode(' ', $authorizationHeader[0]);
                 if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
@@ -50,7 +52,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             if (isset($rawFiles['file'])) {
                 $filesArray = $this->normalizeFilesArray($rawFiles['file']);
             }
-            
+
             $requestObj = [
                 'eligibilityToken' => (!empty($rawBody['eligibilityToken']) && isset($rawBody['eligibilityToken'])) ? $rawBody['eligibilityToken'] : '',
                 'media' => !empty($filesArray) ? $filesArray : [],
@@ -60,7 +62,7 @@ class MultipartPostHandler implements RequestHandlerInterface
 
             $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
         }
-        
+
 
         $response = new Response();
         $response->getBody()->write(json_encode($responseBody));
@@ -77,9 +79,9 @@ class MultipartPostHandler implements RequestHandlerInterface
     /**
      * Normalize PHP's $_FILES array into a per-file format
      */
-    function normalizeFilesArray(array $files): array
+    public function normalizeFilesArray(array $files): array
     {
-        try{
+        try {
 
             $normalized = [];
 
@@ -103,7 +105,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             $uploadedFilesObj = [];
-            foreach ($normalized as $index => $fileObj) {
+            foreach ($normalized as $fileObj) {
                 $uploadedFilesObj[] = new UploadedFile(
                     $fileObj['tmp_name'],
                     $fileObj['name'],
@@ -114,8 +116,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             return $uploadedFilesObj;
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             $this->logger->error("Error normalizing files array: " . $e->getMessage());
             return [];
         }

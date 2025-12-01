@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use DateTime;
@@ -29,11 +31,6 @@ class ProfilUser
         $this->img = $data['img'] ?? '';
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
-
-        if(isset($data['status']) && $data['status'] == 6){
-            $this->username = 'Deleted Account';
-            $this->img = '/profile/14ce7fba-2bee-4607-86a7-b098a3d62a78.jpg'; // NEEDs to replace with Delete User Image on Production
-        }
     }
 
     // Array Copy methods
@@ -98,13 +95,13 @@ class ProfilUser
 
         $validationErrors = $inputFilter->getMessages();
 
-        foreach ($validationErrors as $field => $errors) {
+        foreach ($validationErrors as $errors) {
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
             $errorMessageString = implode("", $errorMessages);
-            
+
             throw new ValidationException($errorMessageString);
         }
         return false;
@@ -130,7 +127,7 @@ class ProfilUser
                 'filters' => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
-                        'min' => $userConfig['SLUG']['MIN_LENGTH'], 
+                        'min' => $userConfig['SLUG']['MIN_LENGTH'],
                         'max' => $userConfig['SLUG']['MAX_LENGTH']
                         ]],
                 ],
@@ -157,7 +154,7 @@ class ProfilUser
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
         }
 
         return (new PeerInputFilter($specification));

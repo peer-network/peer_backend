@@ -1,0 +1,25 @@
+name: Deploy Dependabot → Discord Worker
+
+on:
+  push:
+    paths:
+      - "worker/**"   # only redeploy when code in worker folder changes
+      - ".github/workflows/deploy-worker.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Publish to Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DISCORD_WEBHOOK_DEPENDABOT: ${{ secrets.DISCORD_WEBHOOK_DEPENDABOT }}
+        run: |
+          cd worker
+          wrangler deploy

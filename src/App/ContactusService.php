@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
 
 use Fawaz\App\Contactus;
 use Fawaz\Database\ContactusMapper;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Utils\ResponseHelper;
 
 class ContactusService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected ContactusMapper $contactUsMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected ContactusMapper $contactUsMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -25,17 +29,15 @@ class ContactusService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             \mt_rand(0, 0xffff),
             \mt_rand(0, 0x0fff) | 0x4000,
             \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff), \mt_rand(0, 0xffff), \mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
     private function checkAuthentication(): bool
@@ -51,26 +53,16 @@ class ContactusService
     {
         $contactConfig = ConstantsConfig::contact();
         return $Name &&
-            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] && 
-            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] && 
+            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
+            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
             preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
-    }
-
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
-    private function createSuccessResponse(int $message, array $data = []): array
-    {
-        return ['status' => 'success', 'counter' => count($data), 'ResponseCode' => $message, 'affectedRows' => $data];
     }
 
     private function validateRequiredFields(array $args, array $requiredFields): array
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this->respondWithError("$field is required");
+                return $this::respondWithError(32017);//"$field is required"
             }
         }
         return [];
@@ -86,11 +78,11 @@ class ContactusService
             $this->transactionManager->commit();
 
             return $response;
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
             $this->logger->error("Error occurred in ContactusService.insert", [
                 'error' => $e->getMessage(),
-                'contact' => $contact->getArrayCopy(),
+                'msgid' => $contact->getMsgId(),
             ]);
             return null;
         }
@@ -98,12 +90,12 @@ class ContactusService
 
     public function checkRateLimit(string $ip): bool
     {
-        try{
+        try {
             $this->transactionManager->beginTransaction();
 
             $response = $this->contactUsMapper->checkRateLimit($ip);
 
-            if(!$response) {
+            if (!$response) {
                 $this->logger->info("Rate limit check failed for IP: $ip");
                 $this->transactionManager->rollBack();
                 return false;
@@ -111,7 +103,7 @@ class ContactusService
             $this->transactionManager->commit();
 
             return $response;
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
 
             $this->logger->error("Error occurred in ContactusService.checkRateLimit", [
@@ -126,25 +118,25 @@ class ContactusService
     public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (!in_array($type, ['id', 'name'], true)) {
-            return $this->respondWithError(30105);
+            return $this::respondWithError(30105);
         }
 
         if (empty($value)) {
-            return $this->respondWithError(30102);
+            return $this::respondWithError(30102);
         }
 
         if ($type === 'id') {
             if (!ctype_digit($value)) {
-                return $this->respondWithError(30105);
+                return $this::respondWithError(30105);
             }
             $value = (int)$value;
         }
 
-        $this->logger->info("ContactusService.loadById started", [
+        $this->logger->debug("ContactusService.loadById started", [
             'type' => $type,
             'value' => $value,
         ]);
@@ -153,10 +145,10 @@ class ContactusService
             $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
-                return $this->respondWithError(40401);
+                return $this::respondWithError(40401);
             }
 
-            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+            $existData = $exist->getArrayCopy();
 
             $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'type' => $type,
@@ -173,21 +165,21 @@ class ContactusService
                 'value' => $value,
             ]);
 
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
+            return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
-            return $this->respondWithError(30101);
+            return $this::respondWithError(30101);
         }
 
-        $this->logger->info("ContactusService.fetchAll started", [
+        $this->logger->debug("ContactusService.fetchAll started", [
             'args' => $args,
         ]);
 
@@ -195,10 +187,10 @@ class ContactusService
             $exist = $this->contactUsMapper->fetchAll($args);
 
             if (empty($exist)) {
-                return $this->respondWithError(40401);
+                return $this::respondWithError(40401);
             }
 
-            $existData = array_map(fn(Contactus $contact) => $contact->getArrayCopy(), $exist);
+            $existData = array_map(fn (Contactus $contact) => $contact->getArrayCopy(), $exist);
 
             $this->logger->info("ContactusService.loadById successfully fetched contact", [
                 'args' => $args,
@@ -213,7 +205,7 @@ class ContactusService
                 'args' => $args,
             ]);
 
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 }

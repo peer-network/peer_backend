@@ -1,26 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Fawaz\App;
-
-const LIKE_=2;
-const COMMENT_=4;
-const POST_=5;
-
-const DAILYFREEPOST=1;
-const DAILYFREELIKE=3;
-const DAILYFREECOMMENT=4;
-const DAILYFREEDISLIKE=0;
 
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Psr\Log\LoggerInterface;
+use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class DailyFreeService
 {
+    use ResponseHelper;
     protected ?string $currentUserId = null;
 
-    public function __construct(protected LoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
+    public function __construct(protected PeerLoggerInterface $logger, protected DailyFreeMapper $dailyFreeMapper, protected TransactionManager $transactionManager)
     {
     }
 
@@ -29,16 +24,7 @@ class DailyFreeService
         $this->currentUserId = $userId;
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
-    private function respondWithError(int $message): array
-    {
-        return ['status' => 'error', 'ResponseCode' => $message];
-    }
-
+    
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -50,31 +36,27 @@ class DailyFreeService
 
     public function getUserDailyAvailability(string $userId): array
     {
-        $this->logger->info('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
+        $this->logger->debug('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
 
         try {
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
             if ($affectedRows === false) {
-                $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
-                return $this->respondWithError(40301);
+                $this->logger->error('DailyFree availability not found', ['userId' => $userId]);
+                return $this::respondWithError(40301);
             }
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => 11303,
-                'affectedRows' => $affectedRows,
-            ];
+            return $this::createSuccessResponse(11303, $affectedRows, false);
 
         } catch (\Throwable $e) {
             $this->logger->error('Error in getUserDailyAvailability', ['exception' => $e->getMessage(), 'userId' => $userId]);
-            return $this->respondWithError(40301);
+            return $this::respondWithError(40301);
         }
     }
 
     public function getUserDailyUsage(string $userId, int $artType): int
     {
-        $this->logger->info('DailyFreeService.getUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+        $this->logger->debug('DailyFreeService.getUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
             $results = $this->dailyFreeMapper->getUserDailyUsage($userId, $artType);
@@ -89,7 +71,7 @@ class DailyFreeService
 
     public function incrementUserDailyUsage(string $userId, int $artType): bool
     {
-        $this->logger->info('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
+        $this->logger->debug('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
             $this->transactionManager->beginTransaction();

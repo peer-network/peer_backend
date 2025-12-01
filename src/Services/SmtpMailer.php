@@ -1,8 +1,8 @@
-<?php 
+<?php
+
 declare(strict_types=1);
 
 namespace Fawaz\Services;
-
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -10,7 +10,6 @@ use PHPMailer\PHPMailer\Exception;
 
 class SmtpMailer
 {
-    
     /**
      * Create and configure a PHPMailer instance.
      *
@@ -24,9 +23,9 @@ class SmtpMailer
         $mail->isSMTP();
         $mail->Host = $_ENV['MAIL_HOST'];
         $mail->SMTPAuth = true;
-        $mail->Username = $_ENV['MAIL_USERNAME'];     
+        $mail->Username = $_ENV['MAIL_USERNAME'];
         $mail->Password = $_ENV['MAIL_PASSWORD'];
-        $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];    
+        $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
         $mail->Port =  $_ENV['MAIL_PORT'];
         $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
         $mail->isHTML(true);
@@ -42,7 +41,8 @@ class SmtpMailer
      * @param string $body
      * @return array{status: string, message?: string}
      */
-    public function sendEmail(string $email, string $subject, string $body){
+    public function sendEmail(string $email, string $subject, string $body)
+    {
 
         try {
             $mail = $this->createMailerInstance();
@@ -59,6 +59,6 @@ class SmtpMailer
                 'message' => $e->getMessage()
             ];
         }
-        
+
     }
 }
