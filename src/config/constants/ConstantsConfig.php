@@ -444,7 +444,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'NAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 53,
-            'PATTERN' => '^[a-zA-Z]+$',
         ],
         'MESSAGE' => [
             'MIN_LENGTH' => 3,
