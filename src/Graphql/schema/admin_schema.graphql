@@ -5,13 +5,13 @@ extend type Query {
   gemster: GemsterResponse!
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
-  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
-  alphaMint: DefaultResponse
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
 }
 
 extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
+  alphaMint: DefaultResponse
 }
 
 

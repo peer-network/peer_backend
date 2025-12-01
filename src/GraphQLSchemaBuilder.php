@@ -23,12 +23,10 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -201,6 +199,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->profileService->setCurrentUserId($userid);
