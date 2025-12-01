@@ -7,7 +7,7 @@ namespace Fawaz\Services\TokenTransfer\Strategies;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class PaidCommentTransferStrategy implements TransferStrategy
+class PaidCommentTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
 {
     use ResponseHelper;
 
@@ -25,26 +25,6 @@ class PaidCommentTransferStrategy implements TransferStrategy
     public function getRecipientTransactionType(): string
     {
         return 'transferForComment';
-    }
-
-    public function getInviterFeeTransactionType(): string
-    {
-        return 'transferSenderToInviter';
-    }
-
-    public function getPoolFeeTransactionType(): string
-    {
-        return 'transferSenderToPoolWallet';
-    }
-
-    public function getPeerFeeTransactionType(): string
-    {
-        return 'transferSenderToPeerWallet';
-    }
-
-    public function getBurnFeeTransactionType(): string
-    {
-        return 'transferSenderToBurnWallet';
     }
 
     public function setTransactionId(string $transactionId): void
