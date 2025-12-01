@@ -6,6 +6,7 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Mailer;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\NoFeesTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -101,16 +102,20 @@ class AlphaMintService
 
                         if($userData){
                             $receipientUserId = $userData->getUserId();
-                            $args = [
-                                'recipient' => $receipientUserId,
-                                'numberoftokens' => $usr['alpha_user_tokens'],
-                                'message' => 'Alpha Token Migration',
-                            ];
+                            // Skip duplicate transfer if same user and amount already credited
+                            $amount = (string)$usr['alpha_user_tokens'];
+                            if ($this->peerTokenMapper->hasExistingTransfer($mintUserId, $receipientUserId, $amount)) {
+                                $this->logger->info('Duplicate alpha mint transfer skipped', [
+                                    'recipient' => $receipientUserId,
+                                    'amount' => $amount,
+                                ]);
+                                continue;
+                            }
                             $this->peerTokenMapper->transferToken(
                                 $mintUserId, 
                                 $receipientUserId,
-                                $usr['alpha_user_tokens'],
-                                new DefaultTransferStrategy()
+                                $amount,
+                                new NoFeesTransferStrategy()
                             );
 
                             $totalAlphaUserMinted++;
