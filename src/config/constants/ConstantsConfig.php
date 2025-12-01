@@ -514,7 +514,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TRANSFER_MESSAGE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 500,
-            'PATTERN_URL' => '(https?:\/\/|http:\/\/|www\.)',
+            'PATTERN_URL' => '(:\/\/|www\.)',
         ],
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.00000001,
