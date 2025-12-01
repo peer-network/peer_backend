@@ -413,75 +413,75 @@ class ModerationMapper
         }
 
         // Target Media File for Post
-        if ($targetType == 'post') {
-            $mediaRecord = Post::query()->where('postid', $targetId)->first();
-            if (!$mediaRecord || !$mediaRecord['media']) {
-                $this->logger->error("Media not found for Post ID: $targetId");
-            }
-            $media = json_decode($mediaRecord['media'], true);
+        if ($targetType !== 'post') {
+            return;
+        }
 
+        $mediaRecord = Post::query()->where('postid', $targetId)->first();
+        if (!$mediaRecord || !$mediaRecord['media']) {
+            $this->logger->error("Media not found for Post ID: $targetId");
+            return;
+        }
+
+        $pathsToMove = [];
+
+        $media = json_decode($mediaRecord['media'], true);
+        if (is_array($media)) {
             foreach ($media as $mediaItem) {
-
-                if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
+                if (!isset($mediaItem['path'])) {
                     $this->logger->error("Invalid media path for Post ID: $targetId");
-                }
-                $media = $mediaItem['path'];
-
-                if (fopen($directoryPath.$media, 'r') === false) {
-                    $this->logger->error("Unable to open media file for Post ID: $targetId");
                     continue;
                 }
-                $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
+                $pathsToMove[] = $mediaItem['path'];
+            }
+        }
 
-                $uploadedFile = new \Slim\Psr7\UploadedFile(
-                    $stream,
-                    null,
-                    null
-                );
+        $coverPath = $mediaRecord['cover'] ?? null;
+        if (!empty($coverPath)) {
+            $pathsToMove[] = $coverPath;
+        }
 
-                $mediaDetails = explode('/', $media);
-                $mediaUrl = end($mediaDetails);
+        foreach ($pathsToMove as $path) {
+            $fullPath = $directoryPath . $path;
 
-                $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
-
-                try {
-                    $uploadedFile->moveTo($filePath);
-                } catch (\RuntimeException $e) {
-                    $this->logger->error("Failed to move file: $filePath");
+            if (!file_exists($fullPath)) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Cover file does not exist for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Invalid media path for Post ID: $targetId");
                 }
+                continue;
             }
 
-            $coverPath = $mediaRecord['cover'] ?? null;
-
-            if (!empty($coverPath)) {
-                $fullCoverPath = $directoryPath . $coverPath;
-
-                if (!file_exists($fullCoverPath)) {
-                    $this->logger->error("Cover file does not exist for Post ID: $targetId, path: $fullCoverPath");
-                    return;
+            $resource = fopen($fullPath, 'r');
+            if ($resource === false) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Unable to open cover file for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Unable to open media file for Post ID: $targetId");
                 }
+                continue;
+            }
 
-                if (fopen($fullCoverPath, 'r') === false) {
-                    $this->logger->error("Unable to open cover file for Post ID: $targetId, path: $fullCoverPath");
-                    return;
-                }
+            $stream = new \Slim\Psr7\Stream($resource);
 
-                $coverStream = new \Slim\Psr7\Stream(fopen($fullCoverPath, 'r'));
+            $uploadedFile = new \Slim\Psr7\UploadedFile(
+                $stream,
+                null,
+                null
+            );
 
-                $uploadedCover = new \Slim\Psr7\UploadedFile(
-                    $coverStream,
-                    null,
-                    null
-                );
+            $mediaDetails = explode('/', $path);
+            $fileName = end($mediaDetails);
+            $destinationPath = $illegalDirectoryPath . '/' . $fileName;
 
-                $coverDetails = explode('/', $coverPath);
-                $coverFileName = end($coverDetails);
-                $destinationCoverPath = $illegalDirectoryPath . '/' . $coverFileName;
-
-                try {
-                    $uploadedCover->moveTo($destinationCoverPath);
-                } catch (\RuntimeException $e) {
-                    $this->logger->error("Failed to move cover file: $destinationCoverPath");
+            try {
+                $uploadedFile->moveTo($destinationPath);
+            } catch (\RuntimeException $e) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Failed to move cover file: $destinationPath");
+                } else {
+                    $this->logger->error("Failed to move file: $destinationPath");
                 }
             }
         }
