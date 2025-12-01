@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-bookworm
+FROM php:8.4-fpm-bookworm
 
 RUN apt-get update && \
     apt-get install -y nginx supervisor \
@@ -66,7 +66,7 @@ RUN echo "log_errors = On" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
  && echo "error_reporting = E_ALL & ~E_DEPRECATED & ~E_NOTICE" >> /usr/local/etc/php/conf.d/docker-php-error.ini \
  && echo "error_log = /var/www/html/runtime-data/logs/errorlog.txt" >> /usr/local/etc/php/conf.d/docker-php-error.ini
 
- RUN chmod 777 /tmp
+RUN chmod 777 /tmp
 
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisord.conf
