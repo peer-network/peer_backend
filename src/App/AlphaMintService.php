@@ -115,7 +115,8 @@ class AlphaMintService
                                 $mintUserId, 
                                 $receipientUserId,
                                 $amount,
-                                new NoFeesTransferStrategy()
+                                new DefaultTransferStrategy(),
+                                'Alpha Token Migration'
                             );
 
                             $totalAlphaUserMinted++;
