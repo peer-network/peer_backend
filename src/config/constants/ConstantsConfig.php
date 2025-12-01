@@ -347,7 +347,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TAG' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
-            'PATTERN' => '[a-zA-Z]+',
+            'PATTERN' => '^[a-zA-Z]+$',
             'MAX_COUNT' => [
                 'CREATE' => 10,
                 'SEARCH' => 5,
