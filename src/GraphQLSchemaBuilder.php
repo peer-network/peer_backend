@@ -23,12 +23,10 @@ use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -56,6 +54,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\App\AlphaMintService;
 
 class GraphQLSchemaBuilder
 {
@@ -86,6 +85,7 @@ class GraphQLSchemaBuilder
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected AlphaMintService $alphaMintService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -199,6 +199,7 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        $this->alphaMintService->setCurrentUserId($userid);
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->profileService->setCurrentUserId($userid);
@@ -2468,7 +2469,7 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
         ];
     }
 
@@ -2506,6 +2507,7 @@ class GraphQLSchemaBuilder
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
+            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
         ];
     }
 
