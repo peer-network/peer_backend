@@ -423,8 +423,6 @@ class PostService
         $tagNameConfig = ConstantsConfig::post()['TAG'];
         $minLength = (int) $tagNameConfig['MIN_LENGTH'];
         $maxLength = (int) $tagNameConfig['MAX_LENGTH'];
-        $inputConfig  = ConstantsConfig::input();
-        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
@@ -432,7 +430,7 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
 
-            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || preg_match($controlPattern, $tagName) === 1) {
+            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
             }
 

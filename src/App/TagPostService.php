@@ -53,12 +53,10 @@ class TagPostService
     private function isValidTagName(?string $tagName): bool
     {
         $tagNameConfig = ConstantsConfig::post()['TAG'];
-        $inputConfig  = ConstantsConfig::input();
-        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         return $tagName &&
             strlen($tagName) >= $tagNameConfig['MIN_LENGTH'] &&
             strlen($tagName) <= $tagNameConfig['MAX_LENGTH'] &&
-            preg_match($controlPattern, $tagName) === 0;
+            preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
     private function validateTagName(string $tagName): array|bool
@@ -68,12 +66,10 @@ class TagPostService
         }
 
         $tagNameConfig = ConstantsConfig::post()['TAG'];
-        $inputConfig  = ConstantsConfig::input();
-        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
 
         if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
             strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
-            preg_match($controlPattern, $tagName) === 1) {
+            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this::respondWithError(30255);
         }
 

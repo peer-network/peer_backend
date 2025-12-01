@@ -314,7 +314,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TITLE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
-            'PATTERN' => '^[a-zA-Z0-9_]+$'
         ],
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
@@ -516,7 +515,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TRANSFER_MESSAGE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 500,
-            'PATTERN_URL' => '(https?:\/\/|www\.)',
+            'PATTERN_URL' => '(https?:\/\/|http:\/\/|www\.)',
         ],
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.00000001,
