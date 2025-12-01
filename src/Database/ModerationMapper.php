@@ -436,8 +436,19 @@ class ModerationMapper
             }
         }
 
-        $coverPath = $mediaRecord['cover'] ?? null;
-        if (!empty($coverPath)) {
+        $coverPath = null;
+
+        if (!empty($mediaRecord['cover'])) {
+            $cover = json_decode($mediaRecord['cover'], true);
+
+            if (is_array($cover) && isset($cover[0]['path'])) {
+                $coverPath = $cover[0]['path'];
+            } else {
+                $this->logger->error("Invalid cover path for Post ID: $targetId");
+            }
+        }
+
+        if ($coverPath !== null) {
             $pathsToMove[] = $coverPath;
         }
 
