@@ -8,4 +8,5 @@ enum FeePolicyMode: string
 {
     case INCLUDED = 'INCLUDED'; // Price is gross (includes fees); recipient gets net
     case ADDED = 'ADDED';       // Price is net; fees added on top (current default)
+    case NO_FEES = 'NO_FEES';
 }

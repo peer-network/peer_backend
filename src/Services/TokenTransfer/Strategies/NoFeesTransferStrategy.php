@@ -4,27 +4,36 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
-use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
 {
     use ResponseHelper;
+
     public string $operationId;
     public string $transactionId;
-
     private static FeePolicyMode $mode;
 
     public function __construct()
     {
-        $this::$mode = FeePolicyMode::ADDED;
+        $this::$mode = FeePolicyMode::NO_FEES;
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
     }
-
     public function getRecipientTransactionType(): string
     {
         return 'transferSenderToRecipient';
+    }
+
+    public function setTransactionId(string $transactionId): void
+    {
+        $this->transactionId = $transactionId;
+    }
+
+    public function setOperationId(string $operationId): void
+    {
+        $this->operationId = $operationId;
     }
 
     public function getTransactionId(): string
@@ -36,6 +45,7 @@ class DefaultTransferStrategy extends BaseTransferStrategy implements TransferSt
     {
         return $this->operationId;
     }
+
     public function getFeePolicyMode(): FeePolicyMode
     {
         return $this::$mode;
