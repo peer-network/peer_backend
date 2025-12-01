@@ -6689,7 +6689,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n                isHiddenForUsers\n\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n                isHiddenForUsers\n            }\n        }\n    }\n}\n",
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7657,7 +7657,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9601,7 +9601,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMALIKES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10335,7 +10335,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMAHATES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"query": "query ListBlockedUsers {\n    listBlockedUsers(contentFilterBy: MYGRANDMAHATES) {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -18471,7 +18471,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListBlockedUsers {\n    listBlockedUsers {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n            }\n        }\n    }\n}\n",
+						"query": "query ListBlockedUsers {\n    listBlockedUsers {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n            blockedBy {\n                userid\n                img\n                username\n                slug\n                hasActiveReports\n                visibilityStatus\n          isHiddenForUsers\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
