@@ -15,7 +15,6 @@ use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 class PeerTokenMapper
@@ -29,6 +28,39 @@ class PeerTokenMapper
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper, protected UserMapper $userMapper)
     {
+    }
+
+    /**
+     * Check if a transfer already exists with same sender, recipient and amount.
+     * Considers only recipient credit rows for standard transfers.
+     */
+    public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool
+    {
+        $query = "SELECT 1 FROM transactions 
+                  WHERE senderid = :senderId 
+                    AND recipientid = :recipientId 
+                    AND tokenamount = :amount 
+                    AND transactiontype = 'transferSenderToRecipient' 
+                    AND transferaction = 'CREDIT' 
+                  LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':senderId', $senderId, \PDO::PARAM_STR);
+            $stmt->bindValue(':recipientId', $recipientId, \PDO::PARAM_STR);
+            $stmt->bindValue(':amount', $amount, \PDO::PARAM_STR);
+            $stmt->execute();
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error('PeerTokenMapper.hasExistingTransfer failed', [
+                'error' => $e->getMessage(),
+                'senderId' => $senderId,
+                'recipientId' => $recipientId,
+                'amount' => $amount,
+            ]);
+            // On error, be conservative and assume it exists to avoid duplicates
+            return true;
+        }
     }
 
     /**
@@ -218,8 +250,13 @@ class PeerTokenMapper
                 $this->lockBalances([$senderId, $recipientId]);
             }
             $mode = $strategy->getFeePolicyMode();
-            [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
-                $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
+            [
+                $requiredAmount, 
+                $netRecipientAmount, 
+                $peerFeeAmount, 
+                $burnFeeAmount, 
+                $inviteFeeAmount
+            ] = $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
 
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
@@ -320,7 +357,7 @@ class PeerTokenMapper
 
     /**
      * Calculate required (debit) and net (recipient credit) amounts based on fee policy mode.
-     * Returns array: [required, net, peerFeeAmount, poolFeeAmount, burnFeeAmount, inviteFeeAmount]
+     * Returns array: [required, net, peerFeeAmount, burnFeeAmount, inviteFeeAmount]
      */
     private function calculateAmountsForMode(string $senderId, string $inputAmount, FeePolicyMode $mode): array
     {
@@ -330,6 +367,13 @@ class PeerTokenMapper
         // Sum of fee rates
         $sum1 = TokenHelper::addRc($peerFee, $burnFee);
         $totalRate = TokenHelper::addRc($sum1, $inviteFee);
+
+        // NO_FEES: no fees applied; required equals net; fee amounts are zero
+        if ($mode === FeePolicyMode::NO_FEES) {
+            $required = $inputAmount;
+            $net = $inputAmount;
+            return [$required, $net, '0', '0', '0'];
+        }
 
         if ($mode === FeePolicyMode::ADDED) {
             $net = $inputAmount;
@@ -342,8 +386,8 @@ class PeerTokenMapper
         $required = $inputAmount;
         $onePlus = TokenHelper::addRc('1', $totalRate);
         $net = TokenHelper::divRc($required, $onePlus);
-        [$peerAmt, $poolAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
-        return [$required, $net, $peerAmt, $poolAmt, $burnAmt, $inviteAmt];
+        [$peerAmt, $burnAmt, $inviteAmt] = $this->calculateEachFeesAmount($net);
+        return [$required, $net, $peerAmt, $burnAmt, $inviteAmt];
     }
 
     /**
