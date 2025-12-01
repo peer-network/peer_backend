@@ -3202,6 +3202,11 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(41601);
         }
 
+        // Apply content filtering to each comment
+        foreach ($comments as $comment) {
+            ContentReplacer::placeholderComments($comment, $specs);
+        }
+
         $results = array_map(
             fn (CommentAdvanced $comment) => $comment->getArrayCopy(),
             $comments
