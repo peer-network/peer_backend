@@ -10,6 +10,7 @@ use Fawaz\Database\AdvertisementMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
@@ -53,6 +54,7 @@ class AdvertisementService
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected CommentMapper $commentMapper,
         protected ProfileRepository $profileRepository,
+        protected TransactionManager $transactionManager
     ) {
     }
 
@@ -219,22 +221,12 @@ class AdvertisementService
             return $this->respondWithError(42005);
         }
 
-        // // Euro in PeerTokens umrechnen
-        // $results = $this->convertEuroToTokens($CostPlan, $rescode);
-        // if (isset($results['status']) && $results['status'] === 'error') {
-        //     $this->logger->error('Fehler bei convertEuroToTokens', ['results' => $results]);
-        //     return $results;
-        // }
-        // if (isset($results['status']) && $results['status'] === 'success') {
-        //     $this->logger->info('Umrechnung erfolgreich', ["€$CostPlan in PeerTokens: " => $results['affectedRows']['TokenAmount']]);
-        //     $CostPlan = $results['affectedRows']['TokenAmount'];
-        //     $args['tokencost'] = $CostPlan;
-        // }
-
+        $this->transactionManager->beginTransaction();
         try {
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
+                $this->transactionManager->rollback();
                 $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
@@ -250,20 +242,23 @@ class AdvertisementService
 
                 $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $deducted;
                 }
 
                 if (!$deducted) {
+                    $this->transactionManager->rollback();
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     return $this->respondWithError($deducted['ResponseCode']);
                 }
-
+                $this->transactionManager->commit();
                 return $response;
             }
-
+            $this->transactionManager->rollback();
             return $response;
 
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             return $this->respondWithError(40301);
         }
     }

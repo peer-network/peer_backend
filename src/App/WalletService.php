@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Wallet;
+use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Exception;
@@ -12,7 +13,6 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
-use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 class WalletService
@@ -23,6 +23,7 @@ class WalletService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected WalletMapper $walletMapper,
+        protected UserMapper $userMapper,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
     ) {
@@ -228,27 +229,6 @@ class WalletService
         }
     }
 
-    public function deductFromWallet(string $userId, ?array $args = []): ?array
-    {
-        $this->logger->debug('WalletService.deductFromWallet started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->walletMapper->deductFromWallets($userId, $args);
-            if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
-                return $response;
-            } else {
-                $this->transactionManager->rollBack();
-                return $response;
-            }
-
-        } catch (\Exception $e) {
-            $this->transactionManager->rollBack();
-            return $this::respondWithError(40301);
-        }
-    }
-
     public function callUserMove(): ?array
     {
         $this->logger->debug('WalletService.callUserMove started');
@@ -276,7 +256,7 @@ class WalletService
         $this->logger->debug('WalletService.performPayment started');
 
         try {
-            $this->transactionManager->beginTransaction();
+            // $this->transactionManager->beginTransaction();
 
             $postId = $args['postid'] ?? null;
             $art = $args['art'] ?? null;
@@ -294,7 +274,7 @@ class WalletService
 
             if (!isset($mapping[$art])) {
                 $this->logger->warning('Invalid art type provided.', ['art' => $art]);
-                $this->transactionManager->rollback();
+                // $this->transactionManager->rollback();
                 return self::respondWithError(30105);
             }
 
@@ -314,12 +294,15 @@ class WalletService
                     'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
-                $this->transactionManager->rollback();
+                // $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
             [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $fromId = $args['fromid'] ?? $peerWallet;
+
+            $senderUserObj = $this->userMapper->loadById($fromId);
+            $receipientUserObj = $this->userMapper->loadById($userId);
 
             $args = [
                 'postid' => $postId,
@@ -335,13 +318,15 @@ class WalletService
                 $fromId,
                 $price,
                 $transferStrategy,
-                $text
+                $text,
+                $senderUserObj,
+                $receipientUserObj
             );
 
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
-                $this->transactionManager->rollBack();
+                // $this->transactionManager->rollBack();
                 $this->logger->error("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
@@ -350,16 +335,16 @@ class WalletService
             }
 
             if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
+                // $this->transactionManager->commit();
                 return $response;
             } else {
-                $this->transactionManager->rollBack();
+                // $this->transactionManager->rollBack();
                 return $response;
             }
 
         } catch (\Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
-            $this->transactionManager->rollBack();
+            // $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
     }

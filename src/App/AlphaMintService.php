@@ -5,8 +5,6 @@ namespace Fawaz\App;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\Mailer;
-use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\NoFeesTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -115,8 +113,10 @@ class AlphaMintService
                                 $mintUserId, 
                                 $receipientUserId,
                                 $amount,
-                                new DefaultTransferStrategy(),
-                                'Alpha Token Migration'
+                                new UserToUserTransferStrategy(),
+                                'Alpha Token Migration',
+                                $alphaUserAc,
+                                $userData
                             );
 
                             $totalAlphaUserMinted++;

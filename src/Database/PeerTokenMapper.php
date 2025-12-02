@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
+use Fawaz\App\Repositories\WalletRepositoryFactory;
 use Fawaz\App\User;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
@@ -26,9 +29,14 @@ class PeerTokenMapper
     private string $senderId;
     private string $inviterId;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper, protected UserMapper $userMapper)
-    {
-    }
+    public function __construct(
+        protected PeerLoggerInterface $logger, 
+        protected PDO $db, 
+        protected LiquidityPool $pool, 
+        protected WalletMapper $walletMapper, 
+        protected WalletRepositoryFactory $walletRepositoryFactory,
+        protected UserMapper $userMapper
+    ){}
 
     /**
      * Check if a transfer already exists with same sender, recipient and amount.
@@ -231,9 +239,16 @@ class PeerTokenMapper
         string $numberOfTokens,
         TransferStrategy $strategy,
         ?string $message = null,
+        ?HasUserId $senderObject = null,
+        ?HasUserId $recipientObject = null,
     ): ?array {
         \ignore_user_abort(true);
 
+        $senderRepo = $this->walletRepositoryFactory->for($senderObject);
+        $recipientRepo = $this->walletRepositoryFactory->for($recipientObject);
+        $inviterRepo = $this->walletMapper;
+        $peerFeeRepo = $this->walletMapper;
+        $burnFeeRepo = $this->walletMapper;
         $this->initializeLiquidityPool();
 
         if (!$this->validateFeesWalletUUIDs()) {
@@ -668,5 +683,4 @@ class PeerTokenMapper
         // Fetching the row to ensure the lock is acquired
         $stmt->fetch(\PDO::FETCH_ASSOC);
     }
-
 }
