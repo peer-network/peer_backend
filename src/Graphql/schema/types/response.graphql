@@ -58,10 +58,8 @@ type AuthPayload {
 }
 
 type MintAccountResponse {
-  meta: DefaultResponse
-  status: String @deprecated(reason: "use meta.status . this field will be removed later.")
-  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed later.")
-  affectedRows: MintAccount
+  meta: DefaultResponse!
+  mintAccount: MintAccount!
 }
 
 type TransactionResponse {

@@ -400,15 +400,8 @@ class GraphQLSchemaBuilder
                         'RequestId' => $this->logger->getRequestUid(),
                     ];
                 },
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.MintAccountResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => function (array $root): string {
-                    return $root['ResponseCode'] ?? "";
-                },
-                'affectedRows' => function (array $root): array {
-                    return $root['affectedRows'] ?? [];
+                'mintAccount' => function (array $root): array {
+                    return $root['affectedRows'];
                 },
             ],
             'ReferralInfo' => [
@@ -1352,6 +1345,21 @@ class GraphQLSchemaBuilder
                 'currentliquidity' => function (array $root): float {
                     $this->logger->debug('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
+                },
+            ],
+            'MintAccount' => [
+                'accountid' => function (array $root): string {
+                    $this->logger->debug('Query.MintAccount Resolvers');
+                    return $root['accountid'] ?? '';
+                },
+                'initialBalance' => function (array $root): string {
+                    return (string)$root['initial_balance'] ?? '0';
+                },
+                'currentBalance' => function (array $root): string {
+                    return (string)$root['current_balance'] ?? '0';
+                },
+                'updatedat' => function (array $root): string {
+                    return $root['updatedat'] ?? '';
                 },
             ],
             'UserInfo' => [

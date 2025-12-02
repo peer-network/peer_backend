@@ -311,9 +311,8 @@ type MintingData {
 
 type MintAccount {
   accountid: ID!
-  initial_balance: Decimal!
-  current_balance: Decimal!
-  createdat: String!
+  initialBalance: Decimal!
+  currentBalance: Decimal!
   updatedat: String!
 }
 

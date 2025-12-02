@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Models\MintAccount;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -60,20 +59,14 @@ class MintService
         try {
             $this->logger->debug('MintService.getMintAccount started');
             $account = $this->mintAccountRepository->getDefaultAccount();
-
             if (!$account) {
                 $this->logger->debug('MintService.getMintAccount result is empty');
                 return self::respondWithError(40401);
             }
 
-            $payload = [
-                'status' => 'success',
-                'ResponseCode' => 200,
-                'affectedRows' => $account->getArrayCopy(),
-            ];
-
             $this->logger->info('MintService.getMintAccount completed');
-            return $payload;
+            // Map to MintAccount GraphQL type and wrap in standard success response (no counter)
+            return $this::createSuccessResponse(00000, $account->getArrayCopy(), false);
         } catch (\Throwable $e) {
             $this->logger->error('MintService.getMintAccount failed', [
                 'error' => $e->getMessage(),
