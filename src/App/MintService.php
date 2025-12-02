@@ -66,10 +66,14 @@ class MintService
                 return self::respondWithError(40401);
             }
 
-            $result = $account->getArrayCopy();
+            $payload = [
+                'status' => 'success',
+                'ResponseCode' => 200,
+                'affectedRows' => $account->getArrayCopy(),
+            ];
 
             $this->logger->info('MintService.getMintAccount completed');
-            return $result;
+            return $payload;
         } catch (\Throwable $e) {
             $this->logger->error('MintService.getMintAccount failed', [
                 'error' => $e->getMessage(),

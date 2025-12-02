@@ -21,6 +21,7 @@ use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
+use Fawaz\App\MintService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
@@ -81,6 +82,7 @@ class GraphQLSchemaBuilder
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
         protected AdvertisementService $advertisementService,
+        protected MintService $mintService,
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
@@ -214,6 +216,7 @@ class GraphQLSchemaBuilder
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
+        $this->mintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -379,6 +382,26 @@ class GraphQLSchemaBuilder
                 },
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ReferralResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => function (array $root): string {
+                    return $root['ResponseCode'] ?? "";
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'MintAccountResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'status' => function (array $root): string {
+                    $this->logger->debug('Query.MintAccountResponse Resolvers');
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => function (array $root): string {
@@ -2469,7 +2492,8 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
         ];
     }
 

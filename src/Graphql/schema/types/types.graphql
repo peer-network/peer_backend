@@ -309,6 +309,14 @@ type MintingData {
   tokensMintedYesterday: Float!
 }
 
+type MintAccount {
+  accountid: ID!
+  initial_balance: Decimal!
+  current_balance: Decimal!
+  createdat: String!
+  updatedat: String!
+}
+
 type CurrentLiquidity {
   status: String
   ResponseCode: String
