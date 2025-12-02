@@ -62,7 +62,7 @@ class ConstantsConfig implements ConstantsConfigInterface
     }
     /**
      * @return array{
-     *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     MEDIADESCRIPTION: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     COVER: array{MAX_COUNT: int, MIN_LENGTH: int, MAX_LENGTH: int},
      *     MEDIA: array{MIN_LENGTH: int, MAX_LENGTH: int},
@@ -147,7 +147,7 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     /**
      * @return array{
-     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
