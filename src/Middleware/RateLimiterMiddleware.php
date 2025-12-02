@@ -14,13 +14,8 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class RateLimiterMiddleware implements MiddlewareInterface
 {
-    private RateLimiter $rateLimiter;
-    private PeerLoggerInterface $logger;
-
-    public function __construct(RateLimiter $rateLimiter, PeerLoggerInterface $logger)
+    public function __construct(private readonly RateLimiter $rateLimiter, private readonly PeerLoggerInterface $logger)
     {
-        $this->rateLimiter = $rateLimiter;
-        $this->logger = $logger;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

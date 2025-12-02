@@ -13,7 +13,7 @@ require __DIR__ . '../../../../vendor/autoload.php';
 
 class ConstantValuesInjectorImpl implements ConstantValuesInjector
 {
-    private array $constants;
+    private readonly array $constants;
 
     public function __construct()
     {
@@ -88,7 +88,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     public static function injectSchemaPlaceholders(array $schemaFiles): array
     {
         $suffix = '.graphql.generated';
-        $constants = (new ConstantsConfig())->getData();
+        $constants = new ConstantsConfig()->getData();
         $map = self::flattenConstantsMap($constants);
 
         $report = [];
@@ -117,7 +117,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
 
 
 
-            if (preg_match('/\{[A-Z0-9_.]+\}/', $patched)) {
+            if (preg_match('/\{[A-Z0-9_.]+\}/', (string) $patched)) {
                 throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
             }
 

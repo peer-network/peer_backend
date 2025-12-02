@@ -6,7 +6,7 @@ namespace Fawaz\Services;
 
 class PodcastPostService
 {
-    private Base64FileHandler $fileHandler;
+    private readonly Base64FileHandler $fileHandler;
 
     public function __construct()
     {

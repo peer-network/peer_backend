@@ -15,7 +15,7 @@ final class NormalVisibilityStatusSpec implements Specification
 {
     private array $contentSeverityLevels;
     public function __construct(
-        private ?string $contentFilterBy
+        private readonly ?string $contentFilterBy
     ) {
         $contentFiltering = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];

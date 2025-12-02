@@ -42,19 +42,19 @@ if ($db_driver === 'postgres') {
     if (is_pg_server_running($host, $port)) {
         $dsn = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s",
-            htmlspecialchars($host, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($port, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($dbname, ENT_QUOTES, 'UTF-8')
+            htmlspecialchars((string) $host, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $port, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $dbname, ENT_QUOTES, 'UTF-8')
         );
         $conn_string = sprintf(
             "host=%s port=%d dbname=%s user=%s password=%s connect_timeout=%d sslmode=%s",
-            htmlspecialchars($host, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($port, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($dbname, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($user, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($password, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($connect_timeout, ENT_QUOTES, 'UTF-8'),
-            htmlspecialchars($sslmode, ENT_QUOTES, 'UTF-8')
+            htmlspecialchars((string) $host, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $port, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $dbname, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $user, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $password, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $connect_timeout, ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars((string) $sslmode, ENT_QUOTES, 'UTF-8')
         );
 
         $conn = @pg_connect($conn_string);

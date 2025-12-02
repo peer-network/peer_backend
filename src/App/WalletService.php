@@ -74,9 +74,7 @@ class WalletService
             }
 
             $walletData = array_map(
-                static function (Wallet $wallet) {
-                    return $wallet->getArrayCopy();
-                },
+                static fn(Wallet $wallet) => $wallet->getArrayCopy(),
                 $wallets
             );
 
@@ -212,7 +210,7 @@ class WalletService
             }
 
             return $this::createSuccessResponse(21203);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this::respondWithError(41204);
         }
     }
@@ -223,7 +221,7 @@ class WalletService
 
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return 0.0;
         }
     }
@@ -243,7 +241,7 @@ class WalletService
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
@@ -262,7 +260,7 @@ class WalletService
             );
 
 
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this::respondWithError(41205);
         }
     }
@@ -327,7 +325,7 @@ class WalletService
                 'gems' => 0.0,
                 'numbers' => -abs((float)$price),
                 'whereby' => $whereby,
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ];
 
             $response = $this->peerTokenMapper->transferToken(

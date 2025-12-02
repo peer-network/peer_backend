@@ -160,14 +160,14 @@ class UserService
             $invited = $inviter->getUserId();
         }
 
-        $email = trim($args['email']);
+        $email = trim((string) $args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(30601);
         }
 
-        $username = trim($args['username']);
+        $username = trim((string) $args['username']);
         $slug = $this->generateUniqueSlug($username);
-        $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $createdat = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if ($mediaFile !== '') {
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
@@ -178,7 +178,7 @@ class UserService
             'userid' => $id,
             'attempt' => 1,
             'expiresat' => $expiresat,
-            'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+            'updatedat' => new \DateTime()->format('Y-m-d H:i:s.u')
         ];
 
         // Mask token for logging (show first 6 chars, hide the rest)
@@ -320,7 +320,7 @@ class UserService
             $data = [
                 'username' => $username
             ];
-            (new UserWelcomeMail($data))->send($email);
+            new UserWelcomeMail($data)->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
@@ -351,7 +351,7 @@ class UserService
             if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
             }
-            $userObj = (new User($users, [], false))->getArrayCopy();
+            $userObj = new User($users, [], false)->getArrayCopy();
 
             return $this::createSuccessResponse(
                 11011,
@@ -542,8 +542,8 @@ class UserService
             $currentShown = empty($currentShown) ? [] : (array) $currentShown;
         }
 
-        $currentShown = array_values(array_filter(array_map('strval', $currentShown)));
-        $incoming     = array_values(array_filter(array_map('strval', $shownOnboardingsIn)));
+        $currentShown = array_values(array_filter(array_map(strval(...), $currentShown)));
+        $incoming     = array_values(array_filter(array_map(strval(...), $shownOnboardingsIn)));
 
         $set = array_fill_keys($currentShown, true);
         foreach ($incoming as $onboarding) {
@@ -681,7 +681,7 @@ class UserService
 
         $this->logger->debug('UserService.setUsername started');
 
-        $username = trim($args['username']);
+        $username = trim((string) $args['username']);
         $password = $args['password'] ?? null;
 
         try {
@@ -1000,7 +1000,7 @@ class UserService
             }
 
             return $this::respondWithError(31007);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return self::respondWithError(41207);
         }
     }
@@ -1062,7 +1062,7 @@ class UserService
             }
 
             return self::createSuccessResponse(21001);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return self::respondWithError(41207);
         }
     }
@@ -1226,11 +1226,7 @@ class UserService
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
 
-        if (isset($nextAttemptAtArray['nextAttemptAt'])) {
-            return $nextAttemptAtArray['nextAttemptAt'];
-        }
-
-        return $nextAttemptAt;
+        return $nextAttemptAtArray['nextAttemptAt'] ?? $nextAttemptAt;
     }
 
 

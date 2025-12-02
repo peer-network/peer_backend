@@ -12,7 +12,7 @@ class ResponseMessagesProviderImpl implements ResponseMessagesProvider
     /**
      * @var string
      */
-    private string $filePath;
+    private readonly string $filePath;
 
     /**
      * @var array|null

@@ -242,7 +242,7 @@ final class ProfileServiceImpl implements ProfileService
             }
 
             return self::createSuccessResponse(21001);
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return self::respondWithError(41207);
         }
     }

@@ -27,7 +27,7 @@ class ConstantsModeration
         return self::CONTENT_MODERATION_STATUS;
     }
 
-    private const CONTENT_FILTERING = [
+    private const array CONTENT_FILTERING = [
         'CONTENT_SEVERITY_LEVELS' => [
             0 => 'MYGRANDMALIKES',
             10 => 'MYGRANDMAHATES'
@@ -44,7 +44,7 @@ class ConstantsModeration
      *
      * @var array
      */
-    private const CONTENT_MODERATION_STATUS = [
+    private const array CONTENT_MODERATION_STATUS = [
         'waiting_for_review' => 'Waiting for review',
         'hidden' => 'Hidden',
         'restored' => 'Restored',

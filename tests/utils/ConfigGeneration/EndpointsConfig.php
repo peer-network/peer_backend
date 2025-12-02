@@ -33,12 +33,7 @@ class EndpointsConfig implements DataGeneratable
 
 class TargetEntry
 {
-    public string $version;
-    public string $url;
-
-    public function __construct(string $version, string $url)
+    public function __construct(public string $version, public string $url)
     {
-        $this->version = $version;
-        $this->url = $url;
     }
 }

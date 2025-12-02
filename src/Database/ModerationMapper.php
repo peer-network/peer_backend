@@ -138,9 +138,7 @@ class ModerationMapper
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(function ($reporter) {
-                return (new User($reporter, [], false))->getArrayCopy();
-            }, $reporters);
+            $item['reporters'] = array_map(fn($reporter) => new User($reporter, [], false)->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
@@ -163,11 +161,11 @@ class ModerationMapper
 
         if ($item['targettype'] === 'post') {
             $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
+            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
+            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {
-            $item['targetcontent']['user'] = (new User([
+            $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],
                 'username' => $item['username'],
                 'email' => $item['email'],
@@ -177,7 +175,7 @@ class ModerationMapper
                 'biography' => $item['biography'],
                 'updatedat' => $item['updatedat'],
                 'visibility_status' => $item['visibility_status'],
-            ], [], false))->getArrayCopy();
+            ], [], false)->getArrayCopy();
         }
 
         return $item;
@@ -213,7 +211,7 @@ class ModerationMapper
     {
         try {
             $moderationId = self::generateUUID();
-            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+            $createdat = (string) new DateTime()->format('Y-m-d H:i:s.u');
 
             $report = UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
 
@@ -407,7 +405,7 @@ class ModerationMapper
         if (!is_dir($illegalDirectoryPath)) {
             try {
                 mkdir($illegalDirectoryPath, 0777, true);
-            } catch (\RuntimeException $e) {
+            } catch (\RuntimeException) {
                 $this->logger->error("Directory does not exist: $illegalDirectoryPath"); // Directory does not exist
             }
         }
@@ -425,7 +423,7 @@ class ModerationMapper
 
         $pathsToMove = [];
 
-        $media = json_decode($mediaRecord['media'], true);
+        $media = json_decode((string) $mediaRecord['media'], true);
         if (is_array($media)) {
             foreach ($media as $mediaItem) {
                 if (!isset($mediaItem['path'])) {
@@ -439,7 +437,7 @@ class ModerationMapper
         $coverPath = null;
 
         if (!empty($mediaRecord['cover'])) {
-            $cover = json_decode($mediaRecord['cover'], true);
+            $cover = json_decode((string) $mediaRecord['cover'], true);
 
             if (is_array($cover) && isset($cover[0]['path'])) {
                 $coverPath = $cover[0]['path'];
@@ -482,13 +480,13 @@ class ModerationMapper
                 null
             );
 
-            $mediaDetails = explode('/', $path);
+            $mediaDetails = explode('/', (string) $path);
             $fileName = end($mediaDetails);
             $destinationPath = $illegalDirectoryPath . '/' . $fileName;
 
             try {
                 $uploadedFile->moveTo($destinationPath);
-            } catch (\RuntimeException $e) {
+            } catch (\RuntimeException) {
                 if ($path === $coverPath) {
                     $this->logger->error("Failed to move cover file: $destinationPath");
                 } else {

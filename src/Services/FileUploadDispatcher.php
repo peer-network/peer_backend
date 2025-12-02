@@ -6,11 +6,11 @@ namespace Fawaz\Services;
 
 class FileUploadDispatcher
 {
-    private CoverPostService $coverPostService;
-    private ImagePostService $imagePostService;
-    private PodcastPostService $podcastPostService;
-    private VideoPostService $videoPostService;
-    private NotesPostService $notesPostService;
+    private readonly CoverPostService $coverPostService;
+    private readonly ImagePostService $imagePostService;
+    private readonly PodcastPostService $podcastPostService;
+    private readonly VideoPostService $videoPostService;
+    private readonly NotesPostService $notesPostService;
 
     public function __construct()
     {

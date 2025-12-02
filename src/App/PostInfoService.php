@@ -61,7 +61,7 @@ class PostInfoService
 
             $this->transactionManager->commit();
             return ['status' => 'success', 'ResponseCode' => "11509",];
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             $this->transactionManager->rollback();
             return $this::respondWithError(41509);
         }

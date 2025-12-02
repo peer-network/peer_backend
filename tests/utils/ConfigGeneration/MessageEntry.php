@@ -6,12 +6,7 @@ namespace Tests\utils\ConfigGeneration;
 
 class MessageEntry
 {
-    public string $comment;
-    public string $userFriendlyComment;
-
-    public function __construct(string $comment, string $userFriendlyComment)
+    public function __construct(public string $comment, public string $userFriendlyComment)
     {
-        $this->comment = $comment;
-        $this->userFriendlyComment = $userFriendlyComment;
     }
 }

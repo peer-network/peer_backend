@@ -9,12 +9,8 @@ use Fawaz\Database\Interfaces\RollbackableDatabase;
 
 class TransactionManager implements RollbackableDatabase
 {
-    private PDO $db;
-
-
-    public function __construct(PDO $pdo)
+    public function __construct(private readonly PDO $db)
     {
-        $this->db = $pdo;
     }
 
     public function beginTransaction(): bool

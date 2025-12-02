@@ -18,13 +18,11 @@ use function method_exists;
 
 class PeerInputGenericValidator
 {
-    protected array $specification;
     protected array $data = [];
     protected array $errors = [];
 
-    public function __construct(array $specification)
+    public function __construct(protected array $specification)
     {
-        $this->specification = $specification;
     }
 
     public function setData(array $data): void
@@ -180,12 +178,10 @@ class PeerInputGenericValidator
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', function ($matches) {
-                return '.' . str_pad($matches[1], 6, '0');
-            }, $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad((string) $matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
-            $formatted = trim($formatted);
+            $formatted = trim((string) $formatted);
 
             if ($formatted === $value) {
                 return true;

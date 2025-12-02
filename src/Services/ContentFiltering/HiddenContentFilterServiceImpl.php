@@ -21,16 +21,14 @@ class HiddenContentFilterServiceImpl
 
     /** @var array<string,int> Map of content type => reports amount to hide */
     private array $reports_amount_to_hide_content;
-    private ?string $contentFilterBy;
 
     public function __construct(
-        private ContentType $targetContent,
-        ?string $contentFilterBy = null
+        private readonly ContentType $targetContent,
+        private readonly ?string $contentFilterBy = null
     ) {
         $contentFiltering = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
         $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_CONTENT'];
-        $this->contentFilterBy = $contentFilterBy;
     }
 
     public static function getContentFilteringSeverityLevel(string $contentFilterBy): ?int

@@ -13,9 +13,9 @@ use Fawaz\Utils\PeerLoggerInterface;
 class PoolMapper
 {
     use ResponseHelper;
-    private const DEFAULT_LIMIT = 20;
-    private const MAX_WHEREBY = 100;
-    private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
+    private const int DEFAULT_LIMIT = 20;
+    private const int MAX_WHEREBY = 100;
+    private const array ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {

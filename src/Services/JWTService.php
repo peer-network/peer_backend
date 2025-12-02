@@ -13,30 +13,8 @@ use DateTime;
 
 class JWTService
 {
-    private string $privateKey;
-    private string $publicKey;
-    private string $refreshPrivateKey;
-    private string $refreshPublicKey;
-    private int $accessTokenValidity;
-    private int $refreshTokenValidity;
-    private PeerLoggerInterface $logger;
-
-    public function __construct(
-        string $privateKey,
-        string $publicKey,
-        string $refreshPrivateKey,
-        string $refreshPublicKey,
-        int $accessTokenValidity,
-        int $refreshTokenValidity,
-        PeerLoggerInterface $logger
-    ) {
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
-        $this->refreshPrivateKey = $refreshPrivateKey;
-        $this->refreshPublicKey = $refreshPublicKey;
-        $this->accessTokenValidity = $accessTokenValidity;
-        $this->refreshTokenValidity = $refreshTokenValidity;
-        $this->logger = $logger;
+    public function __construct(private readonly string $privateKey, private readonly string $publicKey, private readonly string $refreshPrivateKey, private readonly string $refreshPublicKey, private readonly int $accessTokenValidity, private readonly int $refreshTokenValidity, private readonly PeerLoggerInterface $logger)
+    {
     }
 
     public function createAccessToken(array $data): string
@@ -113,7 +91,7 @@ class JWTService
             'aud' => 'peerapp.de',
             'uid' => $userId,
             'iat' => $issuedAt,
-            'date' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'date' => new DateTime()->format('Y-m-d H:i:s.u'),
             'jti' => bin2hex(random_bytes(20)),
             'exp' => $expirationTime
         ];

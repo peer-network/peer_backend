@@ -19,7 +19,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class IllegalContentFilterSpec implements Specification
+final readonly class IllegalContentFilterSpec implements Specification
 {
     private ContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;

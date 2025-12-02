@@ -6,12 +6,9 @@ namespace Fawaz\Services;
 
 class LiquidityPool
 {
-    private array $envi;
-
     // Constructor to initialize the envi property with an array
-    public function __construct(array $envi)
+    public function __construct(private readonly array $envi)
     {
-        $this->envi = $envi;
     }
 
     // Method to return accounts or environment data with a status

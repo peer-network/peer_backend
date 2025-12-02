@@ -136,8 +136,8 @@ class Base64FileHandler
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
-            $information['resolution'] = isset($auflg) ? $auflg : null;
+            $information['ratiofrm'] = $ratio ?? null;
+            $information['resolution'] = $auflg ?? null;
 
             return $information;
         } catch (\Exception $e) {
@@ -198,7 +198,7 @@ class Base64FileHandler
         }
 
         $base64String = preg_replace('/\s+/', '', $matches['content']);
-        $decodedFile = base64_decode($base64String, true);
+        $decodedFile = base64_decode((string) $base64String, true);
 
         if ($decodedFile === false) {
             $this->errors[$contentType][] = 'Failed to decode the Base64 media.';
@@ -230,7 +230,7 @@ class Base64FileHandler
         }
 
         $base64String = preg_replace('/\s+/', '', explode(',', $base64File, 2)[1] ?? '');
-        $decodedFile = base64_decode($base64String, true);
+        $decodedFile = base64_decode((string) $base64String, true);
 
         if ($decodedFile === false || strlen($decodedFile) === 0) {
             $this->errors[$contentType][] = 'Failed to decode Base64 data or empty file.';

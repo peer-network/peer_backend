@@ -6,7 +6,7 @@ namespace Fawaz\Services;
 
 class NotesPostService
 {
-    private Base64FileHandler $fileHandler;
+    private readonly Base64FileHandler $fileHandler;
 
     public function __construct()
     {

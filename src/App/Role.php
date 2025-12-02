@@ -6,44 +6,44 @@ namespace Fawaz\App;
 
 final class Role
 {
-    public const USER = 0;
-    public const SYSTEM_ACCOUNT = 1; // LP Account
-    public const COMPANY_ACCOUNT = 2; // PEER BANK ACCOUNT
-    public const BURN_ACCOUNT = 4;
-    public const WEB3_BRIDGE_USER = 8;
-    public const ADMIN = 16;
-    public const CONTRIBUTOR = 32;
-    public const COORDINATOR = 64;
-    public const CREATOR = 128;
-    public const MODERATOR = 256;
-    public const DIRECTOR = 512;
-    public const EDITOR = 1024;
-    public const EMPLOYEE = 2048;
-    public const MAINTAINER = 4096;
-    public const SUPER_EDITOR = 8192;
-    public const SUPER_MODERATOR = 16384;
-    public const PUBLISHER = 32768;
-    public const REVIEWER = 65536;
-    public const SUBSCRIBER = 131072;
-    public const SUPER_ADMIN = 262144;
-    public const MANAGER = 524288;
-    public const DEVELOPER = 1048576;
+    public const int USER = 0;
+    public const int SYSTEM_ACCOUNT = 1; // LP Account
+    public const int COMPANY_ACCOUNT = 2; // PEER BANK ACCOUNT
+    public const int BURN_ACCOUNT = 4;
+    public const int WEB3_BRIDGE_USER = 8;
+    public const int ADMIN = 16;
+    public const int CONTRIBUTOR = 32;
+    public const int COORDINATOR = 64;
+    public const int CREATOR = 128;
+    public const int MODERATOR = 256;
+    public const int DIRECTOR = 512;
+    public const int EDITOR = 1024;
+    public const int EMPLOYEE = 2048;
+    public const int MAINTAINER = 4096;
+    public const int SUPER_EDITOR = 8192;
+    public const int SUPER_MODERATOR = 16384;
+    public const int PUBLISHER = 32768;
+    public const int REVIEWER = 65536;
+    public const int SUBSCRIBER = 131072;
+    public const int SUPER_ADMIN = 262144;
+    public const int MANAGER = 524288;
+    public const int DEVELOPER = 1048576;
 
     public static function getMap(): array
     {
-        $reflectionClass = new \ReflectionClass(static::class);
+        $reflectionClass = new \ReflectionClass(self::class);
         return \array_flip($reflectionClass->getConstants());
     }
 
     public static function getNames(): array
     {
-        $reflectionClass = new \ReflectionClass(static::class);
+        $reflectionClass = new \ReflectionClass(self::class);
         return \array_keys($reflectionClass->getConstants());
     }
 
     public static function getValues(): array
     {
-        $reflectionClass = new \ReflectionClass(static::class);
+        $reflectionClass = new \ReflectionClass(self::class);
         return \array_values($reflectionClass->getConstants());
     }
 

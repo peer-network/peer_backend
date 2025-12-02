@@ -10,9 +10,9 @@ use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
+final readonly class ExcludeAdvertisementsForNormalFeedSpec implements Specification
 {
-    public function __construct(private readonly ?string $postId)
+    public function __construct(private ?string $postId)
     {
     }
 

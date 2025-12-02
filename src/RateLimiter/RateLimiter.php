@@ -6,14 +6,10 @@ namespace Fawaz\RateLimiter;
 
 class RateLimiter
 {
-    private int $rateLimit;
-    private int $timeWindow;
-    private string $storageFile;
+    private readonly string $storageFile;
 
-    public function __construct(int $rateLimit, int $timeWindow, string $ratePath)
+    public function __construct(private readonly int $rateLimit, private readonly int $timeWindow, string $ratePath)
     {
-        $this->rateLimit = $rateLimit;
-        $this->timeWindow = $timeWindow;
         $this->storageFile = rtrim($ratePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . date('Y-m-d') . '_rate_limiter_storage.json';
 
         if (!file_exists($this->storageFile)) {

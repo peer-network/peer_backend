@@ -246,12 +246,12 @@ class ConstantsConfig implements ConstantsConfigInterface
         return ConstantsConfig::INPUT;
     }
 
-    private const ONBOARDING = [
+    private const array ONBOARDING = [
         'AVAILABLE_ONBOARDINGS' => [
             'INTROONBOARDING',
         ],
     ];
-    private const DAILY_FREE = [
+    private const array DAILY_FREE = [
         'DAILY_FREE_ACTIONS' => [
             'post'    => 1,
             'like'    => 3,
@@ -259,11 +259,11 @@ class ConstantsConfig implements ConstantsConfigInterface
             'dislike' => 0,
         ],
     ];
-    private const MINTING = [
+    private const array MINTING = [
         'DAILY_NUMBER_TOKEN' => 5000.0,
     ];
 
-    private const TOKENOMICS = [
+    private const array TOKENOMICS = [
         'ACTION_TOKEN_PRICES' => [
             'post'    => 20.0,
             'like'    => 3.0,
@@ -291,14 +291,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const COMMENT = [
+    private const array COMMENT = [
         'CONTENT' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 200,
         ],
     ];
 
-    private const TRANSACTION = [
+    private const array TRANSACTION = [
         'ACTIONTYPE' => [
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 200,
@@ -310,7 +310,7 @@ class ConstantsConfig implements ConstantsConfigInterface
     ];
 
 
-    private const POST = [
+    private const array POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
@@ -360,7 +360,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const WALLET = [
+    private const array WALLET = [
         'SOLANA_PUBKEY' => [
             'MIN_LENGTH' => 43,
             'MAX_LENGTH' => 44,
@@ -403,7 +403,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const WALLETT = [
+    private const array WALLETT = [
         'LIQUIDITY' => [
             'MIN' => -5000.0,
             'MAX' => 18250000.0,
@@ -414,7 +414,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const CHAT = [
+    private const array CHAT = [
         'MESSAGE' => [
             'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 500,
@@ -440,7 +440,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const CONTACT = [
+    private const array CONTACT = [
         'NAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 53,
@@ -451,7 +451,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-    private const PAGING = [
+    private const array PAGING = [
         'OFFSET' => [
             'MIN' => 0,
             'MAX' => 2147483647,
@@ -470,13 +470,13 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
     // ASCII control chars + zero-width Unicode chars
-    private const CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F\x{200B}\x{200C}\x{200D}\x{FEFF}\x{00A0}]';
+    private const string CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F\x{200B}\x{200C}\x{200D}\x{FEFF}\x{00A0}]';
 
-    private const INPUT = [
+    private const array INPUT = [
         'FORBID_CONTROL_CHARS_PATTERN' => self::CONTROL_CHARS_PATTERN,
     ];
 
-    private const USER = [
+    private const array USER = [
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,

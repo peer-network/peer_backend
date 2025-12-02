@@ -88,7 +88,7 @@ class TagPostService
         }
 
         foreach ($tags as $tagName) {
-            $tagName = trim($tagName);
+            $tagName = trim((string) $tagName);
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
                 return $this::respondWithError(30255);
@@ -101,7 +101,7 @@ class TagPostService
             $tagPost = new TagPost([
                 'postid' => $postId,
                 'tagid' => $tag->getTagId(),
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ]);
             $this->tagPostMapper->insert($tagPost);
         }

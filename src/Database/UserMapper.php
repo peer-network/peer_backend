@@ -34,7 +34,7 @@ class UserMapper
         try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-            $actionType = $actionType ?? 'login';
+            $actionType ??= 'login';
 
             $sql = "INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)";
             $stmt = $this->db->prepare($sql);
@@ -74,7 +74,7 @@ class UserMapper
             $statusCode = http_response_code();
             $responseTime = round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2);
             $location = $this->getLocationFromIP($ip) ?? 'unknown';
-            $actionType = $actionType ?? 'login';
+            $actionType ??= 'login';
 
             $rawInput = \file_get_contents('php://input');
             $input = \json_decode($rawInput, true);
@@ -619,7 +619,7 @@ class UserMapper
 
             if ($data !== false) {
                 $this->logger->info("User info fetched successfully", ['id' => $id]);
-                return (new User($data, [], false))->getArrayCopy();
+                return new User($data, [], false)->getArrayCopy();
             }
 
             $this->logger->warning("No user found with id", ['id' => $id]);
@@ -892,7 +892,7 @@ class UserMapper
             $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $uniqueResults = array_map(unserialize(...), array_unique(array_map(serialize(...), $results)));
 
             $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
@@ -964,7 +964,7 @@ class UserMapper
             $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
+            $uniqueResults = array_map(unserialize(...), array_unique(array_map(serialize(...), $results)));
 
             $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
@@ -1292,7 +1292,7 @@ class UserMapper
             $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
             $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
             $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
             $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
             $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
             $stmt->execute();
@@ -1627,7 +1627,7 @@ class UserMapper
                         'status' => $prt['followerstatus'],
                         'username' => $prt['followername'],
                     ];
-                $userObj = (new User($userObj, [], false))->getArrayCopy();
+                $userObj = new User($userObj, [], false)->getArrayCopy();
 
                 $userResultObj[$key] = $prt;
                 $userResultObj[$key]['followername'] = $userObj['username'];
@@ -1636,7 +1636,7 @@ class UserMapper
                         'status' => $prt['followedstatus'],
                         'username' => $prt['followedname'],
                     ];
-                $userObj = (new User($userObj, [], false))->getArrayCopy();
+                $userObj = new User($userObj, [], false)->getArrayCopy();
                 $userResultObj[$key]['followedname'] = $userObj['username'];
 
             }
@@ -1654,7 +1654,7 @@ class UserMapper
     */
     public function sendPasswordResetEmail(string $email, array $data): void
     {
-        (new PasswordRestMail($data))->send($email);
+        new PasswordRestMail($data)->send($email);
     }
 
     /**

@@ -20,7 +20,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 
 use function DI\string;
 
-final class HiddenContentFilterSpec implements Specification
+final readonly class HiddenContentFilterSpec implements Specification
 {
     private HiddenContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;

@@ -91,8 +91,8 @@ class CommentService
             return $validationErrors;
         }
 
-        $content = trim($args['content']);
-        $postId = trim($args['postid']);
+        $content = trim((string) $args['content']);
+        $postId = trim((string) $args['postid']);
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
 
         if (!$this->validateUUID($postId)) {

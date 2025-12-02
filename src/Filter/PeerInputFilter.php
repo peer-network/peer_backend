@@ -38,13 +38,11 @@ const CUSTOM_FILTER_FLAG_ALLOW_STR = 4;
 
 class PeerInputFilter
 {
-    protected array $specification;
     protected array $data = [];
     protected array $errors = [];
 
-    public function __construct(array $specification)
+    public function __construct(protected array $specification)
     {
-        $this->specification = $specification;
     }
 
     public function setData(array $data): void
@@ -230,7 +228,7 @@ class PeerInputFilter
             return true;
         }
 
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value) === 1;
+        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', (string) $value) === 1;
     }
 
     protected function Date(string $value, array $options = []): bool
@@ -249,12 +247,10 @@ class PeerInputFilter
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', function ($matches) {
-                return '.' . str_pad($matches[1], 6, '0');
-            }, $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad((string) $matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
-            $formatted = trim($formatted);
+            $formatted = trim((string) $formatted);
 
             if ($formatted === $value) {
                 return true;
@@ -402,14 +398,7 @@ class PeerInputFilter
     {
         $min = $options['min'] ?? 0;
         $max = $options['max'] ?? PHP_INT_MAX;
-
-        foreach ($value as $item) {
-            if (!is_string($item) || strlen($item) < $min || strlen($item) > $max) {
-                return false;
-            }
-        }
-
-        return true;
+        return array_all($value, fn($item) => !(!is_string($item) || strlen($item) < $min || strlen($item) > $max));
     }
 
     protected function InArray(mixed $value, array $options = []): bool
@@ -551,7 +540,7 @@ class PeerInputFilter
                isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
                isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
                isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => $chatConfig['MESSAGE']['MIN_LENGTH'], 'max' => $chatConfig['MESSAGE']['MAX_LENGTH']]) &&
-               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidateParticipants(array $participants, array $options = []): bool
@@ -637,7 +626,7 @@ class PeerInputFilter
                isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
                isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
                isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidatePostPure(array $profileposts, array $options = []): bool
@@ -672,7 +661,7 @@ class PeerInputFilter
                isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes) &&
                isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews) &&
                isset($profilepost->amountcomments) && $this->IsNumeric($profilepost->amountcomments) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function validatePassword(string $value, array $options = []): bool

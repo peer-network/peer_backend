@@ -96,10 +96,7 @@ class TagService
             $this->transactionManager->commit();
             return $this->createSuccessResponse(11702, [$tagData]);
 
-        } catch (ValidationException $e) {
-            $this->transactionManager->rollback();
-            return $this->respondWithError(40301);
-        } catch (\Throwable $e) {
+        } catch (ValidationException|\Throwable) {
             $this->transactionManager->rollback();
             return $this->respondWithError(40301);
         } finally {
@@ -120,7 +117,7 @@ class TagService
 
             return $this::createSuccessResponse(11701, $result);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return $this::respondWithError(41702);
         }
     }

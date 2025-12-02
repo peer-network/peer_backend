@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz;
 
-class BaseURL
+class BaseURL implements \Stringable
 {
-    private string $baseUrl;
-
-    public function __construct(string $baseUrl = '')
+    public function __construct(private string $baseUrl = '')
     {
-        $this->baseUrl = $baseUrl;
-
         // set from super globals if not provided
         if (empty($this->baseUrl)) {
             // Scheme
@@ -28,17 +24,17 @@ class BaseURL
 
             // Authority: Port
             $port = $_SERVER['SERVER_PORT'] ?? ($scheme === 'https' ? 443 : 80);
-            if (preg_match('/^(\[[a-fA-F0-9:.]+])(:\d+)?\z/', $host, $matches)) {
+            if (preg_match('/^(\[[a-fA-F0-9:.]+])(:\d+)?\z/', (string) $host, $matches)) {
                 $host = $matches[1];
 
                 if (isset($matches[2])) {
                     $port = (int) substr($matches[2], 1);
                 }
             } else {
-                $pos = strpos($host, ':');
+                $pos = strpos((string) $host, ':');
                 if ($pos !== false) {
-                    $port = (int) substr($host, $pos + 1);
-                    $host = strstr($host, ':', true);
+                    $port = (int) substr((string) $host, $pos + 1);
+                    $host = strstr((string) $host, ':', true);
                 }
             }
             $authority = ($userInfo !== '' ? $userInfo . '@' : '') . $host . ($port ? ':' . $port : '');

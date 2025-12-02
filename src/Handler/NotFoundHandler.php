@@ -12,7 +12,7 @@ use Slim\Psr7\Response;
 class NotFoundHandler
 {
     public function __construct(
-        private PeerLoggerInterface $logger
+        private readonly PeerLoggerInterface $logger
     ) {
     }
 

@@ -206,7 +206,7 @@ class MultipartPost
         // Detect the first media type
         $detectedTypes = [];
         foreach ($this->media as $media) {
-            $extension = pathinfo($media, PATHINFO_EXTENSION);
+            $extension = pathinfo((string) $media, PATHINFO_EXTENSION);
 
             $fileType = $this->getSubfolder(strtolower($extension));
             if (!$fileType) {
@@ -287,7 +287,7 @@ class MultipartPost
         foreach ($this->getMedia() as $media) {
             $originalType = $media->getClientMediaType();
             $fileName = $media->getClientFilename();
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+            $extension = pathinfo((string) $fileName, PATHINFO_EXTENSION);
 
             $tmpFilename = self::generateUUID();
             $directoryPath = __DIR__ . "/../../../runtime-data/media/tmp";
@@ -295,7 +295,7 @@ class MultipartPost
             if (!is_dir($directoryPath)) {
                 try {
                     mkdir($directoryPath, 0777, true);
-                } catch (\RuntimeException $e) {
+                } catch (\RuntimeException) {
                     throw new \Exception("Directory does not exist: $directoryPath"); // Directory does not exist
                 }
             }
@@ -304,7 +304,7 @@ class MultipartPost
 
             try {
                 $media->moveTo($filePath);
-            } catch (\RuntimeException $e) {
+            } catch (\RuntimeException) {
                 throw new \Exception("Failed to move file: $directoryPath"); // Failed to move file
             }
 
@@ -344,7 +344,7 @@ class MultipartPost
 
             try {
                 $uploadedFile->moveTo($filePath);
-            } catch (\RuntimeException $e) {
+            } catch (\RuntimeException) {
                 throw new \Exception("Failed to move file: $filePath");
             }
 
@@ -446,8 +446,8 @@ class MultipartPost
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
-            $information['resolution'] = isset($auflg) ? $auflg : null;
+            $information['ratiofrm'] = $ratio ?? null;
+            $information['resolution'] = $auflg ?? null;
 
             return isset($information) ? (array)$information : null;
 
@@ -467,7 +467,7 @@ class MultipartPost
         foreach ($this->getMedia() as $media) {
 
             // Calculate Subfolder
-            $extension = pathinfo($media, PATHINFO_EXTENSION);
+            $extension = pathinfo((string) $media, PATHINFO_EXTENSION);
             $subFolder = $this->getSubfolder(strtolower($extension));
 
             $directoryPath = __DIR__ . "/../../../runtime-data/media/".$subFolder;
@@ -487,7 +487,7 @@ class MultipartPost
 
                 try {
                     $uploadedFile->moveTo($tmpFolder.$media);
-                } catch (\RuntimeException $e) {
+                } catch (\RuntimeException) {
                     throw new \Exception("Failed to move file: $filePath");
                 }
             }

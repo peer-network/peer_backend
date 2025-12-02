@@ -8,15 +8,8 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class Mailer
 {
-    private array $envi;
-    private PeerLoggerInterface $logger;
-
-    public function __construct(
-        array $envi,
-        PeerLoggerInterface $logger
-    ) {
-        $this->envi = $envi;
-        $this->logger = $logger;
+    public function __construct(private array $envi, private readonly PeerLoggerInterface $logger)
+    {
     }
 
     public function sendViaAPI(array $payload): array

@@ -46,14 +46,7 @@ class ConfigUrl implements DataGeneratable
 
 class ConfigUrlEntry
 {
-    public int $createdAt;
-    public string $hash;
-    public string $url;
-
-    public function __construct(int $createdAt, string $url, string $hash)
+    public function __construct(public int $createdAt, public string $url, public string $hash)
     {
-        $this->createdAt = $createdAt;
-        $this->url = $url;
-        $this->hash = $hash;
     }
 }

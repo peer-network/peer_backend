@@ -10,7 +10,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
-final class CurrentUserIsBlockedUserSpec implements Specification
+final readonly class CurrentUserIsBlockedUserSpec implements Specification
 {
     public function __construct(
         private string $userid,

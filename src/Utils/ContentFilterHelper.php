@@ -6,12 +6,12 @@ namespace Fawaz\Utils;
 
 final class ContentFilterHelper
 {
-    public const CONTENT_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
-    public const POST_FILTER_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
+    public const array CONTENT_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
+    public const array POST_FILTER_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
     public static function normalizeToUpper(array $values): array
     {
-        return array_map('strtoupper', $values);
+        return array_map(strtoupper(...), $values);
     }
 
     public static function invalidAgainstAllowed(array $values, array $allowed): array

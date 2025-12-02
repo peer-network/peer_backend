@@ -354,7 +354,7 @@ class PostMapper
             return [];
         }
 
-        return (new User($data, [], false))->getArrayCopy();
+        return new User($data, [], false)->getArrayCopy();
     }
 
     // Create a post
@@ -744,7 +744,7 @@ class PostMapper
         try {
             $stmt = $this->db->prepare($sql);
             foreach ($params as $k => $v) {
-                $stmt->bindValue(':' . ltrim($k, ':'), $v);
+                $stmt->bindValue(':' . ltrim((string) $k, ':'), $v);
             }
 
             $params['limit'] = $limit;
@@ -753,7 +753,7 @@ class PostMapper
             $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $results = array_map(function (array $row) {
-                $row['tags'] = json_decode($row['tags'], true) ?? [];
+                $row['tags'] = json_decode((string) $row['tags'], true) ?? [];
                 // User-Placeholder anwenden, falls nötig
                 return self::mapRowToPost($row);
             }, $rows);
@@ -838,13 +838,7 @@ class PostMapper
 
             $this->logger->info("PostMapper.updateTokenStatus updated successfully with POST_CREATED status");
 
-        } catch (\PDOException $e) {
-            $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-        } catch (\Throwable $e) {
+        } catch (\PDOException|\Throwable $e) {
             $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -972,9 +966,9 @@ class PostMapper
                 'status' => $status,
             ]);
 
-            $now       = (new \DateTime())->format('Y-m-d H:i:s.u');
-            $expiresAt = (new \DateTime('+5 minutes'))->format('Y-m-d H:i:s.u');
-            $oneHourAgo = (new \DateTime('-1 hour'))->format('Y-m-d H:i:s.u');
+            $now       = new \DateTime()->format('Y-m-d H:i:s.u');
+            $expiresAt = new \DateTime('+5 minutes')->format('Y-m-d H:i:s.u');
+            $oneHourAgo = new \DateTime('-1 hour')->format('Y-m-d H:i:s.u');
 
             // Only enforce cap if status is one of the restricted ones
             $restrictedStatuses = ['NO_FILE', 'FILE_UPLOADED'];

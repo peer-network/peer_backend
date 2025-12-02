@@ -11,7 +11,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 class ContentFilterServiceImpl
 {
     public function __construct(
-        private ContentType $targetContent
+        private readonly ContentType $targetContent
     ) {
     }
 

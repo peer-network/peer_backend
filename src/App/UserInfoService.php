@@ -94,7 +94,7 @@ class UserInfoService
             }
 
             return $this::createSuccessResponse(21001);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this::respondWithError(41001);
         }
     }

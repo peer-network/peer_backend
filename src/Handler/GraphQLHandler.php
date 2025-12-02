@@ -40,7 +40,7 @@ class GraphQLHandler implements RequestHandlerInterface
             return $this->errorResponse("Invalid JSON format. Expected a valid JSON object.", 400);
         }
 
-        if (!isset($decodedBody['query']) || trim($decodedBody['query']) === '') {
+        if (!isset($decodedBody['query']) || trim((string) $decodedBody['query']) === '') {
             //$this->logger->error("GraphQL query is missing or contains only whitespace.");
             return $this->errorResponse("Invalid GraphQL query. Expected a valid query string.", 400);
         }

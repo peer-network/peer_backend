@@ -9,12 +9,9 @@ use Throwable;
 
 class ValidationException extends RuntimeException
 {
-    protected array $errors = [];
-
-    public function __construct(string $message = "", array $errors = [], ?Throwable $previous = null)
+    public function __construct(string $message = "", protected array $errors = [], ?Throwable $previous = null)
     {
         parent::__construct($message, 0, $previous);
-        $this->errors = $errors;
     }
 
     public function getErrors(): array
