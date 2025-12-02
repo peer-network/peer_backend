@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Repositories\WalletRepositoryFactory;
 use Fawaz\BaseURL;
 use Fawaz\Database\InteractionsPermissionsMapperImpl;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
@@ -88,5 +91,11 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return new ResponseMessagesProviderImpl($path);
         },
         InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
+        WalletRepositoryFactory::class => function (ContainerInterface $c) {
+            return new WalletRepositoryFactory(
+                $c->get(WalletMapper::class),
+                $c->get(MintAccountRepository::class)
+            );
+        },
     ]);
 };
