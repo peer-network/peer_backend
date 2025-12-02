@@ -14,6 +14,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\config\constants\ConstantsConfig;
 
 class PeerTokenService
 {
@@ -91,16 +92,45 @@ class PeerTokenService
                 return self::respondWithError(30201);
             }
 
+            $userConfig  = ConstantsConfig::user();
+            $inputConfig = ConstantsConfig::input();
             $message = isset($args['message']) ? (string) $args['message'] : null;
+            if ($message !== null) {
+                $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
-            if ($message !== null && strlen($message) > 200) {
-                $this->logger->warning('message length is too high');
-                return self::respondWithError(30210);
+                $maxLength      = (int) $messageConfig['MAX_LENGTH'];
+                $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
+                $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/iu';
+
+                if (strlen($message) > $maxLength) {
+                    $this->logger->warning('Transfer message length is too high', [
+                        'maxLength' => $maxLength,
+                    ]);
+                    return self::respondWithError(30270);
+                }
+                if (preg_match($controlPattern, $message) === 1) {
+                    $this->logger->warning('Transfer message contains control characters');
+                    return self::respondWithError(30271);
+                }
+                if (preg_match($urlPattern, $message) === 1) {
+                    $this->logger->warning('Transfer message contains URL/link');
+                    return self::respondWithError(30271);
+                }
+            }
+            $transferConfig = $userConfig['TRANSACTION'];
+            $minAmount = (float) $transferConfig['MIN_AMOUNT'];
+            $maxDecimals = (int) $transferConfig['MAX_DECIMALS'];
+
+            $parts = explode('.', (string) $numberOfTokens);
+
+            if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
+                return self::respondWithError(30264);
             }
 
-            if ($numberOfTokens <= 0) {
-                $this->logger->warning('Incorrect Amount Exception: ZERO or less than token should not be transfer', [
+            if ((float) $numberOfTokens < $minAmount) {
+                $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
+                    'minAmount'      => $minAmount,
                 ]);
                 return self::respondWithError(30264);
             }
