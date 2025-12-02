@@ -52,10 +52,12 @@ class ContactusService
     private function isValidName(?string $Name): bool
     {
         $contactConfig = ConstantsConfig::contact();
+        $inputConfig     = ConstantsConfig::input();
+        $controlPattern  = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         return $Name &&
             strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
             strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
+            preg_match($controlPattern, $Name) === 0; 
     }
 
     private function validateRequiredFields(array $args, array $requiredFields): array
