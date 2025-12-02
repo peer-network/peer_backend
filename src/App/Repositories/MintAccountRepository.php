@@ -4,42 +4,33 @@ declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
 
+use Fawaz\App\Models\MintAccount;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
 
 class MintAccountRepository
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
-    {
-    }
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {}
 
     /**
-     * Fetch all rows from mint_account.
-     *
-     * @return array<int, array<string, mixed>>
+     * Get the default (first) mint account entity or null.
      */
-    public function fetchAll(): array
+    public function getDefaultAccount(): ?MintAccount
     {
-        $this->logger->debug('MintAccountRepository.fetchAll started');
-
-        $sql = 'SELECT 
-                accountid, 
-                initial_balance, 
-                current_balance, 
-                createdat, 
-                updatedat 
-            FROM 
-                mint_account 
-            ORDER BY createdat ASC';
-
+        $this->logger->debug('MintAccountRepository.getDefaultAccount started');
+        $sql = 'SELECT accountid, initial_balance, current_balance, createdat, updatedat
+                FROM mint_account
+                ORDER BY createdat ASC
+                LIMIT 1';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-
-        $this->logger->info('MintAccountRepository.fetchAll completed', ['count' => count($rows)]);
-
-        return $rows;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            $this->logger->warning('MintAccountRepository.getDefaultAccount: no rows');
+            return null;
+        }
+        return new MintAccount($row, [], false);
     }
 
     /**
