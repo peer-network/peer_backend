@@ -1353,10 +1353,10 @@ class GraphQLSchemaBuilder
                     return $root['accountid'] ?? '';
                 },
                 'initialBalance' => function (array $root): string {
-                    return (string)$root['initial_balance'] ?? '0';
+                    return (string)$root['initial_balance'];
                 },
                 'currentBalance' => function (array $root): string {
-                    return (string)$root['current_balance'] ?? '0';
+                    return (string)$root['current_balance'];
                 },
                 'updatedat' => function (array $root): string {
                     return $root['updatedat'] ?? '';

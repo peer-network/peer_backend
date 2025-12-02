@@ -7,9 +7,10 @@ namespace Fawaz\App\Models;
 use DateTime;
 use Fawaz\App\ValidationException;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 use Fawaz\Utils\ResponseHelper;
 
-class MintAccount
+class MintAccount implements HasUserId
 {
     use ResponseHelper;
 
@@ -97,6 +98,11 @@ class MintAccount
             throw new ValidationException($errorMessageString);
         }
         return false;
+    }
+
+    public function getUserId(): string
+    {
+        return $this->accountid;
     }
 
     public function getAccountId(): string

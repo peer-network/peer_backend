@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Interfaces\HasTokenWallet;
 use Fawaz\Database\UserMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
+use PDO;
 
 class MintService
 {
@@ -18,7 +20,8 @@ class MintService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected MintAccountRepository $mintAccountRepository,
-        protected UserMapper $userMapper
+        protected UserMapper $userMapper,
+        protected PDO $db
     ) {
     }
 

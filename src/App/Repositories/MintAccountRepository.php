@@ -3,13 +3,11 @@
 declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
-
 use Fawaz\App\Models\MintAccount;
-use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
 
-class MintAccountRepository
+class MintAccountRepository implements WalletRepository
 {
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {}
 
@@ -43,10 +41,11 @@ class MintAccountRepository
      *
      * Returns the new current_balance on success.
      */
-    public function deductCurrentBalance(string $accountId, string $amount): string
+    public function debitIfSufficient(string $userId, string $amount): ?string
+    // public function deductCurrentBalance(string $accountId, string $amount): string
     {
         $this->logger->debug('MintAccountRepository.deductCurrentBalance started', [
-            'accountId' => $accountId,
+            'accountId' => $userId,
             'amount' => $amount,
         ]);
 
@@ -74,7 +73,7 @@ class MintAccountRepository
 
             $updateStmt = $this->db->prepare($updateSql);
             $updateStmt->bindValue(':amount', (string)$amount, PDO::PARAM_STR);
-            $updateStmt->bindValue(':accountId', $accountId, PDO::PARAM_STR);
+            $updateStmt->bindValue(':accountId', $userId, PDO::PARAM_STR);
             $updateStmt->execute();
             $updated = $updateStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -82,7 +81,7 @@ class MintAccountRepository
                 // Could be account missing or insufficient balance
                 // Check if account exists to give a clearer error
                 $checkStmt = $this->db->prepare('SELECT 1 FROM mint_account WHERE accountid = :accountId');
-                $checkStmt->bindValue(':accountId', $accountId, PDO::PARAM_STR);
+                $checkStmt->bindValue(':accountId', $userId, PDO::PARAM_STR);
                 $checkStmt->execute();
                 if (!$checkStmt->fetchColumn()) {
                     throw new \RuntimeException('Account not found');
@@ -92,7 +91,7 @@ class MintAccountRepository
 
             $newBalance = (string)$updated['current_balance'];
             $this->logger->info('MintAccountRepository.deductCurrentBalance succeeded', [
-                'accountId' => $accountId,
+                'accountId' => $userId,
                 'amount' => $amount,
                 'newBalance' => $newBalance,
             ]);
@@ -103,5 +102,22 @@ class MintAccountRepository
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Lock a single wallet balance row for update.
+     */
+    public function lockWalletBalance(string $walletId): void
+    {
+        $this->logger->debug('MintAccountRepository.lockWalletBalance started', [
+            'walletId' => $walletId,
+        ]);
+
+        $query = 'SELECT current_balance FROM mint_account WHERE accountid = :accountid FOR UPDATE';
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':accountid', $walletId, PDO::PARAM_STR);
+        $stmt->execute();
+        // Fetch a row to ensure the lock is taken
+        $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
