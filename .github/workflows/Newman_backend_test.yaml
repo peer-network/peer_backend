@@ -98,39 +98,39 @@ jobs:
                    composer install --prefer-dist --no-interaction && \
                    vendor/bin/phpstan analyse --configuration=/var/www/html/phpstan.neon --memory-limit=1G"
 
-  # validate_sql_files:
-  #   name: Ensure Only Valid SQL Files Are Changed
-  #   runs-on: ubuntu-latest
-  #   needs: [check_branch_sync]
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v6
-  #       with:
-  #         fetch-depth: 0
+  validate_sql_files:
+    name: Ensure Only Valid SQL Files Are Changed
+    runs-on: ubuntu-latest
+    needs: [check_branch_sync]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
  
-  #     - name: Fetch Base Branch
-  #       run: |
-  #         git fetch origin ${{ github.base_ref }}
+      - name: Fetch Base Branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
  
-  #     - name: Check for Unauthorized Changes in sql_files_for_import
-  #       run: |
-  #         echo "Checking SQL file changes..."
-  #         changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
-  #         echo "Changed files:"
-  #         echo "$changed_files"
+      - name: Check for Unauthorized Changes in sql_files_for_import
+        run: |
+          echo "Checking SQL file changes..."
+          changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
+          echo "Changed files:"
+          echo "$changed_files"
  
-  #         for file in $changed_files; do
-  #           if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
-  #             if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
-  #               echo "New file allowed: $file"
-  #             else
-  #               echo "Unauthorized modification detected: $file"
-  #               echo "Only additional_data.sql may be modified. Others can only be added, not edited."
-  #               exit 1
-  #             fi
-  #           fi
-  #         done
-  #         echo "SQL file check passed."
+          for file in $changed_files; do
+            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+                echo "New file allowed: $file"
+              else
+                echo "Unauthorized modification detected: $file"
+                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+                exit 1
+              fi
+            fi
+          done
+          echo "SQL file check passed."
 
   build_and_test:
     name: Build And Run Postman Tests
@@ -138,12 +138,11 @@ jobs:
     needs: [
       check_branch_sync,
       gitleaks_scan_staged,
-      # validate_sql_files, 
-      phpstan_analysis
+      validate_sql_files, phpstan_analysis 
     ]
-    if: 
-      needs.check_branch_sync.outputs.is_behind == 'false'
-      # needs.validate_sql_files.result == 'success'
+    if: ${{ 
+      needs.check_branch_sync.outputs.is_behind == 'false' && 
+      needs.validate_sql_files.result == 'success' }}
     strategy:
       matrix:
         php-version: ['8.4']
@@ -429,7 +428,7 @@ jobs:
           fi
  
       - name: Upload Newman Failure Marker
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: newman-failed-${{ matrix.php-version }}
           path: newman_failed.txt
@@ -467,19 +466,19 @@ jobs:
           fi
  
       - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: backend-runtime-log-${{ matrix.php-version }}
           path: logs/runtime
  
       - name: Upload backend error log for PHP ${{ matrix.php-version }}
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: backend-error-log-${{ matrix.php-version }}
           path: logs/error/errorlog.txt
           
       - name: Upload Newman Report for PHP ${{ matrix.php-version }}
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: docker_newman_report-${{ matrix.php-version }}
           path: ${{ github.workspace }}/newman/reports/report.html
@@ -517,7 +516,7 @@ jobs:
  
       - name: Upload build outcome marker
         if: always()
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: outcome-${{ matrix.php-version }}
           path: outcome.txt
@@ -525,10 +524,11 @@ jobs:
       - name: Save Docker image as artifact
         run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
  
-      - uses: peer-network/.github/.github/actions/upload-artifact@main
+      - uses: actions/upload-artifact@v5
         with:
           name: docker-image-${{ matrix.php-version }}
           path: peer-backend.tar
+          overwrite: true
  
   trivy_scan:
     name: Trivy Security Scan
@@ -583,7 +583,7 @@ jobs:
  
       - name: Upload Trivy build outcome marker
         if: always()
-        uses: peer-network/.github/.github/actions/upload-artifact@main
+        uses: actions/upload-artifact@v5
         with:
           name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
@@ -596,7 +596,7 @@ jobs:
           trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
           trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
  
-      - uses: peer-network/.github/.github/actions/upload-artifact@main
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
@@ -785,7 +785,7 @@ jobs:
     needs: [
       check_branch_sync,
       phpstan_analysis,
-      # validate_sql_files,
+      validate_sql_files,
       build_and_test,
       aggregate_outcome,
       gitleaks_scan_staged,
@@ -800,14 +800,14 @@ jobs:
           outcome="${{ needs.aggregate_outcome.outputs.final_outcome }}"
           is_behind="${{ needs.check_branch_sync.outputs.is_behind }}"
           phpstan_result="${{ needs.phpstan_analysis.result }}"
-          # sql_result="${{ needs.validate_sql_files.result }}"
+          sql_result="${{ needs.validate_sql_files.result }}"
           gitleaks_result="${{ needs.gitleaks_scan_staged.result }}"
 
           type="none"
           if [ "$is_behind" == "true" ]; then
             type="behind"
-          # elif [ "$sql_result" == "failure" ]; then
-          #   type="invalid_sql"
+          elif [ "$sql_result" == "failure" ]; then
+            type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
             type="phpstan"
           elif [ "$gitleaks_result" == "failure" ]; then
