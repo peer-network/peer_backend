@@ -3943,7 +3943,7 @@ class GraphQLSchemaBuilder
         $name = isset($args['name']) ? trim($args['name']) : null;
         $message = isset($args['message']) ? trim($args['message']) : null;
         $args['ip'] = $ip;
-        $args['createdat'] = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $args['createdat'] = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if (empty($email) || empty($name) || empty($message)) {
             return $this::respondWithError(30101);

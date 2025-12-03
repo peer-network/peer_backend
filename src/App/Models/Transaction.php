@@ -37,7 +37,7 @@ class Transaction
         $this->tokenamount = (string) ($data['tokenamount'] ?? 0);
         $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
 
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
@@ -128,7 +128,7 @@ class Transaction
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

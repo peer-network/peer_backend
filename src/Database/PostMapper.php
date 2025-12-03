@@ -354,7 +354,7 @@ class PostMapper
             return [];
         }
 
-        return (new User($data, [], false))->getArrayCopy();
+        return new User($data, [], false)->getArrayCopy();
     }
 
     // Create a post
@@ -972,9 +972,9 @@ class PostMapper
                 'status' => $status,
             ]);
 
-            $now       = (new \DateTime())->format('Y-m-d H:i:s.u');
-            $expiresAt = (new \DateTime('+5 minutes'))->format('Y-m-d H:i:s.u');
-            $oneHourAgo = (new \DateTime('-1 hour'))->format('Y-m-d H:i:s.u');
+            $now       = new \DateTime()->format('Y-m-d H:i:s.u');
+            $expiresAt = new \DateTime('+5 minutes')->format('Y-m-d H:i:s.u');
+            $oneHourAgo = new \DateTime('-1 hour')->format('Y-m-d H:i:s.u');
 
             // Only enforce cap if status is one of the restricted ones
             $restrictedStatuses = ['NO_FILE', 'FILE_UPLOADED'];
