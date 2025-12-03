@@ -17,6 +17,7 @@ use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
+use PDOException;
 
 class UserMapper
 {
@@ -39,10 +40,10 @@ class UserMapper
             $sql = "INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)";
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-            $stmt->bindValue(':browser', $browser, \PDO::PARAM_STR);
-            $stmt->bindValue(':action_type', $actionType, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+            $stmt->bindValue(':browser', $browser, PDO::PARAM_STR);
+            $stmt->bindValue(':action_type', $actionType, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -102,17 +103,17 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-            $stmt->bindValue(':browser', $browser, \PDO::PARAM_STR);
-            $stmt->bindValue(':url', $url, \PDO::PARAM_STR);
-            $stmt->bindValue(':http_method', $httpMethod, \PDO::PARAM_STR);
-            $stmt->bindValue(':status_code', $statusCode, \PDO::PARAM_INT);
-            $stmt->bindValue(':response_time', $responseTime, \PDO::PARAM_INT);
-            $stmt->bindValue(':location', $location, \PDO::PARAM_STR);
-            $stmt->bindValue(':action_type', $actionType, \PDO::PARAM_STR);
-            $stmt->bindValue(':request_payload', $requestPayload, \PDO::PARAM_STR);
-            $stmt->bindValue(':auth_status', $authStatus, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+            $stmt->bindValue(':browser', $browser, PDO::PARAM_STR);
+            $stmt->bindValue(':url', $url, PDO::PARAM_STR);
+            $stmt->bindValue(':http_method', $httpMethod, PDO::PARAM_STR);
+            $stmt->bindValue(':status_code', $statusCode, PDO::PARAM_INT);
+            $stmt->bindValue(':response_time', $responseTime, PDO::PARAM_INT);
+            $stmt->bindValue(':location', $location, PDO::PARAM_STR);
+            $stmt->bindValue(':action_type', $actionType, PDO::PARAM_STR);
+            $stmt->bindValue(':request_payload', $requestPayload, PDO::PARAM_STR);
+            $stmt->bindValue(':auth_status', $authStatus, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -123,7 +124,7 @@ class UserMapper
                 'actionType' => $actionType
             ]);
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error('Database error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
@@ -284,7 +285,7 @@ class UserMapper
             $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $results[] = new UserAdvanced([
@@ -441,7 +442,7 @@ class UserMapper
             $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $this->logger->debug("UserMapper.fetchAll.row started");
                 try {
                     $results[] = new UserAdvanced([
@@ -497,12 +498,12 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':username', $username, \PDO::PARAM_STR);
+            $stmt->bindValue(':username', $username, PDO::PARAM_STR);
 
             $stmt->execute();
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $results[] = new User($row);
             }
 
@@ -531,11 +532,11 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->bindValue(':roles_mask', $roles_mask, \PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+            $stmt->bindValue(':roles_mask', $roles_mask, PDO::PARAM_INT);
 
             $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 return new User($data);
@@ -561,11 +562,11 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, PDO::PARAM_INT);
 
             $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 return new User($data);
@@ -588,10 +589,10 @@ class UserMapper
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status FROM users WHERE email = :email";
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
 
             $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 return new User($data);
@@ -613,9 +614,9 @@ class UserMapper
         try {
             $sql = "SELECT uid, username, status, slug, img, biography, updatedat, visibility_status FROM users WHERE uid = :id";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
+            $stmt->bindValue(':id', $id, PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 $this->logger->info("User info fetched successfully", ['id' => $id]);
@@ -692,7 +693,7 @@ class UserMapper
             $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['username' => $username, 'slug' => $slug]);
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 return new User($data);
@@ -811,7 +812,7 @@ class UserMapper
 
             $stmt->execute($params);
 
-            $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $friends = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $filtered_friends = [];
 
 
@@ -890,7 +891,7 @@ class UserMapper
             $params['offset'] = $offset;
 
             $stmt->execute($params);
-            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
 
@@ -962,7 +963,7 @@ class UserMapper
             $params['offset'] = $offset;
 
             $stmt->execute($params);
-            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $uniqueResults = array_map('unserialize', array_unique(array_map('serialize', $results)));
 
@@ -1051,20 +1052,20 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $data['uid'], PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+            $stmt->bindValue(':username', $data['username'], PDO::PARAM_STR);
+            $stmt->bindValue(':password', $data['password'], PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], PDO::PARAM_INT);
+            $stmt->bindValue(':slug', $data['slug'], PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1090,7 +1091,7 @@ class UserMapper
         try {
             $query = "SELECT 1 FROM user_referral_info WHERE uid = :uid";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
             if ($stmt->fetch()) {
@@ -1103,13 +1104,13 @@ class UserMapper
             $query = "INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
                       VALUES (:uid, :referral_link, :referral_uuid)";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
-            $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':referral_link', $link, PDO::PARAM_STR);
+            $stmt->bindValue(':referral_uuid', $referralUuid, PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->info("Referral link inserted successfully.", ['userId' => $userId]);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("UserMapper.insertReferralInfo: PDOException", ['error' => $e->getMessage()]);
         } catch (\Exception $e) {
             $this->logger->error("UserMapper.insertReferralInfo: Exception", ['error' => $e->getMessage()]);
@@ -1131,10 +1132,10 @@ class UserMapper
                 uid = :uid";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+        $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
         $stmt->execute();
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
             $this->logger->info("No referral info found. Generating new referral for user.", [
@@ -1145,10 +1146,10 @@ class UserMapper
             $this->insertReferralInfo($userId, $referralLink);
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
         }
 
         $this->logger->info("Referral info query result", ['result' => $result]);
@@ -1177,7 +1178,7 @@ class UserMapper
         $params['invitee_uuid'] = $userId;
         $stmt->execute($params);
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!empty($result)) {
             return new Profile($result, [], false);
@@ -1210,7 +1211,7 @@ class UserMapper
         $params['offset'] = $offset;
         $stmt->execute($params);
 
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn ($user) => (new Profile($user, [], false)), $data);
     }
@@ -1234,17 +1235,17 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
-            $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
-            $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
-            $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
-            $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $data['liquidity'], PDO::PARAM_STR);
+            $stmt->bindValue(':amountposts', $data['amountposts'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollower', $data['amountfollower'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfriends', $data['amountfriends'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], PDO::PARAM_INT);
+            $stmt->bindValue(':isprivate', $data['isprivate'], PDO::PARAM_INT);
+            $stmt->bindValue(':invited', $data['invited'], PDO::PARAM_STR);
+            $stmt->bindValue(':pkey', $data['pkey'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1283,18 +1284,18 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
+            $stmt->bindValue(':username', $data['username'], PDO::PARAM_STR);
+            $stmt->bindValue(':password', $data['password'], PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $data['uid'], PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->info("Updated user in database", ['uid' => $data['uid']]);
@@ -1325,10 +1326,10 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':password', $passwordHash, \PDO::PARAM_STR);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':password', $passwordHash, PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $data['ip'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $data['uid'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1367,18 +1368,18 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
+            $stmt->bindValue(':username', $data['username'], PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+            $stmt->bindValue(':status', $data['status'], PDO::PARAM_INT);
+            $stmt->bindValue(':verified', $data['verified'], PDO::PARAM_INT);
+            $stmt->bindValue(':slug', $data['slug'], PDO::PARAM_INT);
+            $stmt->bindValue(':roles_mask', $data['roles_mask'], PDO::PARAM_INT);
+            $stmt->bindValue(':ip', $data['ip'], PDO::PARAM_STR);
+            $stmt->bindValue(':img', $data['img'], PDO::PARAM_STR);
+            $stmt->bindValue(':biography', $data['biography'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
+            $stmt->bindValue(':uid', $data['uid'], PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1414,8 +1415,8 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':status', Status::DELETED, \PDO::PARAM_INT);
-            $stmt->bindValue(':uid', $id, \PDO::PARAM_STR);
+            $stmt->bindValue(':status', Status::DELETED, PDO::PARAM_INT);
+            $stmt->bindValue(':uid', $id, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1438,7 +1439,7 @@ class UserMapper
         try {
             $sql = "SELECT uid FROM users WHERE verified IS NULL";
             $stmt = $this->db->query($sql);
-            $unverifiedUsers = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $unverifiedUsers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if ($unverifiedUsers) {
                 $this->logger->info("Fetched all unverified users from database", ['count' => count($unverifiedUsers)]);
@@ -1473,7 +1474,7 @@ class UserMapper
         try {
             $query = "SELECT COUNT(*) FROM access_tokens WHERE userid = :userid";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
             $stmt->execute();
             $exists = $stmt->fetchColumn();
 
@@ -1487,10 +1488,10 @@ class UserMapper
             }
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':access_token', $accessToken, \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_INT);
-            $stmt->bindValue(':expiresat', $expirationTime, \PDO::PARAM_INT);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindValue(':access_token', $accessToken, PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_INT);
+            $stmt->bindValue(':expiresat', $expirationTime, PDO::PARAM_INT);
             $stmt->execute();
 
             $this->logger->info("Access token successfully saved or updated for user: $userid");
@@ -1510,7 +1511,7 @@ class UserMapper
         try {
             $query = "SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
             $stmt->execute();
             $exists = $stmt->fetchColumn();
 
@@ -1524,10 +1525,10 @@ class UserMapper
             }
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':refresh_token', $refreshToken, \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_INT);
-            $stmt->bindValue(':expiresat', $expirationTime, \PDO::PARAM_INT);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindValue(':refresh_token', $refreshToken, PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_INT);
+            $stmt->bindValue(':expiresat', $expirationTime, PDO::PARAM_INT);
             $stmt->execute();
 
             $this->logger->info("Refresh token successfully saved or updated for user: $userid");
@@ -1544,7 +1545,7 @@ class UserMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->debug('Access tokens deleted', ['userId' => $userId]);
@@ -1565,7 +1566,7 @@ class UserMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->debug('Refresh tokens deleted', ['userId' => $userId]);
@@ -1588,9 +1589,9 @@ class UserMapper
         try {
             $sql = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid AND refresh_token = :token AND expiresat > :now';
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':token', $refreshToken, \PDO::PARAM_STR);
-            $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':token', $refreshToken, PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now, PDO::PARAM_INT);
             $stmt->execute();
             return ((int)$stmt->fetchColumn()) > 0;
         } catch (\Throwable $e) {
@@ -1615,11 +1616,11 @@ class UserMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
 
-            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userResults =  $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $userResultObj = [];
             foreach ($userResults as $key => $prt) {
@@ -1690,7 +1691,7 @@ class UserMapper
             WHERE token = :token";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':attempt_count', $attempt['attempt_count'] + 1, \PDO::PARAM_INT);
+        $stmt->bindValue(':attempt_count', $attempt['attempt_count'] + 1, PDO::PARAM_INT);
         $stmt->bindValue(':last_attempt', $this->getCurrentTimestamp());
         $stmt->bindValue(':token', $attempt['token']);
         $stmt->execute();
@@ -1715,7 +1716,7 @@ class UserMapper
             $stmt->bindValue(':now', $this->getCurrentTimestamp());
             $stmt->execute();
 
-            $data =  $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data =  $stmt->fetch(PDO::FETCH_ASSOC);
             return $data;
         } catch (\Exception $e) {
             $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
@@ -1733,9 +1734,9 @@ class UserMapper
         try {
             $sql = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid AND access_token = :token AND expiresat > :now';
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':token', $accessToken, \PDO::PARAM_STR);
-            $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':token', $accessToken, PDO::PARAM_STR);
+            $stmt->bindValue(':now', $now, PDO::PARAM_INT);
             $stmt->execute();
             return ((int)$stmt->fetchColumn()) > 0;
         } catch (\Throwable $e) {
@@ -1820,11 +1821,11 @@ class UserMapper
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
-        $stmt->bindValue(':current_time', $this->getCurrentTimestamp(), \PDO::PARAM_STR);
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt->bindValue(':current_time', $this->getCurrentTimestamp(), PDO::PARAM_STR);
         $stmt->execute();
 
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     /**
@@ -1837,7 +1838,7 @@ class UserMapper
     {
         $sql = "DELETE FROM password_reset_requests WHERE token = :token";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
+        $stmt->bindValue(':token', $token, PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -1861,9 +1862,9 @@ class UserMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':expiresat', $data['expiresat'], \PDO::PARAM_INT);
+            $stmt->bindValue(':token', $data['token'], PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':expiresat', $data['expiresat'], PDO::PARAM_INT);
 
             $stmt->execute();
 
@@ -1916,7 +1917,7 @@ class UserMapper
 
         $stmt->execute($params);
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $this->logger->info("Referral info query result", ['result' => $result]);
 
@@ -1935,7 +1936,7 @@ class UserMapper
             $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
             $stmt = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (isset($result['invited']) && !empty($result['invited'])) {
                 return $result["invited"];
