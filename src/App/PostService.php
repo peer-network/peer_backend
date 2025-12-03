@@ -189,7 +189,6 @@ class PostService
         ];
 
         try {
-            $this->transactionManager->beginTransaction();
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
@@ -287,7 +286,6 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 $this->logger->error('Failed to create post', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -335,7 +333,6 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 }
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -359,11 +356,9 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->transactionManager->commit();
             return $this::createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             if (isset($args['uploadedFiles'])) {
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }

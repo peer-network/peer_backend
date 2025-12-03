@@ -56,6 +56,7 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalConten
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\AlphaMintService;
+use Fawaz\Database\Interfaces\TransactionManager;
 
 class GraphQLSchemaBuilder
 {
@@ -87,7 +88,8 @@ class GraphQLSchemaBuilder
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected TransactionManager $transactionManager
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -3012,6 +3014,7 @@ class GraphQLSchemaBuilder
         $price = $actionPrices[$action];
         $actionMap = $args['art'] = $actionMaps[$action];
 
+        $this->transactionManager->beginTransaction();
         try {
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
@@ -3021,6 +3024,7 @@ class GraphQLSchemaBuilder
                     if ($action === 'comment') {
                         $response = $this->commentService->createComment($args);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11608";
@@ -3028,16 +3032,19 @@ class GraphQLSchemaBuilder
                     } elseif ($action === 'post') {
                         $response = $this->postService->createPost($args['input']);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11513";
                     } elseif ($action === 'like') {
                         $response = $this->postInfoService->likePost($postId);
                         if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
                             return $response;
                         }
                         $response['ResponseCode'] = "11514";
                     } else {
+                        $this->transactionManager->rollback();
                         return $this::respondWithError(30105);
                     }
 
@@ -3051,10 +3058,12 @@ class GraphQLSchemaBuilder
                         }
 
                         $DailyUsage += 1;
+                        $this->transactionManager->commit();
                         return $response;
                     }
 
                     $this->logger->error("{$action}Post failed", ['response' => $response]);
+                    $this->transactionManager->rollback();
                     $response['affectedRows'] = $args;
                     return $response;
                 }
@@ -3065,6 +3074,7 @@ class GraphQLSchemaBuilder
 
             if ($balance < $price) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
 
@@ -3072,12 +3082,14 @@ class GraphQLSchemaBuilder
             if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11605";
             } elseif ($action === 'post') {
                 $response = $this->postService->createPost($args['input']);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11508";
@@ -3089,16 +3101,19 @@ class GraphQLSchemaBuilder
             } elseif ($action === 'like') {
                 $response = $this->postInfoService->likePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11503";
             } elseif ($action === 'dislike') {
                 $response = $this->postInfoService->dislikePost($postId);
                 if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $response;
                 }
                 $response['ResponseCode'] = "11504";
             } else {
+                $this->transactionManager->rollback();
                 return $this::respondWithError(30105);
             }
 
@@ -3114,21 +3129,25 @@ class GraphQLSchemaBuilder
 
                 $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
                     return $deducted;
                 }
 
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
+                    $this->transactionManager->rollback();
                     return $this::respondWithError($deducted['ResponseCode']);
                 }
-
+                $this->transactionManager->commit();
                 return $response;
             }
 
             $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+            $this->transactionManager->rollback();
             $response['affectedRows'] = $args;
             return $response;
         } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
             $this->logger->error('Unexpected error in resolveActionPost', [
                 'exception' => $e->getMessage(),
                 'args' => $args,
