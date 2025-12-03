@@ -74,9 +74,7 @@ class WalletService
             }
 
             $walletData = array_map(
-                static function (Wallet $wallet) {
-                    return $wallet->getArrayCopy();
-                },
+                static fn(Wallet $wallet) => $wallet->getArrayCopy(),
                 $wallets
             );
 

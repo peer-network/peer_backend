@@ -138,9 +138,7 @@ class ModerationMapper
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(function ($reporter) {
-                return new User($reporter, [], false)->getArrayCopy();
-            }, $reporters);
+            $item['reporters'] = array_map(fn($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
