@@ -237,7 +237,7 @@ class CommentMapper
                         'biography' => $row['biography'],
                         'updatedat' => $row['updatedat'],
                     ];
-            $userObj = (new Profile($userObj, [], false))->getArrayCopy();
+            $userObj = new Profile($userObj, [], false)->getArrayCopy();
 
             $row['user'] = [
                 'uid' => $userObj['uid'] ?? '',
@@ -289,7 +289,7 @@ class CommentMapper
                 'updatedat' => $row['updatedat'],
                 'visibility_status' => $row['visibility_status'],
             ];
-            $userObj = (new User($userObj, [], false))->getArrayCopy();
+            $userObj = new User($userObj, [], false)->getArrayCopy();
 
             $row['user'] = [
                 'uid' => $userObj['uid'] ?? '',
@@ -396,7 +396,7 @@ class CommentMapper
                         'img' => $row['img'],
                         'visibility_status' => $row['user_visibility_status'],
                     ];
-                $userObj = (new User($userObj, [], false))->getArrayCopy();
+                $userObj = new User($userObj, [], false)->getArrayCopy();
 
                 return new CommentAdvanced([
                     'commentid' => $row['commentid'],

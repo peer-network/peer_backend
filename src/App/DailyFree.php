@@ -26,7 +26,7 @@ class DailyFree
         $this->liken = $data['liken'] ?? 0;
         $this->comments = $data['comments'] ?? 0;
         $this->posten = $data['posten'] ?? 0;
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
@@ -143,7 +143,7 @@ class DailyFree
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
