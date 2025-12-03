@@ -7,7 +7,7 @@ use Fawaz\App\Models\MintAccount;
 use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
 
-class MintAccountRepository implements WalletRepository
+class MintAccountRepository implements WalletDebitable
 {
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {}
 

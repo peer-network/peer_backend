@@ -161,13 +161,11 @@ class PeerTokenService
             $transferStrategy = new UserToUserTransferStrategy();
 
             $response = $this->peerTokenMapper->transferToken(
-                $this->currentUserId,
-                $recipientId,
                 $numberOfTokens,
                 $transferStrategy,
-                $message,
                 $senderUserObj,
-                $receipientUserObj
+                $receipientUserObj,
+                $message,
             );
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();

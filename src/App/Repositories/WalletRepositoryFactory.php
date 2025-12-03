@@ -23,7 +23,7 @@ class WalletRepositoryFactory {
     ) {
     }
 
-    public function for(HasUserId $owner): WalletRepository
+    public function for(HasUserId $owner): WalletCreditable | WalletDebitable
     {
         if ($owner instanceof MintAccount) {
             return $this->mintAccountRepository;

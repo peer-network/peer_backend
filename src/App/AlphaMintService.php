@@ -110,13 +110,11 @@ class AlphaMintService
                                 continue;
                             }
                             $this->peerTokenMapper->transferToken(
-                                $mintUserId, 
-                                $receipientUserId,
                                 $amount,
                                 new UserToUserTransferStrategy(),
-                                'Alpha Token Migration',
                                 $alphaUserAc,
-                                $userData
+                                $userData,
+                                'Alpha Token Migration',
                             );
 
                             $totalAlphaUserMinted++;

@@ -8,6 +8,7 @@ namespace Fawaz\Database;
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\App\Repositories\WalletRepositoryFactory;
+use Fawaz\App\Repositories\WalletHandle;
 use Fawaz\App\User;
 use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 use PDO;
@@ -234,36 +235,38 @@ class PeerTokenMapper
      *
      */
     public function transferToken(
-        string $senderId,
-        string $recipientId,
         string $numberOfTokens,
         TransferStrategy $strategy,
+        HasUserId $sender,
+        HasUserId $recipient,
         ?string $message = null,
-        ?HasUserId $senderObject = null,
-        ?HasUserId $recipientObject = null,
     ): ?array {
         \ignore_user_abort(true);
 
-        $senderRepo = $this->walletRepositoryFactory->for($senderObject);
-        $recipientRepo = $this->walletRepositoryFactory->for($recipientObject);
+        // Build wallet handles so each account has its own handler
+        $senderRepo = $this->walletRepositoryFactory->for($sender);
+        $recipientRepo = $this->walletRepositoryFactory->for($recipient);
         $inviterRepo = $this->walletMapper;
         $peerFeeRepo = $this->walletMapper;
         $burnFeeRepo = $this->walletMapper;
+
+        // These handles can be used for future per-account operations
+        // inviter, peer and burn will be finalized after pool + inviter resolution
         $this->initializeLiquidityPool();
 
         if (!$this->validateFeesWalletUUIDs()) {
             return self::respondWithError(41222);
         }
 
-        $this->senderId = $senderId;
-
         try {
-            // Lock both users' balances to prevent race conditions
+            // Lock balances using wallet handles to ensure proper repository per account
+            $senderHandle = new WalletHandle($sender->getUserId(), $senderRepo);
+            $recipientHandle = new WalletHandle($recipient->getUserId(), $recipientRepo);
+            $handlesToLock = [$senderHandle, $recipientHandle];
             if (!empty($this->inviterId)) {
-                $this->lockBalances([$this->inviterId, $senderId, $recipientId]);
-            } else {
-                $this->lockBalances([$senderId, $recipientId]);
+                $handlesToLock[] = new WalletHandle($this->inviterId, $inviterRepo);
             }
+            $this->lockBalances($handlesToLock);
             $mode = $strategy->getFeePolicyMode();
             [
                 $requiredAmount, 
@@ -271,15 +274,15 @@ class PeerTokenMapper
                 $peerFeeAmount, 
                 $burnFeeAmount, 
                 $inviteFeeAmount
-            ] = $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
+            ] = $this->calculateAmountsForMode($sender->getUserId(), $numberOfTokens, $mode);
 
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
-
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
                 // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($senderId, $requiredAmount, 'DEDUCT');
-                $this->walletMapper->debitIfSufficient($senderId, $requiredAmount);
+                $senderHandle->handler()->debitIfSufficient($sender->getUserId(), $requiredAmount);
+                // $this->walletMapper->debitIfSufficient($senderId, $requiredAmount);
 
             }
 
@@ -288,8 +291,8 @@ class PeerTokenMapper
                 $payload = [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getRecipientTransactionType(),
-                    'senderid' => $senderId,
-                    'recipientid' => $recipientId,
+                    'senderid' => $sender->getUserId(),
+                    'recipientid' => $recipient->getUserId(),
                     'tokenamount' => $netRecipientAmount,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
@@ -301,52 +304,59 @@ class PeerTokenMapper
                 $this->createAndSaveTransaction($transRepo, $payload);
 
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
-                $this->walletMapper->credit($recipientId, $netRecipientAmount);
+                // $this->walletMapper->credit($recipientId, $netRecipientAmount);
+                $recipientHandle->handler()->credit($recipient->getUserId(), $netRecipientAmount);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
             if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
+                $inviterHandle = new WalletHandle($this->inviterId, $inviterRepo);
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getInviterFeeTransactionType(),
-                    'senderid' => $senderId,
+                    'senderid' => $sender->getUserId(),
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE'
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
-                $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
+                // $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
+                $inviterHandle->handler()->credit($this->inviterId, $inviteFeeAmount);
 
             }
 
 
             // 5. PEERWALLET: Fee To Peer Wallet
             if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
+                $peerHandle = new WalletHandle($this->peerWallet, $peerFeeRepo);
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getPeerFeeTransactionType(),
-                    'senderid' => $senderId,
+                    'senderid' => $sender->getUserId(),
                     'recipientid' => $this->peerWallet,
                     'tokenamount' => $peerFeeAmount,
                     'transferaction' => 'PEER_FEE'
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerFeeAmount);
-                $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
+                // $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
+                $peerHandle->handler()->credit($this->peerWallet, $peerFeeAmount);
 
             }
 
             // 6. BURNWALLET: Burn Tokens
             if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
+                $burnHandle = new WalletHandle($this->burnWallet, $burnFeeRepo);
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getBurnFeeTransactionType(),
-                    'senderid' => $senderId,
+                    'senderid' => $sender->getUserId(),
                     'recipientid' => $this->burnWallet,
                     'tokenamount' => $burnFeeAmount,
                     'transferaction' => 'BURN_FEE'
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnFeeAmount);
-                $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
+                // $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
+                $burnHandle->handler()->credit($this->burnWallet, $burnFeeAmount);
             }
 
             $this->logger->debug('Token transfer completed successfully');
@@ -361,8 +371,8 @@ class PeerTokenMapper
         } catch (\Throwable $e) {
             $this->logger->error('PeerTokenMapper.transferToken failed', [
                 'error' => $e->getMessage(),
-                'senderId' => $senderId,
-                'recipientId' => $recipientId,
+                'senderId' => $sender->getUserId(),
+                'recipientId' => $recipient->getUserId(),
                 'numberOfTokens' => $numberOfTokens,
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -643,31 +653,40 @@ class PeerTokenMapper
      * Lock balances of both users to prevent race conditions
      * Also Includes Fees wallets
      */
-    private function lockBalances(array $userIds): void
+    private function lockBalances(array $handles): void
     {
-        $walletsToLock = [...$userIds];
-
-        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
-        if (isset($fees['PEER']) && (float)$fees['PEER'] > 0) {
-            $walletsToLock[] = $this->peerWallet;
+        // Normalize to [walletId => WalletHandle]
+        // Deduplication by walletId: avoids locking the same wallet twice if the same handle appears multiple times.
+        $byId = [];
+        foreach ($handles as $h) {
+            if (!$h instanceof WalletHandle) {
+                // Skip unknown entries silently (defensive)
+                continue;
+            }
+            $byId[$h->walletId()] = $h;
         }
-        if (isset($fees['BURN']) && (float)$fees['BURN'] > 0) {
-            $walletsToLock[] = $this->burnWallet;
+
+        // Include fee-related wallets using the default WalletMapper handler
+        $fees = ConstantsConfig::tokenomics()['FEES_STRING'];
+        if (isset($fees['PEER']) && (float)$fees['PEER'] > 0 && isset($this->peerWallet)) {
+            $byId[$this->peerWallet] = new WalletHandle($this->peerWallet, $this->walletMapper);
+        }
+        if (isset($fees['BURN']) && (float)$fees['BURN'] > 0 && isset($this->burnWallet)) {
+            $byId[$this->burnWallet] = new WalletHandle($this->burnWallet, $this->walletMapper);
         }
         if (isset($this->btcpool) && !empty($this->btcpool)) {
-            $walletsToLock[] = $this->btcpool;
+            $byId[$this->btcpool] = new WalletHandle($this->btcpool, $this->walletMapper);
         }
-        // Remove duplicates
-        $walletsToLock = array_unique($walletsToLock);
 
-        // Sort to ensure consistent locking order
-        sort($walletsToLock);
+        // Sort by walletId for consistent lock ordering
+        ksort($byId, SORT_STRING);
 
-        foreach ($walletsToLock as $walletId) {
+        foreach ($byId as $walletId => $handle) {
             if (!self::isValidUUID($walletId)) {
                 throw new \RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
             }
-            $this->lockWalletBalance($walletId);
+            // Call style requested: $handle->handler()->lockWalletBalance($handle->walletId)
+            $handle->handler()->lockWalletBalance($handle->walletId());
         }
     }
 

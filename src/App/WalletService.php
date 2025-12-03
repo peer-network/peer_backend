@@ -299,14 +299,14 @@ class WalletService
             }
 
             [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
-            $fromId = $args['fromid'] ?? $peerWallet;
+            $recipientId = $args['fromid'] ?? $peerWallet;
 
-            $senderUserObj = $this->userMapper->loadById($fromId);
-            $receipientUserObj = $this->userMapper->loadById($userId);
+            $senderUserObj = $this->userMapper->loadById($userId);
+            $receipientUserObj = $this->userMapper->loadById($recipientId);
 
             $args = [
                 'postid' => $postId,
-                'fromid' => $fromId,
+                'fromid' => $userId,
                 'gems' => 0.0,
                 'numbers' => -abs((float)$price),
                 'whereby' => $whereby,
@@ -314,13 +314,11 @@ class WalletService
             ];
 
             $response = $this->peerTokenMapper->transferToken(
-                $userId,
-                $fromId,
                 $price,
                 $transferStrategy,
-                $text,
                 $senderUserObj,
-                $receipientUserObj
+                $receipientUserObj,
+                $text,
             );
 
             $args['gemid'] = $transferStrategy->getOperationId();
@@ -334,13 +332,7 @@ class WalletService
                 return self::respondWithError(41205);
             }
 
-            if ($response['status'] === 'success') {
-                // $this->transactionManager->commit();
-                return $response;
-            } else {
-                // $this->transactionManager->rollBack();
-                return $response;
-            }
+            return $response;
 
         } catch (\Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
