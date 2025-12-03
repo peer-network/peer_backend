@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  
+
 jobs:
   auto_label:
     name: Auto Label PR
@@ -19,7 +19,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
       mode: soft
-      label_config: |
+      label_config: >
         {
           "backend/.*": "backend",
           "src/.*": "backend",
