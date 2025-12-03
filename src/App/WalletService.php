@@ -170,24 +170,6 @@ class WalletService
         }
     }
 
-    public function callUserMove(): ?array
-    {
-        $this->logger->debug('WalletService.callUserMove started');
-
-        try {
-            $response = $this->walletMapper->callUserMove($this->currentUserId);
-            return $this::createSuccessResponse(
-                $response['ResponseCode'],
-                $response['affectedRows'],
-                false // no counter needed for existing data
-            );
-
-
-        } catch (\Exception $e) {
-            return $this::respondWithError(41205);
-        }
-    }
-
     /**
      * Transfer Tokens from User Wallet for Advertisement Actions
      * Add logwins entry

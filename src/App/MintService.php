@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\Interfaces\HasTokenWallet;
+use Fawaz\Database\GemsRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -22,7 +23,7 @@ class MintService
         protected PeerLoggerInterface $logger,
         protected MintAccountRepository $mintAccountRepository,
         protected UserMapper $userMapper,
-        protected WalletMapper $walletMapper,
+        protected GemsRepository $gemsRepository,
         protected PDO $db
     ) {
     }
@@ -50,6 +51,24 @@ class MintService
             return false;
         }
         return true;
+    }
+    
+    public function callUserMove(): ?array
+    {
+        $this->logger->debug('WalletService.callUserMove started');
+
+        try {
+            $response = $this->gemsRepository->callUserMove($this->currentUserId);
+            return $this::createSuccessResponse(
+                $response['ResponseCode'],
+                $response['affectedRows'],
+                false // no counter needed for existing data
+            );
+
+
+        } catch (\Exception $e) {
+            return $this::respondWithError(41205);
+        }
     }
 
     /**
@@ -86,7 +105,7 @@ class MintService
             return $this::respondWithError(60501);
         }
 
-        return $this->walletMapper->callGlobalWins();
+        return $this->gemsRepository->callGlobalWins();
     }
 
     public function callGemster(): array
@@ -95,7 +114,7 @@ class MintService
             return $this::respondWithError(60501);
         }
 
-        return $this->walletMapper->getTimeSorted();
+        return $this->gemsRepository->getTimeSorted();
     }
 
     public function callGemsters(string $day = 'D0'): array
@@ -111,7 +130,7 @@ class MintService
             return $this::respondWithError(30105);
         }
 
-        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
+        $gemsters = $this->gemsRepository->getTimeSortedMatch($day);
 
         if (isset($gemsters['affectedRows']['data'])) {
             $winstatus = $gemsters['affectedRows']['data'][0];

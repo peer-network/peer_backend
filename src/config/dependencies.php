@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\Repositories\WalletRepositoryFactory;
 use Fawaz\BaseURL;
+use Fawaz\Database\GemsRepository;
+use Fawaz\Database\GemsRepositoryImpl;
 use Fawaz\Database\InteractionsPermissionsMapperImpl;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
@@ -97,5 +99,6 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
                 $c->get(MintAccountRepository::class)
             );
         },
+        GemsRepository::class => \DI\autowire(GemsRepositoryImpl::class),
     ]);
 };
