@@ -232,7 +232,7 @@ class WalletService
                 'gems' => 0.0,
                 'numbers' => -abs((float)$price),
                 'whereby' => $whereby,
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ];
 
             $response = $this->peerTokenMapper->transferToken(

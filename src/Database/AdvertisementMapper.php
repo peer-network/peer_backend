@@ -29,7 +29,7 @@ class AdvertisementMapper
         $sortBy    = strtoupper($args['sort'] ?? 'NEWEST');
         $trendDays = isset($args['trenddays']) ? (int)$args['trenddays'] : 7;
 
-        $trendSince = (new \DateTimeImmutable('now'))
+        $trendSince = new \DateTimeImmutable('now')
             ->modify("-{$trendDays} days")
             ->format('Y-m-d H:i:s');
 

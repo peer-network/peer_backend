@@ -44,8 +44,8 @@ class Advertisements implements HasUserId
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->status = $data['status'] ?? 'basic';
-        $this->timestart = $data['timestart'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->timeend = $data['timeend'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->timestart = $data['timestart'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->timeend = $data['timeend'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->tokencost = $data['tokencost'] ?? 0.0;
         $this->eurocost = $data['eurocost'] ?? 0.0;
         $this->gemsearned = $data['gemsearned'] ?? 0.0;
@@ -54,8 +54,8 @@ class Advertisements implements HasUserId
         $this->amountcomments = $data['amountcomments'] ?? 0;
         $this->amountdislikes = $data['amountdislikes'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->post = isset($data['post']) && is_array($data['post']) ? $data['post'] : [];
     }
@@ -281,7 +281,7 @@ class Advertisements implements HasUserId
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                     ['name' => 'isString'],
                 ],
             ],
@@ -289,7 +289,7 @@ class Advertisements implements HasUserId
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                     ['name' => 'isString'],
                 ],
             ],

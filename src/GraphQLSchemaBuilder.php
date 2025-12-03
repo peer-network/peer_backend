@@ -226,11 +226,7 @@ class GraphQLSchemaBuilder
         $statusCode = $status;
         $statusMap = Status::getMap();
 
-        if (isset($statusMap[$statusCode])) {
-            return $statusMap[$statusCode];
-        }
-
-        return null;
+        return $statusMap[$statusCode] ?? null;
     }
 
     public function buildResolvers(): array
@@ -3719,7 +3715,7 @@ class GraphQLSchemaBuilder
 
             return $this::createSuccessResponse(
                 (int)$results['ResponseCode'],
-                isset($results['affectedRows']) ? $results['affectedRows'] : [],
+                $results['affectedRows'] ?? [],
                 false // no counter needed for existing data
             );
 
@@ -3994,7 +3990,7 @@ class GraphQLSchemaBuilder
         $name = isset($args['name']) ? trim($args['name']) : null;
         $message = isset($args['message']) ? trim($args['message']) : null;
         $args['ip'] = $ip;
-        $args['createdat'] = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $args['createdat'] = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if (empty($email) || empty($name) || empty($message)) {
             return $this::respondWithError(30101);

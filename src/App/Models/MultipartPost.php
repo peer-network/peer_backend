@@ -446,8 +446,8 @@ class MultipartPost
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
-            $information['resolution'] = isset($auflg) ? $auflg : null;
+            $information['ratiofrm'] = $ratio ?? null;
+            $information['resolution'] = $auflg ?? null;
 
             return isset($information) ? (array)$information : null;
 
