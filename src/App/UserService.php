@@ -1226,11 +1226,7 @@ class UserService
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
 
-        if (isset($nextAttemptAtArray['nextAttemptAt'])) {
-            return $nextAttemptAtArray['nextAttemptAt'];
-        }
-
-        return $nextAttemptAt;
+        return $nextAttemptAtArray['nextAttemptAt'] ?? $nextAttemptAt;
     }
 
 
