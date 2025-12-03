@@ -20,7 +20,7 @@ jobs:
     with:
       mode: soft
       label_config: |
-        {
+        '{
           "backend/.*": "backend",
           "src/.*": "backend",
           "composer.*": "backend",
@@ -32,7 +32,7 @@ jobs:
           "Dockerfile.*": "docker",
           "docs/.*": "documentation",
           "README.md": "documentation"
-        }
+        }'
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
