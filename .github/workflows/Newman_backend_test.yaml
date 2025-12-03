@@ -145,7 +145,7 @@ jobs:
       needs.validate_sql_files.result == 'success' }}
     strategy:
       matrix:
-        php-version: ['8.3']
+        php-version: ['8.4']
     outputs:
       outcome: ${{ steps.outcome.outputs.outcome }}
     steps:
@@ -537,7 +537,7 @@ jobs:
     if: needs.build_and_test.outputs.outcome == 'success'
     strategy:
       matrix:
-        php-version: ['8.3']
+        php-version: ['8.4']
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v6
@@ -731,17 +731,17 @@ jobs:
       group: reports-deploy
       cancel-in-progress: false
     steps:
-      - name: Download PHP 8.3 HTMLExtra report
+      - name: Download PHP 8.4 HTMLExtra report
         uses: actions/download-artifact@v6
         with:
-          name: docker_newman_report-8.3
-          path: reports/php-8.3
+          name: docker_newman_report-8.4
+          path: reports/php-8.4
  
       - name: Prepare versioned HTMLExtra report
         run: |
-          mkdir -p final_reports/reports/${{ github.run_id }}/php-8.3
+          mkdir -p final_reports/reports/${{ github.run_id }}/php-8.4
  
-          cp reports/php-8.3/report.html final_reports/reports/${{ github.run_id }}/php-8.3/report.html
+          cp reports/php-8.4/report.html final_reports/reports/${{ github.run_id }}/php-8.4/report.html
 
       - name: Clone gh-pages branch
         run: |
@@ -870,12 +870,12 @@ jobs:
               MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
               ;;
             newman_failed)
-              PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
+              PHP84_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.4/report.html"
               MESSAGE=":x: **Newman Tests Failed!**\n"
               MESSAGE+="**PR:** $PR_TITLE\n"
               MESSAGE+="PR Link: <$PR_URL>\n"
               MESSAGE+="CI Run: <$RUN_URL>\n"
-              MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+              MESSAGE+="PHP 8.4 Report: <$PHP84_URL>\n"
               MESSAGE+="Maintainer: <@1362087975906967736>\n"
               MESSAGE+="Author: $DISCORD_MENTION"
               MESSAGE+="\n **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
@@ -903,12 +903,12 @@ jobs:
               MESSAGE+="\nIf these findings are false positives or dependency issues, contact the DevOps team to review and whitelist where appropriate."
               ;;
             success)
-              PHP83_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.3/report.html"
+              PHP84_URL="https://peer-network.github.io/peer-backend-reports/reports/${{ github.run_id }}/php-8.4/report.html"
               MESSAGE=":white_check_mark: **CI Passed Successfully**\n"
               MESSAGE+="**PR:** $PR_TITLE\n"
               MESSAGE+="PR Link: <$PR_URL>\n"
               MESSAGE+="CI Run: <$RUN_URL>\n"
-              MESSAGE+="PHP 8.3 Report: <$PHP83_URL>\n"
+              MESSAGE+="PHP 8.4 Report: <$PHP84_URL>\n"
               MESSAGE+="<@1355093873323671742>\n"
               MESSAGE+=" **Note**: Reports may take up to 10 minutes to appear due to GitHub Pages deployment delays. You can download Artifacts in the Actions tab to view the HTMLExtra report immediately."
               ;;
