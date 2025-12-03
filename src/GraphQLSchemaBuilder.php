@@ -2488,7 +2488,7 @@ class GraphQLSchemaBuilder
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
-            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
+            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->mintService->callUserMove(),
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),

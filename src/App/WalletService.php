@@ -26,8 +26,7 @@ class WalletService
         protected UserMapper $userMapper,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
-    ) {
-    }
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
