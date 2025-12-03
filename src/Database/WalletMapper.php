@@ -13,9 +13,6 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
-
-const TABLESTOGEMS = true;
 
 class WalletMapper implements WalletRepository
 {
