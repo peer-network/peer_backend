@@ -221,11 +221,7 @@ class GraphQLSchemaBuilder
         $statusCode = $status;
         $statusMap = Status::getMap();
 
-        if (isset($statusMap[$statusCode])) {
-            return $statusMap[$statusCode];
-        }
-
-        return null;
+        return $statusMap[$statusCode] ?? null;
     }
 
     public function buildResolvers(): array
@@ -2772,7 +2768,7 @@ class GraphQLSchemaBuilder
 
             return $this::createSuccessResponse(
                 (int)$results['ResponseCode'],
-                isset($results['affectedRows']) ? $results['affectedRows'] : [],
+                $results['affectedRows'] ?? [],
                 false // no counter needed for existing data
             );
 
