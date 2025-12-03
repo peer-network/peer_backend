@@ -37,7 +37,7 @@ class Comment extends Model implements Hashable
         $this->postid = $data['postid'] ?? '';
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
@@ -176,7 +176,7 @@ class Comment extends Model implements Hashable
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'visibility_status' => [

@@ -173,7 +173,7 @@ class PostService
 
         $postId = self::generateUUID();
 
-        $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $createdAt = new \DateTime()->format('Y-m-d H:i:s.u');
 
         $postData = [
             'postid' => $postId,
