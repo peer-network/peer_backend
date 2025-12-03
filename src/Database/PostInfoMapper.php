@@ -322,7 +322,7 @@ class PostInfoMapper
             WHERE ai.advertisementid = oa.advertisementid
         ";
         $stmt = $this->db->prepare($sql);
-        $updatedat = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
         // Jeden Wert explizit binden
         $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
         $stmt->bindValue(':dLikes', $dLikes, \PDO::PARAM_INT);
