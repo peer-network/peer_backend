@@ -137,65 +137,6 @@ class WalletService
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
     }
 
-    public function callGlobalWins(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        return $this->walletMapper->callGlobalWins();
-    }
-
-    public function callGemster(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        return $this->walletMapper->getTimeSorted();
-    }
-
-    public function callGemsters(string $day = 'D0'): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'W0', 'M0', 'Y0'];
-
-        // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
-            return $this::respondWithError(30105);
-        }
-
-        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
-
-        if (isset($gemsters['affectedRows']['data'])) {
-            $winstatus = $gemsters['affectedRows']['data'][0];
-            unset($gemsters['affectedRows']['data'][0]);
-
-            $userStatus = array_values($gemsters['affectedRows']['data']);
-
-            $affectedRows = [
-                'winStatus' => $winstatus ?? [],
-                'userStatus' => $userStatus,
-            ];
-
-            return [
-                'status' => $gemsters['status'],
-                'counter' => $gemsters['counter'] ?? 0,
-                'ResponseCode' => $gemsters['ResponseCode'],
-                'affectedRows' => $affectedRows
-            ];
-        }
-        return [
-            'status' => $gemsters['status'],
-            'counter' => 0,
-            'ResponseCode' => $gemsters['ResponseCode'],
-            'affectedRows' => []
-        ];
-    }
-
     public function loadLiquidityById(string $userId): array
     {
         $this->logger->debug('WalletService.loadLiquidityById started');

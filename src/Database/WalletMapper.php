@@ -28,9 +28,11 @@ class WalletMapper implements WalletRepository
 
     public const STATUS_DELETED = 6;
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool)
-    {
-    }
+    public function __construct(
+        protected PeerLoggerInterface $logger, 
+        protected PDO $db, 
+        protected LiquidityPool $pool
+    ){}
 
     public function fetchPool(array $args = []): array
     {
