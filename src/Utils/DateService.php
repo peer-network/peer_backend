@@ -8,7 +8,7 @@ class DateService
 {
     public static function now(): string
     {
-        return (new \DateTime())->format('Y-m-d H:i:s.u');
+        return new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public static function nowPlusSeconds(int $seconds): string

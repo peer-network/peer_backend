@@ -80,7 +80,7 @@ class ReportsMapper
                 return true;
             }
 
-            $createdat = (string)(new DateTime())->format('Y-m-d H:i:s.u');
+            $createdat = (string)new DateTime()->format('Y-m-d H:i:s.u');
 
             // Add Ticket for reports
             $moderationTicketId = $this->getTicketId($targetid, $targetTypeString, $createdat);

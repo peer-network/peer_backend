@@ -52,8 +52,8 @@ class User extends Model implements Hashable, ProfileReplaceable
         $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
         $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
@@ -91,7 +91,7 @@ class User extends Model implements Hashable, ProfileReplaceable
             'uid' => $this->uid,
             'password' => $this->password,
             'ip' => $this->ip,
-            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
         ];
         return $att;
     }
@@ -314,7 +314,7 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Password Verify methods

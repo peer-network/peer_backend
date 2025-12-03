@@ -436,8 +436,8 @@ class AdvertisementService
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
-                $timestart = (new \DateTime())->format('Y-m-d H:i:s.u'); // Setze timestart
-                $timeend = (new \DateTime('+1 days'))->format('Y-m-d H:i:s.u'); // Setze Timeend
+                $timestart = new \DateTime()->format('Y-m-d H:i:s.u'); // Setze timestart
+                $timeend = new \DateTime('+1 days')->format('Y-m-d H:i:s.u'); // Setze Timeend
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true) {
                     $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
