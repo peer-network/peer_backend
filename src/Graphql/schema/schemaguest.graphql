@@ -14,7 +14,7 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
   resetPasswordTokenVerify(token: String!): DefaultResponse!
-  resetPassword(token: String!, password: String!): DefaultResponse
+  resetPassword(token: String!, password: String!): DefaultResponse!
   refreshToken(refreshToken: String!): AuthPayload!
   verifyReferralString(referralString: String!): ReferralResponse!
   contactus(name: String!, email: String!, message: String!): ContactusResponse!

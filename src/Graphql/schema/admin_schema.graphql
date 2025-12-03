@@ -11,7 +11,7 @@ extend type Query {
 extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
-  alphaMint: DefaultResponse
+  alphaMint: DefaultResponse!
 }
 
 
