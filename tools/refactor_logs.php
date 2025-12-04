@@ -32,10 +32,14 @@ class LogRedactor {
 
         $this-> patterns = [ 
 
-             // Email addresses
-            '/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/' => '[REDACTED]',
+            // Redact entire requestPayload content (handles escaped JSON strings)
+            '/"requestPayload"\s*:\s*"(?:[^"\\\\]|\\\\.)+"/' => '"requestPayload":"[REDACTED_REQUEST_PAYLOAD]"',
             
-            // JWT tokens (full redaction)
+            // Email addresses
+            '/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/' => '[REDACTED]',
+           
+            
+            // JWT tokens 
             '/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/' => '[REDACTED]',
             
             // Verification tokens in verificationData context (partial masking)
@@ -203,6 +207,14 @@ class LogRedactor {
                     if ($replacement === 'MASK_VERIFICATION_TOKEN') {
                         $maskLength = strlen($matches[3]);
                         return $matches[1] . $matches[2] . str_repeat('*', $maskLength) . $matches[4];
+                    }
+                    
+                    if ($replacement === 'MASK_BROWSER') {
+                        // Keep first 20 chars for debugging, mask the rest
+                        $keepPart = $matches[2];
+                        $maskPart = $matches[3];
+                        $masked = strlen($maskPart) > 0 ? '***' : '';
+                        return $matches[1] . $keepPart . $masked . $matches[4];
                     }
                     
                     // Handle $1, $2, $3 replacements
