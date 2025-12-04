@@ -119,17 +119,17 @@ jobs:
           echo "Changed files:"
           echo "$changed_files"
  
-          # for file in $changed_files; do
-          #   if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
-          #     if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
-          #       echo "New file allowed: $file"
-          #     else
-          #       echo "Unauthorized modification detected: $file"
-          #       echo "Only additional_data.sql may be modified. Others can only be added, not edited."
-          #       exit 1
-          #     fi
-          #   fi
-          # done
+          for file in $changed_files; do
+            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+                echo "New file allowed: $file"
+              else
+                echo "Unauthorized modification detected: $file"
+                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+                exit 1
+              fi
+            fi
+          done
           echo "SQL file check passed."
 
   build_and_test:
