@@ -88,7 +88,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     public static function injectSchemaPlaceholders(array $schemaFiles): array
     {
         $suffix = '.graphql.generated';
-        $constants = new ConstantsConfig()->getData();
+        $constants = (new ConstantsConfig())->getData();
         $map = self::flattenConstantsMap($constants);
 
         $report = [];

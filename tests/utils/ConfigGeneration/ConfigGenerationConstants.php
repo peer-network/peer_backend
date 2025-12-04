@@ -27,9 +27,9 @@ enum ConfigGenerationConstants: string implements DataGeneratable
                 Constants::$extension;
 
         return match($this) {
-            ConfigGenerationConstants::endpoints => new EndpointsConfig($path)->getData(),
-            ConfigGenerationConstants::repsonseCodes => new ResponseCodesConfig($path)->getData(),
-            ConfigGenerationConstants::constants => new ConstantsConfigGeneratable()->getData()
+            ConfigGenerationConstants::endpoints => (new EndpointsConfig($path))->getData(),
+            ConfigGenerationConstants::repsonseCodes => (new ResponseCodesConfig($path))->getData(),
+            ConfigGenerationConstants::constants => (new ConstantsConfigGeneratable())->getData()
         };
     }
 
