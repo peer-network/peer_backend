@@ -57,11 +57,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -119,11 +117,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -181,11 +177,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -243,11 +237,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -305,11 +297,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -367,11 +357,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -429,11 +417,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -483,11 +469,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -541,11 +525,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -599,11 +581,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -657,11 +637,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -715,11 +693,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -773,11 +749,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -847,11 +821,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -954,11 +926,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1055,11 +1025,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1120,11 +1088,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1174,11 +1140,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1229,11 +1193,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1287,11 +1249,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1345,11 +1305,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1400,11 +1358,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1455,11 +1411,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1519,11 +1473,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1610,11 +1562,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1664,11 +1614,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1718,11 +1666,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1772,11 +1718,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1845,11 +1789,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1907,11 +1849,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1960,11 +1900,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2013,11 +1951,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2075,11 +2011,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2128,11 +2062,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2190,11 +2122,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2243,11 +2173,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2305,11 +2233,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2358,11 +2284,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2439,11 +2363,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2518,11 +2440,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2580,11 +2500,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2633,11 +2551,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2714,11 +2630,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2793,11 +2707,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2882,11 +2794,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2960,11 +2870,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3040,11 +2948,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3103,11 +3009,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3156,11 +3060,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3218,11 +3120,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3299,11 +3199,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3380,11 +3278,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3459,11 +3355,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3522,11 +3416,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3584,11 +3476,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3647,11 +3537,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3709,11 +3597,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3772,11 +3658,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3878,11 +3762,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3984,11 +3866,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4090,11 +3970,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4196,11 +4074,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4258,11 +4134,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4321,11 +4195,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4380,11 +4252,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4481,11 +4351,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4582,11 +4450,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4683,11 +4549,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4765,11 +4629,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4843,11 +4705,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4941,11 +4801,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4995,11 +4853,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5049,11 +4905,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5111,11 +4965,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5170,11 +5022,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5271,11 +5121,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5372,11 +5220,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5473,11 +5319,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5580,11 +5424,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5634,11 +5476,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5696,11 +5536,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5750,11 +5588,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5812,11 +5648,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5869,11 +5703,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5923,11 +5755,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6019,11 +5849,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6094,11 +5922,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6170,11 +5996,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6245,11 +6069,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6320,11 +6142,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6404,11 +6224,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6481,11 +6299,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6535,11 +6351,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6615,11 +6429,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6670,11 +6482,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6732,11 +6542,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6790,11 +6598,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6848,11 +6654,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6902,11 +6706,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6999,11 +6801,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7074,11 +6874,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7149,11 +6947,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7224,11 +7020,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7297,11 +7091,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7379,11 +7171,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7454,11 +7244,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7508,11 +7296,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7588,11 +7374,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7643,11 +7427,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7725,11 +7507,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7803,11 +7583,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7910,11 +7688,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7984,11 +7760,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8094,11 +7868,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8204,11 +7976,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8314,11 +8084,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8424,11 +8192,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8500,11 +8266,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8576,11 +8340,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8652,11 +8414,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8726,11 +8486,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8781,11 +8539,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8836,11 +8592,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8912,11 +8666,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9009,11 +8761,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9083,11 +8833,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9157,11 +8905,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9232,11 +8978,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9304,11 +9048,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9385,11 +9127,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9460,11 +9200,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9514,11 +9252,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9594,11 +9330,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9649,11 +9383,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9758,11 +9490,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9834,11 +9564,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9910,11 +9638,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9986,11 +9712,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10060,11 +9784,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10143,11 +9865,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10220,11 +9940,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10274,11 +9992,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10354,11 +10070,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10409,11 +10123,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10485,11 +10197,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10560,11 +10270,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10687,11 +10395,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10753,11 +10459,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10819,11 +10523,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10885,11 +10587,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10951,11 +10651,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11026,11 +10724,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11133,11 +10829,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11240,11 +10934,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11336,11 +11028,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11443,11 +11133,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11540,11 +11228,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11637,11 +11323,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11723,11 +11407,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11820,11 +11502,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11886,11 +11566,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11952,11 +11630,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12018,11 +11694,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12080,11 +11754,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12138,11 +11810,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12193,11 +11863,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12301,11 +11969,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12409,11 +12075,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12517,11 +12181,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12625,11 +12287,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12721,11 +12381,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12797,11 +12455,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12873,11 +12529,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -12949,11 +12603,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13023,11 +12675,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13102,11 +12752,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13156,11 +12804,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13221,11 +12867,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13276,11 +12920,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13383,11 +13025,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13484,11 +13124,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13560,11 +13198,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13613,11 +13249,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13676,11 +13310,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13741,11 +13373,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13806,11 +13436,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -13861,11 +13489,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14018,11 +13644,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14093,11 +13717,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14159,11 +13781,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14225,11 +13845,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14287,11 +13905,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14352,11 +13968,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14421,11 +14035,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14506,11 +14118,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14618,11 +14228,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14702,11 +14310,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14790,11 +14396,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14879,11 +14483,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -14956,11 +14558,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15054,11 +14654,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15128,11 +14726,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15183,11 +14779,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15268,11 +14862,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15352,11 +14944,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15440,11 +15030,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15495,11 +15083,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15560,11 +15146,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15614,11 +15198,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15668,11 +15250,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15722,11 +15302,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15776,11 +15354,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15852,11 +15428,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -15965,11 +15539,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16049,11 +15621,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16137,11 +15707,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16213,11 +15781,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16279,11 +15845,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16341,11 +15905,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16399,11 +15961,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16481,11 +16041,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16560,11 +16118,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16614,11 +16170,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16695,11 +16249,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16771,11 +16323,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16837,11 +16387,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16899,11 +16447,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -16959,11 +16505,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17049,11 +16593,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17108,11 +16650,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17215,11 +16755,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17315,11 +16853,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17370,11 +16906,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17435,11 +16969,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17489,11 +17021,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17543,11 +17073,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17597,11 +17125,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17651,11 +17177,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17727,11 +17251,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17793,11 +17315,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17886,11 +17406,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -17961,11 +17479,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18023,11 +17539,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18078,11 +17592,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18137,11 +17649,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18213,11 +17723,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18272,11 +17780,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18346,11 +17852,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18429,11 +17933,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18506,11 +18008,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18561,11 +18061,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18641,11 +18139,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18696,11 +18192,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18758,11 +18252,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18817,11 +18309,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -18912,11 +18402,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19004,11 +18492,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19063,11 +18549,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19122,11 +18606,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19198,11 +18680,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19257,11 +18737,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19331,11 +18809,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19415,11 +18891,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19476,11 +18950,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19531,11 +19003,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19592,11 +19062,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19647,11 +19115,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19708,11 +19174,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19771,11 +19235,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -19834,11 +19296,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
