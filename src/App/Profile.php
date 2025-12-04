@@ -30,6 +30,7 @@ class Profile implements ProfileReplaceable
     protected ?int $rolesmask;
     protected ?int $activeReports;
     protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
 
     // Constructor
@@ -59,6 +60,7 @@ class Profile implements ProfileReplaceable
         $this->amountreports = $data['amountreports'] ?? 0;
         $this->activeReports = $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -83,8 +85,10 @@ class Profile implements ProfileReplaceable
             'amountblocked' => $this->amountblocked,
             'amountreports' => $this->amountreports,
             'reports' => $this->activeReports,
-            'visibility_status' => $this->visibilityStatus,
-            'roles_mask' => $this->rolesmask
+            'hasActiveReports' => $this->hasActiveReports(),
+            'visibility_status' => $this->visibilityStatusForUser,
+            'roles_mask' => $this->rolesmask,
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -121,12 +125,12 @@ class Profile implements ProfileReplaceable
     }
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus;
+        return $this->visibilityStatusForUser;
     }
 
     public function setVisibilityStatus(string $status): void
     {
-        $this->visibilityStatus = $status;
+        $this->visibilityStatusForUser = $status;
     }
 
     public function isVerified(): int
@@ -282,6 +286,18 @@ class Profile implements ProfileReplaceable
     public function setReports(?int $reports): void
     {
         $this->activeReports = $reports;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
     }
 
     // Validation and Array Filtering methods

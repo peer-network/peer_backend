@@ -17,7 +17,6 @@ use Fawaz\Utils\PeerLoggerInterface;
 use RuntimeException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 class PeerTokenMapper
@@ -31,6 +30,39 @@ class PeerTokenMapper
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected WalletMapper $walletMapper, protected UserMapper $userMapper)
     {
+    }
+
+    /**
+     * Check if a transfer already exists with same sender, recipient and amount.
+     * Considers only recipient credit rows for standard transfers.
+     */
+    public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool
+    {
+        $query = "SELECT 1 FROM transactions 
+                  WHERE senderid = :senderId 
+                    AND recipientid = :recipientId 
+                    AND tokenamount = :amount 
+                    AND transactiontype = 'transferSenderToRecipient' 
+                    AND transferaction = 'CREDIT' 
+                  LIMIT 1";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':senderId', $senderId, \PDO::PARAM_STR);
+            $stmt->bindValue(':recipientId', $recipientId, \PDO::PARAM_STR);
+            $stmt->bindValue(':amount', $amount, \PDO::PARAM_STR);
+            $stmt->execute();
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            $this->logger->error('PeerTokenMapper.hasExistingTransfer failed', [
+                'error' => $e->getMessage(),
+                'senderId' => $senderId,
+                'recipientId' => $recipientId,
+                'amount' => $amount,
+            ]);
+            // On error, be conservative and assume it exists to avoid duplicates
+            return true;
+        }
     }
 
     /**
@@ -220,8 +252,13 @@ class PeerTokenMapper
                 $this->lockBalances([$senderId, $recipientId]);
             }
             $mode = $strategy->getFeePolicyMode();
-            [$requiredAmount, $netRecipientAmount, $peerFeeAmount, $burnFeeAmount, $inviteFeeAmount] =
-                $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
+            [
+                $requiredAmount, 
+                $netRecipientAmount, 
+                $peerFeeAmount, 
+                $burnFeeAmount, 
+                $inviteFeeAmount
+            ] = $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
 
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
@@ -322,7 +359,7 @@ class PeerTokenMapper
 
     /**
      * Calculate required (debit) and net (recipient credit) amounts based on fee policy mode.
-     * Returns array: [required, net, peerFeeAmount, poolFeeAmount, burnFeeAmount, inviteFeeAmount]
+     * Returns array: [required, net, peerFeeAmount, burnFeeAmount, inviteFeeAmount]
      */
     private function calculateAmountsForMode(string $senderId, string $inputAmount, FeePolicyMode $mode): array
     {
@@ -332,6 +369,13 @@ class PeerTokenMapper
         // Sum of fee rates
         $sum1 = TokenHelper::addRc($peerFee, $burnFee);
         $totalRate = TokenHelper::addRc($sum1, $inviteFee);
+
+        // NO_FEES: no fees applied; required equals net; fee amounts are zero
+        if ($mode === FeePolicyMode::NO_FEES) {
+            $required = $inputAmount;
+            $net = $inputAmount;
+            return [$required, $net, '0', '0', '0'];
+        }
 
         if ($mode === FeePolicyMode::ADDED) {
             $net = $inputAmount;
@@ -487,7 +531,7 @@ class PeerTokenMapper
             $stmt->execute();
 
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            $data = array_map(fn ($t) => $this->mapTransaction($t), $transactions);
+            $data = array_map($this->mapTransaction(...), $transactions);
 
             return [
                 'status' => 'success',
@@ -674,8 +718,8 @@ class PeerTokenMapper
      */
     private function mapTransaction(array $trans): array
     {
-        $items = (new Transaction($trans, [], false))->getArrayCopy();
-        $items['sender'] = (new User([
+        $items = new Transaction($trans, [], false)->getArrayCopy();
+        $items['sender'] = new User([
             'username' => $trans['sender_username'] ?? null,
             'uid' => $trans['sender_userid'] ?? null,
             'slug' => $trans['sender_slug'] ?? null,
@@ -684,9 +728,9 @@ class PeerTokenMapper
             'biography' => $trans['sender_biography'] ?? null,
             'updatedat' => $trans['sender_updatedat'] ?? null,
             'visibility_status' => $trans['sender_visibility_status'],
-        ], [], false))->getArrayCopy();
+        ], [], false)->getArrayCopy();
 
-        $items['recipient'] = (new User([
+        $items['recipient'] = new User([
             'username' => $trans['recipient_username'] ?? null,
             'uid' => $trans['recipient_userid'] ?? null,
             'slug' => $trans['recipient_slug'] ?? null,
@@ -694,7 +738,7 @@ class PeerTokenMapper
             'img' => $trans['recipient_img'] ?? null,
             'biography' => $trans['recipient_biography'] ?? null,
             'visibility_status' => $trans['recipient_visibility_status'],
-        ], [], false))->getArrayCopy();
+        ], [], false)->getArrayCopy();
 
         return $items;
     }

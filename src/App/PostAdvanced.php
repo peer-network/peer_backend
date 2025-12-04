@@ -41,6 +41,7 @@ class PostAdvanced implements PostReplaceable
     protected ?array $comments = [];
     protected ?int $activeReports = null;
     protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -73,9 +74,10 @@ class PostAdvanced implements PostReplaceable
         $this->isfollowing = $data['isfollowing'] ?? false;
         $this->isfriend = $data['isfriend'] ?? false;
         $this->url = $this->getPostUrl();
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->activeReports = $data['reports'] ?? null;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
         $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
@@ -111,8 +113,10 @@ class PostAdvanced implements PostReplaceable
             'isfriend' => $this->isfriend,
             'createdat' => $this->createdat,
             'tags' => $this->tags, // Include tags
-            'visibility_status' => $this->visibilityStatus,
+            'visibility_status' => $this->visibilityStatusForUser,
             'reports' => $this->activeReports,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
             'user' => $this->user,
             'comments' => $this->comments,
         ];
@@ -202,17 +206,29 @@ class PostAdvanced implements PostReplaceable
     // Capabilities for content filtering
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus;
+        return $this->visibilityStatusForUser;
     }
 
     public function setVisibilityStatus(string $status): void
     {
-        $this->visibilityStatus = $status;
+        $this->visibilityStatusForUser = $status;
     }
 
     public function getActiveReports(): ?int
     {
         return $this->activeReports;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    // Computed property: hidden for users when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
     }
 
     public function getPostUrl(): string
@@ -394,7 +410,7 @@ class PostAdvanced implements PostReplaceable
                 'required' => false,
                 'validators' => [
                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                   ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                   ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'user' => [

@@ -57,11 +57,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -118,11 +116,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -164,11 +160,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -238,11 +232,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -296,11 +288,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -438,11 +428,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -553,16 +541,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -652,11 +638,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -739,11 +723,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -804,16 +786,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -875,11 +855,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -957,16 +935,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1033,16 +1009,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1104,11 +1078,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1186,16 +1158,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1256,16 +1226,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1327,11 +1295,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1442,11 +1408,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1521,16 +1485,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1592,11 +1554,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1686,16 +1646,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{base64_photo1}}\", tags: [\"{{tag}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{base64_photo1}}\", tags: [\"{{tag}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1744,11 +1702,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1797,11 +1753,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1872,11 +1826,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -1938,11 +1890,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2015,11 +1965,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2081,11 +2029,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2154,11 +2100,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2235,11 +2179,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -2323,16 +2265,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2386,16 +2326,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"popa\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"popa\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2457,11 +2395,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2530,11 +2466,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2611,11 +2545,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -2706,16 +2638,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: image\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2778,16 +2708,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query GuestListPost {\n    guestListPost(postid: \"{{postid}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n            }\n        }\n    }\n}\n",
+						"query": "query GuestListPost {\n    guestListPost(postid: \"{{postid}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2849,11 +2777,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -2922,11 +2848,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3003,11 +2927,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -3109,16 +3031,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3180,11 +3100,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3253,11 +3171,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3334,11 +3250,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -3440,16 +3354,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uploadedFiles}}\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3511,11 +3423,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3584,11 +3494,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3655,11 +3563,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -3721,11 +3627,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -3794,11 +3698,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -3886,11 +3788,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -3959,11 +3859,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4033,11 +3931,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -4106,11 +4002,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4179,11 +4073,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -4252,11 +4144,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4325,11 +4215,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -4395,11 +4283,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -4468,11 +4354,9 @@
 					]
 				},
 				"url": {
-					"raw": "https://peer-network.eu/upload-post",
-					"protocol": "https",
+					"raw": "{{test-backend}}/upload-post",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"upload-post"
@@ -4526,16 +4410,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uuid}}.txt\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"test\"\n            contenttype: video\n            uploadedFiles: \"{{uuid}}.txt\"\n        }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4579,16 +4461,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"hi\", \"hi1\", \"hi2\", \"hi3\", \"hi4\", \"hi5\", \"hi6\", \"hi7\", \"hi8\", \"hi9\", \"hi10\", \"hi11\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"hi\", \"hi1\", \"hi2\", \"hi3\", \"hi4\", \"hi5\", \"hi6\", \"hi7\", \"hi8\", \"hi9\", \"hi10\", \"hi11\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4632,16 +4512,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4685,16 +4563,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
+						"query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: { title: \"post with tags\", contenttype: image, media: \"{{new_profile_pic}}\", tags: [\"{{long_message}}\"] }\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4748,16 +4624,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text\", contenttype: text, media: [\"{{new_bio}}\", \"{{new_bio}}\", \"{{new_bio}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text\", contenttype: text, media: [\"{{new_bio}}\", \"{{new_bio}}\", \"{{new_bio}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4816,11 +4690,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4875,16 +4747,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\", \"{{base64_audio}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\", \"{{base64_audio}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -4939,16 +4809,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: [\"{{base64_photo1}}\", \"{{base64_photo2}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: [\"{{base64_photo1}}\", \"{{base64_photo2}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5002,16 +4870,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"all media\", contenttype: image, media: [\"{{base64_audio}}\", \"{{base64_video}}\", \"{{new_bio}}\", \"{{new_profile_pic}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"all media\", contenttype: image, media: [\"{{base64_audio}}\", \"{{base64_video}}\", \"{{new_bio}}\", \"{{new_profile_pic}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5060,11 +4926,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5113,11 +4977,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5177,11 +5039,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5231,11 +5091,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5299,11 +5157,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5399,11 +5255,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5482,11 +5336,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5548,16 +5400,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5606,11 +5456,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5670,11 +5518,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5733,11 +5579,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5786,11 +5630,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5849,11 +5691,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5902,11 +5742,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -5955,11 +5793,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6008,11 +5844,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6061,11 +5895,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6114,11 +5946,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6167,11 +5997,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6220,11 +6048,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6292,11 +6118,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6321,7 +6145,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -6331,7 +6156,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -6356,11 +6182,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6424,11 +6248,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6504,11 +6326,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6568,11 +6388,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6636,11 +6454,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6717,11 +6533,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6770,11 +6584,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6823,11 +6635,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6876,11 +6686,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6929,11 +6737,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -6982,11 +6788,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7035,11 +6839,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7088,11 +6890,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7141,11 +6941,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7195,11 +6993,293 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer with too long message (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30270\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let longMessage = \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. \".repeat(100);",
+							"pm.environment.set(\"long_message\", longMessage);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"{{long_message}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer with forbidden symbols (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30271\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"A\\u00A0B\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer with a link (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30271\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 10, message: \"https://frontend.getpeer.eu/login.php\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer more than 8 decimals (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30264\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 1.123456789, message: \"\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer less than MIN_AMOUNT (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"30264\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation ResolveTransfer {\n    resolveTransferV2(recipient: \"{{w_userid_t3}}\", numberoftokens: 0.000000001, message: \"\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            tokenSend\n            tokensSubstractedFromWallet\n            createdat\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7267,11 +7347,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7348,11 +7426,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7401,11 +7477,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7454,11 +7528,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7511,11 +7583,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7575,11 +7645,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7633,11 +7701,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7721,11 +7787,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7785,11 +7849,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7853,11 +7915,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -7939,11 +7999,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8013,11 +8071,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8092,11 +8148,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8175,11 +8229,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8232,11 +8284,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8296,11 +8346,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8354,11 +8402,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8407,11 +8453,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8461,11 +8505,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8519,16 +8561,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "query Getallposts {\n    listPosts(\n        filterBy: null\n        IgnorList: YES\n        sortBy: null\n        userid: null\n        postid: null\n        title: null\n        tag: null\n        from: null\n        to: null\n        offset: null\n        limit: null\n        commentOffset: null\n        commentLimit: null\n    ) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8607,11 +8647,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8661,11 +8699,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8716,11 +8752,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8769,16 +8803,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n          visibilityStatus\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n        }\n    }\n}\n",
+						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n          visibilityStatus\n          isHiddenForUsers\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n          isHiddenForUsers\n        hasActiveReports\n}\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8832,11 +8864,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8886,11 +8916,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -8938,16 +8966,14 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n        hasActiveReports\n}\n        }\n    }\n}\n",
+						"query": "query Blockedlist {\n    listBlockedUsers {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            iBlocked {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n          isHiddenForUsers\n        hasActiveReports\n}\n            blockedBy {\n                userid\n                img\n                username\n                slug\n            visibilityStatus\n          isHiddenForUsers\n        hasActiveReports\n}\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9002,11 +9028,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9079,11 +9103,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9158,11 +9180,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9212,11 +9232,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9295,11 +9313,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9384,11 +9400,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9483,11 +9497,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9566,11 +9578,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9619,11 +9629,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9683,11 +9691,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9736,11 +9742,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9835,11 +9839,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9900,11 +9902,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -9953,11 +9953,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10017,11 +10015,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10070,11 +10066,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10123,11 +10117,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10176,11 +10168,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10265,11 +10255,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10318,11 +10306,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10371,11 +10357,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10424,11 +10408,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10478,11 +10460,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10531,11 +10511,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10630,11 +10608,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10683,11 +10659,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10747,11 +10721,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10800,11 +10772,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10864,11 +10834,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10922,11 +10890,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -10975,11 +10941,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11030,11 +10994,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"
@@ -11136,11 +11098,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://peer-network.eu/graphql",
-					"protocol": "https",
+					"raw": "{{test-backend}}/graphql",
 					"host": [
-						"peer-network",
-						"eu"
+						"{{test-backend}}"
 					],
 					"path": [
 						"graphql"

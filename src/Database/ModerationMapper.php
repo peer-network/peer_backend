@@ -138,9 +138,7 @@ class ModerationMapper
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(function ($reporter) {
-                return (new User($reporter, [], false))->getArrayCopy();
-            }, $reporters);
+            $item['reporters'] = array_map(fn($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
@@ -163,11 +161,11 @@ class ModerationMapper
 
         if ($item['targettype'] === 'post') {
             $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
+            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
+            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {
-            $item['targetcontent']['user'] = (new User([
+            $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],
                 'username' => $item['username'],
                 'email' => $item['email'],
@@ -177,7 +175,7 @@ class ModerationMapper
                 'biography' => $item['biography'],
                 'updatedat' => $item['updatedat'],
                 'visibility_status' => $item['visibility_status'],
-            ], [], false))->getArrayCopy();
+            ], [], false)->getArrayCopy();
         }
 
         return $item;
@@ -213,7 +211,7 @@ class ModerationMapper
     {
         try {
             $moderationId = self::generateUUID();
-            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+            $createdat = (string) new DateTime()->format('Y-m-d H:i:s.u');
 
             $report = UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
 
@@ -413,41 +411,86 @@ class ModerationMapper
         }
 
         // Target Media File for Post
-        if ($targetType == 'post') {
-            $mediaRecord = Post::query()->where('postid', $targetId)->first();
-            if (!$mediaRecord || !$mediaRecord['media']) {
-                $this->logger->error("Media not found for Post ID: $targetId");
-            }
-            $media = json_decode($mediaRecord['media'], true);
+        if ($targetType !== 'post') {
+            return;
+        }
 
+        $mediaRecord = Post::query()->where('postid', $targetId)->first();
+        if (!$mediaRecord || !$mediaRecord['media']) {
+            $this->logger->error("Media not found for Post ID: $targetId");
+            return;
+        }
+
+        $pathsToMove = [];
+
+        $media = json_decode($mediaRecord['media'], true);
+        if (is_array($media)) {
             foreach ($media as $mediaItem) {
-
-                if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
+                if (!isset($mediaItem['path'])) {
                     $this->logger->error("Invalid media path for Post ID: $targetId");
-                }
-                $media = $mediaItem['path'];
-
-                if (fopen($directoryPath.$media, 'r') === false) {
-                    $this->logger->error("Unable to open media file for Post ID: $targetId");
                     continue;
                 }
-                $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
+                $pathsToMove[] = $mediaItem['path'];
+            }
+        }
 
-                $uploadedFile = new \Slim\Psr7\UploadedFile(
-                    $stream,
-                    null,
-                    null
-                );
+        $coverPath = null;
 
-                $mediaDetails = explode('/', $media);
-                $mediaUrl = end($mediaDetails);
+        if (!empty($mediaRecord['cover'])) {
+            $cover = json_decode($mediaRecord['cover'], true);
 
-                $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
+            if (is_array($cover) && isset($cover[0]['path'])) {
+                $coverPath = $cover[0]['path'];
+            } else {
+                $this->logger->error("Invalid cover path for Post ID: $targetId");
+            }
+        }
 
-                try {
-                    $uploadedFile->moveTo($filePath);
-                } catch (\RuntimeException $e) {
-                    $this->logger->error("Failed to move file: $filePath");
+        if ($coverPath !== null) {
+            $pathsToMove[] = $coverPath;
+        }
+
+        foreach ($pathsToMove as $path) {
+            $fullPath = $directoryPath . $path;
+
+            if (!file_exists($fullPath)) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Cover file does not exist for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Invalid media path for Post ID: $targetId");
+                }
+                continue;
+            }
+
+            $resource = fopen($fullPath, 'r');
+            if ($resource === false) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Unable to open cover file for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Unable to open media file for Post ID: $targetId");
+                }
+                continue;
+            }
+
+            $stream = new \Slim\Psr7\Stream($resource);
+
+            $uploadedFile = new \Slim\Psr7\UploadedFile(
+                $stream,
+                null,
+                null
+            );
+
+            $mediaDetails = explode('/', $path);
+            $fileName = end($mediaDetails);
+            $destinationPath = $illegalDirectoryPath . '/' . $fileName;
+
+            try {
+                $uploadedFile->moveTo($destinationPath);
+            } catch (\RuntimeException $e) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Failed to move cover file: $destinationPath");
+                } else {
+                    $this->logger->error("Failed to move file: $destinationPath");
                 }
             }
         }

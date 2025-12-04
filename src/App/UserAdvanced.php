@@ -36,6 +36,7 @@ class UserAdvanced implements ProfileReplaceable
     protected ?string $updatedat;
     protected ?int $activeReports;
     protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -65,10 +66,11 @@ class UserAdvanced implements ProfileReplaceable
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->activeReports = $data['user_reports'] ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -99,7 +101,9 @@ class UserAdvanced implements ProfileReplaceable
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
             'reports' => $this->activeReports,
-            'visibility_status' => $this->visibilityStatus
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -111,7 +115,7 @@ class UserAdvanced implements ProfileReplaceable
             'uid' => $this->uid,
             'password' => $this->password,
             'ip' => $this->ip,
-            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
         ];
         return $att;
     }
@@ -283,12 +287,24 @@ class UserAdvanced implements ProfileReplaceable
 
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus;
+        return $this->visibilityStatusForUser;
     }
 
     public function setVisibilityStatus(string $status): void
     {
-        $this->visibilityStatus = $status;
+        $this->visibilityStatusForUser = $status;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
     }
 
     public function getAmountPosts(): int|null
@@ -368,7 +384,7 @@ class UserAdvanced implements ProfileReplaceable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function getActiveReports(): int
@@ -574,14 +590,14 @@ class UserAdvanced implements ProfileReplaceable
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'updatedat' => [
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
