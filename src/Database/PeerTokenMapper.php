@@ -529,7 +529,7 @@ class PeerTokenMapper
             $stmt->execute();
 
             $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-            $data = array_map(fn ($t) => $this->mapTransaction($t), $transactions);
+            $data = array_map($this->mapTransaction(...), $transactions);
 
             return [
                 'status' => 'success',
@@ -598,8 +598,8 @@ class PeerTokenMapper
      */
     private function mapTransaction(array $trans): array
     {
-        $items = (new Transaction($trans, [], false))->getArrayCopy();
-        $items['sender'] = (new User([
+        $items = new Transaction($trans, [], false)->getArrayCopy();
+        $items['sender'] = new User([
             'username' => $trans['sender_username'] ?? null,
             'uid' => $trans['sender_userid'] ?? null,
             'slug' => $trans['sender_slug'] ?? null,
@@ -608,9 +608,9 @@ class PeerTokenMapper
             'biography' => $trans['sender_biography'] ?? null,
             'updatedat' => $trans['sender_updatedat'] ?? null,
             'visibility_status' => $trans['sender_visibility_status'],
-        ], [], false))->getArrayCopy();
+        ], [], false)->getArrayCopy();
 
-        $items['recipient'] = (new User([
+        $items['recipient'] = new User([
             'username' => $trans['recipient_username'] ?? null,
             'uid' => $trans['recipient_userid'] ?? null,
             'slug' => $trans['recipient_slug'] ?? null,
@@ -618,7 +618,7 @@ class PeerTokenMapper
             'img' => $trans['recipient_img'] ?? null,
             'biography' => $trans['recipient_biography'] ?? null,
             'visibility_status' => $trans['recipient_visibility_status'],
-        ], [], false))->getArrayCopy();
+        ], [], false)->getArrayCopy();
 
         return $items;
     }

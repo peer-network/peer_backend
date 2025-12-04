@@ -75,7 +75,7 @@ class JSONHandler
         preg_match_all('/"([^"]+)"\s*:/', $json, $matches);
 
         $keys = $matches[1];
-        $numericKeys = array_filter($keys, fn ($key) => is_numeric($key));
+        $numericKeys = array_filter($keys, is_numeric(...));
 
         $counts = array_count_values($numericKeys);
         $duplicatedKeys = array_keys(array_filter($counts, fn ($count) => $count > 1));
