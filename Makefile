@@ -8,6 +8,9 @@ GITLEAKS_VERSION = 8.28.0
 IMAGE_TAG=local
 export IMAGE_TAG
 
+RUST_CRATES = tokencalculation emailverification
+RUST_TOOLCHAIN_VERSION ?= 1.83.0
+
 # Default DB_PORT behavior — only print once at top-level call
 ifeq ($(MAKELEVEL),0)
   ifeq ($(MAKECMDGOALS),ci2)
@@ -132,6 +135,9 @@ dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vend
 		exit 1; \
 	fi
 
+	@echo "Compiling native Rust helpers..."
+	$(MAKE) --no-print-directory rust-libs
+
 	@echo "Building images..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml build
 	@if docker image inspect peer-backend:local >/dev/null 2>&1; then \
@@ -187,6 +193,23 @@ ensure-jq: ## Ensure jq is installed (auto-install if missing)
 		echo "jq not found. Installing via apt..."; \
 		sudo apt update && sudo apt install -y jq; \
 	}
+
+.PHONY: rust-libs
+rust-libs: ## Build the shared Rust libraries used through PHP FFI
+	@command -v rustup >/dev/null 2>&1 || { \
+		echo "rustup not found. Please install Rust (https://www.rust-lang.org/tools/install)."; \
+		exit 1; \
+	}
+	@echo "Ensuring Rust toolchain $(RUST_TOOLCHAIN_VERSION) is installed..."
+	@rustup toolchain install $(RUST_TOOLCHAIN_VERSION) >/dev/null 2>&1 || true
+	@for crate in $(RUST_CRATES); do \
+		if [ -f "$$crate/Cargo.toml" ]; then \
+			echo "→ Building $$crate (release)"; \
+			( cd "$$crate" && rustup run $(RUST_TOOLCHAIN_VERSION) cargo build --release ); \
+		else \
+			echo "→ Skipping $$crate (Cargo.toml missing)"; \
+		fi; \
+	done
 
 test: env-ci init ensure-jq ## Run Newman tests inside Docker and generate HTML report
 	@echo "Building Newman container..."
@@ -248,6 +271,7 @@ clean-all: ## Remove containers, volumes, vendors, reports, logs
 
 	@rm -f composer.lock
 	@rm -rf vendor
+	@rm -rf $(foreach crate,$(RUST_CRATES),$(crate)/target)
 	@rm -rf sql_files_for_import_tmp
 	@rm -rf newman || { \
 		echo "Could not remove newman folder (report.html). Might need sudo or manual cleanup."; \
@@ -264,6 +288,7 @@ clean-all: ## Remove containers, volumes, vendors, reports, logs
 clean-ci: reset-db-and-backend ## Cleanup for CI but keep reports
 	@rm -f composer.lock
 	@rm -rf vendor
+	@rm -rf $(foreach crate,$(RUST_CRATES),$(crate)/target)
 	@rm -rf sql_files_for_import_tmp
 	@rm -f .env.ci
 	@rm -f supervisord.pid
@@ -289,6 +314,7 @@ clean-ci2: ## Cleanup for isolated CI2 environment but keep reports
 	@echo "Removing temp & build artifacts (keeping reports)..."
 	@rm -f composer.lock
 	@rm -rf vendor sql_files_for_import_tmp
+	@rm -rf $(foreach crate,$(RUST_CRATES),$(crate)/target)
 	@rm -f .env.ci supervisord.pid runtime-data/logs/errorlog.txt
 	@rm -f tests/postman_collection/tmp_*.json
 	@echo "CI2 cleanup complete — Newman reports preserved."
@@ -314,6 +340,9 @@ ci2: check-hooks scan env-ci phpstan-fast init ## Run full isolated local CI2 wo
 
 	@echo "Starting isolated CI2 environment..."
 	CI2_PROJECT_NAME=$(COMPOSE_PROJECT_NAME)_ci2
+
+	@echo "Compiling native Rust helpers for CI2..."
+	$(MAKE) --no-print-directory rust-libs
 
 	@echo "Removing any old CI2 volumes..."
 	-@docker volume rm $$(docker volume ls -q | grep "$${CI2_PROJECT_NAME}.*db_data") 2>/dev/null || true

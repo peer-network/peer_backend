@@ -15,6 +15,8 @@ RUN apt-get update && \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
     echo 'source $HOME/.cargo/env' >> /root/.bashrc
 ENV PATH="/root/.cargo/bin:$PATH"
+ENV RUSTUP_TOOLCHAIN=1.83.0
+RUN . /root/.cargo/env && rustup toolchain install ${RUSTUP_TOOLCHAIN} && rustup default ${RUSTUP_TOOLCHAIN}
 
 RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
     && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
@@ -38,6 +40,9 @@ COPY . .
 # Build TokenCalculations if Cargo.toml exists
 RUN if [ -f tokencalculation/Cargo.toml ]; then \
       cd tokencalculation && cargo build --release; \
+    fi
+RUN if [ -f emailverification/Cargo.toml ]; then \
+      cd emailverification && cargo build --release; \
     fi
 
 RUN chown -R www-data:www-data /var/www/

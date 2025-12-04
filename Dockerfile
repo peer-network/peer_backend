@@ -3,6 +3,11 @@ FROM ghcr.io/peer-network/php-backend-base:latest
 
 WORKDIR /var/www/html
 
+ENV RUSTUP_TOOLCHAIN=1.83.0
+RUN if [ -f /root/.cargo/env ]; then \
+        . /root/.cargo/env && rustup toolchain install ${RUSTUP_TOOLCHAIN} && rustup default ${RUSTUP_TOOLCHAIN}; \
+    fi
+
 # Copy app code
 COPY . .
 
@@ -17,6 +22,7 @@ RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
 
 RUN if [ -f tokencalculation/Cargo.toml ]; then cd tokencalculation && . /root/.cargo/env && cargo build --release; fi
+RUN if [ -f emailverification/Cargo.toml ]; then cd emailverification && . /root/.cargo/env && cargo build --release; fi
 
 RUN chown -R www-data:www-data /var/www/
  

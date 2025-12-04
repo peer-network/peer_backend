@@ -36,3 +36,5 @@ changelog
 *.generated
 *.cache
 .gitleaksignore
+tokencalculation/target/
+emailverification/target/

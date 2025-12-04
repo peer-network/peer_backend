@@ -126,8 +126,8 @@ mv refresh_public.pem refresh_public.key
 php -S localhost:8888 -t public/
 ```
 
-### **8. Install Rust Module**
-As it includes Rust Module, We should **Install** `Rust` module in server. 
+### **8. Install Rust Modules**
+As the backend calls into native Rust helpers (token math + email verification), you must install **Rust** on the server.
 
 #### Step 1: Use Below command to install on Linux:
 ```
@@ -135,11 +135,18 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 **For Windows & more details: Please consult official [Rust Documentation](https://www.rust-lang.org/tools/install)**.
 
-#### Step 2: Navigate to `tokencalculation` directory and Generate Build
+#### Step 2: Ensure you are on Rust 1.83
+```
+rustup toolchain install 1.83.0
+rustup default 1.83.0
+```
+
+#### Step 3: Build the native crates
 ```
 cd tokencalculation
-```
-```
+cargo build --release
+
+cd ../emailverification
 cargo build --release
 ```
 
