@@ -41,11 +41,14 @@ class LogRedactor {
             // Verification tokens in verificationData context (partial masking)
             '/(verificationData[^}]*["\']token["\']\s*[:=]\s*["\'])([a-fA-F0-9]{6})([a-fA-F0-9]+)(["\'])/i' => 'MASK_VERIFICATION_TOKEN',
             
-            // Password fields with values
-            '/(password["\']?\s*[:=]\s*["\']?)([^"\'}\s,]+)(["\'}},]?)/i' => '$1[REDACTED]$3',
+            // Password hashes (full hash)
+            '/\$argon2id?\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+\/=]+\$[A-Za-z0-9+\/=]+/' => '[REDACTED_HASH]',
             
-            // Password hashes (bcrypt, argon2)
-            '/\$(?:2[aby]|argon2i?)\$[^\s"\'}{]{40,}/' => '[REDACTED]',
+            '/\[REDACTED\],t=\d+,p=\d+\$[A-Za-z0-9+\/=]+\$[A-Za-z0-9+\/=]+/' => '[REDACTED_HASH]',
+            
+            '/\$2[aby]\$\d{2}\$[A-Za-z0-9.\/]{53}/' => '[REDACTED_HASH]',
+            
+            '/(password["\']?\s*[:=]\s*["\']?)([^"\'}\s,]+)(["\'}},]?)/i' => '$1[REDACTED_HASH]$3',
             
             // API keys
             '/(api[_-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9_-]{20,})(["\'}},]?)/i' => '$1[REDACTED]$3',
