@@ -19,11 +19,11 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
       mode: soft
-      label_config: >
-        {"backend/.*":"backend","src/.*":"backend","composer.*":"backend",
+      label_config: |
+        '{"backend/.*":"backend","src/.*":"backend","composer.*":"backend",
         "android/.*":"android","ios/.*":"ios","web/.*":"web",
         "sql_files_for_import/.*":"database",".github/workflows/.*":"ci",
-        "Dockerfile.*":"docker","docs/.*":"documentation","README.md":"documentation"}
+        "Dockerfile.*":"docker","docs/.*":"documentation","README.md":"documentation"}'
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
