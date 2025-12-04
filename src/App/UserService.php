@@ -21,6 +21,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\EmailVerifier;
 use Fawaz\Services\Mailer;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\ResponseHelper;
@@ -120,6 +121,61 @@ class UserService
         $this->logger->error('Failed to generate unique slug after maximum retries', ['username' => $username]);
         return null;
     }
+    
+    // Verify whether an email address appears reachable via the Rust verifier.
+    private function emailIsReachable(string $email, string $context): ?bool
+    {
+        try {
+            $verifier = new EmailVerifier();
+            $result = $verifier->verify($email);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Email verification threw an exception, skipping reachability gate.', [
+                'email' => $email,
+                'context' => $context,
+                'exception' => $e->getMessage(),
+            ]);
+            return null;
+        }
+
+        if ($result['status'] !== 'ok') {
+            $this->logger->warning('Email verification failed, proceeding with fallback behavior.', [
+                'email' => $email,
+                'context' => $context,
+                'verifier_status' => $result['status'],
+                'verifier_message' => $result['message'],
+            ]);
+            return null;
+        }
+
+        $verifierData = $result['data'] ?? [];
+        $reachability = strtolower((string)($verifierData['is_reachable'] ?? 'unknown'));
+        $baseLogContext = [
+            'email' => $email,
+            'context' => $context,
+            'is_reachable' => $reachability,
+        ];
+        $this->logger->info('Email verification completed.', $baseLogContext);
+
+        if ($reachability !== 'safe') {
+            $this->logger->warning('Email reachability reported as non-safe.', array_merge($baseLogContext, [
+                'misc' => $verifierData['misc'] ?? null,
+                'mx' => $verifierData['mx'] ?? null,
+                'smtp' => $verifierData['smtp'] ?? null,
+                'syntax' => $verifierData['syntax'] ?? null,
+                'debug' => $verifierData['debug'] ?? null,
+            ]));
+        }
+
+        if ($reachability === 'invalid') {
+            $this->logger->warning('Email rejected due to invalid reachability.', [
+                'email' => $email,
+                'context' => $context,
+            ]);
+            return false;
+        }
+
+        return true;
+    }
 
     public function createUser(array $args): array
     {
@@ -161,6 +217,11 @@ class UserService
         }
 
         $email = trim($args['email']);
+        $reachability = $this->emailIsReachable($email, 'registration');
+        if ($reachability === false) {
+            return self::respondWithError(30602);
+        }
+
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(30601);
         }
@@ -1096,6 +1157,12 @@ class UserService
             if (!$user) {
                 $this->logger->warning('Invalid user');
                 return $this->genericPasswordResetSuccessResponse();
+            }
+
+            $reachability = $this->emailIsReachable($email, 'password_reset_request');
+            if ($reachability === false) {
+                $this->transactionManager->rollback();
+                return self::respondWithError(31902);
             }
 
             $userId = $user->getUserId();

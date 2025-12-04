@@ -807,6 +807,10 @@
         "comment": "Already Exists: Email is already registered. Please use a different email",
         "userFriendlyComment": "Email already registered. Use a different one."
     },
+    "30602": {
+        "comment": "Not Reachable: Provided Email address is not reachable. Please check the address again",
+        "userFriendlyComment": "Invalid EMail. Please re-check you address"
+    },
     "30701": {
         "comment": "Information: Account is already verified. No further action is required",
         "userFriendlyComment": "Account already verified!"
@@ -1050,6 +1054,10 @@
     "31901": {
         "comment": "Failure: Too many requests. Email delivery failed. Please try again later. ",
         "userFriendlyComment": "Failure: Too many requests. Email delivery failed. Please try again later."
+    },
+    "31902": {
+        "comment": "Failure: Email delivery failed. The Email connected to your account is not reachable. Please contact support team at peernetworkpse@gmail.com.",
+        "userFriendlyComment": "Failure: Email delivery failed. The Email connected to your account is not reachable. Please contact support team at peernetworkpse@gmail.com."
     },
     "31903": {
         "comment": "Failure: Too many requests. Email delivery failed. Please contact support team at peernetworkpse@gmail.com. ",
