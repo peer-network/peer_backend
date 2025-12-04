@@ -79,6 +79,23 @@ VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0, 0, 0, 0, 0, 0, NULL, 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4', 100000, 0);
 
 
+
+-- bullshito_account (requestPassworReset_test_account ... because you would not be able to register a bullshit acc anymore)
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
+VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4', 'bullshito@tue-bullshit.com', 'bullshit_account',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 1, '127.0.0.1',
+'/profile/3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4.jpg',
+'/userData/3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4.txt');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('3f6d55c1-9731-4f28-8b85-5a30cd7c5bb4', 100000, 0);
+
+
 -- company_account
 INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
 VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df93', 'company@system.com', 'company_account',
