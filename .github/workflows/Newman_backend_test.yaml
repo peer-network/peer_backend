@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull_request: write
  
 jobs:
   auto_update_branch:
