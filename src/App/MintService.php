@@ -129,8 +129,14 @@ class MintService
         if (!in_array($day, $dayActions, true)) {
             return $this::respondWithError(30105);
         }
-
-        $gemsters = $this->gemsRepository->getTimeSortedMatch($day);
+        try {
+            $gemsters = $this->gemsRepository->getTimeSortedMatch($day);
+        } catch(\Throwable $e) {
+            $this->logger->error('Error during mint distribution transfers', [
+                'error' => $e->getMessage(),
+            ]);
+            return $this::respondWithError(40301);
+        }
 
         if (isset($gemsters['affectedRows']['data'])) {
             $winstatus = $gemsters['affectedRows']['data'][0];

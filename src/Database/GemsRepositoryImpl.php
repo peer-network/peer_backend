@@ -11,6 +11,9 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\Database\UserMapper;
+use Fawaz\Services\TokenTransfer\Strategies\MintTransferStrategy;
 
 const TABLESTOGEMS = true;
 
@@ -24,7 +27,10 @@ class GemsRepositoryImpl implements GemsRepository
         protected PeerLoggerInterface $logger, 
         protected PDO $db, 
         protected LiquidityPool $pool,
-        protected WalletMapper $walletMapper
+        protected WalletMapper $walletMapper,
+        protected PeerTokenMapper $peerTokenMapper,
+        protected MintAccountRepository $mintAccountRepository,
+        protected UserMapper $userMapper,
     ){} 
 
     public function callGlobalWins(): array
@@ -84,7 +90,7 @@ class GemsRepositoryImpl implements GemsRepository
                     INNER JOIN posts p ON s.postid = p.postid AND s.userid != p.userid 
                     WHERE s.collected = 0";
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
             return self::respondWithError(41208);
@@ -166,7 +172,7 @@ class GemsRepositoryImpl implements GemsRepository
             ";
 
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $entries = $stmt->fetch(PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
@@ -236,7 +242,7 @@ class GemsRepositoryImpl implements GemsRepository
 
         try {
             $stmt = $this->db->query($sql);
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
@@ -263,6 +269,9 @@ class GemsRepositoryImpl implements GemsRepository
             ]
         ];
 
+        // Build an internal per-user token totals array without changing the response
+        $tokenTotals = [];
+
         foreach ($data as $row) {
             $userId = (string)$row['userid'];
 
@@ -276,6 +285,9 @@ class GemsRepositoryImpl implements GemsRepository
                     'percentage' => (float)$row['percentage'],
                     'details' => []
                 ];
+
+                // Track total tokens per user in a compact internal array
+                $tokenTotals[$userId] = $totalTokenNumber;
             }
 
             $rowgems2token = TokenHelper::mulRc((string) $row['gems'], $gemsintoken);
@@ -305,6 +317,47 @@ class GemsRepositoryImpl implements GemsRepository
         } catch (\Throwable $e) {
             $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
             return self::respondWithError(41212);
+        }
+
+        // After marking gems collected, transfer tokens from MintAccount to each user
+        $mintAccount = $this->mintAccountRepository->getDefaultAccount();
+        if ($mintAccount === null) {
+            $this->logger->warning('No MintAccount available for distribution');
+            return self::respondWithError(40301);
+        } else {
+            foreach ($tokenTotals as $recipientUserId => $amountToTransfer) {
+                // Skip zero or negative amounts
+                if ((float)$amountToTransfer <= 0) {
+                    $this->logger->error('amount to transfer is 0', [
+                        'userId' => $recipientUserId,
+                    ]);
+                    return self::respondWithError(40301);
+                }
+                $recipient = $this->userMapper->loadById($recipientUserId);
+                if ($recipient === false) {
+                    $this->logger->error('Recipient user not found for token transfer', [
+                        'userId' => $recipientUserId,
+                    ]);
+                    return self::respondWithError(40301);
+                }
+
+                $response = $this->peerTokenMapper->transferToken(
+                    (string)$amountToTransfer,
+                    new MintTransferStrategy(),
+                    $mintAccount,
+                    $recipient,
+                    "Mint"
+                );
+
+                if (!is_array($response) || ($response['status'] ?? 'error') === 'error') {
+                    $this->logger->error('Mint distribution transfer failed for user', [
+                        'userId' => $recipientUserId,
+                        'amount' => $amountToTransfer,
+                        'response' => $response,
+                    ]);
+                    return self::respondWithError(40301);
+                }
+            }
         }
 
         return [
@@ -399,7 +452,7 @@ class GemsRepositoryImpl implements GemsRepository
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['userId' => $userId]);
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $interactionCount = (int)($result['interaction_count'] ?? 0);
 
