@@ -138,7 +138,8 @@ jobs:
     needs: [
       check_branch_sync,
       gitleaks_scan_staged,
-      validate_sql_files, phpstan_analysis 
+      validate_sql_files, 
+      phpstan_analysis 
     ]
     if: ${{ 
       needs.check_branch_sync.outputs.is_behind == 'false' && 
