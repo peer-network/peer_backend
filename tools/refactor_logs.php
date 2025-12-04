@@ -58,6 +58,8 @@ class LogRedactor {
             
             // Access/refresh tokens
             '/(["\']?(?:access|refresh)_?token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9._-]{20,})(["\'}},]?)/i' => '$1[REDACTED]$3',
+            
+            '/(["\'\\\\]?token["\'\\\\]?\s*[:=]\s*["\'\\\\]?)([a-fA-F0-9]{32,})(["\'}},]?)/i' => '$1[REDACTED_TOKEN]$3',
         ];
     }
 
