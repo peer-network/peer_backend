@@ -41,7 +41,6 @@ use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\GraphQL\Response\MetaBuilder;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
-use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\Utils\ErrorResponse;
@@ -103,9 +102,12 @@ class GraphQLSchemaBuilder
         // Merge remaining in-file resolvers until fully migrated
         $registry->add($this->buildResolvers());
         $registry->addProvider(new UserQueryResolver(
-            logger: $this->logger,
-            profileService: $this->profileService,
-            userInfoService: $this->userInfoService
+            $this->logger,
+            $this->profileService,
+            $this->userMapper,
+            $this->userInfoService,
+            $this->userService
+
         ));
         $registry->addProvider(new UserTypeResolver(
             $this->logger,
@@ -189,14 +191,6 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-
-                $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
-                if ($user) {
-                    $this->currentUserId = $decodedToken->uid;
-                    $this->userRoles = $decodedToken->rol;
-                    $this->setCurrentUserIdForServices($this->currentUserId);
-                    $this->logger->debug('Query.setCurrentUserId started');
-                }
 
                 $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                 if ($user) {
@@ -1064,7 +1058,6 @@ class GraphQLSchemaBuilder
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'listUsersAdminV2' => fn (mixed $root, array $args) => $this->profileService->listUsersAdmin($args),
             'listUsers' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
-            'listFollowRelations' => fn (mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn (mixed $root, array $args) => $this->resolvePosts($args),
             'guestListPost' => fn (mixed $root, array $args) => $this->guestListPost($args),
@@ -1083,7 +1076,6 @@ class GraphQLSchemaBuilder
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),
             'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
-            'getReferralInfo' => fn (mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
             'postEligibility' => fn (mixed $root, array $args) => $this->postService->postEligibility(),
@@ -2033,32 +2025,7 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function resolveFollows(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveFollows started');
-
-        $validation = RequestValidator::validate($args, []);
-
-        if ($validation instanceof ValidatorErrors) {
-            return $this::respondWithError(
-                $validation->errors[0]
-            );
-        }
-
-        $results = $this->userService->Follows($validation);
-
-
-        if ($results instanceof ErrorResponse) {
-            return $results->response;
-        }
-
-        $this->logger->info('Query.resolveProfile successful');
-        return $results;
-    }
+    
 
     protected function resolveProfile(array $args): array
     {

@@ -20,8 +20,8 @@ trait ResolverHelpers
      */
     protected function withAuth(?array $roles, callable $resolver): callable
     {
-        return function (mixed $root, array $args, mixed $context) use ($resolver) {
-            if (!$context instanceof Context || $context->token === null || $context->token === '') {
+        return function (mixed $root, array $args, Context $context) use ($resolver) {
+            if ($context->token === null || $context->token === '') {
                 return [
                     'status' => 'error',
                     'ResponseCode' => 60501, // not authenticated
@@ -41,7 +41,7 @@ trait ResolverHelpers
      */
     protected function withValidation(?array $rules, callable $resolver): callable
     {
-        return function (mixed $root, array $args, mixed $context) use ($rules, $resolver) {
+        return function (mixed $root, array $args, Context $context) use ($rules, $resolver) {
             $validated = RequestValidator::validate($args, $rules ?? []);
             if ($validated instanceof ValidatorErrors) {
                 return [
@@ -53,4 +53,3 @@ trait ResolverHelpers
         };
     }
 }
-
