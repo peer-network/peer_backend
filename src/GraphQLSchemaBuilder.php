@@ -56,6 +56,10 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalConten
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\AlphaMintService;
+use Fawaz\GraphQL\ResolverRegistry;
+use Fawaz\GraphQL\Resolvers\UserQueryResolver;
+use Fawaz\GraphQL\Resolvers\UserTypeResolver;
+use Fawaz\GraphQL\Resolvers\UserMutationResolver;
 
 class GraphQLSchemaBuilder
 {
@@ -89,7 +93,29 @@ class GraphQLSchemaBuilder
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected AlphaMintService $alphaMintService
     ) {
-        $this->resolvers = $this->buildResolvers();
+        // Registry-based composition of resolvers
+        $registry = new ResolverRegistry();
+
+        // Register modular providers
+
+
+        // Merge remaining in-file resolvers until fully migrated
+        $registry->add($this->buildResolvers());
+        $registry->addProvider(new UserQueryResolver(
+            logger: $this->logger,
+            profileService: $this->profileService,
+            userInfoService: $this->userInfoService,
+        ));
+        $registry->addProvider(new UserTypeResolver(
+            logger: $this->logger,
+        ));
+        $registry->addProvider(new UserMutationResolver(
+            logger: $this->logger,
+            userService: $this->userService,
+            userInfoService: $this->userInfoService,
+            commentInfoService: $this->commentInfoService,
+        ));
+        $this->resolvers = $registry->build();
         $this->metaBuilder = new MetaBuilder($this->responseMessagesProvider, $this->logger);
     }
 
@@ -425,63 +451,27 @@ class GraphQLSchemaBuilder
                 'media' => fn(array $root): string => $root['media'] ?? '',
                 'createdat' => fn(array $root): string => $root['createdat'] ?? '',
             ],
-            'ProfileUser' => [
-                'id' => function (array $root): string {
-                    $this->logger->debug('Query.ProfileUser Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'isfollowed' => fn(array $root): bool => $root['isfollowed'] ?? false,
-                'isfollowing' => fn(array $root): bool => $root['isfollowing'] ?? false,
-                'isfriend' => fn(array $root): bool => $root['isfriend'] ?? false,
-                'isreported' => fn(array $root): bool => $root['isreported'] ?? false,
-            ],
-            'BasicUserInfo' => [
-                'userid' => function (array $root): string {
-                    $this->logger->debug('Query.BasicUserInfo Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'biography' => fn(array $root): string => $root['biography'] ?? '',
-                'updatedat' => fn(array $root): string => $root['updatedat'] ?? '',
-            ],
-            'BlockedUser' => [
-                'userid' => function (array $root): string {
-                    $this->logger->debug('Query.BlockedUser Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-            ],
             'BlockedUsers' => [
                 'iBlocked' => function (array $root): array {
                     $this->logger->debug('Query.BlockedUsers Resolvers');
                     return $root['iBlocked'] ?? [];
                 },
                 'blockedBy' => fn(array $root): array => $root['blockedBy'] ?? [],
+            ],
+            'BlockedUser' => [
+                'userid' => function (array $root): string {
+                    $this->logger->debug('Type.BlockedUser.userid');
+                    return $root['uid'] ?? '';
+                },
+                'img' => fn(array $root): string => $root['img'] ?? '',
+                'username' => fn(array $root): string => $root['username'] ?? '',
+                'slug' => fn(array $root): int => $root['slug'] ?? 0,
+                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
+                'hasActiveReports' => function (array $root): bool {
+                    $reports = $root['reports'] ?? 0;
+                    return (int)$reports > 0;
+                },
+                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
             ],
             'BlockedUsersResponse' => [
                 'meta' => fn(array $root): array => $this->metaBuilder->build($root),
@@ -1293,10 +1283,8 @@ class GraphQLSchemaBuilder
             'hello' => fn (mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
-            'listUsersV2' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
             'listUsersAdminV2' => fn (mixed $root, array $args) => $this->profileService->listUsersAdmin($args),
             'listUsers' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
-            'getProfile' => fn (mixed $root, array $args) => $this->resolveProfile($args),
             'listFollowRelations' => fn (mixed $root, array $args) => $this->resolveFollows($args),
             'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn (mixed $root, array $args) => $this->resolvePosts($args),
@@ -1309,7 +1297,6 @@ class GraphQLSchemaBuilder
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
             'gemster' => fn (mixed $root, array $args) => $this->walletService->callGemster(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
-            'getUserInfo' => fn (mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
@@ -1343,17 +1330,6 @@ class GraphQLSchemaBuilder
             'refreshToken' => fn (mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
             'verifyReferralString' => fn (mixed $root, array $args) => $this->resolveVerifyReferral($args),
             'updateUserPreferences' => fn (mixed $root, array $args) => $this->userService->updateUserPreferences($args),
-            'updateUsername' => fn (mixed $root, array $args) => $this->userService->setUsername($args),
-            'updateEmail' => fn (mixed $root, array $args) => $this->userService->setEmail($args),
-            'updatePassword' => fn (mixed $root, array $args) => $this->userService->setPassword($args),
-            'updateBio' => fn (mixed $root, array $args) => $this->userInfoService->updateBio($args['biography']),
-            'updateProfileImage' => fn (mixed $root, array $args) => $this->userInfoService->setProfilePicture($args['img']),
-            'toggleUserFollowStatus' => fn (mixed $root, array $args) => $this->userInfoService->toggleUserFollow($args['userid']),
-            'toggleBlockUserStatus' => fn (mixed $root, array $args) => $this->userInfoService->toggleUserBlock($args['userid']),
-            'deleteAccount' => fn (mixed $root, array $args) => $this->userService->deleteAccount($args['password']),
-            'likeComment' => fn (mixed $root, array $args) => $this->commentInfoService->likeComment($args['commentid']),
-            'reportComment' => fn (mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
-            'reportUser' => fn (mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
             'contactus' => fn (mixed $root, array $args) => $this->ContactUs($args),
             'createComment' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
             'createPost' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
