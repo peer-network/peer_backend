@@ -14,6 +14,7 @@ use Fawaz\GraphQL\Support\ResolverHelpers;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
+use function PHPUnit\Framework\returnArgument;
 
 class UserQueryResolver implements ResolverProvider
 {
@@ -35,22 +36,34 @@ class UserQueryResolver implements ResolverProvider
             'Query' => [
                 'listUsersV2' => $this->withAuth(
                     null,
-                    fn (mixed $root, array $args, Context $ctx) => $this->profileService->listUsers($args,$ctx)
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->profileService->listUsers($validated,$ctx)
+                    )
                 ),
                 'getUserInfo' => $this->withAuth(
                     null,
-                    fn (mixed $root, array $args, Context $ctx) => $this->resolveUserInfo()
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->resolveUserInfo($ctx)
+                    )
                 ),
                 'getReferralInfo' => $this->withAuth(
-                    null, 
-                    fn (mixed $root, array $args, Context $ctx) => $this->resolveReferralInfo($args, $ctx)
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (mixed $root, array $args, Context $ctx) => $this->resolveReferralInfo($args, $ctx)
+                    )
                 ),
-
                 'listFollowRelations' => $this->withAuth(
                     null,
                     $this->withValidation(
                         [],
-                        fn (mixed $root, array $args) => $this->resolveFollows($args)
+                        fn (mixed $root, array $args, Context $ctx) => $this->resolveFollows($args, $ctx)
                     )
                 ),
                 'listBlockedUsers' => $this->withAuth(
@@ -59,7 +72,7 @@ class UserQueryResolver implements ResolverProvider
                         [],
                         fn (
                             mixed $root, array $validated, Context $ctx
-                        ) => $this->resolveBlocklist($validated)
+                        ) => $this->resolveBlocklist($validated, $ctx)
                     )
                 ),
                 'getProfile' => $this->withAuth(
@@ -113,7 +126,7 @@ class UserQueryResolver implements ResolverProvider
                         [],
                         fn (
                             mixed $root, array $validated, Context $ctx
-                        ) => $this->resolveFriends($validated)
+                        ) => $this->resolveFriends($validated, $ctx)
                     )
                 ),
                 'allfriends' => $this->withAuth(
@@ -122,7 +135,7 @@ class UserQueryResolver implements ResolverProvider
                         [],
                         fn (
                             mixed $root, array $validated, Context $ctx
-                        ) => $this->resolveAllFriends($validated)
+                        ) => $this->resolveAllFriends($validated, $ctx)
                     )
                 ),
                 'referralList' => $this->withAuth(
@@ -138,9 +151,9 @@ class UserQueryResolver implements ResolverProvider
         ];
     }
 
-    private function resolveUserInfo(): array
+    private function resolveUserInfo(Context $ctx): array
     {
-        $this->logger->debug('UserQueryResolver.resolveUserInfo started');
+        $this->logger->debugWithUser('UserQueryResolver.resolveUserInfo started', $ctx->currentUserId);
         $results = $this->userInfoService->loadInfoById();
 
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -158,24 +171,24 @@ class UserQueryResolver implements ResolverProvider
 
     private function resolveProfile(array $args, Context $ctx): array
     {
-        $this->logger->debug('UserQueryResolver.resolveProfile started');
+        $this->logger->debugWithUser('UserQueryResolver.resolveProfile started',$ctx->currentUserId);
 
         $result = $this->profileService->profile($args,$ctx);
+
         if ($result instanceof ErrorResponse) {
             return $result->response;
         }
 
-        return [
-            'status' => 'success',
-            'ResponseCode' => 11008,
-            'affectedRows' => $result->getArrayCopy(),
-        ];
+        return $this::createSuccessResponse(
+            11008,
+            $result->getArrayCopy()
+        );
     }
 
     protected function resolveReferralInfo(array $args, Context $ctx): ?array
     {
 
-        $this->logger->debug('Query.resolveReferralInfo started');
+        $this->logger->debugWithUser('Query.resolveReferralInfo started', $ctx->currentUserId);
 
         try {
             $userId = $ctx->currentUserId;
@@ -184,19 +197,15 @@ class UserQueryResolver implements ResolverProvider
             ]);
 
 
-            $info = $this->userMapper->getReferralInfoByUserId($userId);
+            $info = $this->userMapper->getReferralInfoByUserId($ctx->currentUserId);
             if (empty($info)) {
                 return $this::createSuccessResponse(21002);
             }
 
-            $response = [
+            return $this::createSuccessResponse(11011, [
                 'referralUuid' => $info['referral_uuid'] ?? '',
                 'referralLink' => $info['referral_link'] ?? '',
-                'status' => 'success',
-                'ResponseCode' => "11011"
-            ];
-
-            return $response;
+            ], false);
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveReferralInfo exception', [
                 'message' => $e->getMessage(),
@@ -206,44 +215,34 @@ class UserQueryResolver implements ResolverProvider
         }
     }
 
-    protected function resolveFollows(array $args): ?array
+    protected function resolveFollows(array $args, Context $ctx): ?array
     {
+        $this->logger->debugWithUser('Query.resolveFollows started', $ctx->currentUserId);
 
-        $this->logger->debug('Query.resolveFollows started');
+            $results = $this->userService->Follows($args);
 
-        $results = $this->userService->Follows($args);
+            if ($results instanceof ErrorResponse) {
+                return $results->response;
+            }
 
-
-        if ($results instanceof ErrorResponse) {
-            return $results->response;
-        }
-
-        $this->logger->info('Query.resolveProfile successful');
+            $this->logger->info('Query.resolveProfile successful');
         return $results;
     }
-    protected function resolveBlocklist(array $args): ?array {
-        $this->logger->debug('Query.resolveBlocklist started');
+    protected function resolveBlocklist(array $args, Context $ctx): ?array {
+        $this->logger->debugWithUser('Query.resolveBlocklist started', $ctx->currentUserId);
 
-        $response = $this->userInfoService->loadBlocklist($args);
-        if (isset($response['status']) && $response['status'] === 'error') {
+            $response = $this->userInfoService->loadBlocklist($args);
+        if (is_array($response)) {
             return $response;
         }
 
-        if (empty($response['counter'])) {
-            return $this::createSuccessResponse(11107, [], false);
-        }
-
-        if (is_array($response) || !empty($response)) {
-            return $response;
-        }
-
-        $this->logger->error('Query.resolveBlocklist No data found');
+        $this->logger->errorWithUser('Query.resolveBlocklist invalid response', $ctx->currentUserId);
         return $this::respondWithError(41105);
     }
 
-    protected function resolveFriends(array $args): ?array
+    protected function resolveFriends(array $args, Context $ctx): ?array
     {
-        $this->logger->debug('Query.resolveFriends started');
+        $this->logger->debugWithUser('Query.resolveFriends started', $ctx->currentUserId);
 
         $results = $this->userService->getFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -253,16 +252,16 @@ class UserQueryResolver implements ResolverProvider
         }
 
         if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
+            return $results;
         }
 
         $this->logger->warning('Query.resolveFriends Users not found');
         return $this::createSuccessResponse(21101);
     }
 
-    protected function resolveAllFriends(array $args): ?array
+    protected function resolveAllFriends(array $args, Context $ctx): ?array
     {
-        $this->logger->debug('Query.resolveAllFriends started');
+        $this->logger->debugWithUser('Query.resolveAllFriends started', $ctx->currentUserId);
 
         $results = $this->userService->getAllFriends($args);
         if (isset($results['status']) && $results['status'] === 'success') {
@@ -272,7 +271,7 @@ class UserQueryResolver implements ResolverProvider
         }
 
         if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
+            return $results;
         }
 
         $this->logger->warning('Query.resolveAllFriends No listFriends found');
