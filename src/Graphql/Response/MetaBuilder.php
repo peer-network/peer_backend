@@ -21,11 +21,11 @@ class MetaBuilder
      */
     public function build(array $root): array
     {
-        $code = $root['ResponseCode'] ?? '';
+        $code = (string)$root['ResponseCode'] ?? '';
 
         return [
             'status' => $root['status'] ?? '',
-            'ResponseCode' => isset($root['ResponseCode']) ? (string) $code : '',
+            'ResponseCode' => isset($root['ResponseCode']) ? $code : '',
             'ResponseMessage' => $this->messagesProvider->getMessage($code) ?? '',
             'RequestId' => $this->logger->getRequestUid(),
         ];
