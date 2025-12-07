@@ -38,6 +38,7 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
+use Fawaz\GraphQL\Response\MetaBuilder;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
@@ -62,6 +63,7 @@ class GraphQLSchemaBuilder
     protected array $resolvers = [];
     protected ?string $currentUserId = null;
     protected ?int $userRoles = 0;
+    private MetaBuilder $metaBuilder;
 
     public function __construct(
         protected PeerLoggerInterface $logger,
@@ -88,6 +90,7 @@ class GraphQLSchemaBuilder
         protected AlphaMintService $alphaMintService
     ) {
         $this->resolvers = $this->buildResolvers();
+        $this->metaBuilder = new MetaBuilder($this->responseMessagesProvider, $this->logger);
     }
 
     public function getQueriesDependingOnRole(): ?string
@@ -231,12 +234,7 @@ class GraphQLSchemaBuilder
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
             'UserPreferencesResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid()
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.DefaultResponse Resolvers');
                     return $root['status'] ?? '';
@@ -299,12 +297,7 @@ class GraphQLSchemaBuilder
                 'companyAccountId' => fn(array $root): string => $root['companyAccountId'] ?? '',
             ],
             'RegisterResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.RegisterResponse Resolvers');
                     return $root['status'] ?? '';
@@ -313,12 +306,7 @@ class GraphQLSchemaBuilder
                 'userid' => fn(array $root): string => $root['userid'] ?? '',
             ],
             'ReferralResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ReferralResponse Resolvers');
                     return $root['status'] ?? '';
@@ -365,12 +353,7 @@ class GraphQLSchemaBuilder
                 'updatedat' => fn(array $root): string => $root['updatedat'] ?? '',
             ],
             'UserInfoResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.UserInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -379,12 +362,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'UserListResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.UserListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -429,12 +407,7 @@ class GraphQLSchemaBuilder
                 'audioposts' => fn(array $root): array => [],
             ],
             'ProfileInfo' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ProfileInfo Resolvers');
                     return $root['status'] ?? '';
@@ -511,12 +484,7 @@ class GraphQLSchemaBuilder
                 'blockedBy' => fn(array $root): array => $root['blockedBy'] ?? [],
             ],
             'BlockedUsersResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.BlockedUsersResponse Resolvers');
                     return $root['status'] ?? '';
@@ -533,12 +501,7 @@ class GraphQLSchemaBuilder
                 'following' => fn(array $root): array => $root['following'] ?? [],
             ],
             'FollowRelationsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.FollowRelationsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -548,12 +511,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'UserFriendsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.UserFriendsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -563,12 +521,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'BasicUserInfoResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.BasicUserInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -577,12 +530,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'FollowStatusResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.FollowStatusResponse Resolvers');
                     return $root['status'] ?? '';
@@ -624,12 +572,7 @@ class GraphQLSchemaBuilder
                 'comments' => fn(array $root): array => $root['comments'] ?? [],
             ],
             'PostInfoResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -651,12 +594,7 @@ class GraphQLSchemaBuilder
                 'comments' => fn(array $root): int => $root['comments'] ?? 0,
             ],
             'PostListResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -666,12 +604,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'PostResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostResponse Resolvers');
                     return $root['status'] ?? '';
@@ -680,12 +613,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'AddPostResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.AddPostResponse Resolvers');
                     return $root['status'] ?? '';
@@ -716,13 +644,8 @@ class GraphQLSchemaBuilder
                 'isliked' => fn(array $root): bool => $root['isliked'] ?? false,
                 'user' => fn(array $root): array => $root['user'] ?? [],
             ],
-            'CommentInfoResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+          'CommentInfoResponse' => [
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.CommentInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -737,12 +660,7 @@ class GraphQLSchemaBuilder
                 'comments' => fn(array $root): int => $root['comments'] ?? 0,
             ],
             'CommentResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.CommentResponse Resolvers');
                     return $root['status'] ?? '';
@@ -752,12 +670,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'CommentListResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'counter' => function (array $root): int {
                     $this->logger->debug('Query.CommentListResponse Resolvers');
                     return $root['counter'] ?? 0;
@@ -777,12 +690,7 @@ class GraphQLSchemaBuilder
                 'user' => fn(array $root): array => $root['user'] ?? [],
             ],
             'ListAdvertisementPostsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ListAdvertisementPostsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -808,12 +716,7 @@ class GraphQLSchemaBuilder
                 'RequestId' => fn(array $root): string => $this->logger->getRequestUid(),
             ],
             'AuthPayload' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.AuthPayload Resolvers');
                     return $root['status'] ?? '';
@@ -823,12 +726,7 @@ class GraphQLSchemaBuilder
                 'refreshToken' => fn(array $root): string => $root['refreshToken'] ?? '',
             ],
             'TagSearchResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.TagSearchResponse Resolvers');
                     return $root['status'] ?? '';
@@ -845,12 +743,7 @@ class GraphQLSchemaBuilder
                 'name' => fn(array $root): string => $root['name'] ?? '',
             ],
             'GetDailyResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GetDailyResponse Resolvers');
                     return $root['status'] ?? '';
@@ -867,12 +760,7 @@ class GraphQLSchemaBuilder
                 'available' => fn(array $root): int => $root['available'] ?? 0,
             ],
             'CurrentLiquidity' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.CurrentLiquidity Resolvers');
                     return $root['status'] ?? '';
@@ -903,12 +791,7 @@ class GraphQLSchemaBuilder
                 'userPreferences' => fn(array $root): array => $root['userPreferences'] ?? [],
             ],
             'StandardResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -917,12 +800,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'ListTodaysInteractionsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -931,12 +809,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'PercentBeforeTransactionResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -953,12 +826,7 @@ class GraphQLSchemaBuilder
                 'percentTransferred' => fn(array $root): float => $root['percentTransferred'] ?? 0.0,
             ],
             'GemsterResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GemsterResponse Resolvers');
                     return $root['status'] ?? '';
@@ -967,12 +835,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'DailyGemStatusResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.DailyGemStatusResponse Resolvers');
                     return $root['status'] ?? '';
@@ -981,12 +844,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'DailyGemsResultsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.DailyGemsResultsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1026,12 +884,7 @@ class GraphQLSchemaBuilder
                 'pkey' => fn(array $root): string => $root['pkey'] ?? '',
             ],
             'ContactusResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.StandardResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1040,12 +893,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'GenericResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1055,12 +903,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'GemstersResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1108,12 +951,7 @@ class GraphQLSchemaBuilder
                 'createdat' => fn(array $root): string => $root['createdat'] ?? ''
             ],
             'TestingPoolResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GenericResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1123,12 +961,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'PostCommentsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostCommentsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1180,12 +1013,7 @@ class GraphQLSchemaBuilder
                 'createdat' => fn(array $root): string => $root['createdat'] ?? '',
             ],
             'UserLogWins' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.UserLogWins Resolvers');
                     return $root['status'] ?? '';
@@ -1204,12 +1032,7 @@ class GraphQLSchemaBuilder
                 'followedname' => fn(array $root): string => ($root['followedname'] ?? '') . '.' . ($root['followedslug'] ?? ''),
             ],
             'AllUserFriends' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.AllUserFriends Resolvers');
                     return $root['status'] ?? '';
@@ -1219,12 +1042,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'ReferralInfoResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ReferralInfoResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1234,12 +1052,7 @@ class GraphQLSchemaBuilder
                 'referralLink' => fn(array $root): string => $root['referralLink'] ?? '',
             ],
             'ReferralListResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ReferralListResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1253,12 +1066,7 @@ class GraphQLSchemaBuilder
                 'iInvited' => fn(array $root): array => $root['iInvited'] ?? [],
             ],
             'GetActionPricesResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.GetActionPricesResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1282,12 +1090,7 @@ class GraphQLSchemaBuilder
                 'tokensMintedYesterday' => fn(array $root): float => (float)($root['tokensMintedYesterday'] ?? 0.0),
             ],
             'TokenomicsResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.TokenomicsResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1298,12 +1101,7 @@ class GraphQLSchemaBuilder
                 'mintingData' => fn(array $root): array => $root['mintingData'] ?? [],
             ],
             'ResetPasswordRequestResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.ResetPasswordRequestResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1312,12 +1110,7 @@ class GraphQLSchemaBuilder
                 'nextAttemptAt' => fn(array $root): string => $root['nextAttemptAt'] ?? '',
             ],
             'PostEligibilityResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostEligibilityResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1326,12 +1119,7 @@ class GraphQLSchemaBuilder
                 'eligibilityToken' => fn(array $root): string => $root['eligibilityToken'] ?? ''
             ],
              'TransactionResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.TransactionResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1340,12 +1128,7 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'TransferTokenResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.TransferTokenResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1372,12 +1155,7 @@ class GraphQLSchemaBuilder
                 'recipient' => fn(array $root): array => $root['recipient'] ?? [],
             ],
             'PostInteractionResponse' => [
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.PostInteractionResponse Resolvers');
                     return $root['status'] ?? '';
@@ -1390,12 +1168,7 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.ListAdvertisementData Resolvers');
                     return $root['status'] ?? '';
                 },
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
                 'affectedRows' => fn(array $root): ?array => $root['affectedRows'] ?? null,
             ],
@@ -1417,12 +1190,7 @@ class GraphQLSchemaBuilder
                     return $root['status'] ?? '';
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'affectedRows' => fn(array $root): ?array => $root['affectedRows'] ?? null,
             ],
             'Advertisement' => [
@@ -1479,12 +1247,7 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
             ],
             'ModerationStats' => [
                 'AmountAwaitingReview' => fn(array $root): int => $root['AmountAwaitingReview'] ?? 0,
@@ -1499,12 +1262,7 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-                'meta' => fn(array $root): array => [
-                    'status' => $root['status'] ?? '',
-                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
-                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
-                    'RequestId' => $this->logger->getRequestUid(),
-                ],
+                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
             ],
             'ModerationItem' => [
                 'moderationTicketId' => fn(array $root): string => $root['uid'] ?? '',
