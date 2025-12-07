@@ -113,8 +113,6 @@ final class ProfileServiceImpl implements ProfileService
         $username = $args['username'] ?? null;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $userId = $args['userid'] ?? null;
-        $status = $args['status'] ?? null;
-        $verified = $args['verified'] ?? null;
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if (!empty($username) && !empty($userId)) {
