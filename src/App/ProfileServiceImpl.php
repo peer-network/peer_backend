@@ -377,4 +377,21 @@ final class ProfileServiceImpl implements ProfileService
             return $this::respondWithError(41013);
         }
     }
+
+    public function referralInfo(array $args, Context $ctx): array|ErrorResponse
+    {
+        $this->logger->debugWithUser('ProfileServiceImpl.referralInfo started', $ctx->currentUserId);
+
+        try {
+            $info = $this->userMapper->getReferralInfoByUserId($ctx->currentUserId);
+            
+            return $info;
+        } catch (\Throwable $e) {
+            $this->logger->error('ProfileServiceImpl.referralInfo exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return $this->respondWithErrorObject(41013);
+        }
+    }
 }

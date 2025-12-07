@@ -28,6 +28,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use function PHPUnit\Framework\returnArgument;
 
 class UserService
 {
@@ -748,9 +749,9 @@ class UserService
         }
     }
 
-    public function Follows(?array $args = []): array | ErrorResponse
+    public function follows(?array $args = []): array | ErrorResponse
     {
-        $this->logger->debug('UserService.Follows started');
+        $this->logger->debug('UserService.follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
@@ -821,23 +822,19 @@ class UserService
                 }
             }
 
-            $counter = count($followers) + count($following);
-
-            return [
-                'status' => 'success',
-                'counter' => $counter,
-                'ResponseCode' => "11101",
-                'affectedRows' => [
-                    'followers' => array_map(
-                        fn (Profile $follower) => $follower->getArrayCopy(),
-                        $followers
-                    ),
-                    'following' => array_map(
-                        fn (Profile $followed) => $followed->getArrayCopy(),
-                        $following
-                    )
-                ]
+            $result = [
+                'followers' => array_map(
+                    fn (Profile $follower) => $follower->getArrayCopy(),
+                    $followers
+                ),
+                'following' => array_map(
+                    fn (Profile $followed) => $followed->getArrayCopy(),
+                    $following
+                )
             ];
+
+            return $result;
+
         } catch (\PDOException $e) {
             $this->logger->error('Database Error: Failed to fetch followers or following data', ['error' => $e->getMessage()]);
             return self::respondWithErrorObject(41104);
@@ -847,12 +844,8 @@ class UserService
         }
     }
 
-    public function getFriends(?array $args = []): array|null
+    public function getFriends(?array $args = []): array|ErrorResponse
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         $userId = $args['userid'] ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -893,7 +886,7 @@ class UserService
 
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-            return self::respondWithError(31007);
+            return self::respondWithErrorObject(31007);
         }
 
         $this->logger->info('Fetching friends list', [
@@ -902,6 +895,7 @@ class UserService
         ]);
 
         try {
+            $usersArray = [];
             $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
 
             if (!empty($users)) {
@@ -911,53 +905,28 @@ class UserService
                     }
                     $usersArray[] = $profile->getArrayCopy();
                 }
-
-                $this->logger->info('Friends list retrieved successfully', ['userCount' => count($usersArray)]);
-                return [
-                    'status' => 'success',
-                    'counter' => count($usersArray),
-                    'ResponseCode' => "11102",
-                    'affectedRows' => $usersArray,
-                ];
             }
-
-            $this->logger->info('No friends found for the user', ['targetUserId' => $userId]);
-            return self::createSuccessResponse(21101);
+            return $usersArray;
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return self::respondWithError(41107);
+            return self::respondWithErrorObject(41107);
         }
     }
 
-    public function getAllFriends(?array $args = []): array|null
+    public function getAllFriends(?array $args = []): array|ErrorResponse
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
-        $this->logger->info('Fetching all friends list', ['offset' => $offset, 'limit' => $limit]);
+        $this->logger->infoWithUser('Fetching all friends list', $this->currentUserId);
 
         try {
             $users = $this->userMapper->fetchAllFriends($offset, $limit);
 
-            if (!empty($users)) {
-                $this->logger->info('All friends list retrieved successfully', ['userCount' => count($users)]);
-                return [
-                    'status' => 'success',
-                    'counter' => count($users),
-                    'ResponseCode' => "11102",
-                    'affectedRows' => $users,
-                ];
-            }
-
-            $this->logger->info('No friends found @ all');
-            return self::createSuccessResponse(21101);
+            return $users;
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
-            return self::respondWithError(41107);
+            return self::respondWithErrorObject(41107);
         }
     }
 

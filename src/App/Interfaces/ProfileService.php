@@ -13,4 +13,5 @@ interface ProfileService
     public function listUsersAdmin(array $args, Context $ctx): array | ErrorResponse;
     public function searchUser(array $args, Context $ctx): array;
     public function userReferralList(array $args, Context $ctx): array;
+    public function referralInfo(array $args, Context $ctx): array|ErrorResponse;
 }

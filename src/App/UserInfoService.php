@@ -21,11 +21,13 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ResponseHelper;
+use function PHPUnit\Framework\returnArgument;
 
 class UserInfoService
 {
@@ -51,16 +53,7 @@ class UserInfoService
         $this->currentUserId = $userId;
     }
 
-    private function checkAuthentication(): bool
-    {
-        if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized action attempted');
-            return false;
-        }
-        return true;
-    }
-
-    public function loadInfoById(): array|false
+    public function loadInfoById(): array | ErrorResponse
     {
 
         $this->logger->debug('UserInfoService.loadLastId started');
@@ -90,12 +83,12 @@ class UserInfoService
                 $affectedRows['userPreferences'] = $resultPreferences;
                 $affectedRows['onboardingsWereShown']   = $onboardings;
 
-                return $this::createSuccessResponse(11002, $affectedRows, false);
+                return $affectedRows;
             }
 
-            return $this::createSuccessResponse(21001);
+            return $this->respondWithErrorObject(41001);
         } catch (\Exception $e) {
-            return $this::respondWithError(41001);
+            return $this->respondWithErrorObject(40301);
         }
     }
 
@@ -204,7 +197,7 @@ class UserInfoService
         return $response;
     }
 
-    public function loadBlocklist(?array $args = []): array
+    public function loadBlocklist(?array $args = []): array|ErrorResponse
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
         $offset = max((int)($args['offset'] ?? 0), 0);
@@ -266,20 +259,10 @@ class UserInfoService
                 'iBlocked' => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
             ];
 
-            $counter = count($affected['blockedBy']) + count($affected['iBlocked']);
-
-            $this->logger->info("UserInfoService.loadBlocklist found", ['counter' => $counter]);
-
-            return [
-                'status' => 'success',
-                'counter' => $counter,
-                'ResponseCode' => '11107',
-                'affectedRows' => $affected,
-            ];
-
+            return $affected;
         } catch (\Throwable $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
-            return $this::respondWithError(41008);
+            return $this->respondWithErrorObject(41008);
         }
     }
     

@@ -100,7 +100,6 @@ class GraphQLSchemaBuilder
         $registry->addProvider(new UserQueryResolver(
             $this->logger,
             $this->profileService,
-            $this->userMapper,
             $this->userInfoService,
             $this->userService
 
