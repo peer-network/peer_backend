@@ -17,7 +17,7 @@ class Context
         public readonly ?array $user,
         public readonly ?string $token,
         public readonly array $dataloaders = [],
-        public readonly ?string $userId = null,
+        public readonly ?string $currentUserId = null,
         public readonly ?int $roles = null,
     ) {
     }

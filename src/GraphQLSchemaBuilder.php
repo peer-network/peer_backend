@@ -218,7 +218,6 @@ class GraphQLSchemaBuilder
         $this->alphaMintService->setCurrentUserId($userid);
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
-        $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
@@ -1056,8 +1055,6 @@ class GraphQLSchemaBuilder
             'hello' => fn (mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
             'searchUser' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
             'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
-            'listUsersAdminV2' => fn (mixed $root, array $args) => $this->profileService->listUsersAdmin($args),
-            'listUsers' => fn (mixed $root, array $args) => $this->profileService->listUsers($args),
             'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn (mixed $root, array $args) => $this->resolvePosts($args),
             'guestListPost' => fn (mixed $root, array $args) => $this->guestListPost($args),
@@ -1880,29 +1877,6 @@ class GraphQLSchemaBuilder
         return $this::respondWithError(41201);
     }
 
-    protected function resolveUserInfo(): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveUserInfo started');
-
-        $results = $this->userInfoService->loadInfoById();
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveUserInfo successful');
-
-            return $results;
-        }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
-        }
-
-        $this->logger->error('Query.resolveUserInfo Failed to find INFO');
-        return $this::respondWithError(41001);
-    }
-
     protected function resolveSearchUser(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -2024,39 +1998,6 @@ class GraphQLSchemaBuilder
             return self::respondWithError(41207);
         }
     }
-
-    
-
-    protected function resolveProfile(array $args): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveProfile started');
-
-        $validation = RequestValidator::validate($args);
-
-        if ($validation instanceof ValidatorErrors) {
-            return $this::respondWithError(
-                $validation->errors[0]
-            );
-        }
-
-        $result = $this->profileService->profile($validation);
-
-        if ($result instanceof ErrorResponse) {
-            return $result->response;
-        }
-
-        $this->logger->info('Query.resolveProfile successful');
-        return $this::createSuccessResponse(
-            11008,
-            $result->getArrayCopy(),
-            false
-        );
-    }
-
     protected function resolveVerifyReferral(array $args): array
     {
 

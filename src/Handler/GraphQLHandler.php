@@ -10,7 +10,6 @@ use Fawaz\GraphQL\Loaders\UserLoader;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
 use GraphQL\Error\FormattedError;
-use GraphQL\Validator\Rules\QueryComplexity;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -75,7 +74,7 @@ class GraphQLHandler implements RequestHandlerInterface
             dataloaders: [
                 'user' => $this->userLoader,
             ],
-            userId: $this->schemaBuilder->getCurrentUserId(),
+            currentUserId: $this->schemaBuilder->getCurrentUserId(),
             roles: $this->schemaBuilder->getUserRoles(),
         );
 

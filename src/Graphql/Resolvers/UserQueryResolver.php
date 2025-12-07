@@ -15,9 +15,6 @@ use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 
-/**
- * Query resolvers for User domain: listUsersV2, getProfile, getUserInfo.
- */
 class UserQueryResolver implements ResolverProvider
 {
     use ResolverHelpers;
@@ -38,7 +35,7 @@ class UserQueryResolver implements ResolverProvider
             'Query' => [
                 'listUsersV2' => $this->withAuth(
                     null,
-                    fn (mixed $root, array $args, Context $ctx) => $this->profileService->listUsers($args)
+                    fn (mixed $root, array $args, Context $ctx) => $this->profileService->listUsers($args,$ctx)
                 ),
                 'getUserInfo' => $this->withAuth(
                     null,
@@ -48,7 +45,7 @@ class UserQueryResolver implements ResolverProvider
                     null, 
                     fn (mixed $root, array $args, Context $ctx) => $this->resolveReferralInfo($args, $ctx)
                 ),
-                
+
                 'listFollowRelations' => $this->withAuth(
                     null,
                     $this->withValidation(
@@ -60,21 +57,61 @@ class UserQueryResolver implements ResolverProvider
                     null,
                     $this->withValidation(
                         [],
-                        fn (mixed $root, array $args, Context $ctx) => $this->resolveBlocklist($args)
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->resolveBlocklist($validated)
                     )
                 ),
                 'getProfile' => $this->withAuth(
                     null,
                     $this->withValidation(
                         [],
-                        fn (mixed $root, array $validated, Context $ctx) => $this->resolveProfile($validated)
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->resolveProfile($validated,$ctx)
+                    )
+                ),
+                'searchUser' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->profileService->searchUser($validated,$ctx)
+                    )
+                ),
+                'searchUserAdmin' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->profileService->searchUser($validated, $ctx)
+                    )
+                ),
+                'listUsersAdminV2' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) =>  $this->profileService->listUsersAdmin($validated,$ctx)
+                    )
+                ),
+                'listUsers' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->profileService->listUsers($validated,$ctx)
                     )
                 ),
             ],
         ];
     }
 
-    private function resolveUserInfo(): ?array
+    private function resolveUserInfo(): array
     {
         $this->logger->debug('UserQueryResolver.resolveUserInfo started');
         $results = $this->userInfoService->loadInfoById();
@@ -92,11 +129,11 @@ class UserQueryResolver implements ResolverProvider
         ];
     }
 
-    private function resolveProfile(array $args): array
+    private function resolveProfile(array $args, Context $ctx): array
     {
         $this->logger->debug('UserQueryResolver.resolveProfile started');
 
-        $result = $this->profileService->profile($args);
+        $result = $this->profileService->profile($args,$ctx);
         if ($result instanceof ErrorResponse) {
             return $result->response;
         }
@@ -114,7 +151,7 @@ class UserQueryResolver implements ResolverProvider
         $this->logger->debug('Query.resolveReferralInfo started');
 
         try {
-            $userId = $ctx->userId;
+            $userId = $ctx->currentUserId;
             $this->logger->info('Current userId in resolveReferralInfo', [
                 'userId' => $userId,
             ]);

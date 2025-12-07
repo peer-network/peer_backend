@@ -21,7 +21,7 @@ class MetaBuilder
      */
     public function build(array $root): array
     {
-        $code = (string)$root['ResponseCode'] ?? '';
+        $code = (string)$root['ResponseCode'];
 
         return [
             'status' => $root['status'] ?? '',

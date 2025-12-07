@@ -81,6 +81,18 @@ class ValidationSpec
         ];
     }
 
+    public static function ip(string $field = 'ip', bool $required = true, int $errorCode = 30257): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateIp', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
     /**
      * Merge multiple partial specs into one spec array.
      */
@@ -123,6 +135,7 @@ class ValidationSpec
             'email' => fn (string $f, bool $r) => self::email($f, $r),
             'username' => fn (string $f, bool $r) => self::username($f, $r),
             'password' => fn (string $f, bool $r) => self::password($f, $r),
+            'ip' => fn (string $f, bool $r): array => self::ip($f, $r),
 
             'offset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'limit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
@@ -141,12 +154,6 @@ class ValidationSpec
                 $spec = array_replace($spec, $map[$field]($field, $required));
                 continue;
             }
-
-            // // Heuristics: fields that look like identifiers → UUID validator
-            // $low = strtolower($field);
-            // if ($low === 'id' || str_ends_with($low, 'id')) {
-            //     $spec = array_replace($spec, self::uuid($field, $required));
-            // }
         }
 
         return $spec;

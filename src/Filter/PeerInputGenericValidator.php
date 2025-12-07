@@ -258,6 +258,32 @@ class PeerInputGenericValidator
         return true;
     }
 
+    protected function validateIp(string $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'ip';
+
+        if ($value === '') {
+            $this->pushError($options, $fieldKey, '30101');
+            return false;
+        }
+
+        $flags = 0;
+        if (!empty($options['ipv4'])) {
+            $flags |= FILTER_FLAG_IPV4;
+        }
+        if (!empty($options['ipv6'])) {
+            $flags |= FILTER_FLAG_IPV6;
+        }
+
+        $valid = filter_var($value, FILTER_VALIDATE_IP, $flags ?: 0) !== false;
+        if ($valid) {
+            return true;
+        }
+
+        $this->pushError($options, $fieldKey, '30103');
+        return false;
+    }
+
     protected function validatePassword(string $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'password';
