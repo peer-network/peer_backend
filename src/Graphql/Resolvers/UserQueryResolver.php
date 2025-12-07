@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Fawaz\GraphQL\Resolvers;
 
 use Fawaz\App\Interfaces\ProfileService;
+use Fawaz\App\Role;
 use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
-use Fawaz\Database\UserMapper;
 use Fawaz\GraphQL\Context;
 use Fawaz\GraphQL\ResolverProvider;
 use Fawaz\GraphQL\Support\ResolverHelpers;
@@ -92,7 +92,7 @@ class UserQueryResolver implements ResolverProvider
                     )
                 ),
                 'searchUserAdmin' => $this->withAuth(
-                    null,
+                    [Role::ADMIN],
                     $this->withValidation(
                         [],
                         fn (
@@ -101,7 +101,7 @@ class UserQueryResolver implements ResolverProvider
                     )
                 ),
                 'listUsersAdminV2' => $this->withAuth(
-                    null,
+                    [Role::ADMIN],
                     $this->withValidation(
                         [],
                         fn (
@@ -149,7 +149,7 @@ class UserQueryResolver implements ResolverProvider
         ];
     }
 
-    private function resolveUserInfo(Context $ctx): array
+    public function resolveUserInfo(Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveUserInfo started', $ctx->currentUserId);
         $results = $this->userInfoService->loadInfoById();
@@ -164,7 +164,7 @@ class UserQueryResolver implements ResolverProvider
         );
     }
 
-    private function resolveProfile(array $args, Context $ctx): array
+    public function resolveProfile(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveProfile started',$ctx->currentUserId);
 
@@ -180,7 +180,7 @@ class UserQueryResolver implements ResolverProvider
         );
     }
 
-    protected function resolveReferralInfo(array $args, Context $ctx): array
+    public function resolveReferralInfo(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveReferralInfo started', $ctx->currentUserId);
 
@@ -200,26 +200,38 @@ class UserQueryResolver implements ResolverProvider
         ]);
     }
 
-    protected function resolveFollows(array $args, Context $ctx): array
+    public function resolveFollows(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveFollows started', $ctx->currentUserId);
 
-        $result = $this->userService->Follows($args);
+        $result = $this->userService->follows($args);
 
         if ($result instanceof ErrorResponse) {
             return $result->response;
         }
 
-        $result['counter'] = count($result['followers']) + count($result['following']);
+        $followersCount = count($result['followers'] ?? []);
+        $followingCount = count($result['following'] ?? []);
+        $result['all'] = array_merge($result['followers'] ?? [], $result['following'] ?? []);
+        $total = $followersCount + $followingCount;
 
-        return self::createSuccessResponse(
+        $this->logger->info(
+            'Follow relations retrieved',
+            [
+                'followers' => $followersCount,
+                'following' => $followingCount,
+                'counter' => $total,
+            ]
+        );
+
+        return $this->createSuccessResponse(
             11101,
             $result,
             true,
-            'counter'
+            'all'
         );
     }
-    protected function resolveBlocklist(array $args, Context $ctx): array
+    public function resolveBlocklist(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveBlocklist started', $ctx->currentUserId);
 
@@ -229,19 +241,29 @@ class UserQueryResolver implements ResolverProvider
             return $result->response;
         }
 
-        $result['counter'] = count($result['blockedBy']) + count($result['iBlocked']);
+        $blockedByCount = count($result['blockedBy'] ?? []);
+        $iBlockedCount = count($result['iBlocked'] ?? []);
+        $result['blocked'] = array_merge($result['blockedBy'] ?? [], $result['iBlocked'] ?? []);
+        $total = $blockedByCount + $iBlockedCount;
 
-        $this->logger->info('loadBlocklist list retrieved successfully', ['userCount' => count($result)]);
+        $this->logger->info(
+            'Blocklist retrieved successfully',
+            [
+                'blockedBy' => $blockedByCount,
+                'iBlocked' => $iBlockedCount,
+                'counter' => $total,
+            ]
+        );
         
-        return self::createSuccessResponse(
+        return $this->createSuccessResponse(
             11107,
             $result,
             true,
-            'counter'
+            'blocked'
         );
     }
 
-    protected function resolveFriends(array $args, Context $ctx): ?array
+    public function resolveFriends(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveFriends started', $ctx->currentUserId);
 
@@ -253,13 +275,13 @@ class UserQueryResolver implements ResolverProvider
         
         $this->logger->info('Friends list retrieved successfully', ['userCount' => count($result)]);
         
-        return self::createSuccessResponse(
+        return $this->createSuccessResponse(
             count($result) > 0 ? 11102 : 21101,
             $result
         );
     }
 
-    protected function resolveAllFriends(array $args, Context $ctx): ?array
+    public function resolveAllFriends(array $args, Context $ctx): array
     {
         $this->logger->debugWithUser('UserQueryResolver.resolveAllFriends started', $ctx->currentUserId);
 
@@ -271,7 +293,7 @@ class UserQueryResolver implements ResolverProvider
 
         $this->logger->info('All friends list retrieved successfully', ['userCount' => count($result)]);
         
-        return self::createSuccessResponse(
+        return $this->createSuccessResponse(
             count($result) > 0 ? 11102 : 21101,
             $result
         );
