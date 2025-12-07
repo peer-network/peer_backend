@@ -37,9 +37,9 @@ trait ResponseHelper
         );
     }
 
-    private static function createSuccessResponseObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): SuccessResponse
+    private function createSuccessResponseObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): SuccessResponse
     {
-        return new SuccessResponse(
+        $success =  new SuccessResponse(
             self::createResponse(
                 $responseCode,
                 $data,
@@ -48,6 +48,8 @@ trait ResponseHelper
                 true
             )
         );
+        $this->logResponsePayload($success->response, false);
+        return $success;
     }
 
     private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
@@ -61,9 +63,9 @@ trait ResponseHelper
         );
     }
 
-    private static function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): ErrorResponse
+    private function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): ErrorResponse
     {
-        return new ErrorResponse(
+        $error =  new ErrorResponse(
             self::createResponse(
                 $responseCode,
                 $data,
@@ -72,6 +74,8 @@ trait ResponseHelper
                 true
             )
         );
+        $this->logResponsePayload($error->response, true);
+        return $error;
     }
 
     private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
@@ -102,6 +106,35 @@ trait ResponseHelper
         }
 
         return $response;
+    }
+
+    private function logResponsePayload(array $response, bool $isError): void
+    {
+        try {
+            if (!property_exists($this, 'logger')) {
+                return;
+            }
+            $logger = $this->logger;
+            if (!$logger instanceof PeerLoggerInterface) {
+                return;
+            }
+
+            $context = [
+                'ResponseCode' => $response['ResponseCode'] ?? null,
+            ];
+
+            if (isset($response['counter'])) {
+                $context['counter'] = $response['counter'];
+            }
+
+            if ($isError) {
+                $logger->error('ResponseHelper.error', $context);
+            } else {
+                $logger->debug('ResponseHelper.success',  $context);
+            }
+        } catch (\Throwable $e) {
+            // Swallow logging errors to avoid impacting responses
+        }
     }
 
     private function generateUUID(): string

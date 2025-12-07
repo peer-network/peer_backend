@@ -82,7 +82,6 @@ final class ProfileServiceImpl implements ProfileService
             );
 
             if (!$profileData) {
-                $this->logger->warning('Query.resolveProfile User not found');
                 return self::respondWithErrorObject(31007);
             }
             /** @var Profile $profileData */
@@ -98,13 +97,13 @@ final class ProfileServiceImpl implements ProfileService
                 'userid' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this::respondWithErrorObject(31007);
+            return $this->respondWithErrorObject(31007);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
                 'userid' => $userId,
                 'exception' => $e->getMessage(),
             ]);
-            return $this::respondWithErrorObject(41007);
+            return $this->respondWithErrorObject(41007);
         }
     }
 

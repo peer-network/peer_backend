@@ -24,3 +24,6 @@ parameters:
         - '#Call to static method .+ on an unknown class .+#'
         - '#Invoking callable on an unknown class .+#'
         - '#If condition is always false#'
+
+        - identifier: function.alreadyNarrowedType
+        - identifier: instanceof.alwaysTrue

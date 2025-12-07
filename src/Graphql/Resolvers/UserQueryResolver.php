@@ -179,7 +179,7 @@ class UserQueryResolver implements ResolverProvider
             return $result->response;
         }
 
-        return $this::createSuccessResponse(
+        return $this->createSuccessResponse(
             11008,
             $result->getArrayCopy()
         );
@@ -199,19 +199,19 @@ class UserQueryResolver implements ResolverProvider
 
             $info = $this->userMapper->getReferralInfoByUserId($ctx->currentUserId);
             if (empty($info)) {
-                return $this::createSuccessResponse(21002);
+            return $this->createSuccessResponse(21002);
             }
 
-            return $this::createSuccessResponse(11011, [
+            return $this->createSuccessResponse(11011, [
                 'referralUuid' => $info['referral_uuid'] ?? '',
                 'referralLink' => $info['referral_link'] ?? '',
-            ], false);
+            ]);
         } catch (\Throwable $e) {
             $this->logger->error('Query.resolveReferralInfo exception', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return $this::respondWithError(41013);
+            return $this->respondWithError(41013);
         }
     }
 
@@ -219,25 +219,25 @@ class UserQueryResolver implements ResolverProvider
     {
         $this->logger->debugWithUser('Query.resolveFollows started', $ctx->currentUserId);
 
-            $results = $this->userService->Follows($args);
+        $results = $this->userService->Follows($args);
 
-            if ($results instanceof ErrorResponse) {
-                return $results->response;
-            }
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        }
 
-            $this->logger->info('Query.resolveProfile successful');
+        $this->logger->info('Query.resolveProfile successful');
         return $results;
     }
     protected function resolveBlocklist(array $args, Context $ctx): ?array {
         $this->logger->debugWithUser('Query.resolveBlocklist started', $ctx->currentUserId);
 
-            $response = $this->userInfoService->loadBlocklist($args);
+        $response = $this->userInfoService->loadBlocklist($args);
         if (is_array($response)) {
             return $response;
         }
 
         $this->logger->errorWithUser('Query.resolveBlocklist invalid response', $ctx->currentUserId);
-        return $this::respondWithError(41105);
+        return $this->respondWithError(41105);
     }
 
     protected function resolveFriends(array $args, Context $ctx): ?array
@@ -256,7 +256,7 @@ class UserQueryResolver implements ResolverProvider
         }
 
         $this->logger->warning('Query.resolveFriends Users not found');
-        return $this::createSuccessResponse(21101);
+        return $this->createSuccessResponse(21101);
     }
 
     protected function resolveAllFriends(array $args, Context $ctx): ?array
@@ -275,6 +275,6 @@ class UserQueryResolver implements ResolverProvider
         }
 
         $this->logger->warning('Query.resolveAllFriends No listFriends found');
-        return $this::createSuccessResponse(21101);
+        return $this->createSuccessResponse(21101);
     }
 }
