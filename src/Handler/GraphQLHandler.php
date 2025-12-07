@@ -74,7 +74,9 @@ class GraphQLHandler implements RequestHandlerInterface
             token: $bearerToken,
             dataloaders: [
                 'user' => $this->userLoader,
-            ]
+            ],
+            userId: $this->schemaBuilder->getCurrentUserId(),
+            roles: $this->schemaBuilder->getUserRoles(),
         );
 
         $config = ServerConfig::create()

@@ -16,8 +16,9 @@ class Context
         public readonly ServerRequestInterface $request,
         public readonly ?array $user,
         public readonly ?string $token,
-        public readonly array $dataloaders = []
+        public readonly array $dataloaders = [],
+        public readonly ?string $userId = null,
+        public readonly ?int $roles = null,
     ) {
     }
 }
-

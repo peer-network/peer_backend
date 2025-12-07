@@ -103,19 +103,19 @@ class GraphQLSchemaBuilder
         // Merge remaining in-file resolvers until fully migrated
         $registry->add($this->buildResolvers());
         $registry->addProvider(new UserQueryResolver(
-            $this->logger,
-            $this->profileService,
-            $this->userInfoService
+            logger: $this->logger,
+            profileService: $this->profileService,
+            userInfoService: $this->userInfoService
         ));
         $registry->addProvider(new UserTypeResolver(
             $this->logger,
             $this->metaBuilder
         ));
         $registry->addProvider(new UserMutationResolver(
-            $this->logger,
-            $this->userService,
-            $this->userInfoService,
-            $this->commentInfoService,
+            logger: $this->logger,
+            userService: $this->userService,
+            userInfoService: $this->userInfoService,
+            commentInfoService: $this->commentInfoService,
         ));
         $this->resolvers = $registry->build();
     }
@@ -236,6 +236,16 @@ class GraphQLSchemaBuilder
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
+    }
+
+    public function getCurrentUserId(): ?string
+    {
+        return $this->currentUserId;
+    }
+
+    public function getUserRoles(): ?int
+    {
+        return $this->userRoles;
     }
 
     public function buildResolvers(): array
@@ -1068,7 +1078,6 @@ class GraphQLSchemaBuilder
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
-            'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
             'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
@@ -1093,7 +1102,6 @@ class GraphQLSchemaBuilder
             'requestPasswordReset' => fn (mixed $root, array $args) => $this->userService->requestPasswordReset($args['email']),
             'resetPasswordTokenVerify' => fn (mixed $root, array $args) => $this->userService->resetPasswordTokenVerify($args['token']),
             'resetPassword' => fn (mixed $root, array $args) => $this->userService->resetPassword($args),
-            'register' => fn (mixed $root, array $args) => $this->createUser($args['input']),
             'verifyAccount' => fn (mixed $root, array $args) => $this->verifyAccount($args['userid']),
             'login' => fn (mixed $root, array $args) => $this->login($args['email'], $args['password']),
             'refreshToken' => fn (mixed $root, array $args) => $this->refreshToken($args['refreshToken']),
@@ -1168,55 +1176,7 @@ class GraphQLSchemaBuilder
         }
     }
 
-    protected function createUser(array $args): ?array
-    {
-        $this->logger->debug('Query.createUser started');
 
-        $response = $this->userService->createUser($args);
-        if (isset($response['status']) && $response['status'] === 'error') {
-            return $response;
-        }
-
-        if (!empty($response)) {
-            return $response;
-        }
-
-        $this->logger->error('Query.createUser No data found');
-        return $this::respondWithError(41105);
-    }
-
-    protected function resolveBlocklist(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $validation = RequestValidator::validate($args, []);
-
-        if ($validation instanceof ValidatorErrors) {
-            return $this::respondWithError(
-                $validation->errors[0]
-            );
-        }
-
-        $this->logger->debug('Query.resolveBlocklist started');
-
-        $response = $this->userInfoService->loadBlocklist($args);
-        if (isset($response['status']) && $response['status'] === 'error') {
-            return $response;
-        }
-
-        if (empty($response['counter'])) {
-            return $this::createSuccessResponse(11107, [], false);
-        }
-
-        if (is_array($response) || !empty($response)) {
-            return $response;
-        }
-
-        $this->logger->error('Query.resolveBlocklist No data found');
-        return $this::respondWithError(41105);
-    }
 
     protected function resolveFetchWinsLog(array $args): ?array
     {
