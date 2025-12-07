@@ -67,7 +67,6 @@ class GraphQLSchemaBuilder
     protected array $resolvers = [];
     protected ?string $currentUserId = null;
     protected ?int $userRoles = 0;
-    private MetaBuilder $metaBuilder;
 
     public function __construct(
         protected PeerLoggerInterface $logger,
@@ -91,8 +90,10 @@ class GraphQLSchemaBuilder
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected MetaBuilder $metaBuilder
     ) {
+        $this->metaBuilder = new MetaBuilder($this->responseMessagesProvider, $this->logger);
         // Registry-based composition of resolvers
         $registry = new ResolverRegistry();
 
@@ -102,21 +103,21 @@ class GraphQLSchemaBuilder
         // Merge remaining in-file resolvers until fully migrated
         $registry->add($this->buildResolvers());
         $registry->addProvider(new UserQueryResolver(
-            logger: $this->logger,
-            profileService: $this->profileService,
-            userInfoService: $this->userInfoService,
+            $this->logger,
+            $this->profileService,
+            $this->userInfoService
         ));
         $registry->addProvider(new UserTypeResolver(
-            logger: $this->logger,
+            $this->logger,
+            $this->metaBuilder
         ));
         $registry->addProvider(new UserMutationResolver(
-            logger: $this->logger,
-            userService: $this->userService,
-            userInfoService: $this->userInfoService,
-            commentInfoService: $this->commentInfoService,
+            $this->logger,
+            $this->userService,
+            $this->userInfoService,
+            $this->commentInfoService,
         ));
         $this->resolvers = $registry->build();
-        $this->metaBuilder = new MetaBuilder($this->responseMessagesProvider, $this->logger);
     }
 
     public function getQueriesDependingOnRole(): ?string
@@ -188,14 +189,6 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                // Validate that the provided bearer access token exists in DB and is not expired
-                // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                //     $this->logger->warning('Access token not found or expired for user', [
-                //         'userId' => $decodedToken->uid,
-                //     ]);
-                //     $this->currentUserId = null;
-                //     return;
-                // }
 
                 $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                 if ($user) {
@@ -245,39 +238,13 @@ class GraphQLSchemaBuilder
         $this->advertisementService->setCurrentUserId($userid);
     }
 
-    protected function getStatusNameByID(int $status): ?string
-    {
-        $statusCode = $status;
-        $statusMap = Status::getMap();
-
-        return $statusMap[$statusCode] ?? null;
-    }
-
     public function buildResolvers(): array
     {
         return [
             'Query' => $this->buildQueryResolvers(),
             'Mutation' => $this->buildMutationResolvers(),
             'Subscription' => $this->buildSubscriptionResolvers(),
-            'UserPreferencesResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.DefaultResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'UserPreferences' => [
-                'contentFilteringSeverityLevel' => function (array $root): ?string {
-                    $this->logger->debug('Query.UserPreferences Resolvers');
-                    return $root['contentFilteringSeverityLevel'];
-                },
-                'onboardingsWereShown' => function (array $root): array {
-                    $this->logger->info('Query.UserPreferences.onboardingsWereShown Resolver');
-                    return $root['onboardingsWereShown'] ?? [];
-                },
-            ],
+            
             'TodaysInteractionsData' => [
                 'totalInteractions' => function (array $root): int {
                     $this->logger->debug('Query.TodaysInteractionsData Resolvers');
@@ -348,185 +315,6 @@ class GraphQLSchemaBuilder
                 'username' => fn(array $root): string => $root['username'] ?? '',
                 'slug' => fn(array $root): int => $root['slug'] ?? 0,
                 'img' => fn(array $root): string => $root['img'] ?? '',
-            ],
-            'User' => [
-                'id' => function (array $root): string {
-                    $this->logger->debug('Query.User Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-                'situation' => function (array $root): string {
-                    $status = $root['status'] ?? 0;
-                    return $this->getStatusNameByID($status) ?? '';
-                },
-                'email' => fn(array $root): string => $root['email'] ?? '',
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'password' => fn(array $root): string => $root['password'] ?? '',
-                'status' => fn(array $root): int => $root['status'] ?? 0,
-                'verified' => fn(array $root): int => $root['verified'] ?? 0,
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'roles_mask' => fn(array $root): int => $root['roles_mask'] ?? 0,
-                'ip' => fn(array $root): string => $root['ip'] ?? '',
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'biography' => fn(array $root): string => $root['biography'] ?? '',
-                'liquidity' => fn(array $root): float => $root['liquidity'] ?? 0.0,
-                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
-                'updatedat' => fn(array $root): string => $root['updatedat'] ?? '',
-            ],
-            'UserInfoResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.UserInfoResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'UserListResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.UserListResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => fn(array $root): int => $root['counter'] ?? 0,
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'Profile' => [
-                'id' => function (array $root): string {
-                    $this->logger->debug('Query.User Resolvers');
-                    return $root['uid'] ?? '';
-                },
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-                'situation' => function (array $root): string {
-                    $status = $root['status'] ?? 0;
-                    return $this->getStatusNameByID(0) ?? '';
-                },
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'status' => fn(array $root): int => $root['status'] ?? 0,
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'biography' => fn(array $root): string => $root['biography'] ?? '',
-                'amountposts' => fn(array $root): int => $root['amountposts'] ?? 0,
-                'amounttrending' => fn(array $root): int => $root['amounttrending'] ?? 0,
-                'amountfollower' => fn(array $root): int => $root['amountfollower'] ?? 0,
-                'amountfollowed' => fn(array $root): int => $root['amountfollowed'] ?? 0,
-                'amountfriends' => fn(array $root): int => $root['amountfriends'] ?? 0,
-                'amountblocked' => fn(array $root): int => $root['amountblocked'] ?? 0,
-                'amountreports' => fn(array $root): int => $root['amountreports'] ?? 0,
-                'isfollowed' => fn(array $root): bool => $root['isfollowed'] ?? false,
-                'isfollowing' => fn(array $root): bool => $root['isfollowing'] ?? false,
-                'isreported' => fn(array $root): bool => $root['isreported'] ?? false,
-                'imageposts' => fn(array $root): array => [],
-                'textposts' => fn(array $root): array => [],
-                'videoposts' => fn(array $root): array => [],
-                'audioposts' => fn(array $root): array => [],
-            ],
-            'ProfileInfo' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.ProfileInfo Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'ProfilePostMedia' => [
-                'id' => function (array $root): string {
-                    $this->logger->debug('Query.ProfilePostMedia Resolvers');
-                    return $root['postid'] ?? '';
-                },
-                'title' => fn(array $root): string => $root['title'] ?? '',
-                'contenttype' => fn(array $root): string => $root['contenttype'] ?? '',
-                'media' => fn(array $root): string => $root['media'] ?? '',
-                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
-            ],
-            'BlockedUsers' => [
-                'iBlocked' => function (array $root): array {
-                    $this->logger->debug('Query.BlockedUsers Resolvers');
-                    return $root['iBlocked'] ?? [];
-                },
-                'blockedBy' => fn(array $root): array => $root['blockedBy'] ?? [],
-            ],
-            'BlockedUser' => [
-                'userid' => function (array $root): string {
-                    $this->logger->debug('Type.BlockedUser.userid');
-                    return $root['uid'] ?? '';
-                },
-                'img' => fn(array $root): string => $root['img'] ?? '',
-                'username' => fn(array $root): string => $root['username'] ?? '',
-                'slug' => fn(array $root): int => $root['slug'] ?? 0,
-                'visibilityStatus' => fn(array $root): string => strtoupper($root['visibility_status'] ?? 'NORMAL'),
-                'hasActiveReports' => function (array $root): bool {
-                    $reports = $root['reports'] ?? 0;
-                    return (int)$reports > 0;
-                },
-                'isHiddenForUsers' => fn(array $root): bool => isset($root['isHiddenForUsers']) ? (bool)$root['isHiddenForUsers'] : false,
-            ],
-            'BlockedUsersResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.BlockedUsersResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => fn(array $root): int => $root['counter'] ?? 0,
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'FollowRelations' => [
-                'followers' => function (array $root): array {
-                    $this->logger->debug('Query.FollowRelations Resolvers');
-                    return $root['followers'] ?? [];
-                },
-                'following' => fn(array $root): array => $root['following'] ?? [],
-            ],
-            'FollowRelationsResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.FollowRelationsResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => fn(array $root): int => $root['counter'] ?? 0,
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'UserFriendsResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.UserFriendsResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'counter' => fn(array $root): int => $root['counter'] ?? 0,
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'BasicUserInfoResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.BasicUserInfoResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
-            ],
-            'FollowStatusResponse' => [
-                'meta' => fn(array $root): array => $this->metaBuilder->build($root),
-                'status' => function (array $root): string {
-                    $this->logger->debug('Query.FollowStatusResponse Resolvers');
-                    return $root['status'] ?? '';
-                },
-                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
-                'isfollowing' => fn(array $root): bool => $root['isfollowing'] ?? false,
             ],
             'Post' => [
                 'id' => function (array $root): string {
@@ -634,7 +422,7 @@ class GraphQLSchemaBuilder
                 'isliked' => fn(array $root): bool => $root['isliked'] ?? false,
                 'user' => fn(array $root): array => $root['user'] ?? [],
             ],
-          'CommentInfoResponse' => [
+            'CommentInfoResponse' => [
                 'meta' => fn(array $root): array => $this->metaBuilder->build($root),
                 'status' => function (array $root): string {
                     $this->logger->debug('Query.CommentInfoResponse Resolvers');
@@ -760,25 +548,6 @@ class GraphQLSchemaBuilder
                     $this->logger->debug('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
                 },
-            ],
-            'UserInfo' => [
-                'userid' => function (array $root): string {
-                    $this->logger->debug('Query.UserInfo Resolvers');
-                    return $root['userid'] ?? '';
-                },
-                'liquidity' => fn(array $root): float => $root['liquidity'] ?? 0.0,
-                'isfollowed' => fn(array $root): bool => $root['isfollowed'] ?? false,
-                'isfollowing' => fn(array $root): bool => $root['isfollowing'] ?? false,
-                'isreported' => fn(array $root): bool => $root['isreported'] ?? false,
-                'amountreports' => fn(array $root): int => $root['reports'] ?? 0,
-                'amountposts' => fn(array $root): int => $root['amountposts'] ?? 0,
-                'amountblocked' => fn(array $root): int => $root['amountblocked'] ?? 0,
-                'amountfollowed' => fn(array $root): int => $root['amountfollowed'] ?? 0,
-                'amountfollower' => fn(array $root): int => $root['amountfollower'] ?? 0,
-                'amountfriends' => fn(array $root): int => $root['amountfriends'] ?? 0,
-                'invited' => fn(array $root): string => $root['invited'] ?? '',
-                'updatedat' => fn(array $root): string => $root['updatedat'] ?? '',
-                'userPreferences' => fn(array $root): array => $root['userPreferences'] ?? [],
             ],
             'StandardResponse' => [
                 'meta' => fn(array $root): array => $this->metaBuilder->build($root),
