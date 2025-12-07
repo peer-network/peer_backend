@@ -141,10 +141,6 @@ final class ProfileServiceImpl implements ProfileService
 
     public function listUsers(array $args): array
     {
-        if ($this->currentUserId === null) {
-            return $this::respondWithError(60501);
-        }
-
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
             return $validationResult;

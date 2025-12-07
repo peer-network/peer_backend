@@ -96,10 +96,6 @@ class CommentInfoService
 
     public function likeComment(string $commentId): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
         if (!self::isValidUUID($commentId)) {
             return $this::respondWithError(30201);
         }
@@ -170,10 +166,6 @@ class CommentInfoService
     public function reportComment(string $commentId): array
     {
         $this->logger->debug('CommentInfoService.reportComment started');
-
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
 
         if (!self::isValidUUID($commentId)) {
             return $this::respondWithError(30201);

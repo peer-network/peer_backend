@@ -101,10 +101,6 @@ class UserInfoService
 
     public function toggleUserFollow(string $followedUserId): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
         if (!self::isValidUUID($followedUserId)) {
             return $this::respondWithError(30201);
         }
@@ -158,10 +154,6 @@ class UserInfoService
 
     public function toggleUserBlock(string $blockedUserId): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
         if (!self::isValidUUID($blockedUserId)) {
             return $this::respondWithError(30201);
         }
@@ -333,10 +325,6 @@ class UserInfoService
 
     public function updateBio(string $biography): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
         if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
@@ -391,10 +379,6 @@ class UserInfoService
 
     public function setProfilePicture(string $mediaFile, string $contentType = 'image'): array
     {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
         if (trim($mediaFile) === '') {
             return $this::respondWithError(31102);
         }
@@ -446,10 +430,6 @@ class UserInfoService
     public function reportUser(string $reported_userid): array
     {
         $this->logger->debug('UserInfoService.reportUser started');
-
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
 
         if (!self::isValidUUID($reported_userid)) {
             return $this::respondWithError(30201);

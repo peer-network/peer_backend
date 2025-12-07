@@ -559,10 +559,6 @@ class UserService
 
     public function setPassword(?array $args = []): array
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         if (empty($args)) {
             return self::respondWithError(30101);
         }
@@ -612,10 +608,6 @@ class UserService
 
     public function setEmail(?array $args = []): array
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         if (empty($args)) {
             return self::respondWithError(30101);
         }
@@ -671,10 +663,6 @@ class UserService
 
     public function setUsername(?array $args = []): array
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         if (empty($args['username'])) {
             return self::respondWithError(30101);
         }
@@ -726,10 +714,6 @@ class UserService
 
     public function deleteAccount(string $expassword): array
     {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
         if (empty($expassword)) {
             return self::respondWithError(30101);
         }
