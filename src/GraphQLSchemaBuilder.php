@@ -1053,9 +1053,6 @@ class GraphQLSchemaBuilder
 
         return [
             'hello' => fn (mixed $root, array $args, mixed $context) => $this->resolveHello($root, $args, $context),
-            'searchUser' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
-            'searchUserAdmin' => fn (mixed $root, array $args) => $this->resolveSearchUser($args),
-            'listFriends' => fn (mixed $root, array $args) => $this->resolveFriends($args),
             'listPosts' => fn (mixed $root, array $args) => $this->resolvePosts($args),
             'guestListPost' => fn (mixed $root, array $args) => $this->guestListPost($args),
             'listAdvertisementPosts' => fn (mixed $root, array $args) => $this->resolveAdvertisementsPosts($args),
@@ -1069,11 +1066,9 @@ class GraphQLSchemaBuilder
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
-            'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),
             'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
-            'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
             'postEligibility' => fn (mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn (mixed $root, array $args) => $this->transactionsHistory($args),
@@ -1233,126 +1228,6 @@ class GraphQLSchemaBuilder
 
         $this->logger->warning('Query.resolveFetchPaysLog No records found');
         return $this::createSuccessResponse(21202);
-    }
-
-    protected function resolveReferralInfo(): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveReferralInfo started');
-
-        try {
-            $userId = $this->currentUserId;
-            $this->logger->info('Current userId in resolveReferralInfo', [
-                'userId' => $userId,
-            ]);
-
-
-            $info = $this->userMapper->getReferralInfoByUserId($userId);
-            if (empty($info)) {
-                return $this::createSuccessResponse(21002);
-            }
-
-            $response = [
-                'referralUuid' => $info['referral_uuid'] ?? '',
-                'referralLink' => $info['referral_link'] ?? '',
-                'status' => 'success',
-                'ResponseCode' => "11011"
-            ];
-
-            return $response;
-        } catch (\Throwable $e) {
-            $this->logger->error('Query.resolveReferralInfo exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return $this::respondWithError(41013);
-        }
-    }
-
-    protected function resolveReferralList(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveReferralList started');
-
-        $userId = $this->currentUserId;
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-        try {
-            $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
-
-            $referralUsers = [
-                'invitedBy' => [],
-                'iInvited' => [],
-            ];
-
-            $deletedUserSpec = new DeletedUserSpec(
-                ContentFilteringCases::searchById,
-                ContentType::user
-            );
-            $systemUserSpec = new SystemUserSpec(
-                ContentFilteringCases::searchById,
-                ContentType::user
-            );
-
-            $illegalContentFilterSpec = new IllegalContentFilterSpec(
-                ContentFilteringCases::searchById,
-                ContentType::user
-            );
-
-            $specs = [
-                $illegalContentFilterSpec,
-                $systemUserSpec,
-                $deletedUserSpec,
-            ];
-
-
-            $inviter = $this->userMapper->getInviterByInvitee($userId, $specs);
-            $referralUsers['invitedBy'] = null;
-            if (!empty($inviter)) {
-                $this->logger->info('Inviter data', ['inviter' => $inviter->getUserId()]);
-                ContentReplacer::placeholderProfile($inviter, $specs);
-                $referralUsers['invitedBy'] = $inviter->getArrayCopy();
-            }
-
-            $offset = $args['offset'] ?? 0;
-            $limit = $args['limit'] ?? 20;
-
-            $invited = $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
-
-            if (!empty($invited)) {
-                foreach ($invited as $user) {
-                    ContentReplacer::placeholderProfile($user, $specs);
-                    $referralUsers['iInvited'][] = $user->getArrayCopy();
-                }
-            }
-
-            if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
-                return $this::createSuccessResponse(21003, $referralUsers, false);
-            }
-
-            $this->logger->info('Returning final referralList response', ['referralUsers' => $referralUsers]);
-
-            return [
-                'status' => 'success',
-                'ResponseCode' => "11011",
-                'counter' => count($referralUsers['iInvited']),
-                'affectedRows' => $referralUsers
-            ];
-        } catch (\Throwable $e) {
-            $this->logger->error('Query.resolveReferralList exception', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return $this::respondWithError(41013);
-        }
     }
 
     protected function resolveActionPrices(): ?array
@@ -1877,127 +1752,6 @@ class GraphQLSchemaBuilder
         return $this::respondWithError(41201);
     }
 
-    protected function resolveSearchUser(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (empty($args)) {
-            return $this::respondWithError(30101);
-        }
-
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
-        $userId = $args['userid'] ?? null;
-        $email = $args['email'] ?? null;
-        $status = $args['status'] ?? null;
-        $verified = $args['verified'] ?? null;
-        $ip = $args['ip'] ?? null;
-
-        if (empty($args['username']) && empty($args['userid']) && empty($args['email']) && !isset($args['status']) && !isset($args['verified']) && !isset($args['ip'])) {
-            return $this::respondWithError(30102);
-        }
-
-        if (!empty($username) && !empty($userId)) {
-            return $this::respondWithError(31012);
-        }
-
-        if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this::respondWithError(30201);
-        }
-
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
-            return $this::respondWithError(30202);
-        }
-
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
-            return $this::respondWithError(30202);
-        }
-
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
-        }
-
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
-
-        $this->logger->debug('Query.resolveSearchUser started');
-
-        if ($this->userRoles === 16) {
-            $args['includeDeleted'] = true;
-        }
-
-        $contentFilterCase = ContentFilteringCases::searchByMeta;
-        if (!empty($userId)) {
-            $contentFilterCase = ContentFilteringCases::searchById;
-            if ($userId == $this->currentUserId) {
-
-                $contentFilterCase = ContentFilteringCases::myprofile;
-            }
-            $args['uid'] = $userId;
-        }
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
-        $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterCase,
-            ContentType::user
-        );
-        $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
-            ContentType::user
-        );
-        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterCase,
-            $contentFilterBy,
-            ContentType::user,
-            $this->currentUserId
-        );
-        $illegalContentFilterSpec = new IllegalContentFilterSpec(
-            $contentFilterCase,
-            ContentType::user
-        );
-        $specs = [
-            $illegalContentFilterSpec,
-            $systemUserSpec,
-            $deletedUserSpec,
-            $hiddenContentFilterSpec,
-        ];
-
-
-        try {
-            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
-            $usersArray = [];
-            foreach ($users as $profile) {
-                if ($profile instanceof ProfileReplaceable) {
-                    ContentReplacer::placeholderProfile($profile, $specs);
-                }
-                $usersArray[] = $profile->getArrayCopy();
-            }
-
-            if (!empty($usersArray)) {
-                $this->logger->info('Query.resolveSearchUser successful', ['userCount' => count($usersArray)]);
-                return [
-                    'status' => 'success',
-                    'counter' => count($usersArray),
-                    'ResponseCode' => "11009",
-                    'affectedRows' => $usersArray,
-                ];
-            } else {
-                if ($userId) {
-                    return self::respondWithError(31007);
-                }
-                return self::createSuccessResponse(21001);
-            }
-        } catch (\Throwable $e) {
-            return self::respondWithError(41207);
-        }
-    }
     protected function resolveVerifyReferral(array $args): array
     {
 
@@ -2011,82 +1765,6 @@ class GraphQLSchemaBuilder
         $result = $this->userService->verifyReferral($referralString);
 
         return $result;
-    }
-
-    protected function resolveFriends(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $validation = RequestValidator::validate($args, []);
-
-        if ($validation instanceof ValidatorErrors) {
-            return $this::respondWithError(
-                $validation->errors[0]
-            );
-        }
-
-        $this->logger->debug('Query.resolveFriends started');
-
-        $results = $this->userService->getFriends($validation);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveFriends successful');
-
-            return $results;
-        }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
-        }
-
-        $this->logger->warning('Query.resolveFriends Users not found');
-        return $this::createSuccessResponse(21101);
-    }
-
-    protected function resolveAllFriends(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveAllFriends started');
-
-        $results = $this->userService->getAllFriends($args);
-        if (isset($results['status']) && $results['status'] === 'success') {
-            $this->logger->info('Query.resolveAllFriends successful');
-
-            return $results;
-        }
-
-        if (isset($results['status']) && $results['status'] === 'error') {
-            return $this::respondWithError($results['ResponseCode']);
-        }
-
-        $this->logger->warning('Query.resolveAllFriends No listFriends found');
-        return $this::createSuccessResponse(21101);
-    }
-
-    protected function resolveUsers(array $args): ?array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            return $validationResult;
-        }
-
-        $this->logger->debug('Query.resolveUsers started');
-
-        if ($this->userRoles === 16) {
-            $results = $this->userService->fetchAllAdvance($args);
-        } else {
-            $results = $this->userService->fetchAll($args);
-        }
-
-        return $results;
     }
 
     /**

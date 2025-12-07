@@ -107,6 +107,33 @@ class UserQueryResolver implements ResolverProvider
                         ) => $this->profileService->listUsers($validated,$ctx)
                     )
                 ),
+                'listFriends' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->resolveFriends($validated)
+                    )
+                ),
+                'allfriends' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->resolveAllFriends($validated)
+                    )
+                ),
+                'referralList' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (
+                            mixed $root, array $validated, Context $ctx
+                        ) => $this->profileService->userReferralList($validated,$ctx)
+                    )
+                ),
             ],
         ];
     }
@@ -212,5 +239,43 @@ class UserQueryResolver implements ResolverProvider
 
         $this->logger->error('Query.resolveBlocklist No data found');
         return $this::respondWithError(41105);
+    }
+
+    protected function resolveFriends(array $args): ?array
+    {
+        $this->logger->debug('Query.resolveFriends started');
+
+        $results = $this->userService->getFriends($args);
+        if (isset($results['status']) && $results['status'] === 'success') {
+            $this->logger->info('Query.resolveFriends successful');
+
+            return $results;
+        }
+
+        if (isset($results['status']) && $results['status'] === 'error') {
+            return $this::respondWithError($results['ResponseCode']);
+        }
+
+        $this->logger->warning('Query.resolveFriends Users not found');
+        return $this::createSuccessResponse(21101);
+    }
+
+    protected function resolveAllFriends(array $args): ?array
+    {
+        $this->logger->debug('Query.resolveAllFriends started');
+
+        $results = $this->userService->getAllFriends($args);
+        if (isset($results['status']) && $results['status'] === 'success') {
+            $this->logger->info('Query.resolveAllFriends successful');
+
+            return $results;
+        }
+
+        if (isset($results['status']) && $results['status'] === 'error') {
+            return $this::respondWithError($results['ResponseCode']);
+        }
+
+        $this->logger->warning('Query.resolveAllFriends No listFriends found');
+        return $this::createSuccessResponse(21101);
     }
 }

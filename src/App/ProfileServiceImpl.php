@@ -225,29 +225,12 @@ final class ProfileServiceImpl implements ProfileService
             return $this::respondWithError(30102);
         }
 
-        $username = isset($args['username']) ? trim($args['username']) : null;
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $username = $args['username'] ?? null;
         $userId = $args['userid'] ?? null;
-        $ip = $args['ip'] ?? null;
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         if (!empty($username) && !empty($userId)) {
             return $this::respondWithError(31012);
-        }
-
-        if ($userId !== null && !self::isValidUUID($userId)) {
-            return $this::respondWithError(30201);
-        }
-
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
-            return $this::respondWithError(30202);
-        }
-
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
-            return $this::respondWithError(30202);
-        }
-
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
         }
 
         $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
@@ -262,13 +245,10 @@ final class ProfileServiceImpl implements ProfileService
         if (!empty($userId)) {
             $contentFilterCase = ContentFilteringCases::searchById;
             if ($userId == $ctx->currentUserId) {
-
                 $contentFilterCase = ContentFilteringCases::myprofile;
             }
             $args['uid'] = $userId;
         }
-
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
@@ -322,6 +302,82 @@ final class ProfileServiceImpl implements ProfileService
             }
         } catch (\Throwable $e) {
             return self::respondWithError(41207);
+        }
+    }
+
+    public function userReferralList(array $args, Context $ctx): array
+    {
+        $this->logger->debug('Query.resolveReferralList started');
+
+        $userId = $ctx->currentUserId;
+        
+        try {
+            $this->logger->info('Current userId in resolveReferralList', ['userId' => $userId]);
+
+            $referralUsers = [
+                'invitedBy' => [],
+                'iInvited' => [],
+            ];
+
+            $deletedUserSpec = new DeletedUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
+            $systemUserSpec = new SystemUserSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
+
+            $illegalContentFilterSpec = new IllegalContentFilterSpec(
+                ContentFilteringCases::searchById,
+                ContentType::user
+            );
+
+            $specs = [
+                $illegalContentFilterSpec,
+                $systemUserSpec,
+                $deletedUserSpec,
+            ];
+
+
+            $inviter = $this->userMapper->getInviterByInvitee($userId, $specs);
+            $referralUsers['invitedBy'] = null;
+            if (!empty($inviter)) {
+                $this->logger->info('Inviter data', ['inviter' => $inviter->getUserId()]);
+                ContentReplacer::placeholderProfile($inviter, $specs);
+                $referralUsers['invitedBy'] = $inviter->getArrayCopy();
+            }
+
+            $offset = $args['offset'] ?? 0;
+            $limit = $args['limit'] ?? 20;
+
+            $invited = $this->userMapper->getReferralRelations($userId, $specs, $offset, $limit);
+
+            if (!empty($invited)) {
+                foreach ($invited as $user) {
+                    ContentReplacer::placeholderProfile($user, $specs);
+                    $referralUsers['iInvited'][] = $user->getArrayCopy();
+                }
+            }
+
+            if (empty($referralUsers['invitedBy']) && empty($referralUsers['iInvited'])) {
+                return $this::createSuccessResponse(21003, $referralUsers, false);
+            }
+
+            $this->logger->info('Returning final referralList response', ['referralUsers' => $referralUsers]);
+
+            return [
+                'status' => 'success',
+                'ResponseCode' => "11011",
+                'counter' => count($referralUsers['iInvited']),
+                'affectedRows' => $referralUsers
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error('Query.resolveReferralList exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this::respondWithError(41013);
         }
     }
 }
