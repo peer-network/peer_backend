@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Fawaz\Handler;
 
 use Fawaz\GraphQLSchemaBuilder;
+use Fawaz\GraphQL\Context as GraphQLContext;
+use Fawaz\GraphQL\Loaders\UserLoader;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
 use GraphQL\Error\FormattedError;
@@ -21,6 +23,7 @@ class GraphQLHandler implements RequestHandlerInterface
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected GraphQLSchemaBuilder $schemaBuilder,
+        protected UserLoader $userLoader,
     ) {
     }
 
@@ -65,10 +68,14 @@ class GraphQLHandler implements RequestHandlerInterface
         }
         $schema = $this->schemaBuilder->build();
 
-        $context = [
-            'request' => $request,
-            'bearerToken' => $bearerToken
-        ];
+        $context = new GraphQLContext(
+            request: $request,
+            user: null,
+            token: $bearerToken,
+            dataloaders: [
+                'user' => $this->userLoader,
+            ]
+        );
 
         $config = ServerConfig::create()
             ->setSchema($schema)
