@@ -6,13 +6,13 @@ namespace Fawaz\Database;
 
 interface MintRepository
 {
-    public function callGlobalWins(): array;
+    public function generateGemsFromActions(): array;
 
     public function fetchUncollectedGemsStats(): array;
 
     public function distributeTokensFromGems(string $day = 'D0'): array;
 
-    public function callUserMove(string $userId): array;
+    public function listTodaysInteractions(string $userId): array;
 
     /**
      * Check if a mint was performed for a given day action (e.g., D0..D7).

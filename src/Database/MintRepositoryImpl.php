@@ -33,7 +33,7 @@ class MintRepositoryImpl implements MintRepository
         protected UserMapper $userMapper,
     ){} 
 
-    public function callGlobalWins(): array
+    public function generateGemsFromActions(): array
     {
         if (!TABLESTOGEMS) {
             return self::respondWithError(41215);
@@ -350,7 +350,7 @@ class MintRepositoryImpl implements MintRepository
         ];
     }
 
-    public function callUserMove(string $userId): array
+    public function listTodaysInteractions(string $userId): array
     {
         $tokenomics = ConstantsConfig::tokenomics();
         $actions = ConstantsConfig::wallet()['ACTIONS'];

@@ -53,12 +53,12 @@ class MintService
         return true;
     }
     
-    public function callUserMove(): ?array
+    public function listTodaysInteractions(): ?array
     {
-        $this->logger->debug('WalletService.callUserMove started');
+        $this->logger->debug('WalletService.listTodaysInteractions started');
 
         try {
-            $response = $this->mintRepository->callUserMove($this->currentUserId);
+            $response = $this->mintRepository->listTodaysInteractions($this->currentUserId);
             return $this::createSuccessResponse(
                 $response['ResponseCode'],
                 $response['affectedRows'],
@@ -99,13 +99,13 @@ class MintService
         }
     }
 
-    public function callGlobalWins(): array
+    public function generateGemsFromActions(): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        return $this->mintRepository->callGlobalWins();
+        return $this->mintRepository->generateGemsFromActions();
     }
 
     public function fetchUncollectedGemsStats(): array
