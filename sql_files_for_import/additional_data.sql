@@ -129,7 +129,7 @@ INSERT INTO posts (
     NULL,
     NULL,
     1,
-    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 millisecons',
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
     'normal'
 );
 
@@ -141,9 +141,9 @@ INSERT INTO advertisements (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) + INTERVAL '2 days' + INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) + INTERVAL '2 days' + INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds'
 );
 
 -- adv_post_log
@@ -155,11 +155,11 @@ INSERT INTO advertisements_log (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
     '6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) + INTERVAL '2 days' + INTERVAL '001 millisecons',
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) + INTERVAL '2 days' + INTERVAL '001 milliseconds',
     2000.00000,
     200.00000,
-    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds'
 );
 
 -- adv_post_2
@@ -177,7 +177,7 @@ INSERT INTO posts (
     NULL,
     NULL,
     1,
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons',
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds',
     'normal'
 );
 
@@ -189,9 +189,9 @@ INSERT INTO advertisements (
     '1008c0dd-296c-46d3-811d-f90a2c077757',
     'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '1 day'+ INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) + INTERVAL '3 days'+ INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '1 day'+ INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) + INTERVAL '3 days'+ INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds'
 );
 
 -- adv_post_log_2
@@ -203,11 +203,11 @@ INSERT INTO advertisements_log (
     '1008c0dd-296c-46d3-811d-f90a2c077757',
     'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3',
     'basic',
-    date_trunc('day', NOW()) - INTERVAL '1 day' + INTERVAL '001 millisecons',
-    date_trunc('day', NOW()) + INTERVAL '3 days' + INTERVAL '001 millisecons',
+    date_trunc('day', NOW()) - INTERVAL '1 day' + INTERVAL '001 milliseconds',
+    date_trunc('day', NOW()) + INTERVAL '3 days' + INTERVAL '001 milliseconds',
     2000.00000,
     200.00000,
-    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 millisecons'
+    date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds'
 );
 
 -- post_info for advertisement posts

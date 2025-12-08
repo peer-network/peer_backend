@@ -148,7 +148,7 @@ class GraphQLSchemaBuilder
 
         try {
             $resultSchema = BuildSchema::build($schemaSource);
-            Executor::setDefaultFieldResolver([$this, 'fieldResolver']);
+            Executor::setDefaultFieldResolver($this->fieldResolver(...));
             return $resultSchema;
         } catch (\Throwable $e) {
             $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
@@ -2699,7 +2699,7 @@ class GraphQLSchemaBuilder
         $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $specs);
 
         $postArray['comments'] = array_map(
-            fn (CommentAdvanced $comment) => $this->fetchCommentWithoutReplies($comment),
+            $this->fetchCommentWithoutReplies(...),
             $comments
         );
         return $postArray;
