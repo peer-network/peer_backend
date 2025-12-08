@@ -315,6 +315,19 @@ class UserService
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['userid' => $id]);
 
+        // Welcome email switch off
+        /*
+        try {
+            $data = [
+                'username' => $username,
+            ];
+            (new UserWelcomeMail($data))->send($email);
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error occurred while sending welcome email: ' . $e->getMessage()
+            );
+        }
+        */
         $this->transactionManager->commit();
         return [
             'status' => 'success',
