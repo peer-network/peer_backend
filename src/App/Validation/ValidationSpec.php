@@ -81,6 +81,18 @@ class ValidationSpec
         ];
     }
 
+    public static function biography(string $field = 'biography', bool $required = false, int $errorCode = 30228): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateBiography', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
     public static function ip(string $field = 'ip', bool $required = true, int $errorCode = 30257): array
     {
         return [
@@ -127,6 +139,7 @@ class ValidationSpec
             'userid' => fn (string $f, bool $r) => self::uuid($f, $r),
             'postid' => fn (string $f, bool $r) => self::uuid($f, $r),
             'commentid' => fn (string $f, bool $r) => self::uuid($f, $r),
+            'referralUuid' => fn (string $f, bool $r) => self::uuid($f, $r),
 
             // Content filter
             'contentFilterBy' => fn (string $f, bool $r) => self::contentFilter($f, $r),
@@ -135,6 +148,8 @@ class ValidationSpec
             'email' => fn (string $f, bool $r) => self::email($f, $r),
             'username' => fn (string $f, bool $r) => self::username($f, $r),
             'password' => fn (string $f, bool $r) => self::password($f, $r),
+            'expassword' => fn (string $f, bool $r) => self::password($f, $r),
+            'biography' => fn (string $f, bool $r) => self::biography($f, $r),
             'ip' => fn (string $f, bool $r): array => self::ip($f, $r),
 
             'offset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),

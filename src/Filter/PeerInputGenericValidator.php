@@ -307,6 +307,20 @@ class PeerInputGenericValidator
         return true;
     }
 
+    protected function validateBiography(string $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'biography';
+        $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
+
+        // Mirror service-side rule (UserInfoService::updateBio)
+        if (trim($value) === '' || strlen($value) < $bioConfig['MIN_LENGTH'] || strlen($value) > $bioConfig['MAX_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30228');
+            return false;
+        }
+
+        return true;
+    }
+
     // Validate a single offset/limit-like field based on options['field']
     protected function validateOffsetAndLimit(int $value, array $options = []): bool
     {

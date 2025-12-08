@@ -126,12 +126,6 @@ class UserService
     {
         $this->logger->debug('UserService.createUser started');
 
-        $requiredFields = ['username', 'email', 'password'];
-        $validationErrors = self::validateRequiredFields($args, $requiredFields);
-        if (!empty($validationErrors)) {
-            return $validationErrors;
-        }
-
         $id = self::generateUUID();
 
         $pkey = $args['pkey'] ?? null;
@@ -141,16 +135,13 @@ class UserService
         $invited = null;
         $bin2hex = bin2hex(random_bytes(32));
         $expiresat = (int)\time() + 1800;
+        $email = trim($args['email']);
+        $username = trim($args['username']);
 
         $biography = $args['biography'] ?? '/userData/' . $id . '.txt';
         $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
         if (!empty($referralUuid)) {
-            if (!self::isValidUUID($referralUuid)) {
-                $this->logger->warning('Invalid referral UUID format.', ['referralUuid' => $referralUuid]);
-                return self::respondWithError(31007);
-            }
-
             $inviter = $this->userMapper->loadById($referralUuid);
 
             if (empty($inviter)) {
@@ -161,12 +152,10 @@ class UserService
             $invited = $inviter->getUserId();
         }
 
-        $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
             return self::respondWithError(30601);
         }
 
-        $username = trim($args['username']);
         $slug = $this->generateUniqueSlug($username);
         $createdat = new \DateTime()->format('Y-m-d H:i:s.u');
 

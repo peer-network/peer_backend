@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\GraphQL\Resolvers;
 
+use Fawaz\App\Validation\RequestValidator;
+use Fawaz\App\Validation\ValidatorErrors;
 use Fawaz\GraphQL\Context;
 use Fawaz\GraphQL\ResolverProvider;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -34,19 +36,85 @@ class UserMutationResolver implements ResolverProvider
     {
         return [
             'Mutation' => [
-                'register' => fn (mixed $root, array $args, Context $ctx) => $this->createUser($args['input']),
-                
-                'updateUsername' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userService->setUsername($args)),
-                'updateEmail' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userService->setEmail($args)),
-                'updatePassword' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userService->setPassword($args)),
-                'updateBio' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userInfoService->updateBio($args['biography'])),
-                'updateProfileImage' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userInfoService->setProfilePicture($args['img'])),
-                'toggleUserFollowStatus' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userInfoService->toggleUserFollow($args['userid'])),
-                'toggleBlockUserStatus' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userInfoService->toggleUserBlock($args['userid'])),
-                'deleteAccount' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userService->deleteAccount($args['password'])),
-                'likeComment' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->commentInfoService->likeComment($args['commentid'])),
-                'reportComment' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->commentInfoService->reportComment($args['commentid'])),
-                'reportUser' => $this->withAuth(null, fn (mixed $root, array $args, Context $ctx) => $this->userInfoService->reportUser($args['userid'])),
+                'register' => fn (mixed $root, array $args, Context $ctx) => $this->createUser($args),
+
+                'updateUsername' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['username','password'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userService->setUsername($validated)
+                    )
+                ),
+                'updateEmail' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['email','password'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userService->setEmail($validated)
+                    )
+                ),
+                'updatePassword' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['password','expassword'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userService->setPassword($validated)
+                    )
+                ),
+                'updateBio' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['biography'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userInfoService->updateBio($validated['biography'])
+                    )
+                ),
+                'updateProfileImage' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        [],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userInfoService->setProfilePicture($validated['img'])
+                    )
+                ),
+                'toggleUserFollowStatus' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['userid'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userInfoService->toggleUserFollow($validated['userid'])
+                    )
+                ),
+                'toggleBlockUserStatus' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['userid'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userInfoService->toggleUserBlock($validated['userid'])
+                    )
+                ),
+                'deleteAccount' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['password'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userService->deleteAccount($validated['password'])
+                    )
+                ),
+                'likeComment' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['commentid'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->commentInfoService->likeComment($validated['commentid'])
+                    )
+                ),
+                'reportComment' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['commentid'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->commentInfoService->reportComment($validated['commentid'])
+                    )
+                ),
+                'reportUser' => $this->withAuth(
+                    null,
+                    $this->withValidation(
+                        ['userid'],
+                        fn (mixed $root, array $validated, Context $ctx) => $this->userInfoService->reportUser($validated['userid'])
+                    )
+                ),
             ],
         ];
     }
@@ -55,7 +123,18 @@ class UserMutationResolver implements ResolverProvider
     {
         $this->logger->debug('Query.createUser started');
 
-        $response = $this->userService->createUser($args);
+        $validated = RequestValidator::validate(
+            $args['input'], 
+            ['username', 'email', 'password']
+        );
+
+        if ($validated instanceof ValidatorErrors) {
+            return [
+                'status' => 'error',
+                'ResponseCode' => $validated->errors[0] ?? 30101,
+            ];
+        };
+        $response = $this->userService->createUser($validated);
         if (isset($response['status']) && $response['status'] === 'error') {
             return $response;
         }
