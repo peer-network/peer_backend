@@ -319,13 +319,11 @@ class UserService
         /*
         try {
             $data = [
-                'username' => $username,
+                'username' => $username
             ];
-            (new UserWelcomeMail($data))->send($email);
+            new UserWelcomeMail($data)->send($email);
         } catch (\Throwable $e) {
-            $this->logger->error(
-                'Error occurred while sending welcome email: ' . $e->getMessage()
-            );
+            $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
         */
         $this->transactionManager->commit();
