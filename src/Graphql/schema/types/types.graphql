@@ -51,8 +51,8 @@ type AdvertisementHistoryResult {
 
 type ListedAdvertisementData {
   status: String!
-  ResponseCode: String
-  meta: DefaultResponse
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: AdvertisementHistoryResult
 }
 
@@ -77,8 +77,8 @@ type ContactusResponsePayload {
 
 type ListAdvertisementData {
   status: String!
-  ResponseCode: String
-  meta: DefaultResponse
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: [AdvertisementRow]
 }
 
@@ -202,11 +202,11 @@ type LogWins {
 }
 
 type UserLogWins {
-  status: String
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [LogWins]
-  meta: DefaultResponse
+  meta: DefaultResponse!
 }
 
 type UserInfo {
@@ -256,9 +256,9 @@ type Profile {
 }
 
 type ProfileInfo {
-  status: String
-  ResponseCode: String
-  meta: DefaultResponse
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: Profile
 }
 
@@ -310,9 +310,9 @@ type MintingData {
 }
 
 type CurrentLiquidity {
-  status: String
-  ResponseCode: String
-  meta: DefaultResponse
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   currentliquidity: Decimal
 }
 
@@ -484,16 +484,16 @@ type AllUserInfo {
 type AllUserFriends {
   status: String!
   counter: Int!
-  ResponseCode: String
-  meta: DefaultResponse
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: [AllUserInfo]
 }
 
 type ModerationStatsResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: ModerationStats
-  meta: DefaultResponse
+  meta: DefaultResponse!
 }
 type ModerationStats {
   AmountAwaitingReview: Int!
@@ -503,9 +503,9 @@ type ModerationStats {
 }
 type ModerationItemListResponse {
   status: String!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [ModerationItem!]!
-  meta: DefaultResponse
+  meta: DefaultResponse!
 }
 type ModerationItem {
   moderationTicketId: ID!
