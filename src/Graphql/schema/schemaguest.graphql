@@ -9,7 +9,10 @@ type Query {
 }
 
 type Mutation {
-  register(input: RegistrationInput!): RegisterResponse!
+  register(
+    input: RegistrationInput!
+  ): RegisterResponse!
+
   verifyAccount(userid: ID!): DefaultResponse!
   login(email: String!, password: String!): AuthPayload!
   requestPasswordReset(email: String!): ResetPasswordRequestResponse!
