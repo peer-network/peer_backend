@@ -87,8 +87,9 @@ class TagPostService
             return $this::respondWithError(30211);
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = trim($tagName);
+            $tagName = strtolower(trim((string) $tagName));
 
             if (isset($seenTags[$tagName])) {
                 continue;
@@ -122,7 +123,7 @@ class TagPostService
 
         $this->logger->debug('TagService.createTag started');
 
-        $tagName = trim($tagName);
+        $tagName = strtolower(trim($tagName));
         if (!$this->isValidTagName($tagName)) {
             return $this::respondWithError(30255);
         }

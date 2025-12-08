@@ -71,7 +71,7 @@ class TagService
         }
 
         $this->logger->debug('TagService.createTag started');
-        $tagName = !empty($tagName) ? trim($tagName) : null;
+        $tagName = !empty($tagName) ? strtolower(trim($tagName)) : null;
 
         try {
             $this->transactionManager->beginTransaction();
