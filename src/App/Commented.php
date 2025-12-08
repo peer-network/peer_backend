@@ -35,7 +35,7 @@ class Commented
         $this->postid = $data['postid'] ?? '';
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
         $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
@@ -188,7 +188,7 @@ class Commented
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'amountlikes' => [

@@ -138,9 +138,7 @@ class ModerationMapper
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(function ($reporter) {
-                return (new User($reporter, [], false))->getArrayCopy();
-            }, $reporters);
+            $item['reporters'] = array_map(fn($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
@@ -163,11 +161,11 @@ class ModerationMapper
 
         if ($item['targettype'] === 'post') {
             $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
+            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
+            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {
-            $item['targetcontent']['user'] = (new User([
+            $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],
                 'username' => $item['username'],
                 'email' => $item['email'],
@@ -177,7 +175,7 @@ class ModerationMapper
                 'biography' => $item['biography'],
                 'updatedat' => $item['updatedat'],
                 'visibility_status' => $item['visibility_status'],
-            ], [], false))->getArrayCopy();
+            ], [], false)->getArrayCopy();
         }
 
         return $item;
@@ -213,7 +211,7 @@ class ModerationMapper
     {
         try {
             $moderationId = self::generateUUID();
-            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+            $createdat = (string) new DateTime()->format('Y-m-d H:i:s.u');
 
             $report = UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
 
