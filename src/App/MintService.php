@@ -108,16 +108,16 @@ class MintService
         return $this->mintRepository->callGlobalWins();
     }
 
-    public function callGemster(): array
+    public function fetchUncollectedGemsStats(): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        return $this->mintRepository->getTimeSorted();
+        return $this->mintRepository->fetchUncollectedGemsStats();
     }
 
-    public function callGemsters(string $day = 'D0'): array
+    public function distributeTokensFromGems(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
@@ -137,7 +137,7 @@ class MintService
                 return $this::respondWithError(40301);
             }
 
-            $gemsters = $this->mintRepository->getTimeSortedMatch($day);
+            $gemsters = $this->mintRepository->distributeTokensFromGems($day);
         } catch(\Throwable $e) {
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),

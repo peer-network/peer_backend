@@ -151,7 +151,7 @@ class MintRepositoryImpl implements MintRepository
         ];
     }
 
-    public function getTimeSorted()
+    public function fetchUncollectedGemsStats(): array
     {
         try {
 
@@ -183,7 +183,7 @@ class MintRepositoryImpl implements MintRepository
 
     }
 
-    public function getTimeSortedMatch(string $day = 'D0'): array
+    public function distributeTokensFromGems(string $day = 'D0'): array
     {
         \ignore_user_abort(true);
 
@@ -274,9 +274,7 @@ class MintRepositoryImpl implements MintRepository
 
         foreach ($data as $row) {
             $userId = (string)$row['userid'];
-
             if (!isset($args[$userId])) {
-
                 $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsintoken);
                 $args[$userId] = [
                     'userid' => $userId,
@@ -289,22 +287,6 @@ class MintRepositoryImpl implements MintRepository
                 // Track total tokens per user in a compact internal array
                 $tokenTotals[$userId] = $totalTokenNumber;
             }
-
-            $rowgems2token = TokenHelper::mulRc((string) $row['gems'], $gemsintoken);
-
-            $args[$userId]['details'][] = [
-                'gemid' => (string)$row['gemid'],
-                'userid' => (string)$row['userid'],
-                'postid' => (string)$row['postid'],
-                'fromid' => (string)$row['fromid'],
-                'gems' => (float)$row['gems'],
-                'numbers' => (float)$rowgems2token,
-                'whereby' => (int)$row['whereby'],
-                'createdat' => $row['createdat']
-            ];
-
-            $this->walletMapper->insertWinToLog($userId, end($args[$userId]['details']));
-            $this->walletMapper->insertWinToPool($userId, end($args[$userId]['details']));
         }
 
 

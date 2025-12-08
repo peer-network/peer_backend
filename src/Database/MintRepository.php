@@ -8,9 +8,9 @@ interface MintRepository
 {
     public function callGlobalWins(): array;
 
-    public function getTimeSorted();
+    public function fetchUncollectedGemsStats(): array;
 
-    public function getTimeSortedMatch(string $day = 'D0'): array;
+    public function distributeTokensFromGems(string $day = 'D0'): array;
 
     public function callUserMove(string $userId): array;
 
