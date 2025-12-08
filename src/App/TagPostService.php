@@ -89,6 +89,11 @@ class TagPostService
 
         foreach ($tags as $tagName) {
             $tagName = trim($tagName);
+
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
                 return $this::respondWithError(30255);

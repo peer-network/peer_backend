@@ -132,6 +132,7 @@ class TagService
         try {
 
             if (isset($args['tagName']) && !empty($args['tagName'])) {
+                $args['tagName'] = strtolower(trim((string) $args['tagName']));
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
