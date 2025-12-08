@@ -472,12 +472,6 @@ class PeerTokenMapper
      * get transcations history of current user.
      *
      */
-    // DONE
-    /**
-     *
-     * get transcations history of current user.
-     *
-     */
     public function getTransactions(string $userId, array $args): ?array
     {
         $this->logger->debug('PeerTokenMapper.getTransactions started');

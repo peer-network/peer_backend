@@ -6,7 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\Interfaces\HasTokenWallet;
-use Fawaz\Database\GemsRepository;
+use Fawaz\Database\MintRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -23,7 +23,7 @@ class MintService
         protected PeerLoggerInterface $logger,
         protected MintAccountRepository $mintAccountRepository,
         protected UserMapper $userMapper,
-        protected GemsRepository $gemsRepository,
+        protected MintRepository $mintRepository,
         protected PDO $db
     ) {
     }
@@ -58,7 +58,7 @@ class MintService
         $this->logger->debug('WalletService.callUserMove started');
 
         try {
-            $response = $this->gemsRepository->callUserMove($this->currentUserId);
+            $response = $this->mintRepository->callUserMove($this->currentUserId);
             return $this::createSuccessResponse(
                 $response['ResponseCode'],
                 $response['affectedRows'],
@@ -105,7 +105,7 @@ class MintService
             return $this::respondWithError(60501);
         }
 
-        return $this->gemsRepository->callGlobalWins();
+        return $this->mintRepository->callGlobalWins();
     }
 
     public function callGemster(): array
@@ -114,7 +114,7 @@ class MintService
             return $this::respondWithError(60501);
         }
 
-        return $this->gemsRepository->getTimeSorted();
+        return $this->mintRepository->getTimeSorted();
     }
 
     public function callGemsters(string $day = 'D0'): array
@@ -129,8 +129,15 @@ class MintService
         if (!in_array($day, $dayActions, true)) {
             return $this::respondWithError(30105);
         }
+
         try {
-            $gemsters = $this->gemsRepository->getTimeSortedMatch($day);
+            // Prevent duplicate minting for the selected period
+            if ($this->mintRepository->mintWasPerformedForDay($day)) {
+                $this->logger->error('Mint already performed for selected period', ['day' => $day]);
+                return $this::respondWithError(40301);
+            }
+
+            $gemsters = $this->mintRepository->getTimeSortedMatch($day);
         } catch(\Throwable $e) {
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
@@ -162,5 +169,31 @@ class MintService
             'ResponseCode' => $gemsters['ResponseCode'],
             'affectedRows' => []
         ];
+    }
+
+    /**
+     * Returns true if a mint was performed for the given day action.
+     * Exceptions are handled here (service layer), repository allowed to throw.
+     */
+    public function mintWasPerformedForDay(string $dayAction = 'D0'): bool
+    {
+        if (!$this->checkAuthentication()) {
+            return false;
+        }
+
+        $valid = ['D0','D1','D2','D3','D4','D5','D6','D7','W0','M0','Y0'];
+        if (!in_array($dayAction, $valid, true)) {
+            return false;
+        }
+
+        try {
+            return $this->mintRepository->mintWasPerformedForDay($dayAction);
+        } catch (\Throwable $e) {
+            $this->logger->error('MintService.mintWasPerformedForDay failed', [
+                'error' => $e->getMessage(),
+                'dayAction' => $dayAction,
+            ]);
+            return false;
+        }
     }
 }
