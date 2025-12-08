@@ -33,6 +33,11 @@
 - PRs must include: purpose/summary, screenshots or logs when relevant, steps to validate, and linked issues.
 - Ensure CI passes: run `make dev`, `vendor/bin/phpstan`, `phpunit`, and `make test` locally before opening PRs.
 
+
+- PR template: https://github.com/peer-network/.github/blob/main/.github/pull_request_template.md
+
+
+
 ## Security & Configuration Tips
 - Do not commit secrets. Install hooks with `make install-hooks`; staged changes are scanned via `make scan` (Gitleaks).
 - Prefer `.env.ci` for local compose; avoid using a local `.env` that overrides CI settings.
