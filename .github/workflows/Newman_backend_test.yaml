@@ -21,7 +21,7 @@ jobs:
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
-    needs: [auto_update_branch]
+#    needs: [auto_update_branch]
     runs-on: ubuntu-latest
     outputs:
       is_behind: ${{ steps.check.outputs.is_behind }}
@@ -54,7 +54,7 @@ jobs:
   fail_outdated_branch:
     name: Block CI Due to Outdated Branch
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     if: needs.check_branch_sync.outputs.is_behind == 'true'
     steps:
       - run: |
@@ -64,7 +64,7 @@ jobs:
   gitleaks_notice:
     name: Gitleaks Scan Notice (Soft Mode)
     runs-on: ubuntu-latest
-    needs: [auto_update_branch]
+#    needs: [auto_update_branch]
     steps:
       - name: Display Soft Mode Notice
         run: |
@@ -74,7 +74,7 @@ jobs:
 
   gitleaks_scan_staged:
     name: Gitleaks PR Scan (Soft Mode)
-    needs: [auto_update_branch, gitleaks_notice]
+#    needs: [auto_update_branch, gitleaks_notice]
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
     with:
       config: "gitleaks.toml"
@@ -84,7 +84,7 @@ jobs:
   phpstan_analysis:
     name: Early Static Analysis (PHPStan)
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     env:
       IMAGE_TAG: local
     steps:
@@ -111,7 +111,7 @@ jobs:
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -146,7 +146,6 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      auto_update_branch,
       check_branch_sync,
       gitleaks_scan_staged,
       validate_sql_files, 
@@ -795,7 +794,6 @@ jobs:
     name: Unified Discord Notification
     runs-on: ubuntu-latest
     needs: [
-      auto_update_branch,
       check_branch_sync,
       phpstan_analysis,
       validate_sql_files,
