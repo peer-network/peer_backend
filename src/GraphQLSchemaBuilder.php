@@ -14,6 +14,7 @@ use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\PoolService;
+use Fawaz\App\Interfaces\GemsService;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
 use Fawaz\App\PostService;
@@ -76,6 +77,7 @@ class GraphQLSchemaBuilder
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
+        protected GemsService $gemsService,
         protected PostInfoService $postInfoService,
         protected PostService $postService,
         protected CommentService $commentService,
@@ -209,6 +211,7 @@ class GraphQLSchemaBuilder
         $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
+        $this->gemsService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
         $this->postInfoService->setCurrentUserId($userid);
         $this->commentService->setCurrentUserId($userid);
@@ -1582,7 +1585,7 @@ class GraphQLSchemaBuilder
             'listTags' => fn (mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn (mixed $root, array $args) => $this->resolveTagsearch($args),
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'gemster' => fn (mixed $root, array $args) => $this->mintService->fetchUncollectedGemsStats(),
+            'gemster' => fn (mixed $root, array $args) => $this->gemsService->gemsStats(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn (mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
@@ -1592,7 +1595,7 @@ class GraphQLSchemaBuilder
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
             'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->gemsStats(),
-            'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->allGemsForDay($args['day']),
+            'dailygemsresults' => fn (mixed $root, array $args) => $this->gemsService->allGemsForDay($args['day']),
             'getReferralInfo' => fn (mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),

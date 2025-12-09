@@ -8,10 +8,6 @@ interface MintRepository
 {
     public function generateGemsFromActions(): array;
 
-    public function fetchUncollectedGemsStats(): array;
-
-    public function distributeTokensFromGems(string $day = 'D0'): array;
-
     public function listTodaysInteractions(string $userId): array;
 
     /**

@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\Repositories\MintAccountRepository;
-use Fawaz\App\Interfaces\HasTokenWallet;
+use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\GemsRepository;
 use Fawaz\Database\MintRepository;
+use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Services\TokenTransfer\Strategies\MintTransferStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
+use Fawaz\Utils\TokenCalculations\TokenHelper;
+use InvalidArgumentException;
 use PDO;
+use Fawaz\App\DTO\GemsInTokenResult;
 
 class MintService
 {
@@ -23,7 +30,10 @@ class MintService
         protected PeerLoggerInterface $logger,
         protected MintAccountRepository $mintAccountRepository,
         protected UserMapper $userMapper,
+        protected PeerTokenMapper $peerTokenMapper,
         protected MintRepository $mintRepository,
+        protected GemsRepository $gemsRepository,
+        protected WalletMapper $walletMapper,
         protected PDO $db
     ) {
     }
@@ -108,13 +118,124 @@ class MintService
         return $this->mintRepository->generateGemsFromActions();
     }
 
-    public function fetchUncollectedGemsStats(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+
+    private function calculateGemsInToken(UncollectedGemsResult $uncollectedGems): GemsInTokenResult {
+        $totalGems = $uncollectedGems->overallTotal;
+        $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+
+        $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
+        $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
+        return new GemsInTokenResult($totalGems, $gemsintoken, $bestatigungInitial);
+    }
+
+
+    private function tokensPerUser(
+        UncollectedGemsResult $uncollectedGems,
+        GemsInTokenResult $gemsInToken
+    ): array {
+        //---------------- Build an internal per-user token totals array without changing the response
+        $tokenTotals = [];
+
+        foreach ($uncollectedGems->rows as $row) {
+            $userId = (string)$row->userid;
+            if (!isset($args[$userId])) {
+                $totalTokenNumber = TokenHelper::mulRc((string) $row->totalNumbers, $gemsInToken->gemsInToken);
+                $args[$userId] = [
+                    'userid' => $userId,
+                    'gems' => (float)$row->totalNumbers,
+                    'tokens' => $totalTokenNumber,
+                    'percentage' => (float)$row->percentage,
+                    'details' => []
+                ];
+
+                // Track total tokens per user in a compact internal array
+                $tokenTotals[$userId] = $totalTokenNumber;
+            }
         }
 
-        return $this->mintRepository->fetchUncollectedGemsStats();
+        return $tokenTotals;
+    }
+
+
+    private function transferMintTokens(array $tokensPerUser) {
+        //---------------- After marking gems collected, transfer tokens from MintAccount to each user
+        $mintAccount = $this->mintAccountRepository->getDefaultAccount();
+
+        if ($mintAccount === null) {
+            $this->logger->warning('No MintAccount available for distribution');
+            throw new ValidationException('No MintAccount available for distribution', [40301]);
+        } else {
+            foreach ($tokensPerUser as $recipientUserId => $amountToTransfer) {
+                // Skip zero or negative amounts
+                if ((float)$amountToTransfer <= 0) {
+                    $this->logger->error('amount to transfer is 0', [
+                        'userId' => $recipientUserId,
+                    ]);
+                    throw new ValidationException('amount to transfer is 0', [40301]);
+                }
+                $recipient = $this->userMapper->loadById($recipientUserId); // user loadByIds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if ($recipient === false) {
+                    $this->logger->error('Recipient user not found for token transfer', [
+                        'userId' => $recipientUserId,
+                    ]);
+                    throw new ValidationException('Recipient user not found for token transfer', [40301]);
+                }
+
+                $response = $this->peerTokenMapper->transferToken(
+                    (string)$amountToTransfer,
+                    new MintTransferStrategy(),
+                    $mintAccount,
+                    $recipient,
+                    "Mint"
+                );
+
+                if (!is_array($response) || ($response['status'] ?? 'error') === 'error') {
+                    $this->logger->error('Mint distribution transfer failed for user', [
+                        'userId' => $recipientUserId,
+                        'amount' => $amountToTransfer,
+                        'response' => $response,
+                    ]);
+                    throw new ValidationException('Mint distribution transfer failed', [40301]);
+                }
+            }
+        }
+    }
+
+    private function addMintToWinsLog(
+        UncollectedGemsResult $uncollectedGems,
+        GemsInTokenResult $gemsInTokenResult
+    ): array {
+        $args = [];            
+            foreach ($uncollectedGems as $row) {
+                $userId = (string)$row['userid'];
+
+                if (!isset($args[$userId])) {
+                    $totalTokenNumber = TokenHelper::mulRc((string) $row['total_numbers'], $gemsInTokenResult->gemsInToken);
+                    $args[$userId] = [
+                        'userid' => $userId,
+                        'gems' => (float)$row['total_numbers'],
+                        'tokens' => $totalTokenNumber,
+                        'percentage' => (float)$row['percentage'],
+                        'details' => []
+                    ];
+                }
+
+                $rowgems2token = TokenHelper::mulRc((string) $row['gems'], $gemsInTokenResult->gemsInToken);
+
+                $args[$userId]['details'][] = [
+                    'gemid' => (string)$row['gemid'],
+                    'userid' => (string)$row['userid'],
+                    'postid' => (string)$row['postid'],
+                    'fromid' => (string)$row['fromid'],
+                    'gems' => (float)$row['gems'],
+                    'numbers' => (float)$rowgems2token,
+                    'whereby' => (int)$row['whereby'],
+                    'createdat' => $row['createdat']
+                ];
+
+                $this->walletMapper->insertWinToLog($userId, end($args[$userId]['details']));
+            }
+        return $args;
     }
 
     public function distributeTokensFromGems(string $day = 'D0'): array
@@ -137,38 +258,49 @@ class MintService
                 return $this::respondWithError(40301);
             }
 
-            $gemsters = $this->mintRepository->distributeTokensFromGems($day);
+            $uncollectedGems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
+
+            if (empty($uncollectedGems)) {
+                return self::createSuccessResponse(21206);
+            }
+
+            $gemsInTokenResult = $this->calculateGemsInToken(
+                $uncollectedGems
+            );
+
+            $args = $this->addMintToWinsLog(
+                $uncollectedGems,
+                $gemsInTokenResult
+            );
+
+            $tokensPerUser = $this->tokensPerUser(
+                $uncollectedGems,
+                $gemsInTokenResult
+            );
+
+            $this->gemsRepository->setGemsAsCollected($uncollectedGems);
+
+            $this->transferMintTokens($tokensPerUser);
+
+            $affectedRows = [
+                'affectedRows' => [
+                    'winStatus' => $gemsInTokenResult->toWinStatusArray(),
+                    'userStatus' =>  array_values($args),
+                    'counter' => count($args) - 1
+                ]
+            ];
+            return $this->createSuccessResponse(
+                11208,
+                $affectedRows,
+                true,
+                'counter'    
+            );
         } catch(\Throwable $e) {
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
             return $this::respondWithError(40301);
         }
-
-        if (isset($gemsters['affectedRows']['data'])) {
-            $winstatus = $gemsters['affectedRows']['data'][0];
-            unset($gemsters['affectedRows']['data'][0]);
-
-            $userStatus = array_values($gemsters['affectedRows']['data']);
-
-            $affectedRows = [
-                'winStatus' => $winstatus ?? [],
-                'userStatus' => $userStatus,
-            ];
-
-            return [
-                'status' => $gemsters['status'],
-                'counter' => $gemsters['counter'] ?? 0,
-                'ResponseCode' => $gemsters['ResponseCode'],
-                'affectedRows' => $affectedRows
-            ];
-        }
-        return [
-            'status' => $gemsters['status'],
-            'counter' => 0,
-            'ResponseCode' => $gemsters['ResponseCode'],
-            'affectedRows' => []
-        ];
     }
 
     /**
