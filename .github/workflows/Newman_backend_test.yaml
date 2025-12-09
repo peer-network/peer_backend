@@ -1,15 +1,15 @@
 name: CI
  
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   pull_request:
     branches:
       - development
       - main
       - pre-release
-
-permissions:
-  contents: write
-  pull-requests: write
 
 jobs:
 #  auto_update_branch:
