@@ -24,5 +24,7 @@ interface GemsRepository
     public function fetchUncollectedGemsForMintResult(string $day = 'D0'): UncollectedGemsResult;
 
     public function setGemsAsCollected(UncollectedGemsResult $uncollectedGems);
+
+    public function setGlobalWins(string $tableName, int $winType, float $factor);
 }
 

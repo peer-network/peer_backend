@@ -253,4 +253,74 @@ class GemsRepositoryImpl implements GemsRepository
                 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')'
         );
     }
+
+    public function setGlobalWins(string $tableName, int $winType, float $factor): array
+    {
+        \ignore_user_abort(true);
+
+        $this->logger->debug('WalletMapper.setGlobalWins started');
+
+        try {
+            $sql = "SELECT s.userid, s.postid, s.createdat, p.userid as poster 
+                    FROM $tableName s 
+                    INNER JOIN posts p ON s.postid = p.postid AND s.userid != p.userid 
+                    WHERE s.collected = 0";
+            $stmt = $this->db->query($sql);
+            $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
+            return self::respondWithError(41208);
+        }
+
+        if (empty($entries)) {
+            return ['status' => 'success', 'insertCount' => 0];
+        }
+
+        $insertCount = 0;
+        $entry_ids = [];
+
+        if (!empty($entries)) {
+            $entry_ids = array_map(fn ($row) => isset($row['userid']) && is_string($row['userid']) ? $row['userid'] : null, $entries);
+            $entry_ids = array_filter($entry_ids);
+
+
+            $sql = "INSERT INTO gems (gemid, userid, postid, fromid, gems, whereby, createdat) 
+                    VALUES (:gemid, :userid, :postid, :fromid, :gems, :whereby, :createdat)";
+            $stmt = $this->db->prepare($sql);
+
+            try {
+                foreach ($entries as $row) {
+                    $id = self::generateUUID();
+
+                    $stmt->execute([
+                        ':gemid' => $id,
+                        ':userid' => $row['poster'],
+                        ':postid' => $row['postid'],
+                        ':fromid' => $row['userid'],
+                        ':gems' => $factor,
+                        ':whereby' => $winType,
+                        ':createdat' => $row['createdat']
+                    ]);
+
+                    $insertCount++;
+                }
+
+                if (!empty($entry_ids)) {
+                    $placeholders = implode(',', array_fill(0, count($entry_ids), '?'));
+                    $sql = "UPDATE $tableName SET collected = 1 WHERE collected = 0 AND userid IN ($placeholders)";
+                    $stmt = $this->db->prepare($sql);
+                    $stmt->execute($entry_ids);
+                }
+
+            } catch (\Throwable $e) {
+                $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
+                return self::respondWithError(41210);
+            }
+        }
+
+        return [
+            'status' => 'success',
+            'insertCount' => $insertCount
+        ];
+    }
 }
