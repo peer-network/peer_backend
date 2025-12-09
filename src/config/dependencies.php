@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Fawaz\App\MintService;
+use Fawaz\App\MintServiceImpl;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\Repositories\WalletHandlerFactory;
 use Fawaz\BaseURL;
@@ -10,6 +12,8 @@ use Fawaz\Database\MintRepositoryImpl;
 use Fawaz\Database\InteractionsPermissionsMapperImpl;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\UserActionsRepository;
+use Fawaz\Database\UserActionsRepositoryImpl;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
@@ -105,6 +109,8 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             );
         },
         MintRepository::class => \DI\autowire(MintRepositoryImpl::class),
+        MintService::class => \DI\autowire(MintServiceImpl::class),
         GemsRepository::class => \DI\autowire(GemsRepositoryImpl::class),
+        UserActionsRepository::class => \DI\autowire(UserActionsRepositoryImpl::class),
     ]);
 };

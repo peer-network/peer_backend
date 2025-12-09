@@ -16,5 +16,7 @@ interface GemsService
      * Supported filters: D0..D5, W0, M0, Y0
      */
     public function allGemsForDay(string $day = 'D0'): array;
+    
+    public function generateGemsFromActions(): array;
 }
 

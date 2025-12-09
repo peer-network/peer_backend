@@ -25,10 +25,6 @@ use Fawaz\App\WalletService;
 use Fawaz\App\MintService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -58,6 +54,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\AlphaMintService;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\UserActionsRepository;
 
 class GraphQLSchemaBuilder
 {
@@ -1639,7 +1636,7 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
-            'globalwins' => fn (mixed $root, array $args) => $this->mintService->generateGemsFromActions(),
+            'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
             'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
