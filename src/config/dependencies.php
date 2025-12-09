@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Fawaz\App\Repositories\MintAccountRepository;
-use Fawaz\App\Repositories\WalletRepositoryFactory;
+use Fawaz\App\Repositories\WalletHandlerFactory;
 use Fawaz\BaseURL;
 use Fawaz\Database\MintRepository;
 use Fawaz\Database\MintRepositoryImpl;
@@ -93,8 +93,8 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return new ResponseMessagesProviderImpl($path);
         },
         InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
-        WalletRepositoryFactory::class => function (ContainerInterface $c) {
-            return new WalletRepositoryFactory(
+        WalletHandlerFactory::class => function (ContainerInterface $c) {
+            return new WalletHandlerFactory(
                 $c->get(WalletMapper::class),
                 $c->get(MintAccountRepository::class)
             );

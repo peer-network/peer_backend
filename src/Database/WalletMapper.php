@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-
-use Fawaz\App\Repositories\WalletRepository;
+use Fawaz\App\Repositories\WalletCreditable;
+use Fawaz\App\Repositories\WalletDebitable;
 use PDO;
 use Fawaz\App\Wallet;
 use Fawaz\App\Wallett;
@@ -14,7 +14,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 
-class WalletMapper implements WalletRepository
+class WalletMapper implements WalletCreditable, WalletDebitable
 {
     use ResponseHelper;
     private const DEFAULT_LIMIT = 20;

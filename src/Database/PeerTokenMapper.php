@@ -7,10 +7,11 @@ namespace Fawaz\Database;
 
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Repositories\TransactionRepository;
-use Fawaz\App\Repositories\WalletRepositoryFactory;
+use Fawaz\App\Repositories\WalletHandlerFactory;
 use Fawaz\App\Repositories\WalletHandle;
 use Fawaz\App\User;
 use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
+use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
 use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
@@ -35,7 +36,7 @@ class PeerTokenMapper
         protected PDO $db, 
         protected LiquidityPool $pool, 
         protected WalletMapper $walletMapper, 
-        protected WalletRepositoryFactory $walletRepositoryFactory,
+        protected WalletHandlerFactory $WalletHandlerFactory,
         protected UserMapper $userMapper
     ){}
 
@@ -237,15 +238,15 @@ class PeerTokenMapper
     public function transferToken(
         string $numberOfTokens,
         TransferStrategy $strategy,
-        HasUserId $sender,
-        HasUserId $recipient,
+        HasWalletId $sender,
+        HasWalletId $recipient,
         ?string $message = null,
     ): ?array {
         \ignore_user_abort(true);
 
         // Build wallet handles so each account has its own handler
-        $senderRepo = $this->walletRepositoryFactory->for($sender);
-        $recipientRepo = $this->walletRepositoryFactory->for($recipient);
+        $senderRepo = $this->WalletHandlerFactory->for($sender);
+        $recipientRepo = $this->WalletHandlerFactory->for($recipient);
         $inviterRepo = $this->walletMapper;
         $peerFeeRepo = $this->walletMapper;
         $burnFeeRepo = $this->walletMapper;
@@ -260,8 +261,8 @@ class PeerTokenMapper
 
         try {
             // Lock balances using wallet handles to ensure proper repository per account
-            $senderHandle = new WalletHandle($sender->getUserId(), $senderRepo);
-            $recipientHandle = new WalletHandle($recipient->getUserId(), $recipientRepo);
+            $senderHandle = new WalletHandle($sender->getWalletId(), $senderRepo);
+            $recipientHandle = new WalletHandle($recipient->getWalletId(), $recipientRepo);
             $handlesToLock = [$senderHandle, $recipientHandle];
             if (!empty($this->inviterId)) {
                 $handlesToLock[] = new WalletHandle($this->inviterId, $inviterRepo);
@@ -274,14 +275,14 @@ class PeerTokenMapper
                 $peerFeeAmount, 
                 $burnFeeAmount, 
                 $inviteFeeAmount
-            ] = $this->calculateAmountsForMode($sender->getUserId(), $numberOfTokens, $mode);
+            ] = $this->calculateAmountsForMode($sender->getWalletId(), $numberOfTokens, $mode);
 
             $operationid = $strategy->getOperationId();
             $transRepo = new TransactionRepository($this->logger, $this->db);
             // 1. SENDER: Debit From Account
             if ($requiredAmount) {
                 // To defend against atomoicity issues, we will debit first and then create transaction record. $this->walletMapper->saveWalletEntry($senderId, $requiredAmount, 'DEDUCT');
-                $senderHandle->handler()->debitIfSufficient($sender->getUserId(), $requiredAmount);
+                $senderHandle->handler()->debitIfSufficient($sender->getWalletId(), $requiredAmount);
                 // $this->walletMapper->debitIfSufficient($senderId, $requiredAmount);
 
             }
@@ -291,8 +292,8 @@ class PeerTokenMapper
                 $payload = [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getRecipientTransactionType(),
-                    'senderid' => $sender->getUserId(),
-                    'recipientid' => $recipient->getUserId(),
+                    'senderid' => $sender->getWalletId(),
+                    'recipientid' => $recipient->getWalletId(),
                     'tokenamount' => $netRecipientAmount,
                     'message' => $message,
                     'transferaction' => 'CREDIT'
@@ -305,7 +306,7 @@ class PeerTokenMapper
 
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($recipientId, $numberOfTokens);
                 // $this->walletMapper->credit($recipientId, $netRecipientAmount);
-                $recipientHandle->handler()->credit($recipient->getUserId(), $netRecipientAmount);
+                $recipientHandle->handler()->credit($recipient->getWalletId(), $netRecipientAmount);
             }
 
             // 3. INVITER: Fees To Inviter (if applicable)
@@ -314,7 +315,7 @@ class PeerTokenMapper
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getInviterFeeTransactionType(),
-                    'senderid' => $sender->getUserId(),
+                    'senderid' => $sender->getWalletId(),
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE'
@@ -332,7 +333,7 @@ class PeerTokenMapper
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getPeerFeeTransactionType(),
-                    'senderid' => $sender->getUserId(),
+                    'senderid' => $sender->getWalletId(),
                     'recipientid' => $this->peerWallet,
                     'tokenamount' => $peerFeeAmount,
                     'transferaction' => 'PEER_FEE'
@@ -349,7 +350,7 @@ class PeerTokenMapper
                 $this->createAndSaveTransaction($transRepo, [
                     'operationid' => $operationid,
                     'transactiontype' => $strategy->getBurnFeeTransactionType(),
-                    'senderid' => $sender->getUserId(),
+                    'senderid' => $sender->getWalletId(),
                     'recipientid' => $this->burnWallet,
                     'tokenamount' => $burnFeeAmount,
                     'transferaction' => 'BURN_FEE'
@@ -371,8 +372,8 @@ class PeerTokenMapper
         } catch (\Throwable $e) {
             $this->logger->error('PeerTokenMapper.transferToken failed', [
                 'error' => $e->getMessage(),
-                'senderId' => $sender->getUserId(),
-                'recipientId' => $recipient->getUserId(),
+                'senderId' => $sender->getWalletId(),
+                'recipientId' => $recipient->getWalletId(),
                 'numberOfTokens' => $numberOfTokens,
                 'trace' => $e->getTraceAsString(),
             ]);

@@ -12,11 +12,11 @@ class WalletHandle
 {
     public function __construct(
         private string $walletId,
-        private WalletCreditable|WalletDebitable|WalletRepository $handler,
+        private WalletCreditable|WalletDebitable $handler,
     ) {
     }
 
-    public function handler(): WalletCreditable|WalletDebitable|WalletRepository
+    public function handler(): WalletCreditable|WalletDebitable
     {
         return $this->handler;
     }

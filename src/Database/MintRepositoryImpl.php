@@ -519,7 +519,7 @@ class MintRepositoryImpl implements MintRepository
                 LIMIT 1";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':sender', $mintAccount->getUserId(), \PDO::PARAM_STR);
+        $stmt->bindValue(':sender', $mintAccount->getWalletId(), \PDO::PARAM_STR);
         $stmt->execute();
         return (bool) $stmt->fetchColumn();
     }

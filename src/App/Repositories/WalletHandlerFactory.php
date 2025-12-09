@@ -7,7 +7,7 @@ namespace Fawaz\App\Repositories;
 
 use Fawaz\App\Models\MintAccount;
 use Fawaz\Database\WalletMapper;
-use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
+use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
 
 /**
  * Factory for resolving the appropriate WalletRepository implementation
@@ -16,14 +16,14 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
  * - If the object is a MintAccount, returns MintAccountRepository
  * - Otherwise, returns WalletMapper
  */
-class WalletRepositoryFactory {
+class WalletHandlerFactory {
     public function __construct(
         private WalletMapper $walletMapper,
         private MintAccountRepository $mintAccountRepository,
     ) {
     }
 
-    public function for(HasUserId $owner): WalletCreditable | WalletDebitable
+    public function for(HasWalletId $owner): WalletCreditable | WalletDebitable
     {
         if ($owner instanceof MintAccount) {
             return $this->mintAccountRepository;
