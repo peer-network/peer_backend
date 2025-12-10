@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use PDO;
 use Fawaz\App\PostInfo;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class PostInfoMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
@@ -21,14 +20,14 @@ class PostInfoMapper
 
     public function loadById(string $postid): ?PostInfo
     {
-        $this->logger->debug("PostInfoMapper.loadById started");
+        $this->logger->debug('PostInfoMapper.loadById started');
 
-        $sql = "SELECT * FROM post_info WHERE postid = :postid";
+        $sql  = 'SELECT * FROM post_info WHERE postid = :postid';
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($data !== false) {
+        if (false !== $data) {
             return new PostInfo($data);
         }
 
@@ -37,9 +36,9 @@ class PostInfoMapper
 
     public function isUserExistById(string $id): bool
     {
-        $this->logger->debug("PostInfoMapper.isUserExistById started");
+        $this->logger->debug('PostInfoMapper.isUserExistById started');
 
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE uid = :id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
@@ -48,14 +47,14 @@ class PostInfoMapper
 
     public function insert(PostInfo $postInfo): bool
     {
-        $this->logger->debug("PostInfoMapper.insert started");
+        $this->logger->debug('PostInfoMapper.insert started');
 
         $data = $postInfo->getArrayCopy();
 
-        $query = "INSERT INTO post_info 
+        $query = 'INSERT INTO post_info 
                   (postid, userid, likes, dislikes, reports, totalreports, views, saves, shares, comments) 
                   VALUES 
-                  (:postid, :userid, :likes, :dislikes, :reports, :totalreports, :views, :saves, :shares, :comments)";
+                  (:postid, :userid, :likes, :dislikes, :reports, :totalreports, :views, :saves, :shares, :comments)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -73,81 +72,85 @@ class PostInfoMapper
             $stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
 
             if ($stmt->execute()) {
-                $this->logger->info("Inserted new post info into database", ['postid' => $data['postid']]);
+                $this->logger->info('Inserted new post info into database', ['postid' => $data['postid']]);
+
                 return true;
             } else {
-                $this->logger->error("Failed to insert new post info into database", ['postid' => $data['postid']]);
+                $this->logger->error('Failed to insert new post info into database', ['postid' => $data['postid']]);
+
                 return false;
             }
         } catch (\PDOException $e) {
             $this->logger->error(
-                "PostInfoMapper.insert: Exception occurred while inserting post info",
+                'PostInfoMapper.insert: Exception occurred while inserting post info',
                 [
-                    'postid' => $data['postid'] ?? null,
-                    'exception' => $e->getMessage()
+                    'postid'    => $data['postid'] ?? null,
+                    'exception' => $e->getMessage(),
                 ]
             );
+
             return false;
         } catch (\Exception $e) {
             $this->logger->critical(
-                "PostInfoMapper.update: Unexpected exception occurred",
+                'PostInfoMapper.update: Unexpected exception occurred',
                 [
-                    'postid' => $data['postid'] ?? null,
-                    'exception' => $e->getMessage()
+                    'postid'    => $data['postid'] ?? null,
+                    'exception' => $e->getMessage(),
                 ]
             );
+
             return false;
         }
     }
 
     public function update(PostInfo $postInfo): void
     {
-        $this->logger->debug("PostInfoMapper.update started");
+        $this->logger->debug('PostInfoMapper.update started');
         $data = $postInfo->getArrayCopy();
 
         try {
-            $stmtSel = $this->db->prepare("
+            $stmtSel = $this->db->prepare('
                 SELECT likes, dislikes, reports, views, saves, shares, comments, totalreports
                 FROM post_info
                 WHERE postid = :postid
                 FOR UPDATE
-            ");
+            ');
             $stmtSel->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
             $stmtSel->execute();
             $old = $stmtSel->fetch(\PDO::FETCH_ASSOC) ?: [
-                'likes' => 0,'dislikes' => 0,'reports' => 0,'totalreports' => 0,'views' => 0,'saves' => 0,'shares' => 0,'comments' => 0
+                'likes' => 0, 'dislikes' => 0, 'reports' => 0, 'totalreports' => 0, 'views' => 0, 'saves' => 0, 'shares' => 0, 'comments' => 0,
             ];
 
             // Bereit (positiv clampen Logik erweitern)
-            $dLikes    = max(0, (int)$data['likes']    - (int)$old['likes']);
-            $dDislikes = max(0, (int)$data['dislikes'] - (int)$old['dislikes']);
-            $dReports  = max(0, (int)$data['reports']  - (int)$old['reports']);
-            $dTotalReports  = max(0, (int)$data['totalreports']  - (int)$old['totalreports']);
-            $dViews    = max(0, (int)$data['views']    - (int)$old['views']);
-            $dSaves    = max(0, (int)$data['saves']    - (int)$old['saves']);
-            $dShares   = max(0, (int)$data['shares']   - (int)$old['shares']);
-            $dComments = max(0, (int)$data['comments'] - (int)$old['comments']);
+            $dLikes        = max(0, (int) $data['likes'] - (int) $old['likes']);
+            $dDislikes     = max(0, (int) $data['dislikes'] - (int) $old['dislikes']);
+            $dReports      = max(0, (int) $data['reports'] - (int) $old['reports']);
+            $dTotalReports = max(0, (int) $data['totalreports'] - (int) $old['totalreports']);
+            $dViews        = max(0, (int) $data['views'] - (int) $old['views']);
+            $dSaves        = max(0, (int) $data['saves'] - (int) $old['saves']);
+            $dShares       = max(0, (int) $data['shares'] - (int) $old['shares']);
+            $dComments     = max(0, (int) $data['comments'] - (int) $old['comments']);
 
             // post_info auf absolute Werte setzen
-            $stmtUpd = $this->db->prepare("
+            $stmtUpd = $this->db->prepare('
                 UPDATE post_info
                 SET likes=:likes, dislikes=:dislikes, reports=:reports, totalreports=:totalreports,
                     views=:views, saves=:saves, shares=:shares, comments=:comments
                 WHERE postid=:postid
-            ");
+            ');
             // Jeden Wert explizit binden
-            $stmtUpd->bindValue(':likes', (int)$data['likes'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':reports', (int)$data['reports'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':totalreports', (int)$data['totalreports'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':views', (int)$data['views'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':saves', (int)$data['saves'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':shares', (int)$data['shares'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':comments', (int)$data['comments'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':likes', (int) $data['likes'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':dislikes', (int) $data['dislikes'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':reports', (int) $data['reports'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':totalreports', (int) $data['totalreports'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':views', (int) $data['views'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':saves', (int) $data['saves'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':shares', (int) $data['shares'], \PDO::PARAM_INT);
+            $stmtUpd->bindValue(':comments', (int) $data['comments'], \PDO::PARAM_INT);
             $stmtUpd->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
 
             if (!$stmtUpd->execute()) {
-                throw new \RuntimeException("post_info update failed");
+                throw new \RuntimeException('post_info update failed');
             }
 
             // Bereit auf eine aktive Anzeige buchen
@@ -163,45 +166,45 @@ class PostInfoMapper
                     $dShares,
                     $dComments
                 );
-                $this->logger->info("Ad info bumped (one active ad)", [
-                    'postid' => $data['postid'], 'affected_rows' => $affected
+                $this->logger->info('Ad info bumped (one active ad)', [
+                    'postid' => $data['postid'], 'affected_rows' => $affected,
                 ]);
             }
 
-            $this->logger->info("Updated post info (+ads info, Variant B) successfully", ['postid' => $data['postid']]);
-
+            $this->logger->info('Updated post info (+ads info, Variant B) successfully', ['postid' => $data['postid']]);
         } catch (\Throwable $e) {
-            $this->logger->error("PostInfoMapper.update failed/rolled back", [
-                'postid' => $data['postid'] ?? null,
-                'exception' => $e->getMessage()
+            $this->logger->error('PostInfoMapper.update failed/rolled back', [
+                'postid'    => $data['postid'] ?? null,
+                'exception' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
 
     public function addUserActivity(string $action, string $userid, string $postid): bool
     {
-        $this->logger->debug("PostInfoMapper.addUserActivity started");
+        $this->logger->debug('PostInfoMapper.addUserActivity started');
 
         $table = match ($action) {
-            'likePost' => 'user_post_likes',
+            'likePost'    => 'user_post_likes',
             'dislikePost' => 'user_post_dislikes',
-            'reportPost' => 'user_reports',
-            'savePost' => 'user_post_saves',
-            'sharePost' => 'user_post_shares',
-            'viewPost' => 'user_post_views',
-            default => null,
+            'reportPost'  => 'user_reports',
+            'savePost'    => 'user_post_saves',
+            'sharePost'   => 'user_post_shares',
+            'viewPost'    => 'user_post_views',
+            default       => null,
         };
 
         if (!$table) {
-            $this->logger->error("PostInfoMapper.addUserActivity: Invalid action provided", ['action' => $action]);
+            $this->logger->error('PostInfoMapper.addUserActivity: Invalid action provided', ['action' => $action]);
+
             return false;
         }
 
         try {
-
             // Check if the record already exists
-            $sqlCheck = "SELECT COUNT(*) FROM $table WHERE userid = :userid AND postid = :postid";
+            $sqlCheck  = "SELECT COUNT(*) FROM $table WHERE userid = :userid AND postid = :postid";
             $stmtCheck = $this->db->prepare($sqlCheck);
             $stmtCheck->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmtCheck->bindValue(':postid', $postid, \PDO::PARAM_STR);
@@ -210,35 +213,37 @@ class PostInfoMapper
 
             if (!$exists) {
                 // Insert a new record
-                $sql = "INSERT INTO $table (userid, postid) VALUES (:userid, :postid)";
+                $sql  = "INSERT INTO $table (userid, postid) VALUES (:userid, :postid)";
                 $stmt = $this->db->prepare($sql);
                 $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
                 $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
                 $success = $stmt->execute();
 
                 if ($success) {
-                    $this->logger->info("User activity added successfully", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
+                    $this->logger->info('User activity added successfully', ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
+
                     return true;
                 }
             }
 
-            $this->logger->error("User activity already exists or failed to add", ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
+            $this->logger->error('User activity already exists or failed to add', ['action' => $action, 'userid' => $userid, 'postid' => $postid]);
+
             return false;
         } catch (\Exception $e) {
-            $this->logger->error("PostInfoMapper.addUserActivity: Exception occurred", ['exception' => $e->getMessage()]);
+            $this->logger->error('PostInfoMapper.addUserActivity: Exception occurred', ['exception' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function togglePostSaved(string $userid, string $postid): array
     {
-        $this->logger->debug("PostInfoMapper.togglePostSaved started");
+        $this->logger->debug('PostInfoMapper.togglePostSaved started');
 
         try {
-
             // Check if the post is already saved by the user
-            $query = "SELECT COUNT(*) FROM user_post_saves WHERE userid = :userid AND postid = :postid";
-            $stmt = $this->db->prepare($query);
+            $query = 'SELECT COUNT(*) FROM user_post_saves WHERE userid = :userid AND postid = :postid';
+            $stmt  = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
             $stmt->execute();
@@ -247,24 +252,24 @@ class PostInfoMapper
 
             if ($isSaved) {
                 // Delete the save record
-                $query = "DELETE FROM user_post_saves WHERE userid = :userid AND postid = :postid";
-                $action = "11511";
+                $query   = 'DELETE FROM user_post_saves WHERE userid = :userid AND postid = :postid';
+                $action  = '11511';
                 $issaved = false;
 
                 // Decrement the save count in `post_info`
-                $updatePostInfoQuery = "UPDATE post_info SET saves = saves - 1 WHERE postid = :postid";
-                $updateStmt = $this->db->prepare($updatePostInfoQuery);
+                $updatePostInfoQuery = 'UPDATE post_info SET saves = saves - 1 WHERE postid = :postid';
+                $updateStmt          = $this->db->prepare($updatePostInfoQuery);
                 $updateStmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
                 $updateStmt->execute();
             } else {
                 // Insert a new save record
-                $query = "INSERT INTO user_post_saves (userid, postid) VALUES (:userid, :postid)";
-                $action = "11512";
+                $query   = 'INSERT INTO user_post_saves (userid, postid) VALUES (:userid, :postid)';
+                $action  = '11512';
                 $issaved = true;
 
                 // Increment the save count in `post_info`
-                $updatePostInfoQuery = "UPDATE post_info SET saves = saves + 1 WHERE postid = :postid";
-                $updateStmt = $this->db->prepare($updatePostInfoQuery);
+                $updatePostInfoQuery = 'UPDATE post_info SET saves = saves + 1 WHERE postid = :postid';
+                $updateStmt          = $this->db->prepare($updatePostInfoQuery);
                 $updateStmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
                 $updateStmt->execute();
             }
@@ -275,15 +280,15 @@ class PostInfoMapper
             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
             $stmt->execute();
 
-
             return ['status' => 'success', 'isSaved' => $issaved, 'ResponseCode' => $action];
         } catch (\Exception $e) {
             $this->logger->error('Failed to toggle post save', [
-                'userid' => $userid,
-                'postid' => $postid,
+                'userid'    => $userid,
+                'postid'    => $postid,
                 'exception' => $e->getMessage(),
             ]);
-            return ['status' => 'error', 'ResponseCode' => "41502"];
+
+            return ['status' => 'error', 'ResponseCode' => '41502'];
         }
     }
 
@@ -296,9 +301,9 @@ class PostInfoMapper
         int $dViews,
         int $dSaves,
         int $dShares,
-        int $dComments
+        int $dComments,
     ): int {
-        $sql = "
+        $sql = '
             WITH one_ad AS (
               SELECT a.advertisementid
               FROM advertisements a
@@ -320,8 +325,8 @@ class PostInfoMapper
                 updatedat= :updatedat
             FROM one_ad oa
             WHERE ai.advertisementid = oa.advertisementid
-        ";
-        $stmt = $this->db->prepare($sql);
+        ';
+        $stmt      = $this->db->prepare($sql);
         $updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
         // Jeden Wert explizit binden
         $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
@@ -335,6 +340,7 @@ class PostInfoMapper
         $stmt->bindValue(':dComments', $dComments, \PDO::PARAM_INT);
         $stmt->bindValue(':updatedat', $updatedat, \PDO::PARAM_STR);
         $stmt->execute();
+
         return $stmt->rowCount();
     }
 }

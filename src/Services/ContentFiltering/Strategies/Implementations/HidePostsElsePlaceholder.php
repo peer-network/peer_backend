@@ -6,8 +6,8 @@ namespace Fawaz\Services\ContentFiltering\Strategies\Implementations;
 
 use Fawaz\Services\ContentFiltering\Strategies\AContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 class HidePostsElsePlaceholder extends AContentFilteringStrategy implements ContentFilteringStrategy
 {
@@ -16,13 +16,13 @@ class HidePostsElsePlaceholder extends AContentFilteringStrategy implements Cont
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::post->value => [
-            ContentType::post->value => ContentFilteringAction::hideContent,
+            ContentType::post->value    => ContentFilteringAction::hideContent,
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value    => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::comment->value => [
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value    => ContentFilteringAction::replaceWithPlaceholder,
         ],
     ];
 }

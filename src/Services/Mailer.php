@@ -13,41 +13,42 @@ class Mailer
 
     public function __construct(
         array $envi,
-        PeerLoggerInterface $logger
+        PeerLoggerInterface $logger,
     ) {
-        $this->envi = $envi;
+        $this->envi   = $envi;
         $this->logger = $logger;
     }
 
     public function sendViaAPI(array $payload): array
     {
         $mailApiLink = $this->envi['mailapilink'] ?? '';
-        $mailApiKey = $this->envi['mailapikey'] ?? '';
+        $mailApiKey  = $this->envi['mailapikey']  ?? '';
 
         // Basic validation
         if (empty($mailApiLink) || empty($mailApiKey)) {
             $this->logger->error('Mailer config missing', ['link' => $mailApiLink]);
+
             return ['status' => 'error', 'message' => 'Mailer config missing'];
         }
 
-        $this->logger->info("Sending mail with payload:", ['to' => $payload['to'] , 'template' => $payload['template'] ]);
+        $this->logger->info('Sending mail with payload:', ['to' => $payload['to'], 'template' => $payload['template']]);
 
         $ch = curl_init($mailApiLink);
 
         curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
-            CURLOPT_HTTPHEADER => [
-                'api-key: ' . $mailApiKey,
+            \CURLOPT_POST       => true,
+            \CURLOPT_POSTFIELDS => json_encode($payload),
+            \CURLOPT_HTTPHEADER => [
+                'api-key: '.$mailApiKey,
                 'Accept: application/json',
                 'Content-Type: application/json',
             ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 15,
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_TIMEOUT        => 15,
         ]);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $response  = curl_exec($ch);
+        $httpCode  = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
         curl_close($ch);
 
@@ -55,22 +56,22 @@ class Mailer
         $this->logger->info('Mailer response', [
             'httpCode' => $httpCode,
             'response' => $response,
-            'error' => $curlError
+            'error'    => $curlError,
         ]);
 
-        if ($response === false || $httpCode >= 400) {
+        if (false === $response || $httpCode >= 400) {
             return [
-                'status' => 'error',
-                'message' => $curlError ?: "HTTP $httpCode",
-                'response' => $response
+                'status'   => 'error',
+                'message'  => $curlError ?: "HTTP $httpCode",
+                'response' => $response,
             ];
         }
 
         $decodedResponse = json_decode($response, true);
 
         return [
-            'status' => ($httpCode === 201 || $httpCode === 202) ? 'success' : 'error',
-            'response' => $decodedResponse
+            'status'   => (201 === $httpCode || 202 === $httpCode) ? 'success' : 'error',
+            'response' => $decodedResponse,
         ];
     }
 }

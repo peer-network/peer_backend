@@ -14,18 +14,19 @@ class ValidationSpec
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'validateOffsetAndLimit', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
             ],
         ];
     }
+
     public static function uuid(string $field, bool $required = false, int $errorCode = 30201): array
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'Uuid', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
@@ -37,7 +38,7 @@ class ValidationSpec
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'ContentFilter', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
@@ -49,7 +50,7 @@ class ValidationSpec
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'EmailAddress', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
@@ -61,7 +62,7 @@ class ValidationSpec
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'validateUsername', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
@@ -73,7 +74,7 @@ class ValidationSpec
     {
         return [
             $field => [
-                'required' => $required,
+                'required'   => $required,
                 'validators' => [
                     ['name' => 'validatePassword', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
@@ -87,11 +88,13 @@ class ValidationSpec
     public static function merge(array ...$parts): array
     {
         $merged = [];
+
         foreach ($parts as $part) {
             foreach ($part as $k => $v) {
                 $merged[$k] = $v;
             }
         }
+
         return $merged;
     }
 
@@ -102,7 +105,7 @@ class ValidationSpec
     public static function auto(array $inputKeysOrArgs, array $requiredKeys = []): array
     {
         // If associative args passed, use keys; otherwise assume it's already keys
-        $keys = array_keys($inputKeysOrArgs) === range(0, count($inputKeysOrArgs) - 1)
+        $keys = array_keys($inputKeysOrArgs) === range(0, \count($inputKeysOrArgs) - 1)
             ? $inputKeysOrArgs
             : array_keys($inputKeysOrArgs);
 
@@ -112,31 +115,33 @@ class ValidationSpec
 
         $map = [
             // UUID-like identifiers
-            'userid' => fn (string $f, bool $r) => self::uuid($f, $r),
-            'postid' => fn (string $f, bool $r) => self::uuid($f, $r),
+            'userid'    => fn (string $f, bool $r) => self::uuid($f, $r),
+            'postid'    => fn (string $f, bool $r) => self::uuid($f, $r),
             'commentid' => fn (string $f, bool $r) => self::uuid($f, $r),
 
             // Content filter
             'contentFilterBy' => fn (string $f, bool $r) => self::contentFilter($f, $r),
 
             // User credentials and profile
-            'email' => fn (string $f, bool $r) => self::email($f, $r),
+            'email'    => fn (string $f, bool $r) => self::email($f, $r),
             'username' => fn (string $f, bool $r) => self::username($f, $r),
             'password' => fn (string $f, bool $r) => self::password($f, $r),
 
-            'offset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'limit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'postOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'postLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'offset'        => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'limit'         => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postOffset'    => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'postLimit'     => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'commentOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'commentLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'commentLimit'  => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'messageOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
-            'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+            'messageLimit'  => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
         ];
 
         $spec = [];
+
         foreach ($keys as $field) {
-            $required = in_array($field, $requiredKeys, true);
+            $required = \in_array($field, $requiredKeys, true);
+
             if (isset($map[$field])) {
                 $spec = array_replace($spec, $map[$field]($field, $required));
                 continue;

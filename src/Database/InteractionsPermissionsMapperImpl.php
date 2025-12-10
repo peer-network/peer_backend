@@ -7,18 +7,17 @@ namespace Fawaz\Database;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class InteractionsPermissionsMapperImpl implements InteractionsPermissionsMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
     public function isInteractionAllowed(array $specs, string $targetContentId): bool
     {
-        $this->logger->debug("InteractionsPermissionsMapper.isInteractionAllowed started");
+        $this->logger->debug('InteractionsPermissionsMapper.isInteractionAllowed started');
 
         // Build SQL fragments from specs, ignoring nulls
         $specsSQL = array_filter(
@@ -33,23 +32,23 @@ class InteractionsPermissionsMapperImpl implements InteractionsPermissionsMapper
             return true;
         }
 
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $allSpecs     = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
+        $params       = $allSpecs->paramsToPrepare;
 
         $whereClausesString = implode(' AND ', $whereClauses);
 
         // Combine all spec SQL fragments into a single boolean expression.
         // Default to TRUE (allowed) if no clauses are present (handled above).
-        $booleanExpression = $whereClausesString !== '' ? $whereClausesString : '1=1';
+        $booleanExpression = '' !== $whereClausesString ? $whereClausesString : '1=1';
 
         // Evaluate the combined boolean expression without needing a FROM clause.
-        $sql = 'SELECT (' . $booleanExpression . ') as allowed';
+        $sql  = 'SELECT ('.$booleanExpression.') as allowed';
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $isAllowed = $stmt->fetchColumn();
 
         // fetchColumn returns string|int|false; normalize to strict bool
-        return (bool) ((int) ($isAllowed !== false ? $isAllowed : 0));
+        return (bool) ((int) (false !== $isAllowed ? $isAllowed : 0));
     }
 }

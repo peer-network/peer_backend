@@ -6,7 +6,7 @@ namespace Fawaz\Utils;
 
 final class ContentFilterHelper
 {
-    public const CONTENT_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
+    public const CONTENT_TYPES     = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT'];
     public const POST_FILTER_TYPES = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
     public static function normalizeToUpper(array $values): array
@@ -29,13 +29,15 @@ final class ContentFilterHelper
             'TEXT'  => 'text',
         ];
 
-        $upper = self::normalizeToUpper($filterBy);
+        $upper  = self::normalizeToUpper($filterBy);
         $result = [];
+
         foreach ($upper as $val) {
             if (isset($mapping[$val])) {
                 $result[] = $mapping[$val];
             }
         }
+
         return $result;
     }
 }

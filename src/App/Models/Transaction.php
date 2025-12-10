@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App\Models;
 
-use DateTime;
 use Fawaz\App\ValidationException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Filter\PeerInputFilter;
@@ -19,25 +18,25 @@ class Transaction
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
-    protected string  $tokenamount;
+    protected string $tokenamount;
     protected string $transferaction;
     protected ?string $message;
     protected ?string $createdat;
 
     /**
-     * Assign Notification object while instantiated
+     * Assign Notification object while instantiated.
      */
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
-        $this->transactionid = $data['transactionid'] ?? self::generateUUID();
-        $this->operationid = $data['operationid'] ?? null;
-        $this->senderid = $data['senderid'] ?? null;
-        $this->recipientid = $data['recipientid'] ?? null;
+        $this->transactionid   = $data['transactionid']   ?? self::generateUUID();
+        $this->operationid     = $data['operationid']     ?? null;
+        $this->senderid        = $data['senderid']        ?? null;
+        $this->recipientid     = $data['recipientid']     ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
-        $this->tokenamount = (string) ($data['tokenamount'] ?? 0);
-        $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
-        $this->message = $data['message'] ?? null;
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->tokenamount     = (string) ($data['tokenamount'] ?? 0);
+        $this->transferaction  = $data['transferaction'] ?? 'DEDUCT';
+        $this->message         = $data['message']        ?? null;
+        $this->createdat       = $data['createdat']      ?? new \DateTime()->format('Y-m-d H:i:s.u');
 
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
@@ -45,26 +44,27 @@ class Transaction
     }
 
     /**
-     * Get Values of current state
+     * Get Values of current state.
      */
     public function getArrayCopy(): array
     {
         $att = [
-            'transactionid' => $this->transactionid,
-            'operationid' => $this->operationid,
+            'transactionid'   => $this->transactionid,
+            'operationid'     => $this->operationid,
             'transactiontype' => $this->transactiontype,
-            'senderid' => $this->senderid,
-            'recipientid' => $this->recipientid,
-            'tokenamount' => $this->tokenamount,
-            'transferaction' => $this->transferaction,
-            'message' => $this->message,
-            'createdat' => $this->createdat,
+            'senderid'        => $this->senderid,
+            'recipientid'     => $this->recipientid,
+            'tokenamount'     => $this->tokenamount,
+            'transferaction'  => $this->transferaction,
+            'message'         => $this->message,
+            'createdat'       => $this->createdat,
         ];
+
         return $att;
     }
 
     /**
-     * Define Input filter
+     * Define Input filter.
      */
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
@@ -72,76 +72,76 @@ class Transaction
 
         $specification = [
             'transactionid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'operationid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'senderid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'recipientid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactiontype' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'SqlSanitize']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'errorCode' => 30210
+                        'min'       => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max'       => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'errorCode' => 30210,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'tokenamount' => [
-                'required' => true
+                'required' => true,
             ],
             'transferaction' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
-                        'errorCode' => 30210
+                        'min'       => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max'       => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
+                        'errorCode' => 30210,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'message' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
-                        'max' => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
-                        'errorCode' => 30210
+                        'min'       => $tranConfig['ACTIONTYPE']['MIN_LENGTH'],
+                        'max'       => $tranConfig['ACTIONTYPE']['MAX_LENGTH'],
+                        'errorCode' => 30210,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     /**
-     * Apply Input filter
+     * Apply Input filter.
      */
     public function validate(array $data, array $elements = []): array|false
     {
@@ -156,74 +156,68 @@ class Transaction
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
+
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     /**
-     * Getter method for transactionid
+     * Getter method for transactionid.
      */
     public function getTransactionId(): string
     {
         return $this->transactionid;
     }
 
-
     /**
-     * Getter method for operationid
+     * Getter method for operationid.
      */
     public function getOperationId(): string
     {
         return $this->operationid;
     }
 
-
     /**
-     * Getter method for senderid
+     * Getter method for senderid.
      */
     public function getSenderId(): string
     {
         return $this->senderid;
     }
 
-
     /**
-     * Getter method for recipientid
+     * Getter method for recipientid.
      */
-    public function getRecipientId(): string|null
+    public function getRecipientId(): ?string
     {
         return $this->recipientid;
     }
 
-
-
     /**
-     * Getter method for transactiontype
+     * Getter method for transactiontype.
      */
-    public function getTransactionType(): string|null
+    public function getTransactionType(): ?string
     {
         return $this->transactiontype;
     }
 
-
-
     /**
-     * Getter method for tokenamount
+     * Getter method for tokenamount.
      */
     public function getTokenAmount(): string
     {
         return $this->tokenamount;
     }
 
-
-
     /**
-     * Getter method for transferaction
+     * Getter method for transferaction.
      */
     public function getTransferAction(): string
     {
@@ -231,20 +225,18 @@ class Transaction
     }
 
     /**
-     * Getter method for message
+     * Getter method for message.
      */
-    public function getMessage(): string|null
+    public function getMessage(): ?string
     {
         return $this->message;
     }
 
-
     /**
-     * Getter method for createdat
+     * Getter method for createdat.
      */
     public function getCreatedat(): string
     {
         return $this->createdat;
     }
-
 }

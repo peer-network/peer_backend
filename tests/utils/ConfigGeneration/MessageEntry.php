@@ -11,7 +11,7 @@ class MessageEntry
 
     public function __construct(string $comment, string $userFriendlyComment)
     {
-        $this->comment = $comment;
+        $this->comment             = $comment;
         $this->userFriendlyComment = $userFriendlyComment;
     }
 }

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class Wallet
 {
@@ -26,29 +25,30 @@ class Wallet
             $data = $this->validate($data, $elements);
         }
 
-        $this->token = $data['token'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->postid = $data['postid'] ?? '';
-        $this->fromid = $data['fromid'] ?? '';
-        $this->numbers = $data['numbers'] ?? 0.0;
-        $this->numbersq = $data['numbersq'] ?? 0;
-        $this->whereby = $data['whereby'] ?? 0;
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->token     = $data['token']     ?? '';
+        $this->userid    = $data['userid']    ?? '';
+        $this->postid    = $data['postid']    ?? '';
+        $this->fromid    = $data['fromid']    ?? '';
+        $this->numbers   = $data['numbers']   ?? 0.0;
+        $this->numbersq  = $data['numbersq']  ?? 0;
+        $this->whereby   = $data['whereby']   ?? 0;
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'token' => $this->token,
-            'userid' => $this->userid,
-            'postid' => $this->postid,
-            'fromid' => $this->fromid,
-            'numbers' => $this->numbers,
-            'numbersq' => $this->numbersq,
-            'whereby' => $this->whereby,
+            'token'     => $this->token,
+            'userid'    => $this->userid,
+            'postid'    => $this->postid,
+            'fromid'    => $this->fromid,
+            'numbers'   => $this->numbers,
+            'numbersq'  => $this->numbersq,
+            'whereby'   => $this->whereby,
             'createdat' => $this->createdat,
         ];
+
         return $att;
     }
 
@@ -147,23 +147,25 @@ class Wallet
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $walletConst = ConstantsConfig::wallet();
+        $walletConst   = ConstantsConfig::wallet();
         $specification = [
             'token' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $walletConst['TOKEN']['LENGTH'],
@@ -173,40 +175,40 @@ class Wallet
                 ],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'fromid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'numbers' => [
-                'required' => true,
-                'filters' => [['name' => 'FloatSanitize']],
+                'required'   => true,
+                'filters'    => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => ['min' => $walletConst['NUMBERS']['MIN'], 'max' => $walletConst['NUMBERS']['MAX']]],
                 ],
             ],
             'numbersq' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => $walletConst['NUMBERSQ']['MIN'], 'max' => $walletConst['NUMBERSQ']['MAX']]],
                 ],
             ],
             'whereby' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => $walletConst['WHEREBY']['MIN'], 'max' => $walletConst['WHEREBY']['MAX']]],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
@@ -214,9 +216,9 @@ class Wallet
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

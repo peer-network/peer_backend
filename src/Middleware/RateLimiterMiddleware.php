@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\Middleware;
 
+use Fawaz\RateLimiter\RateLimiter;
+use Fawaz\Utils\PeerLoggerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Response;
-use Fawaz\RateLimiter\RateLimiter;
-use Fawaz\Utils\PeerLoggerInterface;
 
 class RateLimiterMiddleware implements MiddlewareInterface
 {
@@ -20,12 +20,12 @@ class RateLimiterMiddleware implements MiddlewareInterface
     public function __construct(RateLimiter $rateLimiter, PeerLoggerInterface $logger)
     {
         $this->rateLimiter = $rateLimiter;
-        $this->logger = $logger;
+        $this->logger      = $logger;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $ipAddress = filter_var($request->getServerParams()['REMOTE_ADDR'] ?? 'unknown', FILTER_VALIDATE_IP);
+        $ipAddress = filter_var($request->getServerParams()['REMOTE_ADDR'] ?? 'unknown', \FILTER_VALIDATE_IP);
 
         if (!$ipAddress) {
             $this->logger->error('Invalid IP address detected');
@@ -39,10 +39,11 @@ class RateLimiterMiddleware implements MiddlewareInterface
 
             $response = new Response();
             $response->getBody()->write(json_encode([
-                'errors' => 'Rate limit exceeded',
-                'message' => 'You have exceeded the allowed number of requests.',
-                'retry_after' => 60
+                'errors'      => 'Rate limit exceeded',
+                'message'     => 'You have exceeded the allowed number of requests.',
+                'retry_after' => 60,
             ]));
+
             return $response
                 ->withStatus(429)
                 ->withHeader('Content-Type', 'application/json')

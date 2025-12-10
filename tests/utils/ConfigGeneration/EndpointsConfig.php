@@ -15,6 +15,7 @@ class EndpointsConfig implements DataGeneratable
 
         foreach ($decoded as $code => $entry) {
             $targets = [];
+
             foreach ($entry as $target) {
                 $targets[] = new TargetEntry(
                     $target['version'],
@@ -39,6 +40,6 @@ class TargetEntry
     public function __construct(string $version, string $url)
     {
         $this->version = $version;
-        $this->url = $url;
+        $this->url     = $url;
     }
 }

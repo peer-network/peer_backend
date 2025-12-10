@@ -23,6 +23,7 @@ trait ResponseHelper
                 return self::respondWithError(30301);
             }
         }
+
         return [];
     }
 
@@ -77,26 +78,26 @@ trait ResponseHelper
     private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
     {
         // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
-        $firstDigit = (int)substr((string)$responseCode, 0, 1);
-        $isSuccess = $firstDigit === 1 || $firstDigit === 2;
+        $firstDigit = (int) substr((string) $responseCode, 0, 1);
+        $isSuccess  = 1 === $firstDigit || 2 === $firstDigit;
 
-        if ($isError !== null) {
+        if (null !== $isError) {
             $isSuccess = !$isError;
         }
 
         $response = [
-            'status' => $isSuccess ? 'success' : 'error',
-            'ResponseCode' => (string)$responseCode
+            'status'       => $isSuccess ? 'success' : 'error',
+            'ResponseCode' => (string) $responseCode,
         ];
 
         if ($isSuccess) {
             $response['affectedRows'] = $data;
 
-            if ($countEnabled && is_array($data)) {
-                if ($countKey !== null && isset($data[$countKey]) && is_array($data[$countKey])) {
-                    $response['counter'] = count($data[$countKey]);
+            if ($countEnabled && \is_array($data)) {
+                if (null !== $countKey && isset($data[$countKey]) && \is_array($data[$countKey])) {
+                    $response['counter'] = \count($data[$countKey]);
                 } else {
-                    $response['counter'] = count($data);
+                    $response['counter'] = \count($data);
                 }
             }
         }
@@ -108,36 +109,38 @@ trait ResponseHelper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff)
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0x0FFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF)
         );
     }
 
     private function isValidUUID(string $uuid): bool
     {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
+        return 1 === preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid);
     }
 
     /**
-     * Validate Authenticated User
+     * Validate Authenticated User.
      */
     private function checkAuthentication($currentUserId): bool
     {
-        if ($currentUserId === null) {
+        if (null === $currentUserId) {
             return false;
         }
+
         return true;
     }
 
     private static function validateDate(string $date, string $format = 'Y-m-d'): bool
     {
         $d = \DateTime::createFromFormat($format, $date);
+
         return $d && $d->format($format) === $date;
     }
 }

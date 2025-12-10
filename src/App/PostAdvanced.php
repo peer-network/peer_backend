@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 
 class PostAdvanced implements PostReplaceable
@@ -36,9 +35,9 @@ class PostAdvanced implements PostReplaceable
     protected ?bool $isfollowing;
     protected ?bool $isfriend;
     protected string $createdat;
-    protected ?array $tags = [];
-    protected ?array $user = [];
-    protected ?array $comments = [];
+    protected ?array $tags        = [];
+    protected ?array $user        = [];
+    protected ?array $comments    = [];
     protected ?int $activeReports = null;
     protected string $visibilityStatus;
     protected string $visibilityStatusForUser;
@@ -50,76 +49,77 @@ class PostAdvanced implements PostReplaceable
             $data = $this->validate($data, $elements);
         }
 
-        $this->postid = $data['postid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->feedid = $data['feedid'] ?? null;
-        $this->title = $data['title'] ?? '';
-        $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? null;
-        $this->mediadescription = $data['mediadescription'] ?? '';
-        $this->contenttype = $data['contenttype'] ?? 'text';
-        $this->amountlikes = $data['amountlikes'] ?? 0;
-        $this->amountdislikes = $data['amountdislikes'] ?? 0;
-        $this->amountviews = $data['amountviews'] ?? 0;
-        $this->amountcomments = $data['amountcomments'] ?? 0;
-        $this->amountposts = $data['amountposts'] ?? 0;
-        $this->amounttrending = $data['amounttrending'] ?? 0;
-        $this->amountreports = $data['amountreports'] ?? 0;
-        $this->isliked = $data['isliked'] ?? false;
-        $this->isviewed = $data['isviewed'] ?? false;
-        $this->isreported = $data['isreported'] ?? false;
-        $this->isdisliked = $data['isdisliked'] ?? false;
-        $this->issaved = $data['issaved'] ?? false;
-        $this->isfollowed = $data['isfollowed'] ?? false;
-        $this->isfollowing = $data['isfollowing'] ?? false;
-        $this->isfriend = $data['isfriend'] ?? false;
-        $this->url = $this->getPostUrl();
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->activeReports = $data['reports'] ?? null;
-        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->postid                  = $data['postid']           ?? '';
+        $this->userid                  = $data['userid']           ?? '';
+        $this->feedid                  = $data['feedid']           ?? null;
+        $this->title                   = $data['title']            ?? '';
+        $this->media                   = $data['media']            ?? '';
+        $this->cover                   = $data['cover']            ?? null;
+        $this->mediadescription        = $data['mediadescription'] ?? '';
+        $this->contenttype             = $data['contenttype']      ?? 'text';
+        $this->amountlikes             = $data['amountlikes']      ?? 0;
+        $this->amountdislikes          = $data['amountdislikes']   ?? 0;
+        $this->amountviews             = $data['amountviews']      ?? 0;
+        $this->amountcomments          = $data['amountcomments']   ?? 0;
+        $this->amountposts             = $data['amountposts']      ?? 0;
+        $this->amounttrending          = $data['amounttrending']   ?? 0;
+        $this->amountreports           = $data['amountreports']    ?? 0;
+        $this->isliked                 = $data['isliked']          ?? false;
+        $this->isviewed                = $data['isviewed']         ?? false;
+        $this->isreported              = $data['isreported']       ?? false;
+        $this->isdisliked              = $data['isdisliked']       ?? false;
+        $this->issaved                 = $data['issaved']          ?? false;
+        $this->isfollowed              = $data['isfollowed']       ?? false;
+        $this->isfollowing             = $data['isfollowing']      ?? false;
+        $this->isfriend                = $data['isfriend']         ?? false;
+        $this->url                     = $this->getPostUrl();
+        $this->createdat               = $data['createdat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->activeReports           = $data['reports']           ?? null;
+        $this->visibilityStatus        = $data['visibility_status'] ?? 'normal';
         $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
-        $this->tags = isset($data['tags']) && is_array($data['tags']) ? $data['tags'] : [];
-        $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
-        $this->comments = isset($data['comments']) && is_array($data['comments']) ? $data['comments'] : [];
+        $this->tags                    = isset($data['tags'])     && \is_array($data['tags']) ? $data['tags'] : [];
+        $this->user                    = isset($data['user'])     && \is_array($data['user']) ? $data['user'] : [];
+        $this->comments                = isset($data['comments']) && \is_array($data['comments']) ? $data['comments'] : [];
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'postid' => $this->postid,
-            'userid' => $this->userid,
-            'feedid' => $this->feedid,
-            'title' => $this->title,
-            'media' => $this->media,
-            'cover' => $this->cover,
-            'url' => $this->url,
-            'mediadescription' => $this->mediadescription,
-            'contenttype' => $this->contenttype,
-            'amountlikes' => $this->amountlikes,
-            'amountdislikes' => $this->amountdislikes,
-            'amountviews' => $this->amountviews,
-            'amountcomments' => $this->amountcomments,
-            'amountposts' => $this->amountposts,
-            'amounttrending' => $this->amounttrending,
-            'amountreports' => $this->amountreports,
-            'isliked' => $this->isliked,
-            'isviewed' => $this->isviewed,
-            'isreported' => $this->isreported,
-            'isdisliked' => $this->isdisliked,
-            'issaved' => $this->issaved,
-            'isfollowed' => $this->isfollowed,
-            'isfollowing' => $this->isfollowing,
-            'isfriend' => $this->isfriend,
-            'createdat' => $this->createdat,
-            'tags' => $this->tags, // Include tags
+            'postid'            => $this->postid,
+            'userid'            => $this->userid,
+            'feedid'            => $this->feedid,
+            'title'             => $this->title,
+            'media'             => $this->media,
+            'cover'             => $this->cover,
+            'url'               => $this->url,
+            'mediadescription'  => $this->mediadescription,
+            'contenttype'       => $this->contenttype,
+            'amountlikes'       => $this->amountlikes,
+            'amountdislikes'    => $this->amountdislikes,
+            'amountviews'       => $this->amountviews,
+            'amountcomments'    => $this->amountcomments,
+            'amountposts'       => $this->amountposts,
+            'amounttrending'    => $this->amounttrending,
+            'amountreports'     => $this->amountreports,
+            'isliked'           => $this->isliked,
+            'isviewed'          => $this->isviewed,
+            'isreported'        => $this->isreported,
+            'isdisliked'        => $this->isdisliked,
+            'issaved'           => $this->issaved,
+            'isfollowed'        => $this->isfollowed,
+            'isfollowing'       => $this->isfollowing,
+            'isfriend'          => $this->isfriend,
+            'createdat'         => $this->createdat,
+            'tags'              => $this->tags, // Include tags
             'visibility_status' => $this->visibilityStatusForUser,
-            'reports' => $this->activeReports,
-            'hasActiveReports' => $this->hasActiveReports(),
-            'isHiddenForUsers' => $this->isHiddenForUsers(),
-            'user' => $this->user,
-            'comments' => $this->comments,
+            'reports'           => $this->activeReports,
+            'hasActiveReports'  => $this->hasActiveReports(),
+            'isHiddenForUsers'  => $this->isHiddenForUsers(),
+            'user'              => $this->user,
+            'comments'          => $this->comments,
         ];
+
         return $att;
     }
 
@@ -139,6 +139,7 @@ class PostAdvanced implements PostReplaceable
     {
         return $this->user ?? [];
     }
+
     public function getUserid(): string
     {
         return $this->userid;
@@ -163,14 +164,17 @@ class PostAdvanced implements PostReplaceable
     {
         $this->title = $title;
     }
+
     public function getMediaDescription(): string
     {
         return $this->mediadescription;
     }
+
     public function setMediaDescription(string $mediadescription): void
     {
         $this->mediadescription = $mediadescription;
     }
+
     // PostReplaceable requires setDescription
     public function setDescription(string $descriptionConfig): void
     {
@@ -186,10 +190,12 @@ class PostAdvanced implements PostReplaceable
     {
         return $this->media;
     }
+
     public function setMedia(string $media): void
     {
         $this->media = $media;
     }
+
     public function setCover(string $media): void
     {
         $this->cover = $media;
@@ -199,10 +205,12 @@ class PostAdvanced implements PostReplaceable
     {
         return $this->contenttype;
     }
+
     public function setContentType(string $contentType): void
     {
         $this->contenttype = $contentType;
     }
+
     // Capabilities for content filtering
     public function visibilityStatus(): string
     {
@@ -221,14 +229,15 @@ class PostAdvanced implements PostReplaceable
 
     public function hasActiveReports(): bool
     {
-        return (int)($this->activeReports ?? 0) > 0;
+        return (int) ($this->activeReports ?? 0) > 0;
     }
 
     // Computed property: hidden for users when hidden or many reports
     public function isHiddenForUsers(): bool
     {
-        $reports = (int)($this->activeReports ?? 0);
-        return $this->visibilityStatus === 'hidden' || $reports > 4;
+        $reports = (int) ($this->activeReports ?? 0);
+
+        return 'hidden' === $this->visibilityStatus || $reports > 4;
     }
 
     public function getPostUrl(): string
@@ -236,7 +245,8 @@ class PostAdvanced implements PostReplaceable
         if (empty($this->postid)) {
             return '';
         }
-        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
+
+        return getenv('WEB_APP_URL').'/post/'.$this->postid;
     }
 
     // Renew Validation and Array Filtering methods
@@ -250,7 +260,7 @@ class PostAdvanced implements PostReplaceable
         }
 
         $validationErrors = $inputFilter->getMessages();
-        $errorMessages = [];
+        $errorMessages    = [];
 
         foreach ($validationErrors as $field => $errors) {
             foreach ($errors as $error) {
@@ -258,39 +268,39 @@ class PostAdvanced implements PostReplaceable
             }
         }
 
-        throw new ValidationException(implode("", $errorMessages));
+        throw new ValidationException(implode('', $errorMessages));
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $postConst = ConstantsConfig::post();
+        $postConst     = ConstantsConfig::post();
         $specification = [
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'feedid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'title' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
-                        'errorCode' => 30210
+                        'min'       => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max'       => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'errorCode' => 30210,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'media' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['MEDIA']['MIN_LENGTH'],
@@ -300,7 +310,7 @@ class PostAdvanced implements PostReplaceable
                 ],
             ],
             'cover' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['COVER']['MIN_LENGTH'],
@@ -310,19 +320,19 @@ class PostAdvanced implements PostReplaceable
                 ],
             ],
             'mediadescription' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
-                        'errorCode' => 30263
+                        'min'       => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max'       => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'errorCode' => 30263,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'contenttype' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'InArray', 'options' => [
                         'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
@@ -331,73 +341,73 @@ class PostAdvanced implements PostReplaceable
                 ],
             ],
             'amountlikes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountdislikes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountviews' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountcomments' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountposts' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amounttrending' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'isliked' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isviewed' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isreported' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isdisliked' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'issaved' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isfollowed' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isfollowing' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isfriend' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'tags' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'IsArray'],
                     [
-                        'name' => 'ArrayValues',
+                        'name'    => 'ArrayValues',
                         'options' => [
                             'validator' => [
                                 'name' => 'IsString',
@@ -407,20 +417,20 @@ class PostAdvanced implements PostReplaceable
                 ],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
-                   ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                   ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'user' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'IsArray'],
                 ],
             ],
             'comments' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'IsArray'],
                 ],
@@ -428,9 +438,9 @@ class PostAdvanced implements PostReplaceable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

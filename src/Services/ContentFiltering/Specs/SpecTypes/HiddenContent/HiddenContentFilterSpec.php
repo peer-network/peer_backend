@@ -2,7 +2,11 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent;
 
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
@@ -13,22 +17,17 @@ use Fawaz\Services\ContentFiltering\Strategies\Implementations\StrictlyHideEvery
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
-
-use function DI\string;
 
 final class HiddenContentFilterSpec implements Specification
 {
     private HiddenContentFilterServiceImpl $contentFilterService;
     private ContentFilteringStrategy $contentFilterStrategy;
+
     public function __construct(
         ContentFilteringCases $case,
         ?string $contentFilterBy,
         ContentType $contentTarget,
-        private string $currentUserId
+        private string $currentUserId,
     ) {
         $this->contentFilterService = new HiddenContentFilterServiceImpl(
             $contentTarget,
@@ -46,7 +45,7 @@ final class HiddenContentFilterSpec implements Specification
             $this->contentFilterStrategy
         );
 
-        if ($action === ContentFilteringAction::hideContent) {
+        if (ContentFilteringAction::hideContent === $action) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData([
                     "NOT EXISTS (
@@ -61,10 +60,10 @@ final class HiddenContentFilterSpec implements Specification
                         )
                         AND 
                         HiddenContentFiltering_users.userid != :HiddenContentFiltering_currentUserId
-                    )"
+                    )",
                 ], [
-                    "user_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::user),
-                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
+                    'user_report_amount_to_hide'           => $this->contentFilterService->getReportsAmountToHideContent(ContentType::user),
+                    'HiddenContentFiltering_currentUserId' => $this->currentUserId,
                 ]),
                 ContentType::post => new SpecificationSQLData([
                     "NOT EXISTS (
@@ -79,10 +78,10 @@ final class HiddenContentFilterSpec implements Specification
                         )
                         AND 
                         HiddenContentFiltering_posts.userid != :HiddenContentFiltering_currentUserId
-                    )"
+                    )",
                 ], [
-                    "post_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::post),
-                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
+                    'post_report_amount_to_hide'           => $this->contentFilterService->getReportsAmountToHideContent(ContentType::post),
+                    'HiddenContentFiltering_currentUserId' => $this->currentUserId,
                 ]),
                 ContentType::comment => new SpecificationSQLData([
                     "NOT EXISTS (
@@ -97,13 +96,14 @@ final class HiddenContentFilterSpec implements Specification
                         )
                         AND 
                         HiddenContentFiltering_comments.userid != :HiddenContentFiltering_currentUserId
-                    )"
+                    )",
                 ], [
-                    "comment_report_amount_to_hide" => $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment),
-                    "HiddenContentFiltering_currentUserId" => $this->currentUserId,
+                    'comment_report_amount_to_hide'        => $this->contentFilterService->getReportsAmountToHideContent(ContentType::comment),
+                    'HiddenContentFiltering_currentUserId' => $this->currentUserId,
                 ]),
             };
         }
+
         return null;
     }
 
@@ -126,21 +126,23 @@ final class HiddenContentFilterSpec implements Specification
         if ($subject->getUserId() === $this->currentUserId) {
             return ContentReplacementPattern::normal;
         }
-        if ($action === ContentFilteringAction::replaceWithPlaceholder) {
+
+        if (ContentFilteringAction::replaceWithPlaceholder === $action) {
             return ContentReplacementPattern::hidden;
         }
+
         return null;
     }
 
     private static function createStrategy(
-        ContentFilteringCases $strategy
+        ContentFilteringCases $strategy,
     ): ContentFilteringStrategy {
         return match ($strategy) {
-            ContentFilteringCases::myprofile => new DoNothingContentFilteringStrategy(),
-            ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::myprofile    => new DoNothingContentFilteringStrategy(),
+            ContentFilteringCases::searchById   => new PlaceholderEverythingContentFilteringStrategy(),
             ContentFilteringCases::searchByMeta => new PlaceholderEverythingContentFilteringStrategy(),
-            ContentFilteringCases::postFeed => new HidePostsElsePlaceholder(),
-            ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
+            ContentFilteringCases::postFeed     => new HidePostsElsePlaceholder(),
+            ContentFilteringCases::hideAll      => new StrictlyHideEverythingContentFilteringStrategy(),
         };
     }
 

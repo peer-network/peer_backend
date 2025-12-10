@@ -6,8 +6,8 @@ namespace Fawaz\Services\ContentFiltering\Strategies\Implementations;
 
 use Fawaz\Services\ContentFiltering\Strategies\AContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 class PlaceholderEverythingContentFilteringStrategy extends AContentFilteringStrategy implements ContentFilteringStrategy
 {
@@ -16,13 +16,13 @@ class PlaceholderEverythingContentFilteringStrategy extends AContentFilteringStr
             ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::post->value => [
-            ContentType::post->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::post->value    => ContentFilteringAction::replaceWithPlaceholder,
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value    => ContentFilteringAction::replaceWithPlaceholder,
         ],
         ContentType::comment->value => [
             ContentType::comment->value => ContentFilteringAction::replaceWithPlaceholder,
-            ContentType::user->value => ContentFilteringAction::replaceWithPlaceholder,
+            ContentType::user->value    => ContentFilteringAction::replaceWithPlaceholder,
         ],
     ];
 }

@@ -14,8 +14,12 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
 interface PostReplaceable extends HasVisibilityStatus, HasActiveReports, HasUserId
 {
     public function setTitle(string $titleConfig);
+
     public function setMedia(string $mediaPath);
+
     public function setCover(string $mediaPath);
+
     public function setContentType(string $contentType);
+
     public function setDescription(string $descriptionConfig);
 }

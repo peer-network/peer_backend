@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Comment;
-use Fawaz\App\CommentInfo;
-use Fawaz\Database\CommentMapper;
 use Fawaz\Database\CommentInfoMapper;
+use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class CommentService
 {
@@ -25,7 +23,7 @@ class CommentService
         protected CommentInfoMapper $commentInfoMapper,
         protected PostInfoMapper $postInfoMapper,
         protected UserMapper $userMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
     ) {
     }
 
@@ -36,25 +34,27 @@ class CommentService
 
     private function generateUUID(): string
     {
-        return sprintf(
+        return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0x0fff) | 0x4000,
-            mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0x0FFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF)
         );
     }
 
     protected function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
@@ -70,6 +70,7 @@ class CommentService
                 return $this::respondWithError(30265);
             }
         }
+
         return [];
     }
 
@@ -85,29 +86,30 @@ class CommentService
 
         $this->logger->debug('CommentService.createComment started');
 
-        $requiredFields = ['content', 'postid'];
+        $requiredFields   = ['content', 'postid'];
         $validationErrors = $this->validateRequiredFields($args, $requiredFields);
+
         if (!empty($validationErrors)) {
             return $validationErrors;
         }
 
-        $content = trim($args['content']);
-        $postId = trim($args['postid']);
+        $content  = trim($args['content']);
+        $postId   = trim($args['postid']);
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
 
         if (!$this->validateUUID($postId)) {
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
-        if ($parentId !== null && !$this->validateUUID($parentId)) {
+        if (null !== $parentId && !$this->validateUUID($parentId)) {
             return $this::respondWithError(31603, ['parentId' => $parentId]);
         }
 
-        if ($content === '') {
+        if ('' === $content) {
             return $this::respondWithError(30101);
         }
 
-        if ($parentId !== null) {
+        if (null !== $parentId) {
             if (!$this->commentMapper->isParentTopLevel($parentId)) {
                 return $this::respondWithError(41604);
             }
@@ -118,11 +120,11 @@ class CommentService
             $commentId = $this->generateUUID();
 
             $commentData = [
-                'commentid' => $commentId,
-                'userid' => $this->currentUserId,
-                'postid' => $postId,
-                'parentid' => $parentId,
-                'content' => $content,
+                'commentid'         => $commentId,
+                'userid'            => $this->currentUserId,
+                'postid'            => $postId,
+                'parentid'          => $parentId,
+                'content'           => $content,
                 'visibility_status' => 'normal',
             ];
 
@@ -134,6 +136,7 @@ class CommentService
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
+
                 return $this::respondWithError(30265);
             }
 
@@ -142,13 +145,16 @@ class CommentService
             if (!$result) {
                 $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
+
             if (!$postInfo) {
                 $this->logger->warning('PostInfo not found for postId', ['postId' => $postId]);
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31602);
             }
 
@@ -157,16 +163,17 @@ class CommentService
 
             $commentInfoData = [
                 'commentid' => $commentId,
-                'userid' => $this->currentUserId,
-                'likes' => 0,
-                'reports' => 0,
-                'comments' => 0
+                'userid'    => $this->currentUserId,
+                'likes'     => 0,
+                'reports'   => 0,
+                'comments'  => 0,
             ];
             $commentInfo = new CommentInfo($commentInfoData);
             $this->commentInfoMapper->insert($commentInfo);
 
             if (!empty($parentId)) {
                 $parentCommentInfo = $this->commentInfoMapper->loadById($parentId);
+
                 if ($parentCommentInfo) {
                     $parentCommentInfo->setComments($parentCommentInfo->getComments() + 1);
                     $this->commentInfoMapper->update($parentCommentInfo);
@@ -175,7 +182,7 @@ class CommentService
                 }
             }
 
-            $commentResponse = $result->getArrayCopy();
+            $commentResponse         = $result->getArrayCopy();
             $commentResponse['user'] = $this->userMapper->loadUserInfoById($this->currentUserId);
 
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
@@ -183,10 +190,11 @@ class CommentService
 
             $this->transactionManager->commit();
             $this->logger->info('CommentService.createComment completed successfully');
+
             return [
-                'status' => 'success',
-                'counter' => count($response),
-                'ResponseCode' => "11608",
+                'status'       => 'success',
+                'counter'      => \count($response),
+                'ResponseCode' => '11608',
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
@@ -195,6 +203,7 @@ class CommentService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this::respondWithError(41602);
         } finally {
             $this->logger->debug('createComment function execution completed');
@@ -209,14 +218,14 @@ class CommentService
 
         $parentId = $args['parent'] ?? null;
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit  = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
-        if ($parentId !== null && !self::isValidUUID($parentId)) {
+        if (null !== $parentId && !self::isValidUUID($parentId)) {
             return $this::respondWithError(30209);
         }
 
-        $this->logger->debug("CommentService.fetchByParentId started");
+        $this->logger->debug('CommentService.fetchByParentId started');
 
         $results = $this->commentMapper->fetchByParentId($parentId, $this->currentUserId, $offset, $limit);
 
@@ -231,16 +240,17 @@ class CommentService
 
         $postId = $args['postid'] ?? null;
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit  = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
-        if ($postId !== null && !self::isValidUUID($postId)) {
+        if (null !== $postId && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
         }
 
-        $this->logger->debug("CommentService.fetchAllByPostId started");
+        $this->logger->debug('CommentService.fetchAllByPostId started');
 
         $results = $this->commentMapper->fetchAllByPostId($postId, $this->currentUserId, $offset, $limit);
+
         return $results;
     }
 

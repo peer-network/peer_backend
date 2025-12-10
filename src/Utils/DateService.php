@@ -15,9 +15,9 @@ class DateService
     {
         $date = (new \DateTime());
 
-        $interval = (new \DateInterval('PT' . $seconds . 'S'));
+        $interval = (new \DateInterval('PT'.$seconds.'S'));
         $date->add($interval);
 
-        return $date->format("Y-m-d H:i:s.u");
+        return $date->format('Y-m-d H:i:s.u');
     }
 }

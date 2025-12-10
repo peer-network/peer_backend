@@ -3,21 +3,22 @@
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent;
 
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\config\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 final class NormalVisibilityStatusSpec implements Specification
 {
     private array $contentSeverityLevels;
+
     public function __construct(
-        private ?string $contentFilterBy
+        private ?string $contentFilterBy,
     ) {
-        $contentFiltering = ConstantsConfig::contentFiltering();
+        $contentFiltering            = ConstantsConfig::contentFiltering();
         $this->contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
     }
 
@@ -27,11 +28,12 @@ final class NormalVisibilityStatusSpec implements Specification
     }
 
     public function toReplacer(
-        ProfileReplaceable|PostReplaceable|CommentReplaceable $subject
+        ProfileReplaceable|PostReplaceable|CommentReplaceable $subject,
     ): ?ContentReplacementPattern {
-        if ($subject->visibilityStatus() === 'hidden' && ($this->contentFilterBy === null || $this->contentFilterBy !== $this->contentSeverityLevels[0])) {
+        if ('hidden' === $subject->visibilityStatus() && (null === $this->contentFilterBy || $this->contentFilterBy !== $this->contentSeverityLevels[0])) {
             return ContentReplacementPattern::normal;
         }
+
         return null;
     }
 

@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use PDO;
-use Fawaz\App\User;
-use Fawaz\App\UserInfo;
 use Fawaz\App\Profile;
+use Fawaz\App\Status;
+use Fawaz\App\Tokenize;
+use Fawaz\App\User;
+use Fawaz\App\UserAdvanced;
+use Fawaz\App\UserInfo;
+use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\App\UserAdvanced;
-use Fawaz\App\Tokenize;
-use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
-use Fawaz\App\Status;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class UserMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
@@ -32,11 +31,11 @@ class UserMapper
     public function logLoginData(string $userId, ?string $actionType = 'login'): void
     {
         try {
-            $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-            $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-            $actionType = $actionType ?? 'login';
+            $ip         = $_SERVER['REMOTE_ADDR']     ?? 'unknown';
+            $browser    = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $actionType = $actionType                 ?? 'login';
 
-            $sql = "INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)";
+            $sql  = 'INSERT INTO logdata (userid, ip, browser, action_type) VALUES (:userid, :ip, :browser, :action_type)';
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
@@ -47,19 +46,18 @@ class UserMapper
             $stmt->execute();
 
             $this->logger->info('Login data successfully logged', [
-                'userId' => $userId,
-                'ip' => $ip,
-                'browser' => $browser,
-                'actionType' => $actionType
+                'userId'     => $userId,
+                'ip'         => $ip,
+                'browser'    => $browser,
+                'actionType' => $actionType,
             ]);
-
         } catch (\Throwable $e) {
             $this->logger->error('Unexpected error occurred while logging login data', [
-                'error' => $e->getMessage(),
-                'userId' => $userId,
-                'ip' => $ip,
-                'browser' => $browser,
-                'actionType' => $actionType
+                'error'      => $e->getMessage(),
+                'userId'     => $userId,
+                'ip'         => $ip,
+                'browser'    => $browser,
+                'actionType' => $actionType,
             ]);
         }
     }
@@ -67,38 +65,39 @@ class UserMapper
     public function logLoginDaten(string $userId, ?string $actionType = 'login'): void
     {
         try {
-            $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-            $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-            $url = $_SERVER['REQUEST_URI'] ?? 'unknown';
-            $httpMethod = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
-            $statusCode = http_response_code();
+            $ip           = $_SERVER['REMOTE_ADDR']     ?? 'unknown';
+            $browser      = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+            $url          = $_SERVER['REQUEST_URI']     ?? 'unknown';
+            $httpMethod   = $_SERVER['REQUEST_METHOD']  ?? 'unknown';
+            $statusCode   = http_response_code();
             $responseTime = round((microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000, 2);
-            $location = $this->getLocationFromIP($ip) ?? 'unknown';
-            $actionType = $actionType ?? 'login';
+            $location     = $this->getLocationFromIP($ip) ?? 'unknown';
+            $actionType   = $actionType                   ?? 'login';
 
-            $rawInput = \file_get_contents('php://input');
-            $input = \json_decode($rawInput, true);
+            $rawInput = file_get_contents('php://input');
+            $input    = json_decode($rawInput, true);
 
             $requestPayload = null;
-            if ($input !== null) {
+
+            if (null !== $input) {
                 try {
-                    $requestPayload = json_encode($input, JSON_THROW_ON_ERROR);
+                    $requestPayload = json_encode($input, \JSON_THROW_ON_ERROR);
                 } catch (\JsonException $e) {
                     $this->logger->error('JSON encoding error during request payload processing', [
-                        'error' => $e->getMessage(),
-                        'rawInput' => $rawInput
+                        'error'    => $e->getMessage(),
+                        'rawInput' => $rawInput,
                     ]);
                 }
             }
 
             $authStatus = 'success';
 
-            $sql = "
+            $sql = '
                 INSERT INTO logdaten 
                 (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, request_payload, auth_status)
                 VALUES 
                 (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :request_payload, :auth_status)
-            ";
+            ';
 
             $stmt = $this->db->prepare($sql);
 
@@ -117,31 +116,30 @@ class UserMapper
             $stmt->execute();
 
             $this->logger->info('Login data successfully logged', [
-                'userId' => $userId,
-                'ip' => $ip,
-                'browser' => $browser,
-                'actionType' => $actionType
+                'userId'     => $userId,
+                'ip'         => $ip,
+                'browser'    => $browser,
+                'actionType' => $actionType,
             ]);
-
         } catch (\PDOException $e) {
             $this->logger->error('Database error occurred while logging login data', [
-                'error' => $e->getMessage(),
+                'error'  => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip,
-                'url' => $url
+                'ip'     => $ip,
+                'url'    => $url,
             ]);
         } catch (\JsonException $e) {
             $this->logger->error('JSON encoding error occurred while logging login data', [
-                'error' => $e->getMessage(),
+                'error'  => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip
+                'ip'     => $ip,
             ]);
         } catch (\Throwable $e) {
             $this->logger->error('An unexpected error occurred while logging login data', [
-                'error' => $e->getMessage(),
+                'error'  => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip,
-                'url' => $url
+                'ip'     => $ip,
+                'url'    => $url,
             ]);
         }
     }
@@ -152,72 +150,73 @@ class UserMapper
 
         try {
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, \CURLOPT_URL, $url);
+            curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, \CURLOPT_TIMEOUT, 5);
             $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $httpCode = curl_getinfo($ch, \CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-            if ($httpCode !== 200) {
+            if (200 !== $httpCode) {
                 $this->logger->error('Failed to get location from IP, HTTP error', [
-                    'ip' => $ip,
-                    'httpCode' => $httpCode
+                    'ip'       => $ip,
+                    'httpCode' => $httpCode,
                 ]);
+
                 return null;
             }
 
             $data = json_decode($response, true);
 
-            if (json_last_error() === JSON_ERROR_NONE && $data['status'] === 'success') {
+            if (\JSON_ERROR_NONE === json_last_error() && 'success' === $data['status']) {
                 return "{$data['city']}, {$data['country']}";
             }
 
             return null;
-
         } catch (\Throwable $e) {
             $this->logger->error('Failed to get location from IP', [
-                'ip' => $ip,
-                'error' => $e->getMessage()
+                'ip'    => $ip,
+                'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
 
     public function fetchAll(string $currentUserId, array $args = [], array $specifications = []): array
     {
-        $this->logger->debug("UserMapper.fetchAll started");
+        $this->logger->debug('UserMapper.fetchAll started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset     = max((int) ($args['offset'] ?? 0), 0);
+        $limit      = min(max((int) ($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $specsSQL     = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs     = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
+        $params       = $allSpecs->paramsToPrepare;
 
         $params['currentUserId'] = $currentUserId;
 
         foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+            if (\in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
                 $whereClauses[] = "u.$field = :$field";
                 $params[$field] = $value;
             }
 
-            if ($field === 'username') {
-                $whereClauses[] = "u.username ILIKE :username";
-                $params['username'] = '%' . $value . '%';
+            if ('username' === $field) {
+                $whereClauses[]     = 'u.username ILIKE :username';
+                $params['username'] = '%'.$value.'%';
             }
         }
 
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
+        $params['limit']      = $limit;
+        $params['offset']     = $offset;
         $params['trendlimit'] = $trendlimit;
 
         $whereClausesString = implode(' AND ', $whereClauses);
 
-        $sql = sprintf(
+        $sql = \sprintf(
             "
             SELECT 
                 u.uid,
@@ -284,97 +283,100 @@ class UserMapper
             $stmt->execute($params);
 
             $results = [];
+
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $this->logger->debug("UserMapper.fetchAll.row started");
+                $this->logger->debug('UserMapper.fetchAll.row started');
+
                 try {
                     $results[] = new UserAdvanced([
-                        'uid' => $row['uid'],
-                        'email' => $row['email'],
-                        'username' => $row['username'],
-                        'password' => $row['password'],
-                        'status' => $row['status'],
-                        'verified' => $row['verified'],
-                        'slug' => $row['slug'],
-                        'roles_mask' => $row['roles_mask'],
-                        'ip' => $row['ip'],
-                        'img' => $row['img'],
-                        'biography' => $row['biography'],
+                        'uid'               => $row['uid'],
+                        'email'             => $row['email'],
+                        'username'          => $row['username'],
+                        'password'          => $row['password'],
+                        'status'            => $row['status'],
+                        'verified'          => $row['verified'],
+                        'slug'              => $row['slug'],
+                        'roles_mask'        => $row['roles_mask'],
+                        'ip'                => $row['ip'],
+                        'img'               => $row['img'],
+                        'biography'         => $row['biography'],
                         'visibility_status' => $row['visibility_status'],
-                        'user_reports' => $row['user_reports'],
-                        'amountposts' => (int)$row['amountposts'],
-                        'amounttrending' => (int)$row['amounttrending'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                        'amountfollower' => (int)$row['amountfollower'],
-                        'amountfollowed' => (int)$row['amountfollowed'],
-                        'liquidity' => (float)$row['liquidity'],
-                        'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat'],
+                        'user_reports'      => $row['user_reports'],
+                        'amountposts'       => (int) $row['amountposts'],
+                        'amounttrending'    => (int) $row['amounttrending'],
+                        'isfollowed'        => (bool) $row['isfollowed'],
+                        'isfollowing'       => (bool) $row['isfollowing'],
+                        'amountfollower'    => (int) $row['amountfollower'],
+                        'amountfollowed'    => (int) $row['amountfollowed'],
+                        'liquidity'         => (float) $row['liquidity'],
+                        'createdat'         => $row['createdat'],
+                        'updatedat'         => $row['updatedat'],
                     ]);
                 } catch (\Throwable $e) {
-                    $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
+                    $this->logger->error('Failed to map user data', ['error' => $e->getMessage(), 'data' => $row]);
                 }
             }
 
             if ($results) {
-                $this->logger->info("Fetched all users from database", ['count' => count($results)]);
+                $this->logger->info('Fetched all users from database', ['count' => \count($results)]);
             } else {
-                $this->logger->warning("No users found in database");
+                $this->logger->warning('No users found in database');
             }
 
             return $results;
-
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     public function fetchAllAdvance(array $args, array $specifications, ?string $currentUserId = null): array
     {
-        $this->logger->debug("UserMapper.fetchAll started");
+        $this->logger->debug('UserMapper.fetchAll started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset     = max((int) ($args['offset'] ?? 0), 0);
+        $limit      = min(max((int) ($args['limit'] ?? 10), 1), 20);
         $trendlimit = 4;
-        $trenddays = 7;
+        $trenddays  = 7;
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $specsSQL     = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs     = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
+        $params       = $allSpecs->paramsToPrepare;
 
         $includeDeleted = !empty($args['includeDeleted']);
+
         if ($includeDeleted) {
             unset($args['includeDeleted']);
         }
 
-        $params['currentUserId'] =  $currentUserId;
+        $params['currentUserId'] = $currentUserId;
 
         foreach ($args as $field => $value) {
-            if (in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
+            if (\in_array($field, ['uid', 'email', 'status', 'verified', 'ip'], true)) {
                 $whereClauses[] = "u.$field = :$field";
                 $params[$field] = $value;
             }
 
-            if ($field === 'username') {
-                $whereClauses[] = "u.username ILIKE :username";
-                $params['username'] = '%' . $value . '%';
+            if ('username' === $field) {
+                $whereClauses[]     = 'u.username ILIKE :username';
+                $params['username'] = '%'.$value.'%';
             }
         }
 
         if (!$includeDeleted) {
-            $whereClauses[] = 'u.status != :statusExcluded';
+            $whereClauses[]           = 'u.status != :statusExcluded';
             $params['statusExcluded'] = Status::DELETED;
         }
 
-        $params['limit'] = $limit;
-        $params['offset'] = $offset;
+        $params['limit']      = $limit;
+        $params['offset']     = $offset;
         $params['trendlimit'] = $trendlimit;
 
-        $whereClausesString = implode(" AND ", $whereClauses);
+        $whereClausesString = implode(' AND ', $whereClauses);
 
-        $sql = sprintf(
+        $sql = \sprintf(
             "
             SELECT 
                 u.uid,
@@ -441,59 +443,61 @@ class UserMapper
             $stmt->execute($params);
 
             $results = [];
+
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                $this->logger->debug("UserMapper.fetchAll.row started");
+                $this->logger->debug('UserMapper.fetchAll.row started');
+
                 try {
                     $results[] = new UserAdvanced([
-                        'uid' => $row['uid'],
-                        'email' => $row['email'],
-                        'username' => $row['username'],
-                        'password' => $row['password'],
-                        'status' => $row['status'],
-                        'verified' => $row['verified'],
-                        'slug' => $row['slug'],
-                        'roles_mask' => $row['roles_mask'],
-                        'ip' => $row['ip'],
-                        'img' => $row['img'],
-                        'biography' => $row['biography'],
-                        'amountposts' => (int)$row['amountposts'],
-                        'amounttrending' => (int)$row['amounttrending'],
-                        'isfollowed' => (bool)$row['isfollowed'],
-                        'isfollowing' => (bool)$row['isfollowing'],
-                        'amountfollower' => (int)$row['amountfollower'],
-                        'amountfollowed' => (int)$row['amountfollowed'],
-                        'liquidity' => (float)$row['liquidity'],
-                        'createdat' => $row['createdat'],
-                        'updatedat' => $row['updatedat'],
+                        'uid'               => $row['uid'],
+                        'email'             => $row['email'],
+                        'username'          => $row['username'],
+                        'password'          => $row['password'],
+                        'status'            => $row['status'],
+                        'verified'          => $row['verified'],
+                        'slug'              => $row['slug'],
+                        'roles_mask'        => $row['roles_mask'],
+                        'ip'                => $row['ip'],
+                        'img'               => $row['img'],
+                        'biography'         => $row['biography'],
+                        'amountposts'       => (int) $row['amountposts'],
+                        'amounttrending'    => (int) $row['amounttrending'],
+                        'isfollowed'        => (bool) $row['isfollowed'],
+                        'isfollowing'       => (bool) $row['isfollowing'],
+                        'amountfollower'    => (int) $row['amountfollower'],
+                        'amountfollowed'    => (int) $row['amountfollowed'],
+                        'liquidity'         => (float) $row['liquidity'],
+                        'createdat'         => $row['createdat'],
+                        'updatedat'         => $row['updatedat'],
                         'visibility_status' => $row['visibility_status'],
                     ]);
                 } catch (\Throwable $e) {
-                    $this->logger->error("Failed to map user data", ['error' => $e->getMessage(), 'data' => $row]);
+                    $this->logger->error('Failed to map user data', ['error' => $e->getMessage(), 'data' => $row]);
                 }
             }
 
             if ($results) {
-                $this->logger->info("Fetched all users from database", ['count' => count($results)]);
+                $this->logger->info('Fetched all users from database', ['count' => \count($results)]);
             } else {
-                $this->logger->warning("No users found in database");
+                $this->logger->warning('No users found in database');
             }
 
             return $results;
-
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     public function loadByName(string $username): array
     {
-        $this->logger->debug("UserMapper.loadByName started");
+        $this->logger->debug('UserMapper.loadByName started');
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
+            $sql = 'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
-                    WHERE username = :username";
+                    WHERE username = :username';
 
             $stmt = $this->db->prepare($sql);
 
@@ -502,32 +506,33 @@ class UserMapper
             $stmt->execute();
 
             $results = [];
+
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 $results[] = new User($row);
             }
 
             if ($results) {
-                $this->logger->info("Fetched all users from database", ['count' => count($results)]);
+                $this->logger->info('Fetched all users from database', ['count' => \count($results)]);
             } else {
-                $this->logger->warning("No users found in database");
+                $this->logger->warning('No users found in database');
             }
 
             return $results;
-
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     public function loadByIdMAin(string $id, int $roles_mask = 0): User|false
     {
-        $this->logger->debug("UserMapper.loadById started");
+        $this->logger->debug('UserMapper.loadById started');
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
+            $sql = 'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
-                    WHERE uid = :id AND roles_mask = :roles_mask AND status = 0";
+                    WHERE uid = :id AND roles_mask = :roles_mask AND status = 0';
 
             $stmt = $this->db->prepare($sql);
 
@@ -537,27 +542,28 @@ class UserMapper
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if ($data !== false) {
+            if (false !== $data) {
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with id", ['id' => $id]);
-            return false;
+            $this->logger->warning('No user found with id', ['id' => $id]);
 
+            return false;
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function loadById(string $id): User|false
     {
-        $this->logger->debug("UserMapper.loadById started");
+        $this->logger->debug('UserMapper.loadById started');
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
+            $sql = 'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
-                    WHERE uid = :id AND status != :status";
+                    WHERE uid = :id AND status != :status';
 
             $stmt = $this->db->prepare($sql);
 
@@ -567,25 +573,26 @@ class UserMapper
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if ($data !== false) {
+            if (false !== $data) {
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with id", ['id' => $id]);
-            return false;
+            $this->logger->warning('No user found with id', ['id' => $id]);
 
+            return false;
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function loadByEmail(string $email): User|false
     {
-        $this->logger->debug("UserMapper.loadByEmail started");
+        $this->logger->debug('UserMapper.loadByEmail started');
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status FROM users WHERE email = :email";
+            $sql  = 'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status FROM users WHERE email = :email';
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
@@ -593,131 +600,142 @@ class UserMapper
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if ($data !== false) {
+            if (false !== $data) {
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with email");
-            return false;
+            $this->logger->warning('No user found with email');
 
+            return false;
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function loadUserInfoById(string $id): array|false
     {
-        $this->logger->debug("UserMapper.loadUserInfoById started", ['id' => $id]);
+        $this->logger->debug('UserMapper.loadUserInfoById started', ['id' => $id]);
 
         try {
-            $sql = "SELECT uid, username, status, slug, img, biography, updatedat, visibility_status FROM users WHERE uid = :id";
+            $sql  = 'SELECT uid, username, status, slug, img, biography, updatedat, visibility_status FROM users WHERE uid = :id';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':id', $id, \PDO::PARAM_STR);  // Use bindValue here
             $stmt->execute();
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if ($data !== false) {
-                $this->logger->info("User info fetched successfully", ['id' => $id]);
+            if (false !== $data) {
+                $this->logger->info('User info fetched successfully', ['id' => $id]);
+
                 return new User($data, [], false)->getArrayCopy();
             }
 
-            $this->logger->warning("No user found with id", ['id' => $id]);
+            $this->logger->warning('No user found with id', ['id' => $id]);
+
             return false;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while loading user info", ['id' => $id, 'error' => $e->getMessage()]);
+            $this->logger->error('General error while loading user info', ['id' => $id, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function isUserExistById(string $id): bool
     {
-        $this->logger->debug("UserMapper.isUserExistById started", ['id' => $id]);
+        $this->logger->debug('UserMapper.isUserExistById started', ['id' => $id]);
 
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
+            $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE uid = :id');
             $stmt->bindParam(':id', $id);
             $stmt->execute();
             $exists = $stmt->fetchColumn() > 0;
 
-            $this->logger->info("User existence check", ['id' => $id, 'exists' => $exists]);
+            $this->logger->info('User existence check', ['id' => $id, 'exists' => $exists]);
+
             return $exists;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while checking if user exists", ['id' => $id, 'error' => $e->getMessage()]);
+            $this->logger->error('General error while checking if user exists', ['id' => $id, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function isEmailTaken(string $email): bool
     {
-        $this->logger->debug("UserMapper.isEmailTaken started");
+        $this->logger->debug('UserMapper.isEmailTaken started');
 
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
+            $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE email = :email');
             $stmt->execute(['email' => $email]);
             $isTaken = $stmt->fetchColumn() > 0;
 
-            $this->logger->info("Email availability check", ['isTaken' => $isTaken]);
+            $this->logger->info('Email availability check', ['isTaken' => $isTaken]);
+
             return $isTaken;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while checking email", ['error' => $e->getMessage()]);
+            $this->logger->error('General error while checking email', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function checkIfNameAndSlugExist(string $username, int $slug): bool
     {
-        $this->logger->debug("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+        $this->logger->debug('UserMapper.checkIfNameAndSlugExist started', ['username' => $username, 'slug' => $slug]);
 
         try {
-            $sql = "SELECT 1 FROM users WHERE username = :username AND slug = :slug";
+            $sql  = 'SELECT 1 FROM users WHERE username = :username AND slug = :slug';
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['username' => $username, 'slug' => $slug]);
-            $exists = $stmt->fetchColumn() !== false;
+            $exists = false !== $stmt->fetchColumn();
 
-            $this->logger->info("Name and slug existence check", ['username' => $username, 'slug' => $slug, 'exists' => $exists]);
+            $this->logger->info('Name and slug existence check', ['username' => $username, 'slug' => $slug, 'exists' => $exists]);
+
             return $exists;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while checking name and slug", ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
+            $this->logger->error('General error while checking name and slug', ['username' => $username, 'slug' => $slug, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
 
-
     public function getUserByNameAndSlug(string $username, int $slug): User|bool
     {
-        $this->logger->debug("UserMapper.checkIfNameAndSlugExist started", ['username' => $username, 'slug' => $slug]);
+        $this->logger->debug('UserMapper.checkIfNameAndSlugExist started', ['username' => $username, 'slug' => $slug]);
 
         try {
-            $sql = "SELECT * FROM users WHERE username = :username AND slug = :slug";
+            $sql  = 'SELECT * FROM users WHERE username = :username AND slug = :slug';
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['username' => $username, 'slug' => $slug]);
             $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if ($data !== false) {
+            if (false !== $data) {
                 return new User($data);
             }
 
-            $this->logger->warning("No user found with username");
-            return false;
+            $this->logger->warning('No user found with username');
 
+            return false;
         } catch (\Throwable $e) {
-            $this->logger->error("An error occurred", ['error' => $e->getMessage()]);
+            $this->logger->error('An error occurred', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function verifyAccount(string $uid): bool
     {
-        $this->logger->debug("UserMapper.verifyAccount started", ['uid' => $uid]);
+        $this->logger->debug('UserMapper.verifyAccount started', ['uid' => $uid]);
 
         try {
             if (!$this->isUserExistById($uid)) {
-                $this->logger->warning("User not found", ['uid' => $uid]);
+                $this->logger->warning('User not found', ['uid' => $uid]);
+
                 return false;
             }
 
-            $sql = "UPDATE users SET verified = 1 WHERE uid = :uid AND verified = 0";
+            $sql  = 'UPDATE users SET verified = 1 WHERE uid = :uid AND verified = 0';
             $stmt = $this->db->prepare($sql);
 
             $stmt->execute(['uid' => $uid]);
@@ -725,29 +743,31 @@ class UserMapper
             $isVerified = $stmt->rowCount() > 0;
 
             if ($isVerified) {
-                $this->logger->info("User account verified", ['uid' => $uid]);
+                $this->logger->info('User account verified', ['uid' => $uid]);
             } else {
-                $this->logger->warning("User account already verified or not found", ['uid' => $uid]);
+                $this->logger->warning('User account already verified or not found', ['uid' => $uid]);
             }
 
             return $isVerified;
         } catch (\Throwable $e) {
-            $this->logger->error("General error while verifying account", ['uid' => $uid, 'error' => $e->getMessage()]);
+            $this->logger->error('General error while verifying account', ['uid' => $uid, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function deactivateAccount(string $uid): bool
     {
-        $this->logger->debug("UserMapper.deactivateAccount started", ['uid' => $uid]);
+        $this->logger->debug('UserMapper.deactivateAccount started', ['uid' => $uid]);
 
         try {
             if (!$this->isUserExistById($uid)) {
-                $this->logger->warning("User does not exist", ['uid' => $uid]);
+                $this->logger->warning('User does not exist', ['uid' => $uid]);
+
                 return false;
             }
 
-            $sql = "UPDATE users SET verified = 0 WHERE uid = :uid";
+            $sql  = 'UPDATE users SET verified = 0 WHERE uid = :uid';
             $stmt = $this->db->prepare($sql);
 
             $stmt->execute(['uid' => $uid]);
@@ -755,14 +775,15 @@ class UserMapper
             $isDeactivated = $stmt->rowCount() > 0;
 
             if ($isDeactivated) {
-                $this->logger->info("User account deactivated", ['uid' => $uid]);
+                $this->logger->info('User account deactivated', ['uid' => $uid]);
             } else {
-                $this->logger->warning("No rows affected when deactivating account", ['uid' => $uid]);
+                $this->logger->warning('No rows affected when deactivating account', ['uid' => $uid]);
             }
 
             return $isDeactivated;
         } catch (\Throwable $e) {
-            $this->logger->error("Error deactivating account", ['uid' => $uid, 'error' => $e->getMessage()]);
+            $this->logger->error('Error deactivating account', ['uid' => $uid, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -773,15 +794,16 @@ class UserMapper
         int $offset = 0,
         int $limit = 10,
     ): ?array {
-        $this->logger->debug("UserMapper.fetchFriends started", ['userId' => $userId]);
+        $this->logger->debug('UserMapper.fetchFriends started', ['userId' => $userId]);
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "f1.followerid = :userId AND f2.followedid = :userId";
-        $whereClausesString = implode(" AND ", $whereClauses);
+        $specsSQL           = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs           = SpecificationSQLData::merge($specsSQL);
+        $whereClauses       = $allSpecs->whereClauses;
+        $whereClauses[]     = 'f1.followerid = :userId AND f2.followedid = :userId';
+        $whereClausesString = implode(' AND ', $whereClauses);
 
         $params = $allSpecs->paramsToPrepare;
+
         try {
             $sql = "
                 SELECT 
@@ -806,28 +828,28 @@ class UserMapper
             $stmt = $this->db->prepare($sql);
 
             $params['userId'] = $userId;
-            $params['limit'] = $limit;
+            $params['limit']  = $limit;
             $params['offset'] = $offset;
 
             $stmt->execute($params);
 
-            $friends = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $friends          = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             $filtered_friends = [];
-
 
             foreach ($friends as $row) {
                 $filtered_friends[] = new Profile($row, [], false);
             }
 
             if ($filtered_friends) {
-                $this->logger->info("fetchFriends retrieved friends", ['count' => count($filtered_friends)]);
+                $this->logger->info('fetchFriends retrieved friends', ['count' => \count($filtered_friends)]);
             } else {
-                $this->logger->warning("No friends found for user", ['userId' => $userId]);
+                $this->logger->warning('No friends found for user', ['userId' => $userId]);
             }
 
             return $filtered_friends ?: null;
         } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFriends", ['error' => $e->getMessage()]);
+            $this->logger->error('Database error in fetchFriends', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -839,17 +861,17 @@ class UserMapper
         int $offset = 0,
         int $limit = 10,
     ): array {
-        $this->logger->debug("UserMapper.fetchFollowers started", ['userId' => $userId]);
+        $this->logger->debug('UserMapper.fetchFollowers started', ['userId' => $userId]);
 
-        $offset = max((int)$offset, 0);
-        $limit = min(max((int)$limit, 1), 20);
+        $offset = max((int) $offset, 0);
+        $limit  = min(max((int) $limit, 1), 20);
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = 'f.followedid = :userId';
-        $whereClausesString = implode(" AND ", $whereClauses);
-        $params = $allSpecs->paramsToPrepare;
+        $specsSQL           = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs           = SpecificationSQLData::merge($specsSQL);
+        $whereClauses       = $allSpecs->whereClauses;
+        $whereClauses[]     = 'f.followedid = :userId';
+        $whereClausesString = implode(' AND ', $whereClauses);
+        $params             = $allSpecs->paramsToPrepare;
 
         try {
             $sql = "
@@ -883,11 +905,10 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-
-            $params['userId'] = $userId;
+            $params['userId']        = $userId;
             $params['currentUserId'] = $currentUserId;
-            $params['limit'] = $limit;
-            $params['offset'] = $offset;
+            $params['limit']         = $limit;
+            $params['offset']        = $offset;
 
             $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -897,13 +918,14 @@ class UserMapper
             $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
             $this->logger->info(
-                count($users) > 0 ? "fetchFollowers retrieved users" : "No users found",
-                ['count' => count($users)]
+                \count($users) > 0 ? 'fetchFollowers retrieved users' : 'No users found',
+                ['count' => \count($users)]
             );
 
             return $users;
         } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFollowers", ['error' => $e->getMessage()]);
+            $this->logger->error('Database error in fetchFollowers', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
@@ -915,14 +937,14 @@ class UserMapper
         int $offset = 0,
         int $limit = 10,
     ): array {
-        $this->logger->debug("UserMapper.fetchFollowing started", ['userId' => $userId]);
+        $this->logger->debug('UserMapper.fetchFollowing started', ['userId' => $userId]);
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = 'f.followerid = :userId';
-        $whereClausesString = implode(" AND ", $whereClauses);
-        $params = $allSpecs->paramsToPrepare;
+        $specsSQL           = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs           = SpecificationSQLData::merge($specsSQL);
+        $whereClauses       = $allSpecs->whereClauses;
+        $whereClauses[]     = 'f.followerid = :userId';
+        $whereClausesString = implode(' AND ', $whereClauses);
+        $params             = $allSpecs->paramsToPrepare;
 
         try {
             $sql = "
@@ -956,10 +978,10 @@ class UserMapper
 
             $stmt = $this->db->prepare($sql);
 
-            $params['userId'] = $userId;
+            $params['userId']        = $userId;
             $params['currentUserId'] = $currentUserId;
-            $params['limit'] = $limit;
-            $params['offset'] = $offset;
+            $params['limit']         = $limit;
+            $params['offset']        = $offset;
 
             $stmt->execute($params);
             $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -969,31 +991,32 @@ class UserMapper
             $users = array_map(fn ($row) => new Profile($row), $uniqueResults);
 
             $this->logger->info(
-                count($users) > 0 ? "fetchFollowing retrieved users" : "No users found",
-                ['count' => count($users)]
+                \count($users) > 0 ? 'fetchFollowing retrieved users' : 'No users found',
+                ['count' => \count($users)]
             );
 
             return $users;
         } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFollowing", ['error' => $e->getMessage()]);
+            $this->logger->error('Database error in fetchFollowing', ['error' => $e->getMessage()]);
+
             return [];
         }
     }
 
     private function setPassword(string $password): string
     {
-        $this->logger->debug("UserMapper.setPassword started");
+        $this->logger->debug('UserMapper.setPassword started');
 
-        if (defined('PASSWORD_ARGON2ID')) {
-            $hash = \password_hash($password, PASSWORD_ARGON2ID, [
-                'time_cost' => 3,
+        if (\defined('PASSWORD_ARGON2ID')) {
+            $hash = password_hash($password, \PASSWORD_ARGON2ID, [
+                'time_cost'   => 3,
                 'memory_cost' => 65536, // Memory usage (64MB)
-                'threads' => 2
+                'threads'     => 2,
             ]);
             $algorithm = 'ARGON2ID';
         } else {
-            $hash = \password_hash($password, \PASSWORD_BCRYPT, [
-                'cost' => 12
+            $hash = password_hash($password, \PASSWORD_BCRYPT, [
+                'cost' => 12,
             ]);
             $algorithm = 'BCRYPT';
         }
@@ -1005,10 +1028,10 @@ class UserMapper
 
     public function createUser(User $userData): ?string
     {
-        $this->logger->debug("UserMapper.createUser started");
+        $this->logger->debug('UserMapper.createUser started');
 
         try {
-            $userid = $userData->getUserId();
+            $userid   = $userData->getUserId();
             $password = $userData->getPassword();
 
             $hashedPassword = $this->setPassword($password);
@@ -1019,34 +1042,35 @@ class UserMapper
             }
             $this->insert($userData);
 
-            $this->logger->info("Inserted new user into database", ['uid' => $userid]);
+            $this->logger->info('Inserted new user into database', ['uid' => $userid]);
 
             return $userid;
         } catch (\Throwable $e) {
-            $this->logger->error("Error creating user", [
+            $this->logger->error('Error creating user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
 
     public function insert(User $user): User
     {
-        $this->logger->debug("UserMapper.insert started");
+        $this->logger->debug('UserMapper.insert started');
 
         $data = $user->getArrayCopy();
         $this->logger->info('UserMapper.insert second', [
-            'uid' => $data['uid'],
+            'uid'      => $data['uid'],
             'username' => $data['username'],
-            'status' => $data['status'],
-            'verified' => $data['verified']
+            'status'   => $data['status'],
+            'verified' => $data['verified'],
         ]);
 
-        $query = "INSERT INTO users 
+        $query = 'INSERT INTO users 
                   (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status)
                   VALUES 
-                  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat, :visibility_status)";
+                  (:uid, :email, :username, :password, :status, :verified, :slug, :roles_mask, :ip, :img, :biography, :createdat, :updatedat, :visibility_status)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1068,67 +1092,69 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new user into database", ['uid' => $data['uid']]);
+            $this->logger->info('Inserted new user into database', ['uid' => $data['uid']]);
 
             return new User($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
+            $this->logger->error('UserMapper.insert: Exception occurred while inserting user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to insert user into database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to insert user into database: '.$e->getMessage());
         }
     }
 
     public function insertReferralInfo(string $userId, string $link): void
     {
-        $this->logger->debug("UserMapper.insertReferralInfo started", [
+        $this->logger->debug('UserMapper.insertReferralInfo started', [
             'userId' => $userId,
-            'link' => $link,
+            'link'   => $link,
         ]);
 
         try {
-            $query = "SELECT 1 FROM user_referral_info WHERE uid = :uid";
-            $stmt = $this->db->prepare($query);
+            $query = 'SELECT 1 FROM user_referral_info WHERE uid = :uid';
+            $stmt  = $this->db->prepare($query);
             $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
             $stmt->execute();
 
             if ($stmt->fetch()) {
-                $this->logger->info("Referral link already exists, skipping insert.", ['userId' => $userId]);
+                $this->logger->info('Referral link already exists, skipping insert.', ['userId' => $userId]);
+
                 return;
             }
 
             $referralUuid = $userId;
 
-            $query = "INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
-                      VALUES (:uid, :referral_link, :referral_uuid)";
+            $query = 'INSERT INTO user_referral_info (uid, referral_link, referral_uuid)
+                      VALUES (:uid, :referral_link, :referral_uuid)';
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':referral_link', $link, \PDO::PARAM_STR);
             $stmt->bindValue(':referral_uuid', $referralUuid, \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info("Referral link inserted successfully.", ['userId' => $userId]);
+            $this->logger->info('Referral link inserted successfully.', ['userId' => $userId]);
         } catch (\PDOException $e) {
-            $this->logger->error("UserMapper.insertReferralInfo: PDOException", ['error' => $e->getMessage()]);
+            $this->logger->error('UserMapper.insertReferralInfo: PDOException', ['error' => $e->getMessage()]);
         } catch (\Exception $e) {
-            $this->logger->error("UserMapper.insertReferralInfo: Exception", ['error' => $e->getMessage()]);
+            $this->logger->error('UserMapper.insertReferralInfo: Exception', ['error' => $e->getMessage()]);
         }
     }
 
     public function getReferralInfoByUserId(string $userId): ?array
     {
-        $this->logger->debug("UserMapper.getReferralInfoByUserId started", [
+        $this->logger->debug('UserMapper.getReferralInfoByUserId started', [
             'userId' => $userId,
         ]);
 
-        $query = "SELECT 
+        $query = 'SELECT 
                 referral_uuid, 
                 referral_link 
             FROM 
                 user_referral_info 
             WHERE 
-                uid = :uid";
+                uid = :uid';
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':uid', $userId, \PDO::PARAM_STR);
@@ -1137,7 +1163,7 @@ class UserMapper
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$result || empty($result['referral_uuid']) || empty($result['referral_link'])) {
-            $this->logger->info("No referral info found. Generating new referral for user.", [
+            $this->logger->info('No referral info found. Generating new referral for user.', [
                 'userId' => $userId,
             ]);
 
@@ -1151,29 +1177,29 @@ class UserMapper
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         }
 
-        $this->logger->info("Referral info query result", ['result' => $result]);
+        $this->logger->info('Referral info query result', ['result' => $result]);
 
         return $result ?: null;
     }
 
     public function getInviterByInvitee(string $userId, array $specs): ?Profile
     {
-        $this->logger->debug("UserMapper.getInviterByInvitee started", [
+        $this->logger->debug('UserMapper.getInviterByInvitee started', [
             'invitee_uuid' => $userId,
         ]);
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "ui.userid = :invitee_uuid";
-        $whereClausesString = implode(" AND ", $whereClauses);
-        $params = $allSpecs->paramsToPrepare;
-        $query = "SELECT *
+        $specsSQL           = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $allSpecs           = SpecificationSQLData::merge($specsSQL);
+        $whereClauses       = $allSpecs->whereClauses;
+        $whereClauses[]     = 'ui.userid = :invitee_uuid';
+        $whereClausesString = implode(' AND ', $whereClauses);
+        $params             = $allSpecs->paramsToPrepare;
+        $query              = "SELECT *
             FROM users_info ui
             JOIN users u ON ui.invited = u.uid
             WHERE $whereClausesString
         ";
 
-        $stmt = $this->db->prepare($query);
+        $stmt                   = $this->db->prepare($query);
         $params['invitee_uuid'] = $userId;
         $stmt->execute($params);
 
@@ -1188,13 +1214,12 @@ class UserMapper
 
     public function getReferralRelations(string $userId, array $specs, int $offset = 0, int $limit = 20): ?array
     {
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $whereClauses[] = "ui.invited = :userId";
-        $whereClausesString = implode(" AND ", $whereClauses);
-        $params = $allSpecs->paramsToPrepare;
-
+        $specsSQL           = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specs);
+        $allSpecs           = SpecificationSQLData::merge($specsSQL);
+        $whereClauses       = $allSpecs->whereClauses;
+        $whereClauses[]     = 'ui.invited = :userId';
+        $whereClausesString = implode(' AND ', $whereClauses);
+        $params             = $allSpecs->paramsToPrepare;
 
         $query = "SELECT *
             FROM users_info ui
@@ -1204,32 +1229,32 @@ class UserMapper
             LIMIT :limit OFFSET :offset
         ";
 
-        $stmt = $this->db->prepare($query);
+        $stmt             = $this->db->prepare($query);
         $params['userId'] = $userId;
-        $params['limit'] = $limit;
+        $params['limit']  = $limit;
         $params['offset'] = $offset;
         $stmt->execute($params);
 
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-        return array_map(fn ($user) => (new Profile($user, [], false)), $data);
+        return array_map(fn ($user) => new Profile($user, [], false), $data);
     }
 
     public function generateReferralLink(string $referralUuid): string
     {
-        return 'https://frontend.getpeer.eu/register.php?referralUuid=' . $referralUuid;
+        return 'https://frontend.getpeer.eu/register.php?referralUuid='.$referralUuid;
     }
 
     public function insertinfo(UserInfo $user): UserInfo
     {
-        $this->logger->debug("UserMapper.insertinfo started");
+        $this->logger->debug('UserMapper.insertinfo started');
 
         $data = $user->getArrayCopy();
 
-        $query = "INSERT INTO users_info 
+        $query = 'INSERT INTO users_info 
                   (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, pkey, updatedat)
                   VALUES 
-                  (:userid, :liquidity, :amountposts, :amountfollower, :amountfollowed, :amountfriends, :amountblocked, :isprivate, :invited, :pkey, :updatedat)";
+                  (:userid, :liquidity, :amountposts, :amountfollower, :amountfollowed, :amountfriends, :amountblocked, :isprivate, :invited, :pkey, :updatedat)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1248,25 +1273,26 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new user into database", ['userid' => $data['userid']]);
+            $this->logger->info('Inserted new user into database', ['userid' => $data['userid']]);
 
             return new UserInfo($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.insert: Exception occurred while inserting user", [
+            $this->logger->error('UserMapper.insert: Exception occurred while inserting user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to insert UserInfo into database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to insert UserInfo into database: '.$e->getMessage());
         }
     }
 
     public function update(User $user): User
     {
-        $this->logger->debug("UserMapper.update started");
+        $this->logger->debug('UserMapper.update started');
 
         $data = $user->getArrayCopy();
 
-        $query = "UPDATE users
+        $query = 'UPDATE users
                   SET username = :username,
                       password = :password,
                       email = :email,
@@ -1278,7 +1304,7 @@ class UserMapper
                       biography = :biography,
                       updatedat = :updatedat,
                       visibility_status = :visibility_status
-                  WHERE uid = :uid";
+                  WHERE uid = :uid';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1297,30 +1323,31 @@ class UserMapper
             $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
             $stmt->execute();
 
-            $this->logger->info("Updated user in database", ['uid' => $data['uid']]);
+            $this->logger->info('Updated user in database', ['uid' => $data['uid']]);
 
             return new User($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.update: Exception occurred while updating user", [
+            $this->logger->error('UserMapper.update: Exception occurred while updating user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to update user into database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to update user into database: '.$e->getMessage());
         }
     }
 
     public function updatePass(User $user): User
     {
-        $this->logger->debug("UserMapper.updatePass started");
+        $this->logger->debug('UserMapper.updatePass started');
 
-        $data = $user->getArrayCopy();
+        $data         = $user->getArrayCopy();
         $passwordHash = $this->setPassword($data['password']);
 
-        $query = "UPDATE users
+        $query = 'UPDATE users
                   SET password = :password,
                       ip = :ip,
                       updatedat = :updatedat
-                  WHERE uid = :uid";
+                  WHERE uid = :uid';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1332,25 +1359,26 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Updated password in database", ['uid' => $data['uid']]);
+            $this->logger->info('Updated password in database', ['uid' => $data['uid']]);
 
             return new User($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.updatePass: Exception occurred while updating password", [
+            $this->logger->error('UserMapper.updatePass: Exception occurred while updating password', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to update password into database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to update password into database: '.$e->getMessage());
         }
     }
 
     public function updateProfil(User $user): User
     {
-        $this->logger->debug("UserMapper.updateProfil started");
+        $this->logger->debug('UserMapper.updateProfil started');
 
         $data = $user->getArrayCopy();
 
-        $query = "UPDATE users
+        $query = 'UPDATE users
                   SET username = :username,
                       email = :email,
                       status = :status,
@@ -1362,7 +1390,7 @@ class UserMapper
                       biography = :biography,
                       updatedat = :updatedat,
                       visibility_status = :visibility_status
-                  WHERE uid = :uid";
+                  WHERE uid = :uid';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1382,15 +1410,16 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Updated profile in database", ['uid' => $data['uid']]);
+            $this->logger->info('Updated profile in database', ['uid' => $data['uid']]);
 
             return new User($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.updateProfil: Exception occurred while updating profile", [
+            $this->logger->error('UserMapper.updateProfil: Exception occurred while updating profile', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to update profile in database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to update profile in database: '.$e->getMessage());
         }
     }
 
@@ -1401,15 +1430,17 @@ class UserMapper
      * Usage of constant improves readability:
      * const Status::DELETED = 6;
      *
-     * @param string $id User unique identifier (uid).
-     * @return bool True if user was hidden as deleted, false otherwise.
-     * @throws \RuntimeException if database operation fails.
+     * @param string $id user unique identifier (uid)
+     *
+     * @return bool true if user was hidden as deleted, false otherwise
+     *
+     * @throws \RuntimeException if database operation fails
      */
     public function delete(string $id): bool
     {
-        $this->logger->debug("UserMapper.delete started");
+        $this->logger->debug('UserMapper.delete started');
 
-        $query = "UPDATE users SET status = :status WHERE uid = :uid";
+        $query = 'UPDATE users SET status = :status WHERE uid = :uid';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1419,71 +1450,72 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Deleted user in database", ['id' => $id]);
+            $this->logger->info('Deleted user in database', ['id' => $id]);
 
-            return (bool)$stmt->rowCount();
+            return (bool) $stmt->rowCount();
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.delete: Exception occurred while deleting user", [
+            $this->logger->error('UserMapper.delete: Exception occurred while deleting user', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            throw new \RuntimeException("Failed to delete user from database: " . $e->getMessage());
+
+            throw new \RuntimeException('Failed to delete user from database: '.$e->getMessage());
         }
     }
 
     public function deleteUnverifiedUsers(): void
     {
-        $this->logger->debug("UserMapper.deleteUnverifiedUsers started");
+        $this->logger->debug('UserMapper.deleteUnverifiedUsers started');
 
         try {
-            $sql = "SELECT uid FROM users WHERE verified IS NULL";
-            $stmt = $this->db->query($sql);
+            $sql             = 'SELECT uid FROM users WHERE verified IS NULL';
+            $stmt            = $this->db->query($sql);
             $unverifiedUsers = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             if ($unverifiedUsers) {
-                $this->logger->info("Fetched all unverified users from database", ['count' => count($unverifiedUsers)]);
+                $this->logger->info('Fetched all unverified users from database', ['count' => \count($unverifiedUsers)]);
 
                 foreach ($unverifiedUsers as $user) {
                     $uid = $user['uid'] ?? null;
 
-                    if ($uid !== null && is_string($uid)) {
+                    if (null !== $uid && \is_string($uid)) {
                         $this->delete($uid);
                     } else {
-                        $this->logger->warning("Skipping deletion for user with invalid UID", ['uid' => $uid]);
+                        $this->logger->warning('Skipping deletion for user with invalid UID', ['uid' => $uid]);
                     }
                 }
 
-                $this->logger->info("Deleted all unverified users from database");
+                $this->logger->info('Deleted all unverified users from database');
             } else {
-                $this->logger->info("No unverified users found in database");
+                $this->logger->info('No unverified users found in database');
             }
         } catch (\Throwable $e) {
-            $this->logger->error("Error deleting unverified users", ['error' => $e]);
+            $this->logger->error('Error deleting unverified users', ['error' => $e]);
         }
     }
 
     public function saveOrUpdateAccessToken(string $userid, string $accessToken): void
     {
-        $this->logger->debug("UserMapper.saveOrUpdateAccessToken started");
+        $this->logger->debug('UserMapper.saveOrUpdateAccessToken started');
 
         $accessTokenValidity = 604800; // 7 Tage
-        $createdat = time();
-        $expirationTime = $createdat + $accessTokenValidity;
+        $createdat           = time();
+        $expirationTime      = $createdat + $accessTokenValidity;
 
         try {
-            $query = "SELECT COUNT(*) FROM access_tokens WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
+            $query = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid';
+            $stmt  = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->execute();
             $exists = $stmt->fetchColumn();
 
             if ($exists) {
-                $query = "UPDATE access_tokens 
+                $query = 'UPDATE access_tokens 
                           SET access_token = :access_token, createdat = :createdat, expiresat = :expiresat 
-                          WHERE userid = :userid";
+                          WHERE userid = :userid';
             } else {
-                $query = "INSERT INTO access_tokens (userid, access_token, createdat, expiresat) 
-                          VALUES (:userid, :access_token, :createdat, :expiresat)";
+                $query = 'INSERT INTO access_tokens (userid, access_token, createdat, expiresat) 
+                          VALUES (:userid, :access_token, :createdat, :expiresat)';
             }
 
             $stmt = $this->db->prepare($query);
@@ -1495,32 +1527,32 @@ class UserMapper
 
             $this->logger->info("Access token successfully saved or updated for user: $userid");
         } catch (\Throwable $e) {
-            $this->logger->error("Database error in saveOrUpdateAccessToken: ", ['error' => $e]);
+            $this->logger->error('Database error in saveOrUpdateAccessToken: ', ['error' => $e]);
         }
     }
 
     public function saveOrUpdateRefreshToken(string $userid, string $refreshToken): void
     {
-        $this->logger->debug("UserMapper.saveOrUpdateRefreshToken started");
+        $this->logger->debug('UserMapper.saveOrUpdateRefreshToken started');
 
         $refreshTokenValidity = 604800; // 7 Tage
-        $createdat = time();
-        $expirationTime = $createdat + $refreshTokenValidity;
+        $createdat            = time();
+        $expirationTime       = $createdat + $refreshTokenValidity;
 
         try {
-            $query = "SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
+            $query = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid';
+            $stmt  = $this->db->prepare($query);
             $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
             $stmt->execute();
             $exists = $stmt->fetchColumn();
 
             if ($exists) {
-                $query = "UPDATE refresh_tokens 
+                $query = 'UPDATE refresh_tokens 
                           SET refresh_token = :refresh_token, createdat = :createdat, expiresat = :expiresat 
-                          WHERE userid = :userid";
+                          WHERE userid = :userid';
             } else {
-                $query = "INSERT INTO refresh_tokens (userid, refresh_token, createdat, expiresat) 
-                          VALUES (:userid, :refresh_token, :createdat, :expiresat)";
+                $query = 'INSERT INTO refresh_tokens (userid, refresh_token, createdat, expiresat) 
+                          VALUES (:userid, :refresh_token, :createdat, :expiresat)';
             }
 
             $stmt = $this->db->prepare($query);
@@ -1532,7 +1564,7 @@ class UserMapper
 
             $this->logger->info("Refresh token successfully saved or updated for user: $userid");
         } catch (\Throwable $e) {
-            $this->logger->error("Database error in saveOrUpdateRefreshToken: ", ['error' => $e]);
+            $this->logger->error('Database error in saveOrUpdateRefreshToken: ', ['error' => $e]);
         }
     }
 
@@ -1551,8 +1583,9 @@ class UserMapper
         } catch (\Throwable $e) {
             $this->logger->error('UserMapper.deleteAccessTokensByUserId failed', [
                 'userId' => $userId,
-                'error'  => $e->getMessage()
+                'error'  => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
@@ -1572,38 +1605,42 @@ class UserMapper
         } catch (\Throwable $e) {
             $this->logger->error('UserMapper.deleteRefreshTokensByUserId failed', [
                 'userId' => $userId,
-                'error'  => $e->getMessage()
+                'error'  => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
 
     /**
-     * Check whether a refresh token exists for a specific user and is not expired
+     * Check whether a refresh token exists for a specific user and is not expired.
      */
     public function refreshTokenValidForUser(string $userId, string $refreshToken): bool
     {
         $this->logger->debug('UserMapper.refreshTokenValidForUser started', ['userId' => $userId]);
-        $now = (int) \time();
+        $now = (int) time();
+
         try {
-            $sql = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid AND refresh_token = :token AND expiresat > :now';
+            $sql  = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid AND refresh_token = :token AND expiresat > :now';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':token', $refreshToken, \PDO::PARAM_STR);
             $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
             $stmt->execute();
-            return ((int)$stmt->fetchColumn()) > 0;
+
+            return ((int) $stmt->fetchColumn()) > 0;
         } catch (\Throwable $e) {
             $this->logger->error('Error in refreshTokenValidForUser', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
 
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array
     {
-        $this->logger->debug("UserMapper.fetchAllFriends started");
+        $this->logger->debug('UserMapper.fetchAllFriends started');
 
-        $sql = "SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus,
+        $sql = 'SELECT DISTINCT u1.uid AS follower, u1.username AS followername, u1.slug AS followerslug, u1.status as followerstatus,
                                 u2.uid AS followed, u2.username AS followedname, u2.slug AS followedslug, u2.status as followedstatus
                 FROM follows 
                 INNER JOIN follows f2 ON f1.followerid = f2.followedid 
@@ -1611,7 +1648,7 @@ class UserMapper
                 INNER JOIN users u1 ON u1.uid = f1.followerid
                 INNER JOIN users u2 ON u2.uid = f1.followedid
                 ORDER BY follower
-                LIMIT :limit OFFSET :offset";
+                LIMIT :limit OFFSET :offset';
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -1619,39 +1656,39 @@ class UserMapper
             $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
             $stmt->execute();
 
-            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userResults = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $userResultObj = [];
+
             foreach ($userResults as $key => $prt) {
                 $userObj = [
-                        'status' => $prt['followerstatus'],
-                        'username' => $prt['followername'],
-                    ];
+                    'status'   => $prt['followerstatus'],
+                    'username' => $prt['followername'],
+                ];
                 $userObj = new User($userObj, [], false)->getArrayCopy();
 
-                $userResultObj[$key] = $prt;
+                $userResultObj[$key]                 = $prt;
                 $userResultObj[$key]['followername'] = $userObj['username'];
 
                 $userObj = [
-                        'status' => $prt['followedstatus'],
-                        'username' => $prt['followedname'],
-                    ];
-                $userObj = new User($userObj, [], false)->getArrayCopy();
+                    'status'   => $prt['followedstatus'],
+                    'username' => $prt['followedname'],
+                ];
+                $userObj                             = new User($userObj, [], false)->getArrayCopy();
                 $userResultObj[$key]['followedname'] = $userObj['username'];
-
             }
 
             return $userResultObj;
         } catch (\Throwable $e) {
             $this->logger->error('Database error in fetchFriends: ', ['exception' => $e->getMessage()]);
+
             return null;
         }
     }
 
-
     /**
      * Send Actual email to Email.
-    */
+     */
     public function sendPasswordResetEmail(string $email, array $data): void
     {
         new PasswordRestMail($data)->send($email);
@@ -1662,10 +1699,10 @@ class UserMapper
      */
     public function createResetRequest(string $userId, string $token, string $updatedAt, string $expiresAt): array
     {
-        $sql = "
+        $sql = '
             INSERT INTO password_reset_requests 
             (user_id, token, attempt_count, updatedat, last_attempt, expires_at)  
-            VALUES (:user_id, :token, :attempt_count, :updatedat, :last_attempt, :expires_at)";
+            VALUES (:user_id, :token, :attempt_count, :updatedat, :last_attempt, :expires_at)';
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':user_id', $userId);
@@ -1684,10 +1721,10 @@ class UserMapper
      */
     public function updateAttempt(array $attempt): bool
     {
-        $sql = "
+        $sql = '
             UPDATE password_reset_requests 
             SET attempt_count = :attempt_count, last_attempt = :last_attempt 
-            WHERE token = :token";
+            WHERE token = :token';
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':attempt_count', $attempt['attempt_count'] + 1, \PDO::PARAM_INT);
@@ -1703,43 +1740,48 @@ class UserMapper
      */
     public function checkForPasswordResetExpiry(string $userId): array|bool
     {
-        $this->logger->debug("UserMapper.checkForPasswordResetExpiry started");
+        $this->logger->debug('UserMapper.checkForPasswordResetExpiry started');
 
         try {
-            $sql = "
+            $sql = '
                 SELECT * FROM password_reset_requests 
-                WHERE user_id = :user_id AND expires_at >= :now AND collected = false";
+                WHERE user_id = :user_id AND expires_at >= :now AND collected = false';
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':user_id', $userId);
             $stmt->bindValue(':now', $this->getCurrentTimestamp());
             $stmt->execute();
 
-            $data =  $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+
             return $data;
         } catch (\Exception $e) {
-            $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
+            $this->logger->error('Error checking reset request', ['error' => $e->getMessage()]);
         }
+
         return [];
     }
 
     /**
-     * Check whether an access token exists for a specific user and is not expired
+     * Check whether an access token exists for a specific user and is not expired.
      */
     public function accessTokenValidForUser(string $userId, string $accessToken): bool
     {
         $this->logger->debug('UserMapper.accessTokenValidForUser started', ['userId' => $userId]);
-        $now = (int) \time();
+        $now = (int) time();
+
         try {
-            $sql = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid AND access_token = :token AND expiresat > :now';
+            $sql  = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid AND access_token = :token AND expiresat > :now';
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':token', $accessToken, \PDO::PARAM_STR);
             $stmt->bindValue(':now', $now, \PDO::PARAM_INT);
             $stmt->execute();
-            return ((int)$stmt->fetchColumn()) > 0;
+
+            return ((int) $stmt->fetchColumn()) > 0;
         } catch (\Throwable $e) {
             $this->logger->error('Error in accessTokenValidForUser', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -1749,9 +1791,9 @@ class UserMapper
      */
     public function isFirstAttemptTooSoon(array $attempt): bool
     {
-        return $attempt['attempt_count'] === 1
+        return 1 === $attempt['attempt_count']
             && !$attempt['collected']
-            && time() < strtotime($attempt['updatedat'] . ' +1 minute');
+            && time() < strtotime($attempt['updatedat'].' +1 minute');
     }
 
     /**
@@ -1759,9 +1801,9 @@ class UserMapper
      */
     public function isSecondAttemptTooSoon(array $attempt): bool
     {
-        return $attempt['attempt_count'] === 2
+        return 2 === $attempt['attempt_count']
             && !$attempt['collected']
-            && time() < strtotime($attempt['last_attempt'] . ' +10 minutes');
+            && time() < strtotime($attempt['last_attempt'].' +10 minutes');
     }
 
     /**
@@ -1772,15 +1814,15 @@ class UserMapper
         $remaining = $waitSeconds;
 
         if ($lastAttempt) {
-            $remaining = ceil((strtotime($lastAttempt . " +{$waitSeconds} seconds") - time()));
+            $remaining = ceil(strtotime($lastAttempt." +{$waitSeconds} seconds") - time());
         }
 
-        $nextAttemptAt = DateService::nowPlusSeconds((int)$remaining);
+        $nextAttemptAt = DateService::nowPlusSeconds((int) $remaining);
 
         return [
-            'status' => 'error',
-            'ResponseCode' => "31901",
-            'nextAttemptAt' => $nextAttemptAt
+            'status'        => 'error',
+            'ResponseCode'  => '31901',
+            'nextAttemptAt' => $nextAttemptAt,
         ];
     }
 
@@ -1790,8 +1832,8 @@ class UserMapper
     public function tooManyAttemptsResponse(): array
     {
         return [
-            'status' => 'error',
-            'ResponseCode' => "31903"
+            'status'       => 'error',
+            'ResponseCode' => '31903',
         ];
     }
 
@@ -1800,24 +1842,20 @@ class UserMapper
      */
     private function getCurrentTimestamp(): string
     {
-        return date("Y-m-d H:i:s.u");
+        return date('Y-m-d H:i:s.u');
     }
-
 
     /**
      * Fetch password reset request by token if valid and not expired.
-     *
-     * @param string $token
-     * @return array|null
      */
     public function getPasswordResetRequest(string $token): ?array
     {
-        $sql = "
+        $sql = '
             SELECT * FROM password_reset_requests 
             WHERE token = :token 
             AND expires_at >= :current_time 
             AND collected = false
-        ";
+        ';
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
@@ -1829,34 +1867,30 @@ class UserMapper
 
     /**
      * Delete password reset token from database.
-     *
-     * @param string $token
-     * @return void
      */
     public function deletePasswordResetToken(string $token): void
     {
-        $sql = "DELETE FROM password_reset_requests WHERE token = :token";
+        $sql  = 'DELETE FROM password_reset_requests WHERE token = :token';
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':token', $token, \PDO::PARAM_STR);
         $stmt->execute();
     }
 
-
     // public function insertoken(array $args): void
     public function insertoken(Tokenize $data): ?Tokenize
     {
-        $this->logger->debug("UserMapper.insertoken started");
+        $this->logger->debug('UserMapper.insertoken started');
 
         $data = $data->getArrayCopy();
         $this->logger->info('UserMapper.insertoken second', [
-            'userid' => $data['userid'],
-            'expiresat' => $data['expiresat']
+            'userid'    => $data['userid'],
+            'expiresat' => $data['expiresat'],
         ]);
 
-        $query = "INSERT INTO token_holders 
+        $query = 'INSERT INTO token_holders 
                   (token, userid, expiresat)
                   VALUES 
-                  (:token, :userid, :expiresat)";
+                  (:token, :userid, :expiresat)';
 
         try {
             $stmt = $this->db->prepare($query);
@@ -1867,34 +1901,35 @@ class UserMapper
 
             $stmt->execute();
 
-            $this->logger->info("Inserted new token into database", ['userid' => $data['userid']]);
-            return new Tokenize($data);
+            $this->logger->info('Inserted new token into database', ['userid' => $data['userid']]);
 
+            return new Tokenize($data);
         } catch (\Throwable $e) {
-            $this->logger->error("UserMapper.insertoken: Exception occurred while inserting token", [
+            $this->logger->error('UserMapper.insertoken: Exception occurred while inserting token', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }
 
-    public function getValidReferralInfoByLink(string $referralLink, array $specifications): array|null
+    public function getValidReferralInfoByLink(string $referralLink, array $specifications): ?array
     {
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
-        $whereClauses[] = "ur.referral_uuid = :referral_uuid";
+        $specsSQL       = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs       = SpecificationSQLData::merge($specsSQL);
+        $whereClauses   = $allSpecs->whereClauses;
+        $params         = $allSpecs->paramsToPrepare;
+        $whereClauses[] = 'ur.referral_uuid = :referral_uuid';
 
-        $this->logger->debug("UserMapper.getValidReferralInfoByLink started", [
+        $this->logger->debug('UserMapper.getValidReferralInfoByLink started', [
             'referralLink' => $referralLink,
         ]);
 
-        $whereClausesString = implode(" AND ", $whereClauses);
+        $whereClausesString = implode(' AND ', $whereClauses);
 
-        $query = sprintf(
-            "SELECT 
+        $query = \sprintf(
+            'SELECT 
                 ur.referral_uuid,
                 ur.referral_link, 
                 u.username, 
@@ -1906,7 +1941,7 @@ class UserMapper
                 user_referral_info ur 
             LEFT JOIN users u 
                 ON u.uid = ur.referral_uuid  
-            WHERE %s",
+            WHERE %s',
             $whereClausesString
         );
 
@@ -1918,28 +1953,27 @@ class UserMapper
 
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        $this->logger->info("Referral info query result", ['result' => $result]);
-
+        $this->logger->info('Referral info query result', ['result' => $result]);
 
         return $result ?: null;
     }
 
     /**
-    * Get Inviter ID of a user.
-    * This method retrieves the inviter ID for a given user ID from the users_info table.
-    *
-    */
+     * Get Inviter ID of a user.
+     * This method retrieves the inviter ID for a given user ID from the users_info table.
+     */
     public function getInviterID(string $userId): ?string
     {
         try {
-            $query = "SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL";
-            $stmt = $this->db->prepare($query);
+            $query = 'SELECT invited FROM users_info WHERE userid = :userid AND invited IS NOT NULL';
+            $stmt  = $this->db->prepare($query);
             $stmt->execute(['userid' => $userId]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (isset($result['invited']) && !empty($result['invited'])) {
-                return $result["invited"];
+                return $result['invited'];
             }
+
             return null;
         } catch (\Throwable $e) {
             throw new \RuntimeException($e->getMessage());

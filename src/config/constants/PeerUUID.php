@@ -6,5 +6,5 @@ namespace Fawaz\config\constants;
 
 enum PeerUUID: string
 {
-    case empty = "ffffffff-ffff-ffff-ffff-ffffffffffff";
+    case empty = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 }

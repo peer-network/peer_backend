@@ -6,7 +6,7 @@ final class SpecificationSQLData
 {
     public function __construct(
         public array $whereClauses,
-        public array $paramsToPrepare
+        public array $paramsToPrepare,
     ) {
     }
 
@@ -15,7 +15,7 @@ final class SpecificationSQLData
      */
     public static function merge(array $items): self
     {
-        $allWhere = [];
+        $allWhere  = [];
         $allParams = [];
 
         foreach ($items as $item) {
@@ -23,11 +23,10 @@ final class SpecificationSQLData
                 continue;
             }
 
-            $allWhere = array_merge($allWhere, $item->whereClauses);
+            $allWhere  = array_merge($allWhere, $item->whereClauses);
             $allParams = array_merge($allParams, $item->paramsToPrepare);
         }
 
         return new self($allWhere, $allParams);
     }
-
 }

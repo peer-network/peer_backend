@@ -7,7 +7,7 @@ namespace Fawaz\Services\TokenTransfer\Strategies;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 use Fawaz\Utils\ResponseHelper;
 
-class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
     public string $operationId;
@@ -17,8 +17,8 @@ class DefaultTransferStrategy extends BaseTransferStrategy implements TransferSt
 
     public function __construct()
     {
-        $this::$mode = FeePolicyMode::ADDED;
-        $this->operationId = self::generateUUID();
+        $this::$mode         = FeePolicyMode::ADDED;
+        $this->operationId   = self::generateUUID();
         $this->transactionId = self::generateUUID();
     }
 
@@ -36,6 +36,7 @@ class DefaultTransferStrategy extends BaseTransferStrategy implements TransferSt
     {
         return $this->operationId;
     }
+
     public function getFeePolicyMode(): FeePolicyMode
     {
         return $this::$mode;

@@ -2,14 +2,14 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\User;
 
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Specs\Specification;
-use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\App\Status;
 use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\HideEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\HidePostsElsePlaceholder;
@@ -26,7 +26,7 @@ final class DeletedUserSpec implements Specification
 
     public function __construct(
         ContentFilteringCases $case,
-        private ContentType $targetContent
+        private ContentType $targetContent,
     ) {
         $this->contentFilterService = new ContentFilterServiceImpl(
             $targetContent
@@ -38,48 +38,49 @@ final class DeletedUserSpec implements Specification
 
     public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
-        if ($this->contentFilterService->getContentFilterAction(
+        if (ContentFilteringAction::hideContent === $this->contentFilterService->getContentFilterAction(
             $showingContent,
             $this->contentFilterStrategy
-        ) === ContentFilteringAction::hideContent) {
+        )) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = u.uid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],
+                    )', ],
                     []
                 ),
                 ContentType::post => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = p.userid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],
+                    )', ],
                     []
                 ),
                 ContentType::comment => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                             FROM users DeletedUserSpec_users
                             WHERE DeletedUserSpec_users.uid = c.userid
                             AND DeletedUserSpec_users.status IN (0)
-                    )" ],
+                    )', ],
                     []
                 ),
             };
         }
+
         return null;
     }
 
     public function toReplacer(
-        ProfileReplaceable|PostReplaceable|CommentReplaceable $subject
+        ProfileReplaceable|PostReplaceable|CommentReplaceable $subject,
     ): ?ContentReplacementPattern {
         if ($subject instanceof ProfileReplaceable) {
             $showingContent = ContentType::user;
@@ -89,18 +90,18 @@ final class DeletedUserSpec implements Specification
             $showingContent = ContentType::post;
         }
 
-
-        if ($this->contentFilterService->getContentFilterAction(
+        if (ContentFilteringAction::replaceWithPlaceholder === $this->contentFilterService->getContentFilterAction(
             $showingContent,
             $this->contentFilterStrategy
-        )  === ContentFilteringAction::replaceWithPlaceholder) {
+        )) {
             if ($subject instanceof ProfileReplaceable) {
-                if ($subject->getStatus() !== Status::NORMAL) {
+                if (Status::NORMAL !== $subject->getStatus()) {
                     return ContentReplacementPattern::deleted;
                 }
             }
             // posts, comments of Deleted User are not changed
         }
+
         return null;
     }
 
@@ -108,17 +109,17 @@ final class DeletedUserSpec implements Specification
     {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
-                "EXISTS (
+                'EXISTS (
                     SELECT 1
                         FROM users DeletedUserSpec_users
                         WHERE DeletedUserSpec_users.uid = :DeletedUserSpec_userid
                         AND DeletedUserSpec_users.status IN (0)
-                )"
+                )',
             ], [
-                    "DeletedUserSpec_userid" => $targetContentId
+                'DeletedUserSpec_userid' => $targetContentId,
             ]),
-            ContentType::post => null,
-            ContentType::comment => null
+            ContentType::post    => null,
+            ContentType::comment => null,
             // ContentType::post => new SpecificationSQLData([
             //     "EXISTS (
             //         SELECT 1
@@ -145,14 +146,14 @@ final class DeletedUserSpec implements Specification
     }
 
     private static function createStrategy(
-        ContentFilteringCases $strategy
+        ContentFilteringCases $strategy,
     ): ContentFilteringStrategy {
         return match ($strategy) {
-            ContentFilteringCases::myprofile => new PlaceholderEverythingContentFilteringStrategy(),
-            ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::myprofile    => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchById   => new PlaceholderEverythingContentFilteringStrategy(),
             ContentFilteringCases::searchByMeta => new HideEverythingContentFilteringStrategy(),
-            ContentFilteringCases::postFeed => new HidePostsElsePlaceholder(),
-            ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
+            ContentFilteringCases::postFeed     => new HidePostsElsePlaceholder(),
+            ContentFilteringCases::hideAll      => new StrictlyHideEverythingContentFilteringStrategy(),
         };
     }
 }

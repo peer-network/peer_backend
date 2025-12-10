@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Utils\HashObject;
 
 class Post extends Model implements Hashable
@@ -31,22 +30,22 @@ class Post extends Model implements Hashable
     public function __construct(
         array $data = [],
         array $elements = [],
-        bool $validate = true
+        bool $validate = true,
     ) {
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
 
-        $this->postid = $data['postid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->feedid = $data['feedid'] ?? null;
-        $this->title = $data['title'] ?? '';
-        $this->contenttype = $data['contenttype'] ?? 'text';
-        $this->media = $data['media'] ?? '';
-        $this->cover = $data['cover'] ?? null;
-        $this->url = $this->getPostUrl();
-        $this->mediadescription = $data['mediadescription'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->postid           = $data['postid']      ?? '';
+        $this->userid           = $data['userid']      ?? '';
+        $this->feedid           = $data['feedid']      ?? null;
+        $this->title            = $data['title']       ?? '';
+        $this->contenttype      = $data['contenttype'] ?? 'text';
+        $this->media            = $data['media']       ?? '';
+        $this->cover            = $data['cover']       ?? null;
+        $this->url              = $this->getPostUrl();
+        $this->mediadescription = $data['mediadescription']  ?? '';
+        $this->createdat        = $data['createdat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
@@ -54,18 +53,19 @@ class Post extends Model implements Hashable
     public function getArrayCopy(): array
     {
         $att = [
-            'postid' => $this->postid,
-            'userid' => $this->userid,
-            'feedid' => $this->feedid,
-            'title' => $this->title,
-            'contenttype' => $this->contenttype,
-            'media' => $this->media,
-            'cover' => $this->cover,
-            'url' => $this->url,
-            'mediadescription' => $this->mediadescription,
-            'createdat' => $this->createdat,
+            'postid'            => $this->postid,
+            'userid'            => $this->userid,
+            'feedid'            => $this->feedid,
+            'title'             => $this->title,
+            'contenttype'       => $this->contenttype,
+            'media'             => $this->media,
+            'cover'             => $this->cover,
+            'url'               => $this->url,
+            'mediadescription'  => $this->mediadescription,
+            'createdat'         => $this->createdat,
             'visibility_status' => $this->visibilityStatus,
         ];
+
         return $att;
     }
 
@@ -114,45 +114,48 @@ class Post extends Model implements Hashable
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
+
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $postConst = ConstantsConfig::post();
+        $postConst     = ConstantsConfig::post();
         $specification = [
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'feedid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'title' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
-                        'errorCode' => 30210
+                        'min'       => ConstantsConfig::post()['TITLE']['MIN_LENGTH'],
+                        'max'       => ConstantsConfig::post()['TITLE']['MAX_LENGTH'],
+                        'errorCode' => 30210,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'contenttype' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'InArray', 'options' => [
                         'haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery'],
@@ -161,7 +164,7 @@ class Post extends Model implements Hashable
                 ],
             ],
             'media' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['MEDIA']['MIN_LENGTH'],
@@ -171,7 +174,7 @@ class Post extends Model implements Hashable
                 ],
             ],
             'cover' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['COVER']['MIN_LENGTH'],
@@ -181,27 +184,27 @@ class Post extends Model implements Hashable
                 ],
             ],
             'mediadescription' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
-                        'min' => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
-                        'max' => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
-                        'errorCode' => 30263
+                        'min'       => ConstantsConfig::post()['MEDIADESCRIPTION']['MIN_LENGTH'],
+                        'max'       => ConstantsConfig::post()['MEDIADESCRIPTION']['MAX_LENGTH'],
+                        'errorCode' => 30263,
                     ]],
                     ['name' => 'isString'],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'visibility_status' => [
                 'required' => true,
-                'filters' => [
+                'filters'  => [
                     ['name' => 'StringTrim'],
                 ],
                 'validators' => [
@@ -211,10 +214,10 @@ class Post extends Model implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     public function getHashableContent(): string
@@ -238,7 +241,8 @@ class Post extends Model implements Hashable
         if (empty($this->postid)) {
             return '';
         }
-        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
+
+        return getenv('WEB_APP_URL').'/post/'.$this->postid;
     }
 
     // Table name
@@ -246,5 +250,4 @@ class Post extends Model implements Hashable
     {
         return 'posts';
     }
-
 }

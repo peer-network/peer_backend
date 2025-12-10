@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\utils\ConstantsInjection;
 
-require __DIR__ . '../../../../vendor/autoload.php';
+require __DIR__.'../../../../vendor/autoload.php';
 
 interface ConstantValuesInjector
 {

@@ -14,6 +14,7 @@ class SecurityHeadersMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
+
         return $response
             ->withHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none';")
             ->withHeader('X-Content-Type-Options', 'nosniff')
@@ -21,6 +22,6 @@ class SecurityHeadersMiddleware implements MiddlewareInterface
             ->withHeader('X-XSS-Protection', '1; mode=block')
             ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
             ->withHeader('Referrer-Policy', 'no-referrer')
-            ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=()");
+            ->withHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
     }
 }

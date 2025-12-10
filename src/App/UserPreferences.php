@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
-use Tests\utils\ConfigGeneration;
 use Fawaz\Utils\JsonHelper;
 
 class UserPreferences
@@ -22,12 +20,13 @@ class UserPreferences
         if ($validate && !empty($data)) {
             $data = $this->validate($data, $elements);
         }
-        $this->userid = $data['userid'] ?? '';
+        $this->userid                        = $data['userid'] ?? '';
         $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat                     = $data['updatedat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
 
         $raw = $data['onboardingsWereShown'] ?? [];
-        if (is_array($raw)) {
+
+        if (\is_array($raw)) {
             $this->onboardingsWereShown = $raw;
         } else {
             $this->onboardingsWereShown = JsonHelper::decode($raw) ?? [];
@@ -38,11 +37,12 @@ class UserPreferences
     public function getArrayCopy(): array
     {
         $att = [
-            'userid' => $this->userid,
+            'userid'                        => $this->userid,
             'contentFilteringSeverityLevel' => $this->contentFilteringSeverityLevel,
-            'updatedat' => $this->updatedat,
-            'onboardingsWereShown' => $this->onboardingsWereShown,
+            'updatedat'                     => $this->updatedat,
+            'onboardingsWereShown'          => $this->onboardingsWereShown,
         ];
+
         return $att;
     }
 
@@ -64,7 +64,7 @@ class UserPreferences
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
@@ -96,13 +96,15 @@ class UserPreferences
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return [];
     }
 
@@ -110,32 +112,32 @@ class UserPreferences
     {
         $specification = [
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'contentFilteringSeverityLevel' => [
-                'required' => false,
-                'filters' => [],
+                'required'   => false,
+                'filters'    => [],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
             'onboardingsWereShown' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'IsArray']],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

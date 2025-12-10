@@ -4,42 +4,20 @@ declare(strict_types=1);
 
 namespace Fawaz\Filter;
 
-use Exception;
-use DateTime;
 use Fawaz\config\constants\ConstantsConfig;
 
-use function trim;
-use function strip_tags;
-use function htmlspecialchars;
-use function addslashes;
-use function htmlentities;
-use function preg_match;
-use function ctype_digit;
-use function strlen;
-use function get_debug_type;
-use function filter_var;
-use function in_array;
-use function is_array;
-use function is_callable;
-use function is_numeric;
-use function is_int;
-use function is_object;
-use function is_string;
-use function sprintf;
-use function method_exists;
-
-class ValidationException extends Exception
+class ValidationException extends \Exception
 {
 }
 
-const CUSTOM_FILTER_FLAG_ALLOW_INT = 1;
+const CUSTOM_FILTER_FLAG_ALLOW_INT  = 1;
 const CUSTOM_FILTER_FLAG_ALLOW_ZERO = 2;
-const CUSTOM_FILTER_FLAG_ALLOW_STR = 4;
+const CUSTOM_FILTER_FLAG_ALLOW_STR  = 4;
 
 class PeerInputFilter
 {
     protected array $specification;
-    protected array $data = [];
+    protected array $data   = [];
     protected array $errors = [];
 
     public function __construct(array $specification)
@@ -56,17 +34,18 @@ class PeerInputFilter
      * Apply a filter method dynamically by its name.
      *
      * @param string $filterName Name of the filter method to call
-     * @param mixed $value The value to be filtered.
-     * @param array $options Optional arguments passed to the filter method.
+     * @param mixed  $value      the value to be filtered
+     * @param array  $options    optional arguments passed to the filter method
      *
-     * @return mixed The filtered result.
+     * @return mixed the filtered result
      *
-     * @throws ValidationException If the requested filter does not exist.
+     * @throws ValidationException if the requested filter does not exist
      */
     public function applyFilter(string $filterName, mixed $value, array $options = []): mixed
     {
-        if (!method_exists($this, $filterName)) {
+        if (!\method_exists($this, $filterName)) {
             $this->errors[$filterName][] = "Filter '$filterName' does not exist.";
+
             throw new ValidationException("Filter '$filterName' does not exist.");
         }
 
@@ -78,18 +57,19 @@ class PeerInputFilter
     /**
      * Apply a validator method dynamically by its name.
      *
-     * @param string $validatorName Name of the validator method to call.
-     * @param mixed $value The value to be validated.
-     * @param array $options Optional arguments passed to the validator method.
+     * @param string $validatorName name of the validator method to call
+     * @param mixed  $value         the value to be validated
+     * @param array  $options       optional arguments passed to the validator method
      *
-     * @return bool True if validation passes, false otherwise.
+     * @return bool true if validation passes, false otherwise
      *
-     * @throws ValidationException If the requested validator does not exist.
+     * @throws ValidationException if the requested validator does not exist
      */
     public function applyValidator(string $validatorName, mixed $value, array $options = []): bool
     {
-        if (!method_exists($this, $validatorName)) {
+        if (!\method_exists($this, $validatorName)) {
             $this->errors[$validatorName][] = "Validator '$validatorName' does not exist.";
+
             throw new ValidationException("Validator '$validatorName' does not exist.");
         }
 
@@ -103,7 +83,6 @@ class PeerInputFilter
         $this->errors = [];
 
         foreach ($this->specification as $field => $rules) {
-
             if (!isset($this->data[$field]) && empty($rules['required'])) {
                 continue;
             }
@@ -120,8 +99,9 @@ class PeerInputFilter
             if (isset($this->data[$field])) {
                 foreach ($rules['filters'] ?? [] as $filter) {
                     $filterName = $filter['name'];
-                    $options = $filter['options'] ?? [];
-                    if (method_exists($this, $filterName)) {
+                    $options    = $filter['options'] ?? [];
+
+                    if (\method_exists($this, $filterName)) {
                         $this->data[$field] = $this->$filterName($this->data[$field], $options);
                     } else {
                         throw new ValidationException("Filter method $filterName does not exist.");
@@ -130,8 +110,9 @@ class PeerInputFilter
 
                 foreach ($rules['validators'] ?? [] as $validator) {
                     $validatorName = $validator['name'];
-                    $options = $validator['options'] ?? [];
-                    if (method_exists($this, $validatorName)) {
+                    $options       = $validator['options'] ?? [];
+
+                    if (\method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
                             if (isset($this->errors[$field])) {
                                 if (!empty($this->errors[$field][0])) {
@@ -141,6 +122,7 @@ class PeerInputFilter
                                 continue;
                             }
                             $this->errors[$field][] = $field;
+
                             if (!empty($validator['break_chain_on_failure'])) {
                                 break;
                             }
@@ -168,126 +150,131 @@ class PeerInputFilter
     // Filters
     protected function StringTrim(string $value, array $options = []): string
     {
-        return trim($value);
+        return \trim($value);
     }
 
     protected function StripTags(string $value, array $options = []): string
     {
-        return strip_tags($value);
+        return \strip_tags($value);
     }
 
     protected function Boolean(mixed $value, array $options = []): bool
     {
         $filterOptions = [
-            'flags' => FILTER_NULL_ON_FAILURE
+            'flags' => \FILTER_NULL_ON_FAILURE,
         ];
 
         if (isset($options['type'])) {
             $filterOptions['flags'] |= $this->getBooleanFlags($options['type']);
         }
 
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN, $filterOptions);
+        return \filter_var($value, \FILTER_VALIDATE_BOOLEAN, $filterOptions);
     }
 
     protected function EscapeHtml(string $value, array $options = []): string
     {
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        return \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
     }
 
     protected function SqlSanitize(string $value, array $options = []): string
     {
-        return addslashes($value);
+        return \addslashes($value);
     }
 
     protected function HtmlEntities(string $value, array $options = []): string
     {
-        return htmlentities($value, ENT_QUOTES, 'UTF-8');
+        return \htmlentities($value, \ENT_QUOTES, 'UTF-8');
     }
 
     protected function ToInt(mixed $value, array $options = []): int
     {
-        return (int)$value;
+        return (int) $value;
     }
 
     protected function ToFloat(mixed $value, array $options = []): float
     {
-        return (float)$value;
+        return (float) $value;
     }
 
     protected function FloatSanitize(mixed $value, array $options = []): float
     {
-        if (!is_numeric($value)) {
-            $this->errors['value'][] = "30247";
+        if (!\is_numeric($value)) {
+            $this->errors['value'][] = '30247';
         }
 
-        return (float)$value;
+        return (float) $value;
     }
 
     // Validators
     protected function Uuid(mixed $value, array $options = []): bool
     {
-        if ($value === null || $value === '') {
+        if (null === $value || '' === $value) {
             return true;
         }
 
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value) === 1;
+        return 1 === \preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value);
     }
 
     protected function Date(string $value, array $options = []): bool
     {
         $format = $options['format'] ?? 'Y-m-d H:i:s.u';
 
-        if (preg_match('/\.\d+$/', $value, $matches)) {
+        if (\preg_match('/\.\d+$/', $value, $matches)) {
             $microseconds = $matches[0];
-            if (strlen($microseconds) < 7) {
+
+            if (\strlen($microseconds) < 7) {
                 $value = str_replace($microseconds, str_pad($microseconds, 7, '0'), $value);
             }
         }
 
-        $dateTime = DateTime::createFromFormat($format, $value);
+        $dateTime = \DateTime::createFromFormat($format, $value);
 
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn ($matches) => '.'.str_pad($matches[1], 6, '0'), $formatted);
 
-            $value = trim($value);
-            $formatted = trim($formatted);
+            $value     = \trim($value);
+            $formatted = \trim($formatted);
 
             if ($formatted === $value) {
                 return true;
             }
         }
 
-        $this->errors['Date'][] = "30258";
+        $this->errors['Date'][] = '30258';
+
         return false;
     }
 
     protected function LessThan(string $value, array $options = []): bool
     {
-        $max = $options['max'] ?? null;
+        $max       = $options['max']       ?? null;
         $inclusive = $options['inclusive'] ?? false;
 
-        if ($max === null) {
-            $this->errors['Max'][] = "30248";
+        if (null === $max) {
+            $this->errors['Max'][] = '30248';
+
             return false;
         }
 
-        $valueDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $value);
-        $maxDateTime = DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
+        $valueDateTime = \DateTime::createFromFormat('Y-m-d H:i:s.u', $value);
+        $maxDateTime   = \DateTime::createFromFormat('Y-m-d H:i:s.u', $max);
 
-        if ($valueDateTime === false) {
-            $this->errors['valueDateTime'][] = "30249";
+        if (false === $valueDateTime) {
+            $this->errors['valueDateTime'][] = '30249';
+
             return false;
         }
 
-        if ($maxDateTime === false) {
-            $this->errors['maxDateTime'][] = "30250";
+        if (false === $maxDateTime) {
+            $this->errors['maxDateTime'][] = '30250';
+
             return false;
         }
 
-        $valueTimestamp = (float)$valueDateTime->format('U.u');
-        $maxTimestamp = (float)$maxDateTime->format('U.u');
+        $valueTimestamp = (float) $valueDateTime->format('U.u');
+        $maxTimestamp   = (float) $maxDateTime->format('U.u');
 
         return $inclusive ? $valueTimestamp <= $maxTimestamp : $valueTimestamp < $maxTimestamp;
     }
@@ -298,14 +285,16 @@ class PeerInputFilter
 
         if (!$timestart) {
             $this->errors['timestart'][] = 30251;
+
             return false;
         }
 
-        $start = DateTime::createFromFormat('Y-m-d H:i:s.u', $timestart);
-        $end = DateTime::createFromFormat('Y-m-d H:i:s.u', $timeend);
+        $start = \DateTime::createFromFormat('Y-m-d H:i:s.u', $timestart);
+        $end   = \DateTime::createFromFormat('Y-m-d H:i:s.u', $timeend);
 
         if (!$start || !$end) {
             $this->errors['datetime'][] = 30252;
+
             return false;
         }
 
@@ -314,22 +303,25 @@ class PeerInputFilter
 
     protected function validateIntRange(mixed $value, array $options = []): bool
     {
-        if (!is_numeric($value) || (int)$value != $value) {
-            $this->errors['int_range'][] = "30244";
+        if (!\is_numeric($value) || (int) $value != $value) {
+            $this->errors['int_range'][] = '30244';
+
             return false;
         }
 
-        $value = (int)$value;
-        $min = $options['min'] ?? PHP_INT_MIN;
-        $max = $options['max'] ?? PHP_INT_MAX;
+        $value = (int) $value;
+        $min   = $options['min'] ?? \PHP_INT_MIN;
+        $max   = $options['max'] ?? \PHP_INT_MAX;
 
         if ($value < $min) {
-            $this->errors['int_range'][] = "30245";
+            $this->errors['int_range'][] = '30245';
+
             return false;
         }
 
         if ($value > $max) {
-            $this->errors['int_range'][] = "30246";
+            $this->errors['int_range'][] = '30246';
+
             return false;
         }
 
@@ -338,57 +330,65 @@ class PeerInputFilter
 
     protected function EmailAddress(string $value, array $options = []): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
-            $this->errors['email'][] = "30224";
+        if (false == \filter_var($value, \FILTER_VALIDATE_EMAIL)) {
+            $this->errors['email'][] = '30224';
+
             return false;
         }
+
         return true;
     }
 
     protected function Digits(string $value, array $options = []): bool
     {
-        return ctype_digit($value);
+        return \ctype_digit($value);
     }
 
     protected function StringLength(string $value, array $options = []): bool
     {
-        $min =  (int)($options['min'] ?? 0);
-        $max = (int)($options['max'] ?? PHP_INT_MAX);
+        $min       = (int) ($options['min'] ?? 0);
+        $max       = (int) ($options['max'] ?? \PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
-        $length = strlen($value);
+        $length    = \strlen($value);
 
         $validationResult = ($length >= $min && $length <= $max);
 
-        if ($validationResult == false) {
+        if (false == $validationResult) {
             $this->errors['content'][] = $errorCode;
         }
+
         return $validationResult;
     }
 
     protected function ArrayValues(mixed $value, array $options = []): bool
     {
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             $this->errors['ArrayValues'][] = 40301;
+
             return false;
         }
 
         $validator = $options['validator'] ?? null;
+
         if (!$validator || !isset($validator['name'])) {
-            $this->errors['ArrayValues'][] = "40301";
+            $this->errors['ArrayValues'][] = '40301';
+
             return false;
         }
 
-        $validatorName = $validator['name'];
+        $validatorName    = $validator['name'];
         $validatorOptions = $validator['options'] ?? [];
 
-        if (!method_exists($this, $validatorName)) {
+        if (!\method_exists($this, $validatorName)) {
             $this->errors['ArrayValues'][] = 40301;
+
             return false;
         }
 
         foreach ($value as $index => $item) {
             if (!$this->$validatorName($item, $validatorOptions)) {
                 $this->errors['ArrayValues'][] = 40301;
+
                 return false;
             }
         }
@@ -399,10 +399,10 @@ class PeerInputFilter
     protected function ArrayElementStringLength(array $value, array $options = []): bool
     {
         $min = $options['min'] ?? 0;
-        $max = $options['max'] ?? PHP_INT_MAX;
+        $max = $options['max'] ?? \PHP_INT_MAX;
 
         foreach ($value as $item) {
-            if (!is_string($item) || strlen($item) < $min || strlen($item) > $max) {
+            if (!\is_string($item) || \strlen($item) < $min || \strlen($item) > $max) {
                 return false;
             }
         }
@@ -413,17 +413,19 @@ class PeerInputFilter
     protected function InArray(mixed $value, array $options = []): bool
     {
         $haystack = $options['haystack'] ?? [];
-        return in_array($value, $haystack, true);
+
+        return \in_array($value, $haystack, true);
     }
 
     protected function IsArray(mixed $value, array $options = []): bool
     {
-        return is_array($value);
+        return \is_array($value);
     }
 
     protected function ValidateObjectProperties(object $value, array $options = []): bool
     {
         $requiredProperties = $options['required_properties'] ?? [];
+
         foreach ($requiredProperties as $property) {
             if (!property_exists($value, $property)) {
                 return false;
@@ -435,37 +437,37 @@ class PeerInputFilter
 
     protected function IsObject(mixed $value, array $options = []): bool
     {
-        return is_object($value);
+        return \is_object($value);
     }
 
     protected function IsInt(mixed $value, array $options = []): bool
     {
-        return filter_var($value, FILTER_VALIDATE_INT) !== false;
+        return false !== \filter_var($value, \FILTER_VALIDATE_INT);
     }
 
     protected function IsNumeric(mixed $value, array $options = []): bool
     {
-        return is_numeric($value);
+        return \is_numeric($value);
     }
 
     protected function IsFloat(mixed $value, array $options = []): bool
     {
-        return filter_var($value, FILTER_VALIDATE_FLOAT) !== false;
+        return false !== \filter_var($value, \FILTER_VALIDATE_FLOAT);
     }
 
     protected function IsString(mixed $value, array $options = []): bool
     {
-        return is_string($value);
+        return \is_string($value);
     }
 
     protected function ValidateFloat(mixed $value, array $options = []): bool
     {
-        if (!is_numeric($value)) {
+        if (!\is_numeric($value)) {
             return false;
         }
 
-        $min = $options['min'] ?? -INF;
-        $max = $options['max'] ?? INF;
+        $min = $options['min'] ?? -\INF;
+        $max = $options['max'] ?? \INF;
 
         return $value >= $min && $value <= $max;
     }
@@ -473,28 +475,33 @@ class PeerInputFilter
     protected function IsIp(string $value, array $options = []): bool
     {
         $flags = 0;
+
         if (!empty($options['ipv4'])) {
-            $flags |= FILTER_FLAG_IPV4;
+            $flags |= \FILTER_FLAG_IPV4;
         }
+
         if (!empty($options['ipv6'])) {
-            $flags |= FILTER_FLAG_IPV6;
+            $flags |= \FILTER_FLAG_IPV6;
         }
-        return filter_var($value, FILTER_VALIDATE_IP, $flags) !== false;
+
+        return false !== \filter_var($value, \FILTER_VALIDATE_IP, $flags);
     }
 
     protected function isImage(string $value, array $options = []): bool
     {
         $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif', 'tiff', 'webp'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff', 'image/webp'];
+        $allowedMimeTypes  = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff', 'image/webp'];
 
-        $extension = pathinfo($value, PATHINFO_EXTENSION);
-        if (!in_array(strtolower($extension), $allowedExtensions)) {
+        $extension = pathinfo($value, \PATHINFO_EXTENSION);
+
+        if (!\in_array(strtolower($extension), $allowedExtensions)) {
             return false;
         }
 
         if (file_exists($value)) {
             $mimeType = mime_content_type($value);
-            if (!in_array($mimeType, $allowedMimeTypes)) {
+
+            if (!\in_array($mimeType, $allowedMimeTypes)) {
                 return false;
             }
         }
@@ -526,8 +533,8 @@ class PeerInputFilter
     protected function ValidateChatMessages(array $chatmessages, array $options = []): bool
     {
         foreach ($chatmessages as $message) {
-            if (is_array($message)) {
-                $message = (object)$message;
+            if (\is_array($message)) {
+                $message = (object) $message;
             }
 
             if (!$this->ValidateChatStructure($message, $options)) {
@@ -541,22 +548,23 @@ class PeerInputFilter
     protected function ValidateChatStructure(mixed $chatmessage, array $options = []): bool
     {
         $chatConfig = ConstantsConfig::chat();
-        if (is_array($chatmessage)) {
-            $chatmessage = (object)$chatmessage;
+
+        if (\is_array($chatmessage)) {
+            $chatmessage = (object) $chatmessage;
         }
 
-        return isset($chatmessage->messid) && $this->IsNumeric($chatmessage->messid) &&
-               isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
-               isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
-               isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => $chatConfig['MESSAGE']['MIN_LENGTH'], 'max' => $chatConfig['MESSAGE']['MAX_LENGTH']]) &&
-               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+        return isset($chatmessage->messid) && $this->IsNumeric($chatmessage->messid)
+                                           && isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid)
+                                           && isset($chatmessage->userid) && $this->Uuid($chatmessage->userid)
+                                           && isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => $chatConfig['MESSAGE']['MIN_LENGTH'], 'max' => $chatConfig['MESSAGE']['MAX_LENGTH']])
+                                           && isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidateParticipants(array $participants, array $options = []): bool
     {
         foreach ($participants as $participant) {
-            if (is_array($participant)) {
-                $participant = (object)$participant;
+            if (\is_array($participant)) {
+                $participant = (object) $participant;
             }
 
             if (!$this->ValidateParticipantStructure($participant, $options)) {
@@ -570,21 +578,22 @@ class PeerInputFilter
     protected function ValidateParticipantStructure(mixed $participant, array $options = []): bool
     {
         $chatConfig = ConstantsConfig::chat();
-        if (is_array($participant)) {
-            $participant = (object)$participant;
+
+        if (\is_array($participant)) {
+            $participant = (object) $participant;
         }
 
-        return isset($participant->userid) && $this->Uuid($participant->userid) &&
-               isset($participant->username) && $this->validateUsername($participant->username) &&
-               isset($participant->img) && $this->StringLength($participant->img, ['min' => $chatConfig['IMAGE']['MIN_LENGTH'], 'max' => $chatConfig['IMAGE']['MAX_LENGTH']]) &&
-               isset($participant->hasaccess) && $this->validateIntRange($participant->hasaccess, ['min' => $chatConfig['ACCESS_LEVEL']['MIN'], 'max' => $chatConfig['ACCESS_LEVEL']['MAX']]);
+        return isset($participant->userid) && $this->Uuid($participant->userid)
+                                           && isset($participant->username) && $this->validateUsername($participant->username)
+                                           && isset($participant->img) && $this->StringLength($participant->img, ['min' => $chatConfig['IMAGE']['MIN_LENGTH'], 'max' => $chatConfig['IMAGE']['MAX_LENGTH']])
+                                           && isset($participant->hasaccess) && $this->validateIntRange($participant->hasaccess, ['min' => $chatConfig['ACCESS_LEVEL']['MIN'], 'max' => $chatConfig['ACCESS_LEVEL']['MAX']]);
     }
 
     protected function ValidateUsers(array $users, array $options = []): bool
     {
         foreach ($users as $user) {
-            if (is_array($user)) {
-                $user = (object)$user;
+            if (\is_array($user)) {
+                $user = (object) $user;
             }
 
             if (!$this->ValidateUserStructure($user, $options)) {
@@ -598,22 +607,23 @@ class PeerInputFilter
     protected function ValidateUserStructure(mixed $user, array $options = []): bool
     {
         $userConfig = ConstantsConfig::user();
-        if (is_array($user)) {
-            $user = (object)$user;
+
+        if (\is_array($user)) {
+            $user = (object) $user;
         }
 
-        return isset($user->uid) && $this->Uuid($user->uid) &&
-               isset($user->username) && $this->validateUsername($user->username) &&
-               isset($user->img) && $this->StringLength($user->img, ['min' => $userConfig['IMAGE']['MIN_LENGTH'], 'max' => $userConfig['IMAGE']['MAX_LENGTH']]) &&
-               isset($user->isfollowed) && is_bool($user->isfollowed) &&
-               isset($user->isfollowing) && is_bool($user->isfollowing);
+        return isset($user->uid) && $this->Uuid($user->uid)
+                                 && isset($user->username) && $this->validateUsername($user->username)
+                                 && isset($user->img) && $this->StringLength($user->img, ['min' => $userConfig['IMAGE']['MIN_LENGTH'], 'max' => $userConfig['IMAGE']['MAX_LENGTH']])
+                                 && isset($user->isfollowed) && \is_bool($user->isfollowed)
+                                 && isset($user->isfollowing) && \is_bool($user->isfollowing);
     }
 
     protected function ValidateProfilePost(array $profileposts, array $options = []): bool
     {
         foreach ($profileposts as $post) {
-            if (is_array($post)) {
-                $post = (object)$post;
+            if (\is_array($post)) {
+                $post = (object) $post;
             }
 
             if (!$this->ValidatePostStructure($post, $options)) {
@@ -627,22 +637,23 @@ class PeerInputFilter
     protected function ValidatePostStructure(mixed $profilepost, array $options = []): bool
     {
         $postConst = ConstantsConfig::post();
-        if (is_array($profilepost)) {
-            $profilepost = (object)$profilepost;
+
+        if (\is_array($profilepost)) {
+            $profilepost = (object) $profilepost;
         }
 
-        return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
-               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
-               isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
-               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+        return isset($profilepost->postid) && $this->Uuid($profilepost->postid)
+                                           && isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']])
+                                           && isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']])
+                                           && isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']])
+                                           && isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidatePostPure(array $profileposts, array $options = []): bool
     {
         foreach ($profileposts as $post) {
-            if (is_array($post)) {
-                $post = (object)$post;
+            if (\is_array($post)) {
+                $post = (object) $post;
             }
 
             if (!$this->ValidatePostPureStructure($post, $options)) {
@@ -656,39 +667,43 @@ class PeerInputFilter
     protected function ValidatePostPureStructure(mixed $profilepost, array $options = []): bool
     {
         $postConst = ConstantsConfig::post();
-        if (is_array($profilepost)) {
-            $profilepost = (object)$profilepost;
+
+        if (\is_array($profilepost)) {
+            $profilepost = (object) $profilepost;
         }
 
-        return isset($profilepost->postid) && $this->Uuid($profilepost->postid) &&
-               isset($profilepost->userid) && $this->Uuid($profilepost->userid) &&
-               isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
-               isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
-               isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
-               isset($profilepost->mediadescription) && $this->StringLength($profilepost->mediadescription, ['min' => $postConst['MEDIADESCRIPTION']['MIN_LENGTH'], 'max' => $postConst['MEDIADESCRIPTION']['MAX_LENGTH']]) &&
-               isset($profilepost->amountlikes) && $this->IsNumeric($profilepost->amountlikes) &&
-               isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes) &&
-               isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews) &&
-               isset($profilepost->amountcomments) && $this->IsNumeric($profilepost->amountcomments) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+        return isset($profilepost->postid) && $this->Uuid($profilepost->postid)
+                                           && isset($profilepost->userid) && $this->Uuid($profilepost->userid)
+                                           && isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']])
+                                           && isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']])
+                                           && isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']])
+                                           && isset($profilepost->mediadescription) && $this->StringLength($profilepost->mediadescription, ['min' => $postConst['MEDIADESCRIPTION']['MIN_LENGTH'], 'max' => $postConst['MEDIADESCRIPTION']['MAX_LENGTH']])
+                                           && isset($profilepost->amountlikes) && $this->IsNumeric($profilepost->amountlikes)
+                                           && isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes)
+                                           && isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews)
+                                           && isset($profilepost->amountcomments) && $this->IsNumeric($profilepost->amountcomments)
+                                           && isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function validatePassword(string $value, array $options = []): bool
     {
         $passwordConfig = ConstantsConfig::user()['PASSWORD'];
 
-        if ($value === '') {
-            $this->errors['password'][] = "30101";
+        if ('' === $value) {
+            $this->errors['password'][] = '30101';
+
             return false;
         }
 
-        if (strlen($value) < $passwordConfig['MIN_LENGTH'] || strlen($value) > $passwordConfig['MAX_LENGTH']) {
-            $this->errors['password'][] = "30226";
+        if (\strlen($value) < $passwordConfig['MIN_LENGTH'] || \strlen($value) > $passwordConfig['MAX_LENGTH']) {
+            $this->errors['password'][] = '30226';
+
             return false;
         }
 
-        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['password'][] = "30226";
+        if (!\preg_match('/'.$passwordConfig['PATTERN'].'/u', $value)) {
+            $this->errors['password'][] = '30226';
+
             return false;
         }
 
@@ -698,30 +713,35 @@ class PeerInputFilter
     protected function validateUsername(string $value, array $options = []): bool
     {
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer'];
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $usernameConfig     = ConstantsConfig::user()['USERNAME'];
 
-        if ($value === '') {
-            $this->errors['username'][] = "30202";
+        if ('' === $value) {
+            $this->errors['username'][] = '30202';
+
             return false;
         }
 
-        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
-            $this->errors['username'][] = "30202";
+        if (\strlen($value) < $usernameConfig['MIN_LENGTH'] || \strlen($value) > $usernameConfig['MAX_LENGTH']) {
+            $this->errors['username'][] = '30202';
+
             return false;
         }
 
-        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['username'][] = "30202";
+        if (!\preg_match('/'.$usernameConfig['PATTERN'].'/u', $value)) {
+            $this->errors['username'][] = '30202';
+
             return false;
         }
 
-        if (!preg_match('/[a-zA-Z]/', $value)) {
-            $this->errors['username'][] = "30202";
+        if (!\preg_match('/[a-zA-Z]/', $value)) {
+            $this->errors['username'][] = '30202';
+
             return false;
         }
 
-        if (in_array(strtolower($value), $forbiddenUsernames, true)) {
-            $this->errors['username'][] = "31002";
+        if (\in_array(strtolower($value), $forbiddenUsernames, true)) {
+            $this->errors['username'][] = '31002';
+
             return false;
         }
 
@@ -732,21 +752,24 @@ class PeerInputFilter
     {
         $tagConfig = ConstantsConfig::post()['TAG'];
 
-        if ($value === '') {
-            $this->errors['tag'][] = "30101";
+        if ('' === $value) {
+            $this->errors['tag'][] = '30101';
+
             return false;
         }
 
-        $value = trim($value);
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = \trim($value);
+        $value = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
-            $this->errors['tag'][] = "30103";
+        if (\strlen($value) < $tagConfig['MIN_LENGTH'] || \strlen($value) > $tagConfig['MAX_LENGTH']) {
+            $this->errors['tag'][] = '30103';
+
             return false;
         }
 
-        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['tag'][] = "30103";
+        if (!\preg_match('/'.$tagConfig['PATTERN'].'/u', $value)) {
+            $this->errors['tag'][] = '30103';
+
             return false;
         }
 
@@ -755,22 +778,25 @@ class PeerInputFilter
 
     protected function validatePkey(string $value, array $options = []): bool
     {
-        if ($value === '') {
-            $this->errors['pkey'][] = "30103";
+        if ('' === $value) {
+            $this->errors['pkey'][] = '30103';
+
             return false;
         }
 
-        $value = trim($value);
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value       = \trim($value);
+        $value       = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
         $walletConst = ConstantsConfig::wallet();
 
-        if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
-            $this->errors['pkey'][] = "30254";
+        if (\strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || \strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
+            $this->errors['pkey'][] = '30254';
+
             return false;
         }
 
-        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
-            $this->errors['pkey'][] = "30254";
+        if (!\preg_match('/'.$walletConst['SOLANA_PUBKEY']['PATTERN'].'/u', $value)) {
+            $this->errors['pkey'][] = '30254';
+
             return false;
         }
 
@@ -781,17 +807,18 @@ class PeerInputFilter
     {
         $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
 
-        if ($value === '') {
-            $this->errors['phone'][] = "30103";
+        if ('' === $value) {
+            $this->errors['phone'][] = '30103';
+
             return false;
         }
 
-        $value = trim($value);
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = \trim($value);
+        $value = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
 
+        if (!\preg_match('/'.$phoneConfig['PATTERN'].'/u', $value)) {
+            $this->errors['phone'][] = '30253';
 
-        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
-            $this->errors['phone'][] = "30253";
             return false;
         }
 
@@ -800,21 +827,24 @@ class PeerInputFilter
 
     protected function validateResetToken(string $value, array $options = []): bool
     {
-        if ($value === '') {
+        if ('' === $value) {
             $this->errors['reset_token'][] = 'Reset token is required.';
+
             return false;
         }
 
-        $value = trim($value);
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = \trim($value);
+        $value = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) !== 64) {
+        if (64 !== \strlen($value)) {
             $this->errors['reset_token'][] = 'Reset token must be exactly 64 characters.';
+
             return false;
         }
 
-        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+        if (!\preg_match('/^[a-f0-9]{64}$/i', $value)) {
             $this->errors['reset_token'][] = 'Invalid reset token format.';
+
             return false;
         }
 
@@ -823,21 +853,24 @@ class PeerInputFilter
 
     protected function validateActivationToken(string $value, array $options = []): bool
     {
-        if ($value === '') {
+        if ('' === $value) {
             $this->errors['activation_token'][] = 'Activation token is required.';
+
             return false;
         }
 
-        $value = trim($value);
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $value = \trim($value);
+        $value = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
 
-        if (strlen($value) !== 64) {
+        if (64 !== \strlen($value)) {
             $this->errors['activation_token'][] = 'Activation token must be exactly 64 characters.';
+
             return false;
         }
 
-        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+        if (!\preg_match('/^[a-f0-9]{64}$/i', $value)) {
             $this->errors['activation_token'][] = 'Invalid activation token format.';
+
             return false;
         }
 
@@ -847,46 +880,54 @@ class PeerInputFilter
     protected function validateImage(string $imagePath, array $options = []): bool
     {
         $allowedExtensions = $options['extensions'] ?? ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/webp', 'image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff'];
-        $maxFileSize = $options['max_size'] ?? 5 * 1024 * 1024;
-        $maxWidth = $options['max_width'] ?? null;
-        $maxHeight = $options['max_height'] ?? null;
-        $imagePath = __DIR__ . '/../../runtime-data/media' . $imagePath;
+        $allowedMimeTypes  = $options['mime_types'] ?? ['image/webp', 'image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff'];
+        $maxFileSize       = $options['max_size']   ?? 5 * 1024 * 1024;
+        $maxWidth          = $options['max_width']  ?? null;
+        $maxHeight         = $options['max_height'] ?? null;
+        $imagePath         = __DIR__.'/../../runtime-data/media'.$imagePath;
 
         if (!is_readable($imagePath)) {
-            $this->errors['image'][] = "30263";
+            $this->errors['image'][] = '30263';
+
             return false;
         }
 
         if (filesize($imagePath) > $maxFileSize) {
-            $this->errors['image'][] = "21517";
+            $this->errors['image'][] = '21517';
+
             return false;
         }
 
-        $extension = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
-        if (!in_array($extension, $allowedExtensions, true)) {
-            $this->errors['image'][] = "21518";
+        $extension = strtolower(pathinfo($imagePath, \PATHINFO_EXTENSION));
+
+        if (!\in_array($extension, $allowedExtensions, true)) {
+            $this->errors['image'][] = '21518';
+
             return false;
         }
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $finfo    = finfo_open(\FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $imagePath);
         finfo_close($finfo);
 
-        if (!in_array($mimeType, $allowedMimeTypes, true)) {
-            $this->errors['image'][] = "21519";
+        if (!\in_array($mimeType, $allowedMimeTypes, true)) {
+            $this->errors['image'][] = '21519';
+
             return false;
         }
 
-        if ($maxWidth !== null || $maxHeight !== null) {
+        if (null !== $maxWidth || null !== $maxHeight) {
             [$width, $height] = getimagesize($imagePath);
+
             if (!$width || !$height) {
-                $this->errors['image'][] = "25120";
+                $this->errors['image'][] = '25120';
+
                 return false;
             }
 
-            if (($maxWidth !== null && $width > $maxWidth) || ($maxHeight !== null && $height > $maxHeight)) {
-                $this->errors['image'][] = "21521";
+            if ((null !== $maxWidth && $width > $maxWidth) || (null !== $maxHeight && $height > $maxHeight)) {
+                $this->errors['image'][] = '21521';
+
                 return false;
             }
         }

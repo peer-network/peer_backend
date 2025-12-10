@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\ModerationMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
-use Fawaz\Database\ReportsMapper;
-use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
@@ -21,10 +23,8 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\ResponseHelper;
 
 class UserInfoService
@@ -41,7 +41,7 @@ class UserInfoService
         protected ReportsMapper $reportsMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected ModerationMapper $moderationMapper
+        protected ModerationMapper $moderationMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -53,16 +53,17 @@ class UserInfoService
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized action attempted');
+
             return false;
         }
+
         return true;
     }
 
     public function loadInfoById(): array|false
     {
-
         $this->logger->debug('UserInfoService.loadLastId started');
 
         try {
@@ -70,25 +71,26 @@ class UserInfoService
 
             $userPreferences = $this->userPreferencesMapper->loadPreferencesById($this->currentUserId);
 
-            if ($results !== false && $userPreferences !== false) {
-                $affectedRows = $results->getArrayCopy();
+            if (false !== $results && false !== $userPreferences) {
+                $affectedRows      = $results->getArrayCopy();
                 $resultPreferences = $userPreferences->getArrayCopy();
 
                 $contentFiltering = $resultPreferences['contentFilteringSeverityLevel'];
 
                 $onboardings = $resultPreferences['onboardingsWereShown'] ?? [];
-                if (!is_array($onboardings)) {
+
+                if (!\is_array($onboardings)) {
                     $onboardings = $onboardings ? (array) $onboardings : [];
                 }
 
                 $resultPreferences['onboardingsWereShown'] = $onboardings;
 
-                $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
+                $this->logger->info('UserInfoService.loadInfoById found', ['affectedRows' => $affectedRows]);
 
                 $resultPreferences['contentFilteringSeverityLevel'] = HiddenContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel($contentFiltering);
 
-                $affectedRows['userPreferences'] = $resultPreferences;
-                $affectedRows['onboardingsWereShown']   = $onboardings;
+                $affectedRows['userPreferences']      = $resultPreferences;
+                $affectedRows['onboardingsWereShown'] = $onboardings;
 
                 return $this::createSuccessResponse(11002, $affectedRows, false);
             }
@@ -131,13 +133,13 @@ class UserInfoService
         );
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
         ];
 
-        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if (false === $this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $followedUserId
-        ) === false) {
+        )) {
             return $this::respondWithError(31107, ['followedUserId' => $followedUserId]);
         }
 
@@ -145,9 +147,10 @@ class UserInfoService
 
         $response = $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
 
-        if (isset($response['status']) && $response['status'] === 'error') {
+        if (isset($response['status']) && 'error' === $response['status']) {
             $this->logger->error('Error toggling user follow', ['error' => $response]);
             $this->transactionManager->rollback();
+
             return $response;
         }
 
@@ -188,13 +191,13 @@ class UserInfoService
         );
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
         ];
 
-        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if (false === $this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $blockedUserId
-        ) === false) {
+        )) {
             return $this::respondWithError(31107, ['blockedUserId' => $blockedUserId]);
         }
 
@@ -202,9 +205,10 @@ class UserInfoService
 
         $response = $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
 
-        if (isset($response['status']) && $response['status'] === 'error') {
+        if (isset($response['status']) && 'error' === $response['status']) {
             $this->logger->error('Error toggling user block', ['error' => $response]);
             $this->transactionManager->rollback();
+
             return $response;
         }
         $this->transactionManager->commit();
@@ -215,8 +219,8 @@ class UserInfoService
     public function loadBlocklist(?array $args = []): array
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset          = max((int) ($args['offset'] ?? 0), 0);
+        $limit           = min(max((int) ($args['limit'] ?? 10), 1), 20);
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
@@ -229,7 +233,6 @@ class UserInfoService
             ContentFilteringCases::searchById,
             ContentType::user
         );
-
 
         $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
             ContentFilteringCases::searchById,
@@ -249,20 +252,21 @@ class UserInfoService
             $systemUserSpec,
             $deletedUserSpec,
             $usersHiddenContentFilterSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
         try {
-            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs, $offset, $limit);
 
             $blockedBy = $lists['blockedBy'] ?? [];
-            $iBlocked = $lists['iBlocked'] ?? [];
+            $iBlocked  = $lists['iBlocked']  ?? [];
 
             foreach ($blockedBy as $profile) {
                 if ($profile instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($profile, $specs);
                 }
             }
+
             foreach ($iBlocked as $profile) {
                 if ($profile instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($profile, $specs);
@@ -271,26 +275,26 @@ class UserInfoService
 
             $affected = [
                 'blockedBy' => array_map(fn (Profile $p) => $p->getArrayCopy(), $blockedBy),
-                'iBlocked' => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
+                'iBlocked'  => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
             ];
 
-            $counter = count($affected['blockedBy']) + count($affected['iBlocked']);
+            $counter = \count($affected['blockedBy']) + \count($affected['iBlocked']);
 
-            $this->logger->info("UserInfoService.loadBlocklist found", ['counter' => $counter]);
+            $this->logger->info('UserInfoService.loadBlocklist found', ['counter' => $counter]);
 
             return [
-                'status' => 'success',
-                'counter' => $counter,
+                'status'       => 'success',
+                'counter'      => $counter,
                 'ResponseCode' => '11107',
                 'affectedRows' => $affected,
             ];
-
         } catch (\Throwable $e) {
-            $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
+            $this->logger->error('Error in UserInfoService.loadBlocklist', ['exception' => $e->getMessage()]);
+
             return $this::respondWithError(41008);
         }
     }
-    
+
     /* ----- unused function --------
         public function toggleProfilePrivacy(): array
         {
@@ -339,7 +343,7 @@ class UserInfoService
 
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
-        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
+        if ('' === trim($biography) || \strlen($biography) < $bioConfig['MIN_LENGTH'] || \strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this::respondWithError(30228);
         }
 
@@ -349,6 +353,7 @@ class UserInfoService
             $this->transactionManager->beginTransaction();
 
             $user = $this->userMapper->loadById($this->currentUserId);
+
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -371,20 +376,21 @@ class UserInfoService
             }
 
             $user->setBiography($mediaPathFile);
-            $updatedUser = $this->userMapper->update($user);
-            $responseMessage = "11003";
+            $updatedUser     = $this->userMapper->update($user);
+            $responseMessage = '11003';
 
-            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string) $responseMessage, ['userId' => $this->currentUserId]);
 
             $this->transactionManager->commit();
 
             return [
-                'status' => 'success',
+                'status'       => 'success',
                 'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error updating biography', ['exception' => $e]);
+
             return $this::respondWithError(41002);
         }
     }
@@ -395,7 +401,7 @@ class UserInfoService
             return $this::respondWithError(60501);
         }
 
-        if (trim($mediaFile) === '') {
+        if ('' === trim($mediaFile)) {
             return $this::respondWithError(31102);
         }
 
@@ -403,6 +409,7 @@ class UserInfoService
 
         try {
             $user = $this->userMapper->loadById($this->currentUserId);
+
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -419,26 +426,27 @@ class UserInfoService
                 } else {
                     return $this::respondWithError(40306);
                 }
-
             } else {
                 return $this::respondWithError(40307);
             }
             $this->transactionManager->beginTransaction();
 
             $user->setProfilePicture($mediaPathFile);
-            $updatedUser = $this->userMapper->update($user);
-            $responseMessage = "11004";
+            $updatedUser     = $this->userMapper->update($user);
+            $responseMessage = '11004';
 
-            $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
+            $this->logger->info((string) $responseMessage, ['userId' => $this->currentUserId]);
 
             $this->transactionManager->commit();
+
             return [
-                'status' => 'success',
+                'status'       => 'success',
                 'ResponseCode' => $responseMessage,
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error setting profile picture', ['exception' => $e]);
+
             return $this::respondWithError(41003);
         }
     }
@@ -457,6 +465,7 @@ class UserInfoService
 
         if ($this->currentUserId === $reported_userid) {
             $this->logger->warning('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
+
             return $this->respondWithError(31009); // you cant report on yourself
         }
 
@@ -465,11 +474,13 @@ class UserInfoService
 
             if (!$user) {
                 $this->logger->warning('UserInfoService.reportUser: User not found');
+
                 return $this->respondWithError(31007);
             }
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
                 $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
+
                 return $this->respondWithError(32104);
             }
 
@@ -477,23 +488,28 @@ class UserInfoService
 
             if (!$userInfo) {
                 $this->logger->error('UserInfoService.reportUser: Error while fetching user data from db');
+
                 return $this::respondWithError(41001);
             }
         } catch (\Exception $e) {
             $this->logger->error('UserInfoService.reportUser: Error while fetching data for report generation ', ['exception' => $e]);
+
             return $this::respondWithError(41015); // 410xx - failed to report user
         }
 
         $contentHash = $user->hashValue();
+
         if (empty($contentHash)) {
             $this->logger->error('UserInfoService.reportUser: Error while generation content hash');
+
             return $this::respondWithError(41015); // 410xx - failed to report user
         }
 
         try {
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
-                $this->logger->warning("UserInfoService.reportUser: User report already exists");
+                $this->logger->warning('UserInfoService.reportUser: User report already exists');
+
                 return $this::respondWithError(32102); // This content has already been reviewed and noderated by our team.
             }
 
@@ -506,15 +522,17 @@ class UserInfoService
                 $contentHash
             );
 
-            if ($exists === null) {
-                $this->logger->error("UserInfoService.reportUser: Failed to add report");
+            if (null === $exists) {
+                $this->logger->error('UserInfoService.reportUser: Failed to add report');
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(41015); // 410xx - failed to report user
             }
 
-            if ($exists === true) {
+            if (true === $exists) {
                 $this->logger->warning('UserInfoService.reportUser: User report already exists');
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31008); // report already exists
             }
 
@@ -525,10 +543,10 @@ class UserInfoService
             $this->transactionManager->commit();
 
             return $this::createSuccessResponse(11012);
-
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+
             return $this::respondWithError(41015); // 410xx - failed to report user
         }
     }

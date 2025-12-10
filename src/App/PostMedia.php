@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class PostMedia
 {
@@ -22,21 +21,22 @@ class PostMedia
             $data = $this->validate($data, $elements);
         }
 
-        $this->postid = $data['postid'] ?? '';
+        $this->postid      = $data['postid']      ?? '';
         $this->contenttype = $data['contenttype'] ?? 'text';
-        $this->media = $data['media'] ?? '';
-        $this->options = $data['options'] ?? '';
+        $this->media       = $data['media']       ?? '';
+        $this->options     = $data['options']     ?? '';
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'postid' => $this->postid,
+            'postid'      => $this->postid,
             'contenttype' => $this->contenttype,
-            'media' => $this->media,
-            'options' => $this->options,
+            'media'       => $this->media,
+            'options'     => $this->options,
         ];
+
         return $att;
     }
 
@@ -75,26 +75,28 @@ class PostMedia
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $postConst = ConstantsConfig::post();
+        $postConst     = ConstantsConfig::post();
         $specification = [
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'contenttype' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'InArray', 'options' => [
                         'haystack' => ['image', 'text', 'video', 'audio', 'cover'],
@@ -103,8 +105,8 @@ class PostMedia
                 ],
             ],
             'media' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['MEDIA']['MIN_LENGTH'],
@@ -114,8 +116,8 @@ class PostMedia
                 ],
             ],
             'options' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $postConst['OPTIONS']['MIN_LENGTH'],
@@ -127,9 +129,9 @@ class PostMedia
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

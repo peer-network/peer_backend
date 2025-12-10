@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
 class Tag
@@ -20,7 +19,7 @@ class Tag
         }
 
         $this->tagid = $data['tagid'] ?? 0;
-        $this->name = $data['name'] ?? '';
+        $this->name  = $data['name']  ?? '';
     }
 
     // Array Copy methods
@@ -28,14 +27,14 @@ class Tag
     {
         return [
             'tagid' => $this->tagid,
-            'name' => $this->name,
+            'name'  => $this->name,
         ];
     }
 
     // Array Update methods
     public function update(array $data): void
     {
-        $data = $this->validate($data, ['name']);
+        $data       = $this->validate($data, ['name']);
         $this->name = $data['name'] ?? $this->name;
     }
 
@@ -74,13 +73,15 @@ class Tag
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -88,22 +89,22 @@ class Tag
     {
         $specification = [
             'tagid' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'name' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
-                    ['name' => 'validateTagName']
-                ]
+                    ['name' => 'validateTagName'],
+                ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

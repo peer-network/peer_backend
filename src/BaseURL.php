@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz;
 
-class BaseURL
+class BaseURL implements \Stringable
 {
     private string $baseUrl;
 
@@ -15,19 +15,20 @@ class BaseURL
         // set from super globals if not provided
         if (empty($this->baseUrl)) {
             // Scheme
-            $https = $_SERVER['HTTPS'] ?? false;
-            $scheme = ($https === false || $https === 'off') ? 'http' : 'https';
+            $https  = $_SERVER['HTTPS'] ?? false;
+            $scheme = (false === $https || 'off' === $https) ? 'http' : 'https';
 
             // Authority: Username and pass
             $username = $_SERVER['PHP_AUTH_USER'] ?? '';
-            $password = $_SERVER['PHP_AUTH_PW'] ?? '';
-            $userInfo = $username . (!empty($password) ? ":$password" : '');
+            $password = $_SERVER['PHP_AUTH_PW']   ?? '';
+            $userInfo = $username.(!empty($password) ? ":$password" : '');
 
             // Authority: Host
             $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
 
             // Authority: Port
-            $port = $_SERVER['SERVER_PORT'] ?? ($scheme === 'https' ? 443 : 80);
+            $port = $_SERVER['SERVER_PORT'] ?? ('https' === $scheme ? 443 : 80);
+
             if (preg_match('/^(\[[a-fA-F0-9:.]+])(:\d+)?\z/', $host, $matches)) {
                 $host = $matches[1];
 
@@ -36,15 +37,16 @@ class BaseURL
                 }
             } else {
                 $pos = strpos($host, ':');
-                if ($pos !== false) {
+
+                if (false !== $pos) {
                     $port = (int) substr($host, $pos + 1);
                     $host = strstr($host, ':', true);
                 }
             }
-            $authority = ($userInfo !== '' ? $userInfo . '@' : '') . $host . ($port ? ':' . $port : '');
+            $authority = ('' !== $userInfo ? $userInfo.'@' : '').$host.($port ? ':'.$port : '');
 
             // Construct the base URL without unnecessary checks
-            $this->baseUrl = $scheme . '://' . $authority;
+            $this->baseUrl = $scheme.'://'.$authority;
         }
     }
 

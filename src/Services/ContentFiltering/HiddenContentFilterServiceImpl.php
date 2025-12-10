@@ -6,7 +6,6 @@ namespace Fawaz\Services\ContentFiltering;
 
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
-use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategyFactory;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\HidePostsElsePlaceholder;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\PlaceholderEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\StrictlyHideEverythingContentFilteringStrategy;
@@ -25,34 +24,36 @@ class HiddenContentFilterServiceImpl
 
     public function __construct(
         private ContentType $targetContent,
-        ?string $contentFilterBy = null
+        ?string $contentFilterBy = null,
     ) {
-        $contentFiltering = ConstantsConfig::contentFiltering();
-        $this->contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
+        $contentFiltering                     = ConstantsConfig::contentFiltering();
+        $this->contentSeverityLevels          = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
         $this->reports_amount_to_hide_content = $contentFiltering['REPORTS_COUNT_TO_HIDE_CONTENT'];
-        $this->contentFilterBy = $contentFilterBy;
+        $this->contentFilterBy                = $contentFilterBy;
     }
 
     public static function getContentFilteringSeverityLevel(string $contentFilterBy): ?int
     {
-        $contentFiltering = ConstantsConfig::contentFiltering();
+        $contentFiltering      = ConstantsConfig::contentFiltering();
         $contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
 
         $allowedTypes = $contentSeverityLevels;
 
         $key = array_search($contentFilterBy, $allowedTypes);
+
         return $key;
     }
 
     public static function getContentFilteringStringFromSeverityLevel(?int $contentFilterSeverityLevel): ?string
     {
-        $contentFiltering = ConstantsConfig::contentFiltering();
+        $contentFiltering      = ConstantsConfig::contentFiltering();
         $contentSeverityLevels = $contentFiltering['CONTENT_SEVERITY_LEVELS'];
-        $allowedTypes = $contentSeverityLevels;
+        $allowedTypes          = $contentSeverityLevels;
 
-        if ($contentFilterSeverityLevel !== null && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
+        if (null !== $contentFilterSeverityLevel && isset($allowedTypes[$contentFilterSeverityLevel]) && !empty($allowedTypes[$contentFilterSeverityLevel])) {
             return $allowedTypes[$contentFilterSeverityLevel];
         }
+
         return null;
     }
 
@@ -76,12 +77,13 @@ class HiddenContentFilterServiceImpl
      * - If a decision path requires a strategy and none is provided, returns null.
      *
      * Parameters
-     * @param ContentType $showingContent              The type currently being rendered (user, post, comment).
-     * @param ContentFilteringStrategy|null $strategy  Strategy that maps (target, showing) to an action.
-     * @param int|null $showingContentReportAmount     Current report count for the shown content (if known).
-     * @param string|null $visibilityStatus            Current visibility, e.g. 'normal' or 'hidden'.
      *
-     * @return ContentFilteringAction|null             The action to take or null when no action applies.
+     * @param ContentType                   $showingContent             the type currently being rendered (user, post, comment)
+     * @param ContentFilteringStrategy|null $strategy                   strategy that maps (target, showing) to an action
+     * @param int|null                      $showingContentReportAmount current report count for the shown content (if known)
+     * @param string|null                   $visibilityStatus           Current visibility, e.g. 'normal' or 'hidden'.
+     *
+     * @return ContentFilteringAction|null the action to take or null when no action applies
      */
     public function getContentFilterAction(
         ContentType $showingContent,
@@ -89,35 +91,38 @@ class HiddenContentFilterServiceImpl
         ?int $showingContentReportAmount = null,
         ?string $visibilityStatus = null,
     ): ?ContentFilteringAction {
-        if ($visibilityStatus === null) {
-            if ($showingContentReportAmount === null && $this->contentFilterBy === $this->contentSeverityLevels[0]) {
-                if ($strategy === null) {
+        if (null === $visibilityStatus) {
+            if (null === $showingContentReportAmount && $this->contentFilterBy === $this->contentSeverityLevels[0]) {
+                if (null === $strategy) {
                     return null;
                 }
+
                 return $strategy::getAction($this->targetContent, $showingContent);
             }
         } else {
-            if (($visibilityStatus === "hidden" || ($visibilityStatus === "normal" && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent))) &&
-                $this->contentFilterBy === $this->contentSeverityLevels[0]
+            if (('hidden' === $visibilityStatus || ('normal' === $visibilityStatus && $showingContentReportAmount >= $this->getReportsAmountToHideContent($showingContent)))
+                && $this->contentFilterBy === $this->contentSeverityLevels[0]
             ) {
-                if ($strategy === null) {
+                if (null === $strategy) {
                     return null;
                 }
+
                 return $strategy::getAction($this->targetContent, $showingContent);
             }
         }
+
         return null;
     }
 
     public static function create(
-        ContentFilteringCases $strategy
+        ContentFilteringCases $strategy,
     ): ContentFilteringStrategy {
         return match ($strategy) {
-            ContentFilteringCases::postFeed   => new HidePostsElsePlaceholder(),
+            ContentFilteringCases::postFeed     => new HidePostsElsePlaceholder(),
             ContentFilteringCases::myprofile    => new PlaceholderEverythingContentFilteringStrategy(),
-            ContentFilteringCases::searchById => new PlaceholderEverythingContentFilteringStrategy(),
+            ContentFilteringCases::searchById   => new PlaceholderEverythingContentFilteringStrategy(),
             ContentFilteringCases::searchByMeta => new PlaceholderEverythingContentFilteringStrategy(),
-            ContentFilteringCases::hideAll => new StrictlyHideEverythingContentFilteringStrategy()
+            ContentFilteringCases::hideAll      => new StrictlyHideEverythingContentFilteringStrategy(),
         };
     }
 }

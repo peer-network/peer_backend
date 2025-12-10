@@ -13,9 +13,10 @@ class RequestValidator
      */
     public static function validate(array $input, array $requiredFields = []): array|ValidatorErrors
     {
-        $spec = ValidationSpec::auto($input, $requiredFields);
+        $spec        = ValidationSpec::auto($input, $requiredFields);
         $inputFilter = new PeerInputGenericValidator($spec);
         $inputFilter->setData($input);
+
         if ($inputFilter->isValid()) {
             return $inputFilter->getValues();
         }

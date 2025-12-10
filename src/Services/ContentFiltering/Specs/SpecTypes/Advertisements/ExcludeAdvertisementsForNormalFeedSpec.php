@@ -2,12 +2,12 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements;
 
+use Fawaz\config\ContentReplacementPattern;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
@@ -18,20 +18,20 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
 
     public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
-        if ($showingContent !== ContentType::post) {
+        if (ContentType::post !== $showingContent) {
             return null;
         }
 
         // If postid is not NULL, return NOT EXISTS (active advertisements)
-        if ($this->postId === null) {
+        if (null === $this->postId) {
             return new SpecificationSQLData([
-                "NOT EXISTS (
+                'NOT EXISTS (
                   SELECT 1
                   FROM advertisements a
                   WHERE a.postid = p.postid
                     AND a.timestart <= NOW()
                     AND a.timeend > NOW()
-                )"
+                )',
             ], []);
         }
 
@@ -42,6 +42,7 @@ final class ExcludeAdvertisementsForNormalFeedSpec implements Specification
     {
         return null;
     }
+
     public function forbidInteractions(string $targetContentId): ?SpecificationSQLData
     {
         return null;

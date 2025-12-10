@@ -2,13 +2,13 @@
 
 namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\User;
 
+use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\config\ContentReplacementPattern;
-use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
-use Fawaz\Services\ContentFiltering\Replaceables\CommentReplaceable;
 use Fawaz\Services\ContentFiltering\Strategies\ContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Strategies\Implementations\HideEverythingContentFilteringStrategy;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringAction;
@@ -22,7 +22,7 @@ final class SystemUserSpec implements Specification
 
     public function __construct(
         ContentFilteringCases $case,
-        private ContentType $targetContent
+        private ContentType $targetContent,
     ) {
         $this->contentFilterService = new ContentFilterServiceImpl(
             $targetContent
@@ -34,46 +34,47 @@ final class SystemUserSpec implements Specification
 
     public function toSql(ContentType $showingContent): ?SpecificationSQLData
     {
-        if ($this->contentFilterService->getContentFilterAction(
+        if (ContentFilteringAction::hideContent === $this->contentFilterService->getContentFilterAction(
             $showingContent,
             $this->contentFilterStrategy
-        ) === ContentFilteringAction::hideContent) {
+        )) {
             return match ($showingContent) {
                 ContentType::user => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = u.uid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],
+                    )', ],
                     []
                 ),
                 ContentType::post => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = p.userid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],
+                    )', ],
                     []
                 ),
                 ContentType::comment => new SpecificationSQLData(
                     [
-                    "EXISTS (
+                        'EXISTS (
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = c.userid AND
                         SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
                         SystemUserSpec_users.verified = 1
-                    )" ],
+                    )', ],
                     []
                 ),
             };
         }
+
         return null;
     }
 
@@ -82,9 +83,8 @@ final class SystemUserSpec implements Specification
         return null;
     }
 
-
     private static function createStrategy(
-        ContentFilteringCases $strategy
+        ContentFilteringCases $strategy,
     ): ContentFilteringStrategy {
         return new HideEverythingContentFilteringStrategy();
     }
@@ -93,39 +93,39 @@ final class SystemUserSpec implements Specification
     {
         return match ($this->targetContent) {
             ContentType::user => new SpecificationSQLData([
-                "EXISTS (
+                'EXISTS (
                     SELECT 1
                     FROM users SystemUserSpec_users
                     WHERE SystemUserSpec_users.uid = :SystemUserSpec_userid
                     AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
                     AND SystemUserSpec_users.verified = 1
-                )"
+                )',
             ], [
-                "SystemUserSpec_userid" => $targetContentId
+                'SystemUserSpec_userid' => $targetContentId,
             ]),
             ContentType::post => new SpecificationSQLData([
-                "EXISTS (
+                'EXISTS (
                     SELECT 1
                     FROM posts SystemUserSpec_posts
                     LEFT JOIN users SystemUserSpec_users ON SystemUserSpec_users.uid = SystemUserSpec_posts.userid
                     WHERE SystemUserSpec_posts.postid = :SystemUserSpec_postid
                     AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
                     AND SystemUserSpec_users.verified = 1
-                )"
+                )',
             ], [
-                "SystemUserSpec_postid" => $targetContentId
+                'SystemUserSpec_postid' => $targetContentId,
             ]),
             ContentType::comment => new SpecificationSQLData([
-                "EXISTS (
+                'EXISTS (
                     SELECT 1
                     FROM comments SystemUserSpec_comments
                     LEFT JOIN users SystemUserSpec_users ON SystemUserSpec_users.uid = SystemUserSpec_comments.userid
                     WHERE SystemUserSpec_comments.commentid = :SystemUserSpec_commentid
                     AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
                     AND SystemUserSpec_users.verified = 1
-                )"
+                )',
             ], [
-                "SystemUserSpec_commentid" => $targetContentId
+                'SystemUserSpec_commentid' => $targetContentId,
             ]),
         };
     }

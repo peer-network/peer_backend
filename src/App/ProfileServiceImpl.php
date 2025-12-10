@@ -3,24 +3,21 @@
 namespace Fawaz\App;
 
 use Fawaz\App\Interfaces\ProfileService;
-use Fawaz\App\Profile;
+use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
-use Fawaz\App\ValidationException;
-use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\App\UserService;
 
 final class ProfileServiceImpl implements ProfileService
 {
@@ -40,11 +37,11 @@ final class ProfileServiceImpl implements ProfileService
         $this->currentUserId = $userId;
     }
 
-    public function profile(array $args): Profile | ErrorResponse
+    public function profile(array $args): Profile|ErrorResponse
     {
         $this->logger->info('ProfileService.Profile started');
 
-        $userId = $args['userid'] ?? $this->currentUserId;
+        $userId          = $args['userid']          ?? $this->currentUserId;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = $userId === $this->currentUserId ? ContentFilteringCases::myprofile : ContentFilteringCases::searchById;
@@ -76,7 +73,7 @@ final class ProfileServiceImpl implements ProfileService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
         try {
@@ -88,49 +85,51 @@ final class ProfileServiceImpl implements ProfileService
 
             if (!$profileData) {
                 $this->logger->warning('Query.resolveProfile User not found');
+
                 return self::respondWithErrorObject(31007);
             }
-            /** @var Profile $profileData */
+            /* @var Profile $profileData */
             // Hint analyzers: keep concrete type after by-ref mutation
             ContentReplacer::placeholderProfile($profileData, $specs);
 
-            $this->logger->debug("Fetched profile data", ['userid' => $profileData->getUserId()]);
+            $this->logger->debug('Fetched profile data', ['userid' => $profileData->getUserId()]);
 
             return $profileData;
-
         } catch (ValidationException $e) {
             $this->logger->error('Validation error: Failed to fetch profile data', [
-                'userid' => $userId,
+                'userid'    => $userId,
                 'exception' => $e->getMessage(),
             ]);
+
             return $this::respondWithErrorObject(31007);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch profile data', [
-                'userid' => $userId,
+                'userid'    => $userId,
                 'exception' => $e->getMessage(),
             ]);
+
             return $this::respondWithErrorObject(41007);
         }
     }
 
     private function validateOffsetAndLimit(array $args = []): ?array
     {
-        $offset = isset($args['offset']) ? (int)$args['offset'] : null;
-        $limit = isset($args['limit']) ? (int)$args['limit'] : null;
+        $offset = isset($args['offset']) ? (int) $args['offset'] : null;
+        $limit  = isset($args['limit']) ? (int) $args['limit'] : null;
 
-        $paging = ConstantsConfig::paging();
+        $paging    = ConstantsConfig::paging();
         $minOffset = $paging['OFFSET']['MIN'];
         $maxOffset = $paging['OFFSET']['MAX'];
-        $minLimit = $paging['LIMIT']['MIN'];
-        $maxLimit = $paging['LIMIT']['MAX'];
+        $minLimit  = $paging['LIMIT']['MIN'];
+        $maxLimit  = $paging['LIMIT']['MAX'];
 
-        if ($offset !== null) {
+        if (null !== $offset) {
             if ($offset < $minOffset || $offset > $maxOffset) {
                 return $this::respondWithError(30203);
             }
         }
 
-        if ($limit !== null) {
+        if (null !== $limit) {
             if ($limit < $minLimit || $limit > $maxLimit) {
                 return $this::respondWithError(30204);
             }
@@ -141,54 +140,55 @@ final class ProfileServiceImpl implements ProfileService
 
     public function listUsers(array $args): array
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+
+        if (isset($validationResult['status']) && 'error' === $validationResult['status']) {
             return $validationResult;
         }
 
-        $username = isset($args['username']) ? trim($args['username']) : null;
+        $username       = isset($args['username']) ? trim($args['username']) : null;
         $usernameConfig = ConstantsConfig::user()['USERNAME'];
-        $userId = $args['userid'] ?? null;
-        $email = $args['email'] ?? null;
-        $status = $args['status'] ?? null;
-        $verified = $args['verified'] ?? null;
-        $ip = $args['ip'] ?? null;
+        $userId         = $args['userid']   ?? null;
+        $email          = $args['email']    ?? null;
+        $status         = $args['status']   ?? null;
+        $verified       = $args['verified'] ?? null;
+        $ip             = $args['ip']       ?? null;
 
         if (!empty($username) && !empty($userId)) {
             return $this::respondWithError(31012);
         }
 
-        if ($userId !== null && !self::isValidUUID($userId)) {
+        if (null !== $userId && !self::isValidUUID($userId)) {
             return $this::respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
+        if (null !== $username && (\strlen($username) < $usernameConfig['MIN_LENGTH'] || \strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
+        if (null !== $username && !preg_match('/'.$usernameConfig['PATTERN'].'/u', $username)) {
             return $this::respondWithError(30202);
         }
 
-
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (!empty($ip) && !filter_var($ip, \FILTER_VALIDATE_IP)) {
             return $this::respondWithError(30257);
         }
 
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $args['limit'] = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         $this->logger->debug('ProfileService.listUsers started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchByMeta;
+
         if (!empty($userId)) {
             $contentFilterCase = ContentFilteringCases::searchById;
-            $args['uid'] = $userId;
+            $args['uid']       = $userId;
         }
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -216,13 +216,13 @@ final class ProfileServiceImpl implements ProfileService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
-
         try {
-            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            $users      = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
             $usersArray = [];
+
             foreach ($users as $profile) {
                 if ($profile instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($profile, $specs);
@@ -231,12 +231,12 @@ final class ProfileServiceImpl implements ProfileService
             }
 
             if ($usersArray) {
-                $this->logger->info('ProfileService.listUsers successful', ['userCount' => count($usersArray)]);
+                $this->logger->info('ProfileService.listUsers successful', ['userCount' => \count($usersArray)]);
 
                 return [
-                    'status' => 'success',
-                    'counter' => count($usersArray),
-                    'ResponseCode' => "11009",
+                    'status'       => 'success',
+                    'counter'      => \count($usersArray),
+                    'ResponseCode' => '11009',
                     'affectedRows' => $usersArray,
                 ];
             }
@@ -249,33 +249,34 @@ final class ProfileServiceImpl implements ProfileService
 
     public function listUsersAdmin(array $args): array
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
-        if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
+
+        if (isset($validationResult['status']) && 'error' === $validationResult['status']) {
             return $validationResult;
         }
 
-        $username = isset($args['username']) ? trim($args['username']) : null;
+        $username       = isset($args['username']) ? trim($args['username']) : null;
         $usernameConfig = ConstantsConfig::user()['USERNAME'];
-        $userId = $args['userid'] ?? null;
-        $ip = $args['ip'] ?? null;
+        $userId         = $args['userid'] ?? null;
+        $ip             = $args['ip']     ?? null;
 
         if (!empty($username) && !empty($userId)) {
             return $this::respondWithError(31012);
         }
 
-        if ($userId !== null && !self::isValidUUID($userId)) {
+        if (null !== $userId && !self::isValidUUID($userId)) {
             return $this::respondWithError(30201);
         }
 
-        if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
+        if (null !== $username && (\strlen($username) < $usernameConfig['MIN_LENGTH'] || \strlen($username) > $usernameConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30202);
         }
 
-        if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
+        if (null !== $username && !preg_match('/'.$usernameConfig['PATTERN'].'/u', $username)) {
             return $this::respondWithError(30202);
         }
 
@@ -283,11 +284,11 @@ final class ProfileServiceImpl implements ProfileService
             $args['uid'] = $userId;
         }
 
-        if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
+        if (!empty($ip) && !filter_var($ip, \FILTER_VALIDATE_IP)) {
             return $this::respondWithError(30257);
         }
 
-        $args['limit'] = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $args['limit']          = min(max((int) ($args['limit'] ?? 10), 1), 20);
         $args['includeDeleted'] = true;
 
         $this->logger->debug('ProfileService.listUsersAdmin started');
@@ -297,12 +298,14 @@ final class ProfileServiceImpl implements ProfileService
         $data = $this->userService->fetchAllAdvance($args);
 
         if (!empty($data)) {
-            $this->logger->info('ProfileService.listUsersAdmin.fetchAll successful', ['userCount' => count($data)]);
+            $this->logger->info('ProfileService.listUsersAdmin.fetchAll successful', ['userCount' => \count($data)]);
+
             foreach ($data as $i => $item) {
                 if ($item instanceof ProfileReplaceable) {
                     ContentReplacer::placeholderProfile($item, $specs);
                 }
             }
+
             return $data;
         }
 

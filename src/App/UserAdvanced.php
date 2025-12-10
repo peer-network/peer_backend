@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
 class UserAdvanced implements ProfileReplaceable
@@ -45,31 +44,31 @@ class UserAdvanced implements ProfileReplaceable
             $data = $this->validate($data, $elements);
         }
 
-        $this->uid = $data['uid'] ?? '';
-        $this->email = $data['email'] ?? '';
-        $this->username = $data['username'] ?? '';
-        $this->password = $data['password'] ?? '';
-        $this->status = $data['status'] ?? 0;
-        $this->verified = $data['verified'] ?? 0;
-        $this->slug = $data['slug'] ?? 0;
-        $this->roles_mask = $data['roles_mask'] ?? 0;
-        $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
-        $this->img = $data['img'] ?? '';
-        $this->biography = $data['biography'] ?? '';
-        $this->amountposts = $data['amountposts'] ?? 0;
-        $this->amounttrending = $data['amounttrending'] ?? 0;
-        $this->isprivate = $data['isprivate'] ?? 0;
-        $this->isreported = $data['isreported'] ?? false;
-        $this->isfollowed = $data['isfollowed'] ?? false;
-        $this->isfollowing = $data['isfollowing'] ?? false;
-        $this->amountfollower = $data['amountfollower'] ?? 0;
-        $this->amountfollowed = $data['amountfollowed'] ?? 0;
-        $this->amountfriends = $data['amountfriends'] ?? 0;
-        $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->activeReports = $data['user_reports'] ?? 0;
-        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->uid                     = $data['uid']               ?? '';
+        $this->email                   = $data['email']             ?? '';
+        $this->username                = $data['username']          ?? '';
+        $this->password                = $data['password']          ?? '';
+        $this->status                  = $data['status']            ?? 0;
+        $this->verified                = $data['verified']          ?? 0;
+        $this->slug                    = $data['slug']              ?? 0;
+        $this->roles_mask              = $data['roles_mask']        ?? 0;
+        $this->ip                      = $data['ip']                ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->img                     = $data['img']               ?? '';
+        $this->biography               = $data['biography']         ?? '';
+        $this->amountposts             = $data['amountposts']       ?? 0;
+        $this->amounttrending          = $data['amounttrending']    ?? 0;
+        $this->isprivate               = $data['isprivate']         ?? 0;
+        $this->isreported              = $data['isreported']        ?? false;
+        $this->isfollowed              = $data['isfollowed']        ?? false;
+        $this->isfollowing             = $data['isfollowing']       ?? false;
+        $this->amountfollower          = $data['amountfollower']    ?? 0;
+        $this->amountfollowed          = $data['amountfollowed']    ?? 0;
+        $this->amountfriends           = $data['amountfriends']     ?? 0;
+        $this->liquidity               = $data['liquidity']         ?? 0.0;
+        $this->createdat               = $data['createdat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat               = $data['updatedat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->activeReports           = $data['user_reports']      ?? 0;
+        $this->visibilityStatus        = $data['visibility_status'] ?? 'normal';
         $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
@@ -77,34 +76,35 @@ class UserAdvanced implements ProfileReplaceable
     public function getArrayCopy(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'email' => $this->email,
-            'username' => $this->username,
-            'password' => $this->password,
-            'status' => $this->status,
-            'verified' => $this->verified,
-            'slug' => $this->slug,
-            'roles_mask' => $this->roles_mask,
-            'ip' => $this->ip,
-            'img' => $this->img,
-            'biography' => $this->biography,
-            'amountposts' => $this->amountposts,
-            'amounttrending' => $this->amounttrending,
-            'isprivate' => $this->isprivate,
-            'isfollowed' => $this->isfollowed,
-            'isreported' => $this->isreported,
-            'isfollowing' => $this->isfollowing,
-            'amountfollower' => $this->amountfollower,
-            'amountfollowed' => $this->amountfollowed,
-            'amountfriends' => $this->amountfriends,
-            'liquidity' => $this->liquidity,
-            'createdat' => $this->createdat,
-            'updatedat' => $this->updatedat,
-            'reports' => $this->activeReports,
+            'uid'               => $this->uid,
+            'email'             => $this->email,
+            'username'          => $this->username,
+            'password'          => $this->password,
+            'status'            => $this->status,
+            'verified'          => $this->verified,
+            'slug'              => $this->slug,
+            'roles_mask'        => $this->roles_mask,
+            'ip'                => $this->ip,
+            'img'               => $this->img,
+            'biography'         => $this->biography,
+            'amountposts'       => $this->amountposts,
+            'amounttrending'    => $this->amounttrending,
+            'isprivate'         => $this->isprivate,
+            'isfollowed'        => $this->isfollowed,
+            'isreported'        => $this->isreported,
+            'isfollowing'       => $this->isfollowing,
+            'amountfollower'    => $this->amountfollower,
+            'amountfollowed'    => $this->amountfollowed,
+            'amountfriends'     => $this->amountfriends,
+            'liquidity'         => $this->liquidity,
+            'createdat'         => $this->createdat,
+            'updatedat'         => $this->updatedat,
+            'reports'           => $this->activeReports,
             'visibility_status' => $this->visibilityStatusForUser,
-            'hasActiveReports' => $this->hasActiveReports(),
-            'isHiddenForUsers' => $this->isHiddenForUsers(),
+            'hasActiveReports'  => $this->hasActiveReports(),
+            'isHiddenForUsers'  => $this->isHiddenForUsers(),
         ];
+
         return $att;
     }
 
@@ -112,11 +112,12 @@ class UserAdvanced implements ProfileReplaceable
     public function getUpdatePass(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'password' => $this->password,
-            'ip' => $this->ip,
-            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
+            'uid'       => $this->uid,
+            'password'  => $this->password,
+            'ip'        => $this->ip,
+            'updatedat' => new \DateTime()->format('Y-m-d H:i:s.u'),
         ];
+
         return $att;
     }
 
@@ -124,13 +125,14 @@ class UserAdvanced implements ProfileReplaceable
     public function getArrayProfile(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'username' => $this->username,
-            'status' => $this->status,
-            'slug' => $this->slug,
-            'img' => $this->img,
+            'uid'       => $this->uid,
+            'username'  => $this->username,
+            'status'    => $this->status,
+            'slug'      => $this->slug,
+            'img'       => $this->img,
             'biography' => $this->biography,
         ];
+
         return $att;
     }
 
@@ -139,7 +141,7 @@ class UserAdvanced implements ProfileReplaceable
     {
         $data = $this->validate($data, ['img', 'biography', 'isprivate']);
 
-        $this->img = $data['img'] ?? $this->img;
+        $this->img       = $data['img']       ?? $this->img;
         $this->biography = $data['biography'] ?? $this->biography;
         $this->isprivate = $data['isprivate'] ?? $this->isprivate;
     }
@@ -150,7 +152,7 @@ class UserAdvanced implements ProfileReplaceable
         $data = $this->validate($data, ['username', 'email', 'password']);
 
         $this->username = $data['username'] ?? $this->username;
-        $this->email = $data['email'] ?? $this->email;
+        $this->email    = $data['email']    ?? $this->email;
         $this->password = $data['password'] ?? $this->password;
     }
 
@@ -225,7 +227,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->verified = $verified;
     }
 
-    public function getRoles(): int|null
+    public function getRoles(): ?int
     {
         return $this->roles_mask;
     }
@@ -242,7 +244,7 @@ class UserAdvanced implements ProfileReplaceable
 
     public function setIp(?string $ip = null): void
     {
-        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->ip = filter_var($ip, \FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getImg(): ?string
@@ -265,7 +267,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->biography = $biography;
     }
 
-    public function getisprivate(): int|null
+    public function getisprivate(): ?int
     {
         return $this->isprivate;
     }
@@ -298,16 +300,17 @@ class UserAdvanced implements ProfileReplaceable
     // Computed property: hidden for others when hidden or many reports
     public function isHiddenForUsers(): bool
     {
-        $reports = (int)($this->activeReports ?? 0);
-        return $this->visibilityStatus === 'hidden' || $reports > 4;
+        $reports = (int) ($this->activeReports ?? 0);
+
+        return 'hidden' === $this->visibilityStatus || $reports > 4;
     }
 
     public function hasActiveReports(): bool
     {
-        return (int)($this->activeReports ?? 0) > 0;
+        return (int) ($this->activeReports ?? 0) > 0;
     }
 
-    public function getAmountPosts(): int|null
+    public function getAmountPosts(): ?int
     {
         return $this->amountposts;
     }
@@ -317,7 +320,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->amountposts = $amountposts;
     }
 
-    public function getAmountTrending(): int|null
+    public function getAmountTrending(): ?int
     {
         return $this->amounttrending;
     }
@@ -347,7 +350,7 @@ class UserAdvanced implements ProfileReplaceable
         $this->amountfollowed = $amountfollowed;
     }
 
-    public function getAmountFriends(): int|null
+    public function getAmountFriends(): ?int
     {
         return $this->amountfriends;
     }
@@ -384,7 +387,7 @@ class UserAdvanced implements ProfileReplaceable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function getActiveReports(): int
@@ -397,16 +400,12 @@ class UserAdvanced implements ProfileReplaceable
         return $this->roles_mask;
     }
 
-
-
     // Password Verify methods
     public function verifyPassword(string $password): bool
     {
-        if (\password_verify($password, $this->password)) {
-
-            if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-
-                $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
+        if (password_verify($password, $this->password)) {
+            if (password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
+                $newHash = password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
 
                 $this->password = $newHash;
             }
@@ -439,86 +438,88 @@ class UserAdvanced implements ProfileReplaceable
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $userConfig = ConstantsConfig::user();
+        $userConfig    = ConstantsConfig::user();
         $specification = [
             'uid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'email' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
                 ],
             ],
             'username' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validateUsername'],
                 ],
             ],
             'password' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validatePassword'],
                 ],
             ],
             'status' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 6]],
                 ],
             ],
             'verified' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1]],
                 ],
             ],
             'slug' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
                         'min' => $userConfig['SLUG']['MIN_LENGTH'],
-                        'max' => $userConfig['SLUG']['MAX_LENGTH']
-                        ]],
+                        'max' => $userConfig['SLUG']['MAX_LENGTH'],
+                    ]],
                 ],
             ],
             'roles_mask' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1048576]],
                 ],
             ],
             'ip' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
                 ],
             ],
             'img' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $userConfig['IMAGE']['MIN_LENGTH'],
@@ -528,8 +529,8 @@ class UserAdvanced implements ProfileReplaceable
                 ],
             ],
             'biography' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $userConfig['BIOGRAPHY']['MIN_LENGTH'],
@@ -539,73 +540,73 @@ class UserAdvanced implements ProfileReplaceable
                 ],
             ],
             'amountposts' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amounttrending' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'isprivate' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'isfollowed' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'isfollowing' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'amountfollower' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfriends' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'liquidity' => [
-                'required' => true,
-                'filters' => [['name' => 'FloatSanitize']],
+                'required'   => true,
+                'filters'    => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => [
                         'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'],
-                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
-                        ]],
+                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH'],
+                    ]],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }
