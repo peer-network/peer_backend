@@ -21,6 +21,8 @@ class Profile implements ProfileReplaceable
     protected ?int $amounttrending;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $iFollowThisUser;
+    protected ?bool $thisUserFollowsMe;
     protected ?bool $isreported;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
@@ -229,6 +231,26 @@ class Profile implements ProfileReplaceable
         $this->isfollowing = $isfollowing;
     }
 
+    public function getIFollowThisUser(): ?bool
+    {
+        return $this->iFollowThisUser;
+    }
+
+    public function setIFollowThisUser(?bool $iFollowThisUser): void
+    {
+        $this->iFollowThisUser = $iFollowThisUser;
+    }
+
+    public function getThisUserFollowsMe(): ?bool
+    {
+        return $this->thisUserFollowsMe;
+    }
+
+    public function setThisUserFollowsMe(?bool $thisUserFollowsMe): void
+    {
+        $this->thisUserFollowsMe = $thisUserFollowsMe;
+    }
+
     public function getAmountfollower(): ?int
     {
         return $this->amountfollower;
@@ -406,6 +428,14 @@ class Profile implements ProfileReplaceable
             'isfollowing' => [
                 'required' => false,
                 'filters'  => [['name' => 'Boolean']],
+            ],
+            'iFollowThisUser' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'thisUserFollowsMe' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
             ],
             'amountfollower' => [
                 'required'   => false,
