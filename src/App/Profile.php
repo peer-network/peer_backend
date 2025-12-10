@@ -21,6 +21,8 @@ class Profile implements ProfileReplaceable
     protected ?int $amounttrending;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $iFollowThisUser;
+    protected ?bool $thisUserFollowsMe;
     protected ?bool $isreported;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
@@ -53,6 +55,8 @@ class Profile implements ProfileReplaceable
         $this->amounttrending = $data['amounttrending'] ?? 0;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->iFollowThisUser = $data['iFollowThisUser'] ?? $this->isfollowing ?? false;
+        $this->thisUserFollowsMe = $data['thisUserFollowsMe'] ?? $this->isfollowed ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
@@ -78,6 +82,8 @@ class Profile implements ProfileReplaceable
             'amounttrending' => $this->amounttrending,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'iFollowThisUser' => $this->iFollowThisUser,
+            'thisUserFollowsMe' => $this->thisUserFollowsMe,
             'isreported' => $this->isreported,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
@@ -226,6 +232,26 @@ class Profile implements ProfileReplaceable
     public function setIsfollowing(?bool $isfollowing): void
     {
         $this->isfollowing = $isfollowing;
+    }
+
+    public function getIFollowThisUser(): ?bool
+    {
+        return $this->iFollowThisUser;
+    }
+
+    public function setIFollowThisUser(?bool $iFollowThisUser): void
+    {
+        $this->iFollowThisUser = $iFollowThisUser;
+    }
+
+    public function getThisUserFollowsMe(): ?bool
+    {
+        return $this->thisUserFollowsMe;
+    }
+
+    public function setThisUserFollowsMe(?bool $thisUserFollowsMe): void
+    {
+        $this->thisUserFollowsMe = $thisUserFollowsMe;
     }
 
     public function getAmountfollower(): ?int
@@ -400,6 +426,14 @@ class Profile implements ProfileReplaceable
                 'filters' => [['name' => 'Boolean']],
             ],
             'isfollowing' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'iFollowThisUser' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'thisUserFollowsMe' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],

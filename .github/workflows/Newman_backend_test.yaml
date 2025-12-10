@@ -16,41 +16,18 @@ jobs:
     name: Auto-Update PR Branch
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
-      pull_request: ${{ toJson(github.event.pull_request) }}
+      pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
+      pr_head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || '' }}
     secrets: inherit
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
     needs: [auto_update_branch]
-    runs-on: ubuntu-latest
-    outputs:
-      is_behind: ${{ steps.check.outputs.is_behind }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
- 
-      - name: Fetch all branches
-        run: |
-          git fetch --all
- 
-      - id: check
-        run: |
-          base_branch="${{ github.event.pull_request.base.ref }}"
-          pr_branch="${{ github.event.pull_request.head.ref }}"
- 
-          echo "Comparing $pr_branch against $base_branch"
-          behind=$(git rev-list --left-right --count origin/${base_branch}...origin/${pr_branch} | awk '{print $1}')
- 
-          if [ "$behind" -gt 0 ]; then
-            echo "Branch is behind!"
-            echo "is_behind=true" >> $GITHUB_OUTPUT
-          else
-            echo "Branch is up-to-date."
-            echo "is_behind=false" >> $GITHUB_OUTPUT
-          fi
- 
+    uses: peer-network/.github/.github/workflows/check-branch-sync.yml@main
+    with:
+      base_branch: ${{ github.event.pull_request.base.ref }}
+      pr_branch: ${{ github.event.pull_request.head.ref }}
+
   fail_outdated_branch:
     name: Block CI Due to Outdated Branch
     runs-on: ubuntu-latest
