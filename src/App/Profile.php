@@ -431,11 +431,11 @@ class Profile implements ProfileReplaceable
             ],
             'iFollowThisUser' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'thisUserFollowsMe' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'amountfollower' => [
                 'required'   => false,

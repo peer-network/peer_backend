@@ -26,13 +26,13 @@ class ProfilUser
             $data = $this->validate($data, $elements);
         }
 
-        $this->uid         = $data['uid']         ?? '';
-        $this->username    = $data['username']    ?? '';
-        $this->slug        = $data['slug']        ?? 0;
-        $this->img         = $data['img']         ?? '';
-        $this->isfollowed  = $data['isfollowed']  ?? false;
-        $this->isfollowing = $data['isfollowing'] ?? false;
-        $this->iFollowThisUser = $data['iFollowThisUser'] ?? $this->isfollowing ?? false;
+        $this->uid               = $data['uid']               ?? '';
+        $this->username          = $data['username']          ?? '';
+        $this->slug              = $data['slug']              ?? 0;
+        $this->img               = $data['img']               ?? '';
+        $this->isfollowed        = $data['isfollowed']        ?? false;
+        $this->isfollowing       = $data['isfollowing']       ?? false;
+        $this->iFollowThisUser   = $data['iFollowThisUser']   ?? $this->isfollowing ?? false;
         $this->thisUserFollowsMe = $data['thisUserFollowsMe'] ?? $this->isfollowed ?? false;
     }
 
@@ -40,13 +40,13 @@ class ProfilUser
     public function getArrayCopy(): array
     {
         $att = [
-            'uid'         => $this->uid,
-            'username'    => $this->username,
-            'slug'        => $this->slug,
-            'img'         => $this->img,
-            'isfollowed'  => $this->isfollowed,
-            'isfollowing' => $this->isfollowing,
-            'iFollowThisUser' => $this->iFollowThisUser,
+            'uid'               => $this->uid,
+            'username'          => $this->username,
+            'slug'              => $this->slug,
+            'img'               => $this->img,
+            'isfollowed'        => $this->isfollowed,
+            'isfollowing'       => $this->isfollowing,
+            'iFollowThisUser'   => $this->iFollowThisUser,
             'thisUserFollowsMe' => $this->thisUserFollowsMe,
         ];
 
@@ -161,11 +161,11 @@ class ProfilUser
             ],
             'iFollowThisUser' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'thisUserFollowsMe' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
         ];
 

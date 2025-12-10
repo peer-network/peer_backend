@@ -159,7 +159,7 @@ class ModerationMapper
 
             if ($postRow) {
                 $postEntity = new Post($postRow, [], false);
-                $postData = $postEntity->getArrayCopy();
+                $postData   = $postEntity->getArrayCopy();
 
                 $authorData = [];
                 if (!empty($postRow['userid'])) {
@@ -169,37 +169,37 @@ class ModerationMapper
 
                     if ($authorRow) {
                         $authorEntity = new User($authorRow, [], false);
-                        $authorData = $authorEntity->getArrayCopy();
+                        $authorData   = $authorEntity->getArrayCopy();
                     }
                 }
 
-                $postData['user'] = $authorData;
+                $postData['user']              = $authorData;
                 $item['targetcontent']['post'] = $postData;
             }
         } elseif ($item['targettype'] === 'comment') {
-        $commentRow = Comment::query()
-            ->where('commentid', $item['targetid'])
-            ->first();
+            $commentRow = Comment::query()
+                ->where('commentid', $item['targetid'])
+                ->first();
 
-        if ($commentRow) {
-            $commentEntity = new Comment($commentRow, [], false);
-            $commentData = $commentEntity->getArrayCopy();
+            if ($commentRow) {
+                $commentEntity = new Comment($commentRow, [], false);
+                $commentData   = $commentEntity->getArrayCopy();
 
-            $authorData = [];
-            if (!empty($commentRow['userid'])) {
-                $authorRow = User::query()
-                    ->where('uid', $commentRow['userid'])
-                    ->first();
+                $authorData = [];
+                if (!empty($commentRow['userid'])) {
+                    $authorRow = User::query()
+                        ->where('uid', $commentRow['userid'])
+                        ->first();
 
-                if ($authorRow) {
-                    $authorEntity = new User($authorRow, [], false);
-                    $authorData = $authorEntity->getArrayCopy();
+                    if ($authorRow) {
+                        $authorEntity = new User($authorRow, [], false);
+                        $authorData   = $authorEntity->getArrayCopy();
+                    }
                 }
-            }
 
-            $commentData['user'] = $authorData;
-            $item['targetcontent']['comment'] = $commentData;
-        }
+                $commentData['user']              = $authorData;
+                $item['targetcontent']['comment'] = $commentData;
+            }
         } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = new User([
                 'uid'               => $item['uid'],
