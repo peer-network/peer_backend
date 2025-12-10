@@ -74,9 +74,8 @@ class ModerationService
                 return self::respondWithError(62101); // Unauthorized access attempt to get moderation items
             }
 
-            $offset = max((int)($args['offset'] ?? 1), 0);
+            $offset = max((int)($args['offset'] ?? 0), 0);
             $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-
             $results = $this->moderationMapper->getModerationItems($offset, $limit, $args);
 
             return self::createSuccessResponse(12102, $results, true); // Moderation items retrieved successfully

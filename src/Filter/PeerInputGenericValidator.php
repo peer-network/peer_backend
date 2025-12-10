@@ -180,9 +180,7 @@ class PeerInputGenericValidator
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', function ($matches) {
-                return '.' . str_pad($matches[1], 6, '0');
-            }, $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
             $formatted = trim($formatted);
@@ -432,6 +430,7 @@ class PeerInputGenericValidator
 
         return true;
     }
+
 
     protected function validatePkey(string $value, array $options = []): bool
     {

@@ -22,7 +22,7 @@ class UserBlock
 
         $this->blockerid = $data['blockerid'] ?? '';
         $this->blockedid = $data['blockedid'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods

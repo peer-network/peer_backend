@@ -74,9 +74,7 @@ class WalletService
             }
 
             $walletData = array_map(
-                static function (Wallet $wallet) {
-                    return $wallet->getArrayCopy();
-                },
+                static fn(Wallet $wallet) => $wallet->getArrayCopy(),
                 $wallets
             );
 
@@ -318,7 +316,7 @@ class WalletService
                 return self::respondWithError(51301);
             }
 
-            [$poolWallet, $burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
+            [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $fromId = $args['fromid'] ?? $peerWallet;
 
             $args = [
@@ -327,7 +325,7 @@ class WalletService
                 'gems' => 0.0,
                 'numbers' => -abs((float)$price),
                 'whereby' => $whereby,
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ];
 
             $response = $this->peerTokenMapper->transferToken(
@@ -342,7 +340,7 @@ class WalletService
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
                 $this->transactionManager->rollBack();
-                $this->logger->warning("Error occurred in performPayment.insertWinToLog", [
+                $this->logger->error("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);

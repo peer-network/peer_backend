@@ -29,7 +29,7 @@ class AdvertisementMapper
         $sortBy    = strtoupper($args['sort'] ?? 'NEWEST');
         $trendDays = isset($args['trenddays']) ? (int)$args['trenddays'] : 7;
 
-        $trendSince = (new \DateTimeImmutable('now'))
+        $trendSince = new \DateTimeImmutable('now')
             ->modify("-{$trendDays} days")
             ->format('Y-m-d H:i:s');
 
@@ -357,9 +357,7 @@ class AdvertisementMapper
             $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
             $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
-            $ads = array_values(array_filter(array_map(function ($row) {
-                return self::mapRowToAdvertisementt($row);
-            }, $rows)));
+            $ads = array_values(array_filter(array_map(self::mapRowToAdvertisementt(...), $rows)));
 
             return [
                 'affectedRows' => [
@@ -448,7 +446,7 @@ class AdvertisementMapper
                 'isreported'      => (bool)$row['isreported'],
                 'isdisliked'      => (bool)$row['isdisliked'],
                 'issaved'         => (bool)$row['issaved'],
-                'url'             => (string)$_ENV['WEB_APP_URL'] . '/post/' . $row['postid'],
+                'url'             => (string)getenv('WEB_APP_URL') . '/post/' . $row['postid'],
                 'tags'            => $tags,
                 'visibility_status' => (string)$row['post_visibility_status'],
                 'user' => [

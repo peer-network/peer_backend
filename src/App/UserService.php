@@ -167,7 +167,7 @@ class UserService
 
         $username = trim($args['username']);
         $slug = $this->generateUniqueSlug($username);
-        $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $createdat = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if ($mediaFile !== '') {
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
@@ -178,7 +178,7 @@ class UserService
             'userid' => $id,
             'attempt' => 1,
             'expiresat' => $expiresat,
-            'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+            'updatedat' => new \DateTime()->format('Y-m-d H:i:s.u')
         ];
 
         // Mask token for logging (show first 6 chars, hide the rest)
@@ -320,7 +320,7 @@ class UserService
             $data = [
                 'username' => $username
             ];
-            (new UserWelcomeMail($data))->send($email);
+            new UserWelcomeMail($data)->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
@@ -351,7 +351,7 @@ class UserService
             if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
             }
-            $userObj = (new User($users, [], false))->getArrayCopy();
+            $userObj = new User($users, [], false)->getArrayCopy();
 
             return $this::createSuccessResponse(
                 11011,
@@ -769,9 +769,9 @@ class UserService
         $this->logger->debug('UserService.Follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
@@ -822,7 +822,7 @@ class UserService
                 $this->currentUserId,
                 $specs,
                 $offset,
-                $limit,
+                $limit
             );
 
             foreach ($followers as $profile) {
@@ -870,9 +870,9 @@ class UserService
         }
 
         $userId = $args['userid'] ?? $this->currentUserId;
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
@@ -907,10 +907,6 @@ class UserService
             $normalVisibilityStatusSpec
         ];
 
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(30201);
-        }
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
             return self::respondWithError(31007);
@@ -918,13 +914,11 @@ class UserService
 
         $this->logger->info('Fetching friends list', [
             'currentUserId' => $this->currentUserId,
-            'targetUserId'  => $userId,
-            'offset' => $offset,
-            'limit' => $limit
+            'targetUserId'  => $userId
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {
@@ -1232,11 +1226,7 @@ class UserService
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
 
-        if (isset($nextAttemptAtArray['nextAttemptAt'])) {
-            return $nextAttemptAtArray['nextAttemptAt'];
-        }
-
-        return $nextAttemptAt;
+        return $nextAttemptAtArray['nextAttemptAt'] ?? $nextAttemptAt;
     }
 
 

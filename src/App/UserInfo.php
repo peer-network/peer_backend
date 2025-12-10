@@ -46,7 +46,7 @@ class UserInfo extends Model
         $this->invited = $data['invited'] ?? null;
         $this->phone = $data['phone'] ?? null;
         $this->pkey = $data['pkey'] ?? null;
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
@@ -183,7 +183,7 @@ class UserInfo extends Model
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function getActiveReports(): int

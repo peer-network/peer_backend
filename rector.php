@@ -13,7 +13,7 @@ return RectorConfig::configure()
         __DIR__ . '/tests',
     ])
     // uncomment to reach your current PHP version
-     ->withRules([
+    ->withRules([
         TypedPropertyFromStrictConstructorRector::class
     ])
     // ->withTypeCoverageLevel(0)

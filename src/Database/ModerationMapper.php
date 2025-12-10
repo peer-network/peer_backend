@@ -9,6 +9,7 @@ use Fawaz\App\Comment;
 use Fawaz\App\CommentInfo;
 use Fawaz\App\Models\UserReport;
 use Fawaz\config\constants\ConstantsModeration;
+use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\App\Models\Moderation;
 use Fawaz\App\Models\ModerationTicket;
@@ -26,6 +27,7 @@ class ModerationMapper
 
     public function __construct(
         protected PeerLoggerInterface $logger,
+        protected ProfileRepository $profileRepository,
         protected PDO $db
     ) {
 
@@ -77,40 +79,43 @@ class ModerationMapper
 
         $items['data'] = array_map(function ($item) {
 
-            $userReport = UserReport::query()
-                                    ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-                                    ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
-                                    ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-                                    ->select(
-                                        'user_reports.reportid',
-                                        'user_reports.reporter_userid',
-                                        'user_reports.targetid',
-                                        'user_reports.targettype',
-                                        'user_reports.message',
-                                        'user_reports.moderationid',
-                                        'posts.postid as post_postid', // Need to refactor this later
-                                        'posts.userid',
-                                        'posts.contenttype',
-                                        'posts.title',
-                                        'posts.mediadescription',
-                                        'posts.media',
-                                        'posts.cover',
-                                        'posts.options',
-                                        'comments.userid',
-                                        'comments.parentid',
-                                        'comments.content',
-                                        'target_user.uid as target_user_uid',
-                                        'target_user.username as target_user_username',
-                                        'target_user.email as target_user_email',
-                                        'target_user.img as target_user_img',
-                                        'target_user.slug as target_user_slug',
-                                        'target_user.status as target_user_status',
-                                        'target_user.biography as target_user_biography',
-                                        'target_user.updatedat as target_user_updatedat',
-                                    )
-                                    ->where('moderationticketid', $item['uid'])
-                                    ->latest()
-                                    ->first();
+        $userReport = UserReport::query()
+            ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
+            ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
+            ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
+            ->select(
+                'user_reports.reportid',
+                'user_reports.reporter_userid',
+                'user_reports.targetid',
+                'user_reports.targettype',
+                'user_reports.message',
+                'user_reports.moderationid',
+                'posts.postid as post_postid', // Need to refactor this later
+                'posts.userid',
+                'posts.contenttype',
+                'posts.title',
+                'posts.mediadescription',
+                'posts.visibility_status',
+                'posts.media',
+                'posts.cover',
+                'posts.options',
+                'comments.userid',
+                'comments.parentid',
+                'comments.content',
+                'comments.visibility_status',
+                'target_user.uid as target_user_uid',
+                'target_user.username as target_user_username',
+                'target_user.email as target_user_email',
+                'target_user.img as target_user_img',
+                'target_user.slug as target_user_slug',
+                'target_user.status as target_user_status',
+                'target_user.biography as target_user_biography',
+                'target_user.updatedat as target_user_updatedat',
+                'target_user.visibility_status as target_user_visibility_status',
+            )
+            ->where('moderationticketid', $item['uid'])
+            ->latest()
+            ->first();
 
 
             $targetContent = $this->mapTargetContent($userReport);
@@ -127,14 +132,13 @@ class ModerationMapper
                                         'users.status as userstatus',
                                         'users.biography',
                                         'users.updatedat',
+                                        'users.visibility_status',
                                     )
                                     ->where('moderationticketid', $item['uid'])
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(function ($reporter) {
-                return (new User($reporter, [], false))->getArrayCopy();
-            }, $reporters);
+            $item['reporters'] = array_map(fn($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
@@ -157,11 +161,11 @@ class ModerationMapper
 
         if ($item['targettype'] === 'post') {
             $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = (new Post($item, [], false))->getArrayCopy();
+            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = (new Comment($item, [], false))->getArrayCopy();
+            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {
-            $item['targetcontent']['user'] = (new User([
+            $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],
                 'username' => $item['username'],
                 'email' => $item['email'],
@@ -171,7 +175,7 @@ class ModerationMapper
                 'biography' => $item['biography'],
                 'updatedat' => $item['updatedat'],
                 'visibility_status' => $item['visibility_status'],
-            ], [], false))->getArrayCopy();
+            ], [], false)->getArrayCopy();
         }
 
         return $item;
@@ -207,7 +211,7 @@ class ModerationMapper
     {
         try {
             $moderationId = self::generateUUID();
-            $createdat = (string) (new DateTime())->format('Y-m-d H:i:s.u');
+            $createdat = (string) new DateTime()->format('Y-m-d H:i:s.u');
 
             $report = UserReport::query()->where('moderationticketid', $moderationTicketId)->first();
 
@@ -407,41 +411,86 @@ class ModerationMapper
         }
 
         // Target Media File for Post
-        if ($targetType == 'post') {
-            $mediaRecord = Post::query()->where('postid', $targetId)->first();
-            if (!$mediaRecord || !$mediaRecord['media']) {
-                $this->logger->error("Media not found for Post ID: $targetId");
-            }
-            $media = json_decode($mediaRecord['media'], true);
+        if ($targetType !== 'post') {
+            return;
+        }
 
+        $mediaRecord = Post::query()->where('postid', $targetId)->first();
+        if (!$mediaRecord || !$mediaRecord['media']) {
+            $this->logger->error("Media not found for Post ID: $targetId");
+            return;
+        }
+
+        $pathsToMove = [];
+
+        $media = json_decode($mediaRecord['media'], true);
+        if (is_array($media)) {
             foreach ($media as $mediaItem) {
-
-                if (!isset($mediaItem['path']) || !file_exists($directoryPath.$mediaItem['path'])) {
+                if (!isset($mediaItem['path'])) {
                     $this->logger->error("Invalid media path for Post ID: $targetId");
-                }
-                $media = $mediaItem['path'];
-
-                if (fopen($directoryPath.$media, 'r') === false) {
-                    $this->logger->error("Unable to open media file for Post ID: $targetId");
                     continue;
                 }
-                $stream = new \Slim\Psr7\Stream(fopen($directoryPath.$media, 'r'));
+                $pathsToMove[] = $mediaItem['path'];
+            }
+        }
 
-                $uploadedFile = new \Slim\Psr7\UploadedFile(
-                    $stream,
-                    null,
-                    null
-                );
+        $coverPath = null;
 
-                $mediaDetails = explode('/', $media);
-                $mediaUrl = end($mediaDetails);
+        if (!empty($mediaRecord['cover'])) {
+            $cover = json_decode($mediaRecord['cover'], true);
 
-                $filePath = $illegalDirectoryPath.'/'.$mediaUrl;
+            if (is_array($cover) && isset($cover[0]['path'])) {
+                $coverPath = $cover[0]['path'];
+            } else {
+                $this->logger->error("Invalid cover path for Post ID: $targetId");
+            }
+        }
 
-                try {
-                    $uploadedFile->moveTo($filePath);
-                } catch (\RuntimeException $e) {
-                    $this->logger->error("Failed to move file: $filePath");
+        if ($coverPath !== null) {
+            $pathsToMove[] = $coverPath;
+        }
+
+        foreach ($pathsToMove as $path) {
+            $fullPath = $directoryPath . $path;
+
+            if (!file_exists($fullPath)) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Cover file does not exist for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Invalid media path for Post ID: $targetId");
+                }
+                continue;
+            }
+
+            $resource = fopen($fullPath, 'r');
+            if ($resource === false) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Unable to open cover file for Post ID: $targetId, path: $fullPath");
+                } else {
+                    $this->logger->error("Unable to open media file for Post ID: $targetId");
+                }
+                continue;
+            }
+
+            $stream = new \Slim\Psr7\Stream($resource);
+
+            $uploadedFile = new \Slim\Psr7\UploadedFile(
+                $stream,
+                null,
+                null
+            );
+
+            $mediaDetails = explode('/', $path);
+            $fileName = end($mediaDetails);
+            $destinationPath = $illegalDirectoryPath . '/' . $fileName;
+
+            try {
+                $uploadedFile->moveTo($destinationPath);
+            } catch (\RuntimeException $e) {
+                if ($path === $coverPath) {
+                    $this->logger->error("Failed to move cover file: $destinationPath");
+                } else {
+                    $this->logger->error("Failed to move file: $destinationPath");
                 }
             }
         }

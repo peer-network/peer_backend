@@ -27,10 +27,28 @@ BEGIN
 		ADD COLUMN IF NOT EXISTS moderationticketid UUID DEFAULT NULL,
 		ADD COLUMN IF NOT EXISTS moderationid UUID DEFAULT NULL;
 
-	-- Add constraints
-	ALTER TABLE user_reports
-		ADD CONSTRAINT fk_userreport_moderationticketid FOREIGN KEY (moderationticketid) REFERENCES moderation_tickets(uid) ON DELETE SET NULL,
-		ADD CONSTRAINT fk_userreport_moderationid FOREIGN KEY (moderationid) REFERENCES moderations(uid) ON DELETE SET NULL;
+    -- Add constraints (idempotent)
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint c
+        JOIN pg_class t ON t.oid = c.conrelid
+        WHERE c.conname = 'fk_userreport_moderationticketid'
+          AND t.relname = 'user_reports'
+    ) THEN
+        ALTER TABLE user_reports
+            ADD CONSTRAINT fk_userreport_moderationticketid FOREIGN KEY (moderationticketid) REFERENCES moderation_tickets(uid) ON DELETE SET NULL;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint c
+        JOIN pg_class t ON t.oid = c.conrelid
+        WHERE c.conname = 'fk_userreport_moderationid'
+          AND t.relname = 'user_reports'
+    ) THEN
+        ALTER TABLE user_reports
+            ADD CONSTRAINT fk_userreport_moderationid FOREIGN KEY (moderationid) REFERENCES moderations(uid) ON DELETE SET NULL;
+    END IF;
 
 	-- Add Total Reports column to post_info table
 	ALTER TABLE post_info

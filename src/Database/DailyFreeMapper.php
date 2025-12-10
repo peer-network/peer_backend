@@ -38,7 +38,7 @@ class DailyFreeMapper
             return new DailyFree($data);
         } catch (\PDOException $e) {
             if ($e->getCode() === '23505') {
-                $this->logger->warning("Duplicate record detected", [
+                $this->logger->error("Duplicate record detected", [
                     'userid' => $user->getArrayCopy()['userid'],
                     'error' => $e->getMessage(),
                 ]);

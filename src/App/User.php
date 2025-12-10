@@ -32,6 +32,7 @@ class User extends Model implements Hashable, ProfileReplaceable
     protected string $updatedat;
     protected ?int $activeReports = null;
     protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -51,11 +52,12 @@ class User extends Model implements Hashable, ProfileReplaceable
         $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
         $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -75,7 +77,9 @@ class User extends Model implements Hashable, ProfileReplaceable
             'biography' => $this->biography,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
-            'visibility_status' => $this->visibilityStatus,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -87,7 +91,7 @@ class User extends Model implements Hashable, ProfileReplaceable
             'uid' => $this->uid,
             'password' => $this->password,
             'ip' => $this->ip,
-            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
         ];
         return $att;
     }
@@ -102,7 +106,9 @@ class User extends Model implements Hashable, ProfileReplaceable
             'slug' => $this->slug,
             'img' => $this->img,
             'biography' => $this->biography,
-            'visibility_status' => $this->visibilityStatus
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -259,14 +265,26 @@ class User extends Model implements Hashable, ProfileReplaceable
         return $this->activeReports;
     }
 
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
     public function visibilityStatus(): string
     {
-        return $this->visibilityStatus;
+        return $this->visibilityStatusForUser;
     }
 
     public function setVisibilityStatus(string $status): void
     {
-        $this->visibilityStatus = $status;
+        $this->visibilityStatusForUser = $status;
     }
 
     public function updateBio(string $biography): void
@@ -296,7 +314,7 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Password Verify methods

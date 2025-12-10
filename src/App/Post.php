@@ -46,7 +46,7 @@ class Post extends Model implements Hashable
         $this->cover = $data['cover'] ?? null;
         $this->url = $this->getPostUrl();
         $this->mediadescription = $data['mediadescription'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
@@ -196,7 +196,7 @@ class Post extends Model implements Hashable
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'visibility_status' => [
@@ -238,7 +238,7 @@ class Post extends Model implements Hashable
         if (empty($this->postid)) {
             return '';
         }
-        return $_ENV['WEB_APP_URL'] . '/post/' . $this->postid;
+        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
 
     // Table name

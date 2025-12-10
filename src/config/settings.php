@@ -15,7 +15,7 @@ require __DIR__ . '/checker.php';
 return static function (string $appEnv) {
 
     $settings =  [
-        'base_url' => $_ENV['BASE_URL'] ?? '',
+        'media_server_url' => $_ENV['MEDIA_SERVER_URL'] ?? '',
         'di_compilation_path' => __DIR__ . '/../../' . $_ENV['CONTAINER_PATH'],
         'display_error_details' => false,
         'log_errors' => true,
