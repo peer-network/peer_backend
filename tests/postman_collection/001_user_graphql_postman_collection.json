@@ -8372,6 +8372,189 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Check profile following flags",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11008\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check follow relationship flags\", function () {",
+							"    const user = pm.response.json()?.data?.getProfile?.affectedRows;",
+							"",
+							"    pm.expect(user, \"User data must exist\").to.exist;",
+							"",
+							"    pm.expect(user.iFollowThisUser, \"iFollowThisUser should be true\").to.be.true;",
+							"    pm.expect(user.thisUserFollowsMe, \"thisUserFollowsMe should be false\").to.be.false;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetProfile {\n    getProfile(userid: \"{{w_userid_t2}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            isfollowed\n            isfollowing\n            iFollowThisUser\n            thisUserFollowsMe\n            isreported\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n            amountreports\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check profile following flags",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11008\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check follow relationship flags\", function () {",
+							"    const user = pm.response.json()?.data?.getProfile?.affectedRows;",
+							"",
+							"    pm.expect(user, \"User data must exist\").to.exist;",
+							"",
+							"    pm.expect(user.iFollowThisUser, \"iFollowThisUser should be true\").to.be.true;",
+							"    pm.expect(user.thisUserFollowsMe, \"thisUserFollowsMe should be true\").to.be.true;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetProfile {\n    getProfile(userid: \"{{userid}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            isfollowed\n            isfollowing\n            iFollowThisUser\n            thisUserFollowsMe\n            isreported\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n            amountreports\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check profile following flags",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11008\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"Check follow relationship flags\", function () {",
+							"    const user = pm.response.json()?.data?.getProfile?.affectedRows;",
+							"",
+							"    pm.expect(user, \"User data must exist\").to.exist;",
+							"",
+							"    pm.expect(user.iFollowThisUser, \"iFollowThisUser should be false\").to.be.false;",
+							"    pm.expect(user.thisUserFollowsMe, \"thisUserFollowsMe should be false\").to.be.false;",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query GetProfile {\n    getProfile(userid: \"{{w_userid_t3}}\") {\n        status\n        ResponseCode\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            isfollowed\n            isfollowing\n            iFollowThisUser\n            thisUserFollowsMe\n            isreported\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n            amountreports\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
