@@ -160,8 +160,29 @@ class ModerationMapper
         $item['targetcontent']['user'] = null;
 
         if ($item['targettype'] === 'post') {
-            $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
+            $postRow = Post::query()
+                ->where('postid', $item['targetid'])
+                ->first();
+
+            if ($postRow) {
+                $postEntity = new Post($postRow, [], false);
+                $postData = $postEntity->getArrayCopy();
+
+                $authorData = [];
+                if (!empty($postRow['userid'])) {
+                    $authorRow = User::query()
+                        ->where('uid', $postRow['userid'])
+                        ->first();
+
+                    if ($authorRow) {
+                        $authorEntity = new User($authorRow, [], false);
+                        $authorData = $authorEntity->getArrayCopy();
+                    }
+                }
+
+                $postData['user'] = $authorData;
+                $item['targetcontent']['post'] = $postData;
+            }
         } elseif ($item['targettype'] === 'comment') {
             $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
         } elseif ($item['targettype'] === 'user') {

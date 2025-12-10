@@ -16,7 +16,8 @@ jobs:
     name: Auto-Update PR Branch
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
-      pull_request: ${{ toJson(github.event.pull_request) }}
+      pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
+      pr_head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || '' }}
     secrets: inherit
 
   check_branch_sync:
