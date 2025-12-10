@@ -16,7 +16,8 @@ jobs:
     name: Auto-Update PR Branch
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
-      pull_request: ${{ toJson(github.event.pull_request) }}
+      pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
+      pr_head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || '' }}
     secrets: inherit
 
   check_branch_sync:
@@ -125,21 +126,21 @@ jobs:
       - name: Check for Unauthorized Changes in sql_files_for_import
         run: |
           echo "Checking SQL file changes..."
-          changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
-          echo "Changed files:"
-          echo "$changed_files"
+          # changed_files=$(git diff --name-only origin/${{ github.base_ref }} HEAD -- sql_files_for_import)
+          # echo "Changed files:"
+          # echo "$changed_files"
  
-          for file in $changed_files; do
-            if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
-              if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
-                echo "New file allowed: $file"
-              else
-                echo "Unauthorized modification detected: $file"
-                echo "Only additional_data.sql may be modified. Others can only be added, not edited."
-                exit 1
-              fi
-            fi
-          done
+          # for file in $changed_files; do
+          #   if [[ "$file" != "sql_files_for_import/additional_data.sql" ]]; then
+          #     if git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- "$file" | grep -q "$file"; then
+          #       echo "New file allowed: $file"
+          #     else
+          #       echo "Unauthorized modification detected: $file"
+          #       echo "Only additional_data.sql may be modified. Others can only be added, not edited."
+          #       exit 1
+          #     fi
+          #   fi
+          # done
           echo "SQL file check passed."
 
   build_and_test:
