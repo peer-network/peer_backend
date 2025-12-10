@@ -136,8 +136,10 @@ type ProfileUser {
   visibilityStatus: ContentVisibilityStatus!
   isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
-  isfollowed: Boolean
-  isfollowing: Boolean
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
   isreported: Boolean
   isfriend: Boolean
 }
@@ -239,8 +241,10 @@ type Profile {
   visibilityStatus: ContentVisibilityStatus!
   isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
-  isfollowed: Boolean
-  isfollowing: Boolean
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
   isreported: Boolean
   amountposts: Int
   amounttrending: Int

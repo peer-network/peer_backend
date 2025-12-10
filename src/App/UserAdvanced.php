@@ -27,6 +27,8 @@ class UserAdvanced implements ProfileReplaceable
     protected ?int $isprivate;
     protected ?bool $isfollowed;
     protected ?bool $isreported;
+    protected ?bool $iFollowThisUser;
+    protected ?bool $thisUserFollowsMe;
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
@@ -62,6 +64,8 @@ class UserAdvanced implements ProfileReplaceable
         $this->isreported = $data['isreported'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->iFollowThisUser = $data['iFollowThisUser'] ?? $this->isfollowing ?? false;
+        $this->thisUserFollowsMe = $data['thisUserFollowsMe'] ?? $this->isfollowed ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
@@ -94,6 +98,8 @@ class UserAdvanced implements ProfileReplaceable
             'isfollowed' => $this->isfollowed,
             'isreported' => $this->isreported,
             'isfollowing' => $this->isfollowing,
+            'iFollowThisUser' => $this->iFollowThisUser,
+            'thisUserFollowsMe' => $this->thisUserFollowsMe,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,
@@ -558,6 +564,14 @@ class UserAdvanced implements ProfileReplaceable
                 'filters' => [['name' => 'Boolean']],
             ],
             'isfollowing' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'iFollowThisUser' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'thisUserFollowsMe' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
