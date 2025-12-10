@@ -357,7 +357,7 @@ class AdvertisementMapper
             $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
             $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
-            $ads = array_values(array_filter(array_map(fn($row) => self::mapRowToAdvertisementt($row), $rows)));
+            $ads = array_values(array_filter(array_map(self::mapRowToAdvertisementt(...), $rows)));
 
             return [
                 'affectedRows' => [

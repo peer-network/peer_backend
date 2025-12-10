@@ -529,8 +529,8 @@ class PeerTokenMapper
             }
             $stmt->execute();
 
-            $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            $data = array_map(fn ($t) => $this->mapTransaction($t), $transactions);
+            $transactions = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = array_map($this->mapTransaction(...), $transactions);
 
             return [
                 'status' => 'success',
