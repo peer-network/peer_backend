@@ -8,7 +8,7 @@
 #   echo "⚡ Using local gitleaks binary"
 #   SCAN_CMD="gitleaks detect \
 #     --pipe \
-#     --config=gitleaks.toml \
+#     --config=.security/gitleaks.toml \
 #     --report-format=json \
 #     --report-path=.gitleaks_out/gitleaks-precommit.json \
 #     --no-banner"
@@ -16,7 +16,7 @@
 #   echo "Local gitleaks not found, using Docker fallback"
 #   SCAN_CMD="docker run --rm -i -v \"$(pwd)\":/repo ghcr.io/gitleaks/gitleaks:v8.28.0 detect \
 #     --pipe \
-#     --config=/repo/gitleaks.toml \
+#     --config=/repo/.security/gitleaks.toml \
 #     --report-format=json \
 #     --report-path=/repo/.gitleaks_out/gitleaks-precommit.json \
 #     --no-banner"
