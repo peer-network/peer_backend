@@ -19,8 +19,3 @@ parameters:
         - '#Variable .+ in (isset|empty)\(\) (always exists and is not (nullable|falsy)|is never defined)#'
         - '#Unreachable statement - code above always terminates#'
         - '#Call to function is_array\(\) with .+ will always evaluate to (true|false)#'
-        - '#Parameter .+ of function array_map expects .+, .+ given#'
-        - '#Offset .+ does not exist on array\{\}#'
-        - '#Call to static method .+ on an unknown class .+#'
-        - '#Invoking callable on an unknown class .+#'
-        - '#If condition is always false#'
