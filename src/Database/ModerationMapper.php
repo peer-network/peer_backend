@@ -120,6 +120,29 @@ class ModerationMapper
 
             $targetContent = $this->mapTargetContent($userReport);
 
+            // Get moderator info
+            $moderatedBy = null;
+
+            $moderationRow = Moderation::query()
+                ->join('users', 'moderations.moderatorid', '=', 'users.uid')
+                ->select(
+                    'users.uid',
+                    'users.username',
+                    'users.email',
+                    'users.img',
+                    'users.slug',
+                    'users.status as userstatus',
+                    'users.biography',
+                    'users.updatedat',
+                    'users.visibility_status',
+                )
+                ->where('moderations.moderationticketid', $item['uid'])
+                ->latest() 
+                ->first();
+
+            if ($moderationRow) {
+                $moderatedBy = (new User($moderationRow, [], false))->getArrayCopy();
+            }
             // Get all reporters for the ModerationTicket
             $reporters = UserReport::query()
                                     ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
@@ -142,6 +165,7 @@ class ModerationMapper
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
+            $item['moderatedBy'] = $moderatedBy;
 
             return $item;
         }, $items['data']);

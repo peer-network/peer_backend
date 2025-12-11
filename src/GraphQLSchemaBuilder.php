@@ -1521,6 +1521,7 @@ class GraphQLSchemaBuilder
                 'targetcontent' => fn(array $root): array => $root['targetcontent'] ?? [],
                 'reporters' => fn(array $root): array => $root['reporters'] ?? [],
                 'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+                'moderatedBy' => fn(array $root): ?array => $root['moderatedBy'] ?? null,
             ],
             'TargetContent' => [
                 'post' => fn(array|null $root): ?array => $root['post'] ?? null,
