@@ -427,8 +427,14 @@ class PostService
             throw new \Exception('Maximum tag limit exceeded');
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = !empty($tagName) ? trim((string) $tagName) : '';
+            $tagName = strtolower(trim((string) $tagName));
+
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
 
             if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
@@ -468,6 +474,7 @@ class PostService
 
     private function createTag(string $tagName): Tag|false
     {
+        $tagName = strtolower(trim($tagName));
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
 
