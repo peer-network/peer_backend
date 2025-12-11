@@ -67,8 +67,8 @@ class TagPostService
 
         $tagNameConfig = ConstantsConfig::post()['TAG'];
 
-        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
-            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
+        if (strlen($tagName) <= $tagNameConfig['MIN_LENGTH'] ||
+            strlen($tagName) >= $tagNameConfig['MAX_LENGTH'] ||
             !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this::respondWithError(30255);
         }
