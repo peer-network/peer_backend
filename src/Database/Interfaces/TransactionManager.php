@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\Database\Interfaces;
 
-use PDO;
-use Fawaz\Database\Interfaces\RollbackableDatabase;
-
 class TransactionManager implements RollbackableDatabase
 {
-    private PDO $db;
+    private \PDO $db;
 
-
-    public function __construct(PDO $pdo)
+    public function __construct(\PDO $pdo)
     {
         $this->db = $pdo;
     }

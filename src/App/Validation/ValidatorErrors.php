@@ -7,7 +7,7 @@ namespace Fawaz\App\Validation;
 class ValidatorErrors
 {
     public function __construct(
-        public array $errors
+        public array $errors,
     ) {
     }
 }

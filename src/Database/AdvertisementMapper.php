@@ -4,72 +4,77 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use Fawaz\Services\ContentFiltering\Specs\Specification;
-use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\Utils\ContentFilterHelper;
-use PDO;
 use Fawaz\App\Advertisements;
 use Fawaz\App\PostAdvanced;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class AdvertisementMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
     public function fetchAllWithStats(array $specifications, ?array $args = []): array
     {
-        $this->logger->debug("AdvertisementMapper.fetchAllWithStats started");
+        $this->logger->debug('AdvertisementMapper.fetchAllWithStats started');
 
-        $offset    = isset($args['offset']) ? (int)$args['offset'] : 0;
-        $limit     = isset($args['limit']) ? (int)$args['limit'] : 10;
+        $offset    = isset($args['offset']) ? (int) $args['offset'] : 0;
+        $limit     = isset($args['limit']) ? (int) $args['limit'] : 10;
         $filterBy  = $args['filter'] ?? [];
         $sortBy    = strtoupper($args['sort'] ?? 'NEWEST');
-        $trendDays = isset($args['trenddays']) ? (int)$args['trenddays'] : 7;
+        $trendDays = isset($args['trenddays']) ? (int) $args['trenddays'] : 7;
 
         $trendSince = new \DateTimeImmutable('now')
             ->modify("-{$trendDays} days")
             ->format('Y-m-d H:i:s');
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
-        $conditions = $allSpecs->whereClauses;
+        $specsSQL     = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs     = SpecificationSQLData::merge($specsSQL);
+        $conditions   = $allSpecs->whereClauses;
         $paramsCommon = $allSpecs->paramsToPrepare;
 
         // ---- Filterbedingungen + gemeinsame Parameter
-        $conditions   = [];
+        $conditions = [];
         // $paramsCommon = [];
 
         if (!empty($filterBy['from'])) {
-            $conditions[] = "al.createdat >= :from";
+            $conditions[]         = 'al.createdat >= :from';
             $paramsCommon['from'] = $filterBy['from'];
         }
+
         if (!empty($filterBy['to'])) {
-            $conditions[] = "al.createdat <= :to";
+            $conditions[]       = 'al.createdat <= :to';
             $paramsCommon['to'] = $filterBy['to'];
         }
+
         if (!empty($filterBy['type'])) {
             $typeMap = ['PINNED' => 'pinned', 'BASIC' => 'basic'];
+
             if (isset($typeMap[$filterBy['type']])) {
-                $conditions[] = "al.status = :type";
+                $conditions[]         = 'al.status = :type';
                 $paramsCommon['type'] = $typeMap[$filterBy['type']];
             }
         }
+
         if (!empty($filterBy['advertisementId'])) {
-            $conditions[] = "al.advertisementid = :advertisementId";
+            $conditions[]                    = 'al.advertisementid = :advertisementId';
             $paramsCommon['advertisementId'] = $filterBy['advertisementId'];
         }
+
         if (!empty($filterBy['postId'])) {
-            $conditions[] = "al.postid = :postId";
+            $conditions[]           = 'al.postid = :postId';
             $paramsCommon['postId'] = $filterBy['postId'];
         }
+
         if (!empty($filterBy['userId'])) {
-            $conditions[] = "al.userid = :userId";
+            $conditions[]           = 'al.userid = :userId';
             $paramsCommon['userId'] = $filterBy['userId'];
         }
-        $conditionsString = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $conditionsString = $conditions ? 'WHERE '.implode(' AND ', $conditions) : '';
         // $whereClause = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
         // ---- Sortierung
@@ -343,8 +348,8 @@ class AdvertisementMapper
             $this->logger->info('fetchAllWithStats.statsStmt', ['statsStmt' => $stats]);
 
             // Data
-            $dataStmt = $this->db->prepare($dSql);
-            $paramsData['limit'] = $limit;
+            $dataStmt             = $this->db->prepare($dSql);
+            $paramsData['limit']  = $limit;
             $paramsData['offset'] = $offset;
             // foreach ($paramsData as $k => $v) {
             //     if ($v !== null) {
@@ -362,26 +367,27 @@ class AdvertisementMapper
             return [
                 'affectedRows' => [
                     'stats' => [
-                        'tokenSpent'     => (float)($stats['total_token_spent'] ?? 0),
-                        'euroSpent'      => (float)($stats['total_euro_spent'] ?? 0),
-                        'amountAds'      => (int)($stats['total_ads'] ?? 0),
-                        'gemsEarned'     => (float)($stats['total_gems_earned'] ?? 0),
-                        'amountLikes'    => (int)($stats['total_amount_likes'] ?? 0),
-                        'amountViews'    => (int)($stats['total_amount_views'] ?? 0),
-                        'amountComments' => (int)($stats['total_amount_comments'] ?? 0),
-                        'amountDislikes' => (int)($stats['total_amount_dislikes'] ?? 0),
-                        'amountReports'  => (int)($stats['total_amount_reports'] ?? 0),
+                        'tokenSpent'     => (float) ($stats['total_token_spent'] ?? 0),
+                        'euroSpent'      => (float) ($stats['total_euro_spent'] ?? 0),
+                        'amountAds'      => (int) ($stats['total_ads'] ?? 0),
+                        'gemsEarned'     => (float) ($stats['total_gems_earned'] ?? 0),
+                        'amountLikes'    => (int) ($stats['total_amount_likes'] ?? 0),
+                        'amountViews'    => (int) ($stats['total_amount_views'] ?? 0),
+                        'amountComments' => (int) ($stats['total_amount_comments'] ?? 0),
+                        'amountDislikes' => (int) ($stats['total_amount_dislikes'] ?? 0),
+                        'amountReports'  => (int) ($stats['total_amount_reports'] ?? 0),
                     ],
                     'advertisements' => $ads,
                 ],
             ];
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching advertisement stats or data", [
+            $this->logger->error('Error fetching advertisement stats or data', [
                 'error' => $e->getMessage(),
             ]);
+
             return [
                 'affectedRows' => [
-                    'stats' => null,
+                    'stats'          => null,
                     'advertisements' => [],
                 ],
             ];
@@ -390,83 +396,85 @@ class AdvertisementMapper
 
     private static function mapRowToAdvertisementt(array $row): array
     {
-        $tags = is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
-        if (!is_array($tags)) {
+        $tags = \is_string($row['tags'] ?? null) ? json_decode($row['tags'], true) : ($row['tags'] ?? []);
+
+        if (!\is_array($tags)) {
             $tags = [];
         }
 
-        $comments = is_string($row['comments'] ?? null) ? json_decode($row['comments'], true) : ($row['comments'] ?? []);
-        if (!is_array($comments)) {
+        $comments = \is_string($row['comments'] ?? null) ? json_decode($row['comments'], true) : ($row['comments'] ?? []);
+
+        if (!\is_array($comments)) {
             $comments = [];
         }
 
         return [
-            'advertisementid' => (string)$row['advertisementid'],
-            'createdat'       => (string)$row['createdat'],
-            'userid'          => (string)$row['creatorid'],
-            'postid'          => (string)$row['postid'],
-            'status'          => (string)$row['status'],
-            'timestart'       => (string)$row['timeframestart'],
-            'timeend'         => (string)$row['timeframeend'],
-            'tokencost'       => (float)$row['totaltokencost'],
-            'eurocost'        => (float)$row['totaleurocost'],
-            'gemsearned'      => (float)$row['gemsearned'],
-            'amountlikes'     => (int)$row['adsamountlikes'],
-            'amountviews'     => (int)$row['adsamountviews'],
-            'amountcomments'  => (int)$row['adsamountcomments'],
-            'amountdislikes'  => (int)$row['adsamountdislikes'],
-            'amountreports'   => (int)$row['adsamountreports'],
+            'advertisementid' => (string) $row['advertisementid'],
+            'createdat'       => (string) $row['createdat'],
+            'userid'          => (string) $row['creatorid'],
+            'postid'          => (string) $row['postid'],
+            'status'          => (string) $row['status'],
+            'timestart'       => (string) $row['timeframestart'],
+            'timeend'         => (string) $row['timeframeend'],
+            'tokencost'       => (float) $row['totaltokencost'],
+            'eurocost'        => (float) $row['totaleurocost'],
+            'gemsearned'      => (float) $row['gemsearned'],
+            'amountlikes'     => (int) $row['adsamountlikes'],
+            'amountviews'     => (int) $row['adsamountviews'],
+            'amountcomments'  => (int) $row['adsamountcomments'],
+            'amountdislikes'  => (int) $row['adsamountdislikes'],
+            'amountreports'   => (int) $row['adsamountreports'],
 
             'user' => [
-                'uid'         => (string)$row['creatorid'],
-                'username'    => (string)$row['creator_username'],
-                'slug'        => (int)$row['creator_slug'],
-                'img'         => (string)$row['creator_img'],
-                'visibility_status' => (string)$row['creator_visibility_status'],
-                'isfollowed'  => (bool)$row['isfollowed'],
-                'isfollowing' => (bool)$row['isfollowing'],
-                'isfriend'    => (bool)$row['isfriend'],
+                'uid'               => (string) $row['creatorid'],
+                'username'          => (string) $row['creator_username'],
+                'slug'              => (int) $row['creator_slug'],
+                'img'               => (string) $row['creator_img'],
+                'visibility_status' => (string) $row['creator_visibility_status'],
+                'isfollowed'        => (bool) $row['isfollowed'],
+                'isfollowing'       => (bool) $row['isfollowing'],
+                'isfriend'          => (bool) $row['isfriend'],
             ],
 
             'post' => [
-                'postid'          => (string)$row['postid'],
-                'contenttype'     => (string)$row['contenttype'],
-                'title'           => (string)$row['title'],
-                'media'           => (string)$row['media'],
-                'cover'           => (string)$row['cover'],
-                'mediadescription' => (string)$row['mediadescription'],
-                'createdat'       => (string)$row['post_createdat'],
-                'amountlikes'     => (int)$row['amountlikes'],
-                'amountviews'     => (int)$row['amountviews'],
-                'amountcomments'  => (int)$row['amountcomments'],
-                'amountdislikes'  => (int)$row['amountdislikes'],
-                'amounttrending'  => (int)$row['amounttrending'],
-                'isliked'         => (bool)$row['isliked'],
-                'isviewed'        => (bool)$row['isviewed'],
-                'isreported'      => (bool)$row['isreported'],
-                'isdisliked'      => (bool)$row['isdisliked'],
-                'issaved'         => (bool)$row['issaved'],
-                'url'             => (string)getenv('WEB_APP_URL') . '/post/' . $row['postid'],
-                'tags'            => $tags,
-                'visibility_status' => (string)$row['post_visibility_status'],
-                'user' => [
-                    'uid'         => (string)$row['post_owner_id'],
-                    'username'    => (string)$row['post_username'],
-                    'slug'        => (int)$row['post_slug'],
-                    'img'         => (string)$row['post_userimg'],
-                    'isfollowed'  => (bool)$row['isfollowed'],
-                    'isfollowing' => (bool)$row['isfollowing'],
-                    'isfriend'    => (bool)$row['isfriend'],
-                    'visibility_status' => (string)$row['post_user_visibility_status'],
+                'postid'            => (string) $row['postid'],
+                'contenttype'       => (string) $row['contenttype'],
+                'title'             => (string) $row['title'],
+                'media'             => (string) $row['media'],
+                'cover'             => (string) $row['cover'],
+                'mediadescription'  => (string) $row['mediadescription'],
+                'createdat'         => (string) $row['post_createdat'],
+                'amountlikes'       => (int) $row['amountlikes'],
+                'amountviews'       => (int) $row['amountviews'],
+                'amountcomments'    => (int) $row['amountcomments'],
+                'amountdislikes'    => (int) $row['amountdislikes'],
+                'amounttrending'    => (int) $row['amounttrending'],
+                'isliked'           => (bool) $row['isliked'],
+                'isviewed'          => (bool) $row['isviewed'],
+                'isreported'        => (bool) $row['isreported'],
+                'isdisliked'        => (bool) $row['isdisliked'],
+                'issaved'           => (bool) $row['issaved'],
+                'url'               => (string) getenv('WEB_APP_URL').'/post/'.$row['postid'],
+                'tags'              => $tags,
+                'visibility_status' => (string) $row['post_visibility_status'],
+                'user'              => [
+                    'uid'               => (string) $row['post_owner_id'],
+                    'username'          => (string) $row['post_username'],
+                    'slug'              => (int) $row['post_slug'],
+                    'img'               => (string) $row['post_userimg'],
+                    'isfollowed'        => (bool) $row['isfollowed'],
+                    'isfollowing'       => (bool) $row['isfollowing'],
+                    'isfriend'          => (bool) $row['isfriend'],
+                    'visibility_status' => (string) $row['post_user_visibility_status'],
                 ],
-                'comments'        => $comments,
+                'comments' => $comments,
             ],
         ];
     }
 
     public function isAdvertisementDurationValid(string $postId, string $userId): bool
     {
-        $this->logger->debug("AdvertisementMapper.isAdvertisementDurationValid started");
+        $this->logger->debug('AdvertisementMapper.isAdvertisementDurationValid started');
 
         $sql = "
             SELECT EXTRACT(EPOCH FROM (timeend - timestart)) / 60 AS duration_minutes
@@ -488,27 +496,30 @@ class AdvertisementMapper
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if ($result && isset($result['duration_minutes'])) {
-                $durationMinutes = (float)$result['duration_minutes'];
-                $isValid = $durationMinutes >= 1440;
-                $this->logger->info("Duration calculated", ['minutes' => $durationMinutes, 'isValid' => $isValid]);
+                $durationMinutes = (float) $result['duration_minutes'];
+                $isValid         = $durationMinutes >= 1440;
+                $this->logger->info('Duration calculated', ['minutes' => $durationMinutes, 'isValid' => $isValid]);
+
                 return $isValid;
             }
 
-            $this->logger->info("No valid advertisement found for given postId");
+            $this->logger->info('No valid advertisement found for given postId');
+
             return false;
         } catch (\Throwable $e) {
-            $this->logger->error("Error checking advertisement duration", [
-                'error' => $e->getMessage()
+            $this->logger->error('Error checking advertisement duration', [
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
 
     public function hasShortActiveAdWithUpcomingAd(string $postId, string $userId): bool
     {
-        $this->logger->debug("AdvertisementMapper.hasShortActiveAdWithUpcomingAd started", [
+        $this->logger->debug('AdvertisementMapper.hasShortActiveAdWithUpcomingAd started', [
             'postid' => $postId,
-            'userid' => $userId
+            'userid' => $userId,
         ]);
 
         $sql = "
@@ -539,27 +550,28 @@ class AdvertisementMapper
 
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            $this->logger->info("Advertisement timing check result", $result);
+            $this->logger->info('Advertisement timing check result', $result);
 
             return $result['has_short_active'] && $result['has_upcoming'];
         } catch (\Throwable $e) {
-            $this->logger->error("Error in hasShortActiveAdWithUpcomingAd", [
-                'error' => $e->getMessage()
+            $this->logger->error('Error in hasShortActiveAdWithUpcomingAd', [
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
 
     public function fetchByAdvID(string $postId, string $status): array
     {
-        $this->logger->debug("AdvertisementMapper.fetchByAdvID started", [
+        $this->logger->debug('AdvertisementMapper.fetchByAdvID started', [
             'postId' => $postId,
-            'status' => $status
+            'status' => $status,
         ]);
 
-        $sql = "SELECT advertisementid, postid, userid, status, timestart, timeend, createdat 
+        $sql = 'SELECT advertisementid, postid, userid, status, timestart, timeend, createdat 
                 FROM advertisements 
-                WHERE postid = :postId AND status = :status";
+                WHERE postid = :postId AND status = :status';
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -570,24 +582,25 @@ class AdvertisementMapper
             $results = array_map(fn ($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
 
             $this->logger->info(
-                $results ? "Fetched advertisementId successfully" : "No advertisements found for userid.",
-                ['count' => count($results)]
+                $results ? 'Fetched advertisementId successfully' : 'No advertisements found for userid.',
+                ['count' => \count($results)]
             );
 
             return $results;
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching advertisementId from database", [
-                'error' => $e->getMessage()
+            $this->logger->error('Error fetching advertisementId from database', [
+                'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }
 
     public function advertisementExistsById(string $advertisementId): bool
     {
-        $this->logger->debug("AdvertisementMapper.advertisementExistsById started");
+        $this->logger->debug('AdvertisementMapper.advertisementExistsById started');
 
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM advertisements WHERE advertisementId = :advertisementId");
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM advertisements WHERE advertisementId = :advertisementId');
         $stmt->bindValue(':advertisementId', $advertisementId, \PDO::PARAM_STR);
         $stmt->execute();
 
@@ -596,9 +609,9 @@ class AdvertisementMapper
 
     public function isAdvertisementIdExist(string $postId, string $status): bool
     {
-        $this->logger->debug("AdvertisementMapper.isAdvertisementIdExist started");
+        $this->logger->debug('AdvertisementMapper.isAdvertisementIdExist started');
 
-        $sql = "SELECT 1 FROM advertisements WHERE postid = :postId AND status = :status LIMIT 1";
+        $sql  = 'SELECT 1 FROM advertisements WHERE postid = :postId AND status = :status LIMIT 1';
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
         $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
@@ -609,12 +622,12 @@ class AdvertisementMapper
 
     public function hasActiveAdvertisement(string $postId, string $status): bool
     {
-        $this->logger->debug("AdvertisementMapper.hasActiveAdvertisement started", [
+        $this->logger->debug('AdvertisementMapper.hasActiveAdvertisement started', [
             'postId' => $postId,
-            'status' => $status
+            'status' => $status,
         ]);
 
-        $sql = "
+        $sql = '
             SELECT 1
             FROM advertisements
             WHERE postid   = :postId
@@ -622,7 +635,7 @@ class AdvertisementMapper
               AND timestart <= NOW()
               AND timeend   >= NOW()
             LIMIT 1
-        ";
+        ';
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -632,27 +645,28 @@ class AdvertisementMapper
 
             $exists = (bool) $stmt->fetchColumn();
 
-            $this->logger->info("Active advertisement check result", ['exists' => $exists]);
+            $this->logger->info('Active advertisement check result', ['exists' => $exists]);
 
             return $exists;
         } catch (\Throwable $e) {
-            $this->logger->error("Error checking active advertisement", [
-                'error' => $e->getMessage()
+            $this->logger->error('Error checking active advertisement', [
+                'error' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
 
     public function hasTimeConflict(string $postId, string $status, string $newStart, string $newEnd, $currentUserId): bool
     {
-        $this->logger->debug("AdvertisementMapper.hasTimeConflict started", [
-            'postId' => $postId,
-            'status' => $status,
+        $this->logger->debug('AdvertisementMapper.hasTimeConflict started', [
+            'postId'   => $postId,
+            'status'   => $status,
             'newStart' => $newStart,
-            'newEnd' => $newEnd
+            'newEnd'   => $newEnd,
         ]);
 
-        $sql = "
+        $sql = '
             SELECT 1
             FROM advertisements
             WHERE postid   = :postId
@@ -661,7 +675,7 @@ class AdvertisementMapper
               AND timeend  > :newStart
               AND timestart < :newEnd
             LIMIT 1
-        ";
+        ';
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -674,13 +688,14 @@ class AdvertisementMapper
 
             $hasConflict = (bool) $stmt->fetchColumn();
 
-            $this->logger->info("Conflict check result", ['conflict' => $hasConflict]);
+            $this->logger->info('Conflict check result', ['conflict' => $hasConflict]);
 
             return $hasConflict; // true = Konflikt, false = frei
         } catch (\Throwable $e) {
-            $this->logger->error("Error checking reservation conflicts", [
-                'error' => $e->getMessage()
+            $this->logger->error('Error checking reservation conflicts', [
+                'error' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
@@ -688,91 +703,95 @@ class AdvertisementMapper
     // Create a Post Advertisement with Loging
     public function insert(Advertisements $post): Advertisements
     {
-        $this->logger->debug("AdvertisementMapper.insert started");
+        $this->logger->debug('AdvertisementMapper.insert started');
 
         $data = $post->getArrayCopy();
 
         // SQL-Statements für beide Tabellen
-        $query1 = "INSERT INTO advertisements 
+        $query1 = 'INSERT INTO advertisements 
                    (advertisementid, postid, userid, status, timestart, timeend, createdat)
                    VALUES 
-                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :createdat)";
+                   (:advertisementid, :postid, :userid, :status, :timestart, :timeend, :createdat)';
 
-        $query2 = "INSERT INTO advertisements_log 
+        $query2 = 'INSERT INTO advertisements_log 
                    (advertisementid, operationid, postid, userid, status, timestart, timeend, tokencost, eurocost, createdat)
                    VALUES 
-                   (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost, :createdat)";
+                   (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost, :createdat)';
 
-        $query3 = "INSERT INTO advertisements_info 
+        $query3 = 'INSERT INTO advertisements_info 
                    (advertisementid, postid, userid, updatedat, createdat)
                    VALUES 
-                   (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
+                   (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING';
 
         try {
             $this->db->beginTransaction();
 
             // Statement 1
             $stmt1 = $this->db->prepare($query1);
+
             if (!$stmt1) {
-                throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
+                throw new \RuntimeException('SQL prepare() failed: '.implode(', ', $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend','createdat'] as $key) {
-                $stmt1->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+            foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'createdat'] as $key) {
+                $stmt1->bindValue(':'.$key, $data[$key], \PDO::PARAM_STR);
             }
 
             $stmt1->execute();
 
             // Statement 2
             $stmt2 = $this->db->prepare($query2);
+
             if (!$stmt2) {
-                throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
+                throw new \RuntimeException('SQL prepare() failed: '.implode(', ', $this->db->errorInfo()));
             }
 
-            foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost','createdat'] as $key) {
-                $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+            foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
+                $stmt2->bindValue(':'.$key, $data[$key], \PDO::PARAM_STR);
             }
 
             $stmt2->execute();
 
             // Statement 3
             $stmt3 = $this->db->prepare($query3);
+
             if (!$stmt3) {
-                throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
+                throw new \RuntimeException('SQL prepare() failed: '.implode(', ', $this->db->errorInfo()));
             }
 
             foreach (['advertisementid', 'postid', 'userid', 'updatedat', 'createdat'] as $key) {
-                $stmt3->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt3->bindValue(':'.$key, $data[$key], \PDO::PARAM_STR);
             }
 
             $stmt3->execute();
 
             $this->db->commit();
 
-            $this->logger->info("Inserted new PostAdvertisement into both tables");
-            return new Advertisements($data);
+            $this->logger->info('Inserted new PostAdvertisement into both tables');
 
+            return new Advertisements($data);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
-            throw new \RuntimeException("Failed to insert PostAdvertisement: " . $e->getMessage());
+            $this->logger->error('insert: Exception occurred while insertng', ['error' => $e->getMessage()]);
+
+            throw new \RuntimeException('Failed to insert PostAdvertisement: '.$e->getMessage());
         }
     }
 
     // Update a Post Advertisement with Logging
     public function update(Advertisements $post): Advertisements
     {
-        $this->logger->debug("AdvertisementMapper.update started");
+        $this->logger->debug('AdvertisementMapper.update started');
 
         $data = $post->getArrayCopy();
 
-        $query1 = "UPDATE advertisements 
+        $query1 = 'UPDATE advertisements 
                     SET timestart = :timestart, timeend = :timeend, userid = :userid
-                    WHERE postid = :postid AND status = :status";
+                    WHERE postid = :postid AND status = :status';
 
-        $query2 = "INSERT INTO advertisements_log 
+        $query2 = 'INSERT INTO advertisements_log 
                     (advertisementid, operationid, postid, userid, status, timestart, timeend, tokencost, eurocost,createdat) 
-                    VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
+                    VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)';
 
         try {
             $this->db->beginTransaction();
@@ -787,20 +806,22 @@ class AdvertisementMapper
             $stmt1->execute();
 
             $stmt2 = $this->db->prepare($query2);
+
             foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
-                $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt2->bindValue(':'.$key, $data[$key], \PDO::PARAM_STR);
             }
             $stmt2->execute();
 
             $this->db->commit();
 
-            $this->logger->info("Updated Post Advertisement & inserted into Log");
-            return new Advertisements($data);
+            $this->logger->info('Updated Post Advertisement & inserted into Log');
 
+            return new Advertisements($data);
         } catch (\Throwable $e) {
             $this->db->rollBack();
-            $this->logger->error("update: Exception occurred while updating", ['error' => $e->getMessage()]);
-            throw new \RuntimeException("Failed to update PostAdvertisement: " . $e->getMessage());
+            $this->logger->error('update: Exception occurred while updating', ['error' => $e->getMessage()]);
+
+            throw new \RuntimeException('Failed to update PostAdvertisement: '.$e->getMessage());
         }
     }
 
@@ -827,64 +848,66 @@ class AdvertisementMapper
 
     public function findAdvertiser(string $currentUserId, array $specifications, ?array $args = []): array
     {
-        $this->logger->debug("AdvertisementMapper.findAdvertiser started");
+        $this->logger->debug('AdvertisementMapper.findAdvertiser started');
 
-        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
-        $allSpecs = SpecificationSQLData::merge($specsSQL);
+        $specsSQL     = array_map(fn (Specification $spec) => $spec->toSql(ContentType::post), $specifications);
+        $allSpecs     = SpecificationSQLData::merge($specsSQL);
         $whereClauses = $allSpecs->whereClauses;
-        $params = $allSpecs->paramsToPrepare;
+        $params       = $allSpecs->paramsToPrepare;
 
-
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit  = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset    = max((int) ($args['offset'] ?? 0), 0);
+        $limit     = min(max((int) ($args['limit'] ?? 10), 1), 20);
         $trenddays = 7;
 
-        $from   = $args['from']   ?? null;
-        $to     = $args['to']     ?? null;
+        $from = $args['from'] ?? null;
+        $to   = $args['to']   ?? null;
         // Normalize and map content-type filter values using shared helper
-        $filterBy = isset($args['filterBy']) && is_array($args['filterBy']) ? ContentFilterHelper::normalizeToUpper($args['filterBy']) : [];
-        $tag    = $args['tag']    ?? null;
-        $postId = $args['postid'] ?? null;
-        $userId = $args['userid'] ?? null;
+        $filterBy = isset($args['filterBy']) && \is_array($args['filterBy']) ? ContentFilterHelper::normalizeToUpper($args['filterBy']) : [];
+        $tag      = $args['tag']    ?? null;
+        $postId   = $args['postid'] ?? null;
+        $userId   = $args['userid'] ?? null;
 
-        $whereClauses[] = "p.feedid IS NULL";
+        $whereClauses[]          = 'p.feedid IS NULL';
         $params['currentUserId'] = $currentUserId;
 
-
-
-        if ($postId !== null) {
-            $whereClauses[] = "p.postid = :postId";
+        if (null !== $postId) {
+            $whereClauses[]   = 'p.postid = :postId';
             $params['postId'] = $postId;
         }
-        if ($userId !== null) {
-            $whereClauses[] = "p.userid = :userId";
+
+        if (null !== $userId) {
+            $whereClauses[]   = 'p.userid = :userId';
             $params['userId'] = $userId;
         }
-        if ($from !== null) {
-            $whereClauses[] = "p.createdat >= :from";
+
+        if (null !== $from) {
+            $whereClauses[] = 'p.createdat >= :from';
             $params['from'] = $from;
         }
-        if ($to !== null) {
-            $whereClauses[] = "p.createdat <= :to";
-            $params['to'] = $to;
+
+        if (null !== $to) {
+            $whereClauses[] = 'p.createdat <= :to';
+            $params['to']   = $to;
         }
-        if ($tag !== null) {
-            $whereClauses[] = "t.name = :tag";
-            $params['tag'] = $tag;
+
+        if (null !== $tag) {
+            $whereClauses[] = 't.name = :tag';
+            $params['tag']  = $tag;
         }
 
         // FilterBy Content Types
-        if (!empty($filterBy) && is_array($filterBy)) {
+        if (!empty($filterBy) && \is_array($filterBy)) {
             $dbTypes = ContentFilterHelper::mapContentTypesForDb($filterBy);
 
             if (!empty($dbTypes)) {
                 $placeholders = [];
+
                 foreach (array_values($dbTypes) as $i => $value) {
-                    $key = "filter$i";
+                    $key            = "filter$i";
                     $placeholders[] = ":$key";
-                    $params[$key] = $value;
+                    $params[$key]   = $value;
                 }
-                $whereClauses[] = "p.contenttype IN (" . implode(", ", $placeholders) . ")";
+                $whereClauses[] = 'p.contenttype IN ('.implode(', ', $placeholders).')';
             }
         }
 
@@ -914,13 +937,13 @@ class AdvertisementMapper
             LEFT JOIN post_tags pt ON p.postid = pt.postid
             LEFT JOIN advertisements a ON p.postid = a.postid
             LEFT JOIN tags t ON pt.tagid = t.tagid
-            WHERE " . implode(" AND ", $whereClauses) . "
+            WHERE ".implode(' AND ', $whereClauses).'
             GROUP BY p.postid, a.advertisementid,
                      tuserid, ad_type, ad_order, end_order,
                      tcreatedat
-        ";
+        ';
 
-        $params['limit'] = $limit;
+        $params['limit']  = $limit;
         $params['offset'] = $offset;
 
         $sqlPinnedPosts = "WITH base_posts AS ($baseSelect)
@@ -951,23 +974,27 @@ class AdvertisementMapper
 
         try {
             $pinnedStmt = $this->db->prepare($sqlPinnedPosts);
+
             foreach ($params as $key => $val) {
-                $pinnedStmt->bindValue(":" . $key, $val);
+                $pinnedStmt->bindValue(':'.$key, $val);
             }
             $pinnedStmt->execute();
             $pinned = $pinnedStmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $basicStmt = $this->db->prepare($sqlBasicAds);
+
             foreach ($params as $key => $val) {
-                $basicStmt->bindValue(":" . $key, $val);
+                $basicStmt->bindValue(':'.$key, $val);
             }
             $basicStmt->execute();
             $basic = $basicStmt->fetchAll(\PDO::FETCH_ASSOC);
 
             $finalPosts = [];
+
             if (!empty($pinned)) {
                 $finalPosts = array_merge($finalPosts, $pinned);
             }
+
             if (!empty($basic)) {
                 $finalPosts = array_merge($finalPosts, $basic);
             }
@@ -976,15 +1003,15 @@ class AdvertisementMapper
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
 
                 return [
-                    'post' => self::mapRowToPost($row),
+                    'post'          => self::mapRowToPost($row),
                     'advertisement' => self::mapRowToAdvertisement($row),
                 ];
             }, $finalPosts);
-
         } catch (\Throwable $e) {
             $this->logger->error('General error in findAdvertiser', [
                 'error' => $e,
             ]);
+
             return [];
         }
     }
@@ -992,40 +1019,40 @@ class AdvertisementMapper
     private static function mapRowToPost(array $row): PostAdvanced
     {
         return new PostAdvanced([
-            'postid' => (string)$row['postid'],
-            'userid' => (string)$row['userid'],
-            'contenttype' => (string)$row['contenttype'],
-            'title' => (string)$row['title'],
-            'media' => (string)$row['media'],
-            'cover' => (string)$row['cover'],
-            'mediadescription' => (string)$row['mediadescription'],
-            'createdat' => (string)$row['createdat'],
-            'amountlikes' => (int)$row['amountlikes'],
-            'amountviews' => (int)$row['amountviews'],
-            'amountcomments' => (int)$row['amountcomments'],
-            'amountdislikes' => (int)$row['amountdislikes'],
-            'amounttrending' => (int)$row['amounttrending'],
-            'isliked' => (bool)$row['isliked'],
-            'isviewed' => (bool)$row['isviewed'],
-            'isreported' => (bool)$row['isreported'],
-            'isdisliked' => (bool)$row['isdisliked'],
-            'issaved' => (bool)$row['issaved'],
-            'tags' => $row['tags'],
+            'postid'            => (string) $row['postid'],
+            'userid'            => (string) $row['userid'],
+            'contenttype'       => (string) $row['contenttype'],
+            'title'             => (string) $row['title'],
+            'media'             => (string) $row['media'],
+            'cover'             => (string) $row['cover'],
+            'mediadescription'  => (string) $row['mediadescription'],
+            'createdat'         => (string) $row['createdat'],
+            'amountlikes'       => (int) $row['amountlikes'],
+            'amountviews'       => (int) $row['amountviews'],
+            'amountcomments'    => (int) $row['amountcomments'],
+            'amountdislikes'    => (int) $row['amountdislikes'],
+            'amounttrending'    => (int) $row['amounttrending'],
+            'isliked'           => (bool) $row['isliked'],
+            'isviewed'          => (bool) $row['isviewed'],
+            'isreported'        => (bool) $row['isreported'],
+            'isdisliked'        => (bool) $row['isdisliked'],
+            'issaved'           => (bool) $row['issaved'],
+            'tags'              => $row['tags'],
             'visibility_status' => $row['visibility_status'],
-            'reports' => $row['post_reports'],
+            'reports'           => $row['post_reports'],
         ]);
     }
 
     private static function mapRowToAdvertisement(array $row): Advertisements
     {
         return new Advertisements([
-            'advertisementid' => (string)$row['advertisementid'],
-            'postid' => (string)$row['postid'],
-            'userid' => (string)$row['tuserid'],
-            'status' => (string)$row['ad_type'],
-            'timestart' => (string)$row['ad_order'],
-            'timeend' => (string)$row['end_order'],
-            'createdat' => (string)$row['tcreatedat']
+            'advertisementid' => (string) $row['advertisementid'],
+            'postid'          => (string) $row['postid'],
+            'userid'          => (string) $row['tuserid'],
+            'status'          => (string) $row['ad_type'],
+            'timestart'       => (string) $row['ad_order'],
+            'timeend'         => (string) $row['end_order'],
+            'createdat'       => (string) $row['tcreatedat'],
         ]);
     }
 }

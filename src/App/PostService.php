@@ -4,36 +4,33 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Post;
-use Fawaz\App\Comment;
-use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
-use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\config\constants\PeerUUID;
+use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
+use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
-use Fawaz\Services\VideoCoverGenerator;
-use Fawaz\Services\Base64FileHandler;
-use Fawaz\Utils\ResponseHelper;
-use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\JWTService;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Database\Interfaces\ProfileRepository;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
+use Fawaz\Services\VideoCoverGenerator;
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class PostService
 {
@@ -68,15 +65,18 @@ class PostService
     private static function validateDate($date, $format = 'Y-m-d')
     {
         $d = \DateTime::createFromFormat($format, $date);
+
         return $d && $d->format($format) === $date;
     }
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized action attempted.');
+
             return false;
         }
+
         return true;
     }
 
@@ -92,62 +92,66 @@ class PostService
 
     private function validateCoverCount(array $args, string $contenttype): array
     {
-        if (!is_array($args['cover'])) {
+        if (!\is_array($args['cover'])) {
             return ['success' => false, 'error' => '30102'];
         }
 
-        $covers = $args['cover'];
-        $coversCount = count($covers);
+        $covers      = $args['cover'];
+        $coversCount = \count($covers);
 
         try {
             $limitObj = ContentLimitsPerPost::from($contenttype);
+
             if (!$limitObj) {
                 return ['success' => false, 'error' => '40301'];
             }
             $coverLimit = $limitObj->coverLimit();
-
         } catch (\Throwable $e) {
-            echo($e->getMessage());
+            echo $e->getMessage();
+
             return ['success' => false, 'error' => '40301'];
         }
 
         if ($coversCount > $coverLimit) {
-            return ['success' => false, 'error' => 30268 ];
+            return ['success' => false, 'error' => 30268];
         } else {
             return ['success' => true, 'error' => null];
         }
     }
 
-
     private function validateContentCount(array $args): array
     {
-        if (!isset($args['contenttype']) && empty($args['contenttype']) && !is_string($args['contenttype'])) {
+        if (!isset($args['contenttype']) && empty($args['contenttype']) && !\is_string($args['contenttype'])) {
             return ['success' => false, 'error' => 30206];
         }
-        $contenttype = strval($args['contenttype']);
-        if (!isset($args['media']) && empty($args['media']) && !is_array($args['media'])) {
-            return ['success' => false, 'error' => 30102 ];
+        $contenttype = (string) $args['contenttype'];
+
+        if (!isset($args['media']) && empty($args['media']) && !\is_array($args['media'])) {
+            return ['success' => false, 'error' => 30102];
         }
+
         if (isset($args['cover']) && !empty($args['cover'])) {
             return $this->validateCoverCount($args, $contenttype);
         }
 
-        $media = $args['media'];
-        $mediaCount = count($media);
+        $media      = $args['media'];
+        $mediaCount = \count($media);
 
         try {
             $mediaLimitObj = ContentLimitsPerPost::from($contenttype);
+
             if (!$mediaLimitObj) {
-                return ['success' => false, 'error' => 40301 ];
+                return ['success' => false, 'error' => 40301];
             }
             $mediaLimit = $mediaLimitObj->mediaLimit();
         } catch (\Throwable $e) {
-            echo($e->getMessage());
+            echo $e->getMessage();
+
             return ['success' => false, 'error' => 40301];
         }
 
         if ($mediaCount > $mediaLimit) {
-            return ['success' => false, 'error' => 30267 ];
+            return ['success' => false, 'error' => 30267];
         } else {
             return ['success' => true, 'error' => null];
         }
@@ -176,23 +180,25 @@ class PostService
         $createdAt = new \DateTime()->format('Y-m-d H:i:s.u');
 
         $postData = [
-            'postid' => $postId,
-            'userid' => $this->currentUserId,
-            'feedid' => $args['feedid'] ?? null,
-            'contenttype' => $args['contenttype'],
-            'title' => $args['title'],
-            'media' => null,
-            'cover' => null,
-            'mediadescription' => $args['mediadescription'] ?? null,
-            'createdat' => $createdAt,
+            'postid'            => $postId,
+            'userid'            => $this->currentUserId,
+            'feedid'            => $args['feedid'] ?? null,
+            'contenttype'       => $args['contenttype'],
+            'title'             => $args['title'],
+            'media'             => null,
+            'cover'             => null,
+            'mediadescription'  => $args['mediadescription'] ?? null,
+            'createdat'         => $createdAt,
             'visibility_status' => 'normal',
         ];
 
         try {
             $this->transactionManager->beginTransaction();
+
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
+
                 if (isset($validateContentCountResult['error'])) {
                     return $this::respondWithError($validateContentCountResult['error']);
                 }
@@ -210,9 +216,7 @@ class PostService
                     return $this::respondWithError(30251);
                 }
             } elseif (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
-
                 try {
-
                     $validateSameMediaType = new MultipartPost(['media' => explode(',', $args['uploadedFiles'])], [], false);
 
                     if (!$validateSameMediaType->isFilesExists()) {
@@ -223,8 +227,8 @@ class PostService
 
                     if ($hasSameMediaType) {
                         $postData['contenttype'] = $hasSameMediaType;
-                        $args['contenttype'] = $hasSameMediaType;
-                        $uploadedFileArray = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
+                        $args['contenttype']     = $hasSameMediaType;
+                        $uploadedFileArray       = $this->postMapper->handelFileMoveToMedia($args['uploadedFiles']);
                         $this->postMapper->updateTokenStatus($this->currentUserId);
 
                         $mediaPath['path'] = $uploadedFileArray;
@@ -235,12 +239,14 @@ class PostService
                             if (isset($args['uploadedFiles'])) {
                                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                             }
+
                             return $this::respondWithError(30101);
                         }
                     } else {
                         if (isset($args['uploadedFiles'])) {
                             $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                         }
+
                         return $this::respondWithError(30266); // Provided files should have same type
                     }
                 } catch (\Exception $e) {
@@ -251,10 +257,9 @@ class PostService
                         'message' => $e->getMessage(),
                         'trace'   => $e->getTraceAsString(),
                     ]);
+
                     return $this::respondWithError(40301); // Unexpected error occurred
                 }
-
-
             } else {
                 return $this::respondWithError(30101);
             }
@@ -270,19 +275,21 @@ class PostService
                     if (isset($args['uploadedFiles'])) {
                         $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                     }
+
                     return $this::respondWithError(40306);
                 }
-            } elseif ($args['contenttype'] === 'video') {
+            } elseif ('video' === $args['contenttype']) {
                 $videoRelativePath = $mediaPath['path'][0]['path'];
-                $videoFilePath = __DIR__ . '/../../runtime-data/media' . $videoRelativePath;
+                $videoFilePath     = __DIR__.'/../../runtime-data/media'.$videoRelativePath;
 
                 $coverResult = $this->generateCoverFromVideo($videoFilePath, $postId);
 
                 if (!empty($coverResult['path'])) {
                     $postData['cover'] = $this->argsToJsString($coverResult['path']);
-                    $coverPath = ['path' => $coverResult['path']];
+                    $coverPath         = ['path' => $coverResult['path']];
                 }
             }
+
             try {
                 // Post speichern
                 $post = new Post($postData);
@@ -292,10 +299,13 @@ class PostService
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
+
                 return $this::respondWithError(30263);
+
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
+
                 return $this::respondWithError($e->getMessage());
             }
             $this->postMapper->insert(post: $post);
@@ -304,10 +314,10 @@ class PostService
                 // Media Posts_media
                 foreach ($mediaPath['path'] as $media) {
                     $postMed = [
-                        'postid' => $postId,
+                        'postid'      => $postId,
                         'contenttype' => $args['contenttype'],
-                        'media' => $media['path'],
-                        'options' => $this->argsToJsString($media['options']),
+                        'media'       => $media['path'],
+                        'options'     => $this->argsToJsString($media['options']),
                     ];
 
                     $postMedia = new PostMedia($postMed);
@@ -318,11 +328,11 @@ class PostService
             if (isset($coverPath['path']) && !empty($coverPath['path'])) {
                 // Cover Posts_media
                 $coverDecoded = $coverPath['path'];
-                $coverMed = [
-                    'postid' => $postId,
+                $coverMed     = [
+                    'postid'      => $postId,
                     'contenttype' => 'cover',
-                    'media' => $coverDecoded[0]['path'],
-                    'options' => $this->argsToJsString($coverDecoded[0]['options']),
+                    'media'       => $coverDecoded[0]['path'],
+                    'options'     => $this->argsToJsString($coverDecoded[0]['options']),
                 ];
 
                 $coverMedia = new PostMedia($coverMed);
@@ -331,14 +341,16 @@ class PostService
 
             // Tags speichern
             try {
-                if (!empty($args['tags']) && is_array($args['tags'])) {
+                if (!empty($args['tags']) && \is_array($args['tags'])) {
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 }
             } catch (\Throwable $e) {
                 $this->transactionManager->rollback();
+
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
+
                 return $this::respondWithError(30262);
             }
 
@@ -352,22 +364,25 @@ class PostService
 
             foreach ($tagPosts as $tp) {
                 $tag = $this->tagMapper->loadById($tp->getTagId());
+
                 if ($tag) {
                     $tagNames[] = $tag->getName();
                 }
             }
 
-            $data = $post->getArrayCopy();
+            $data         = $post->getArrayCopy();
             $data['tags'] = $tagNames;
             $this->transactionManager->commit();
-            return $this::createSuccessResponse(11513, $data);
 
+            return $this::createSuccessResponse(11513, $data);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
+
             if (isset($args['uploadedFiles'])) {
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
             $this->logger->error('Failed to create post', ['exception' => $e]);
+
             return $this::respondWithError(41508);
         }
     }
@@ -378,7 +393,7 @@ class PostService
 
         try {
             $generatedCoverPath = $this->videoCoverGenerator->generate($videoFilePath);
-            $base64String = $this->base64Encoder->encodeFileToBase64($generatedCoverPath, 'image/jpeg');
+            $base64String       = $this->base64Encoder->encodeFileToBase64($generatedCoverPath, 'image/jpeg');
 
             $coverResult = $this->base64filehandler->handleUploads([$base64String], 'cover', $postId);
 
@@ -395,7 +410,6 @@ class PostService
                 $this->videoCoverGenerator->deleteTemporaryFile($generatedCoverPath);
                 $this->logger->debug('Temporary cover file deleted after upload failure', ['path' => $generatedCoverPath]);
             }
-
         } catch (\Throwable $e) {
             $this->logger->error('Autogenerated cover generation error', ['exception' => $e]);
 
@@ -408,29 +422,30 @@ class PostService
 
     private function isValidMedia($media): bool
     {
-        return isset($media) && is_array($media) && !empty($media);
+        return isset($media) && \is_array($media) && !empty($media);
     }
 
     private function isValidCover(array $args): bool
     {
-        return isset($args['cover']) && is_array($args['cover']) && !empty($args['cover'])
-            && in_array($args['contenttype'], ['audio', 'video'], true);
+        return isset($args['cover']) && \is_array($args['cover']) && !empty($args['cover'])
+                                     && \in_array($args['contenttype'], ['audio', 'video'], true);
     }
 
     private function handleTags(array $tags, string $postId, string $createdAt): void
     {
-        $maxTags = 10;
+        $maxTags       = 10;
         $tagNameConfig = ConstantsConfig::post()['TAG'];
-        $minLength = (int) $tagNameConfig['MIN_LENGTH'];
-        $maxLength = (int) $tagNameConfig['MAX_LENGTH'];
-        if (count($tags) > $maxTags) {
+        $minLength     = (int) $tagNameConfig['MIN_LENGTH'];
+        $maxLength     = (int) $tagNameConfig['MAX_LENGTH'];
+
+        if (\count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
 
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
 
-            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
+            if (\strlen($tagName) < $minLength || \strlen($tagName) > $maxLength || !preg_match('/'.$tagNameConfig['PATTERN'].'/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
             }
 
@@ -444,12 +459,13 @@ class PostService
 
             if (!$tag) {
                 $this->logger->error('Failed to load or create tag', ['tagName' => $tagName]);
-                throw new \Exception('Failed to load or create tag: ' . $tagName);
+
+                throw new \Exception('Failed to load or create tag: '.$tagName);
             }
 
             $tagPost = new TagPost([
-                'postid' => $postId,
-                'tagid' => $tag->getTagId(),
+                'postid'    => $postId,
+                'tagid'     => $tag->getTagId(),
                 'createdat' => $createdAt,
             ]);
 
@@ -457,37 +473,39 @@ class PostService
                 $this->tagPostMapper->insert($tagPost);
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to insert tag-post relationship', [
-                    'postid' => $postId,
-                    'tagName' => $tagName,
+                    'postid'    => $postId,
+                    'tagName'   => $tagName,
                     'exception' => $e->getMessage(),
                 ]);
-                throw new \Exception('Failed to insert tag-post relationship: ' . $tagName);
+
+                throw new \Exception('Failed to insert tag-post relationship: '.$tagName);
             }
         }
     }
 
     private function createTag(string $tagName): Tag|false
     {
-        $tagId = 0;
+        $tagId   = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
 
         $tag = new Tag($tagData);
 
         $tag = $this->tagMapper->insert($tag);
+
         return $tag;
     }
 
     private function insertPostMetadata(string $postId, string $userId): void
     {
         $postInfo = new PostInfo([
-            'postid' => $postId,
-            'userid' => $userId,
-            'likes' => 0,
+            'postid'   => $postId,
+            'userid'   => $userId,
+            'likes'    => 0,
             'dislikes' => 0,
-            'reports' => 0,
-            'views' => 0,
-            'saves' => 0,
-            'shares' => 0,
+            'reports'  => 0,
+            'views'    => 0,
+            'saves'    => 0,
+            'shares'   => 0,
             'comments' => 0,
         ]);
         $this->postInfoMapper->insert($postInfo);
@@ -499,23 +517,24 @@ class PostService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug("PostService.fetchAll started");
+        $this->logger->debug('PostService.fetchAll started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit  = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
         try {
-            $posts = $this->postMapper->fetchAll($offset, $limit);
+            $posts  = $this->postMapper->fetchAll($offset, $limit);
             $result = array_map(fn (Post $post) => $post->getArrayCopy(), $posts);
 
-            $this->logger->info("Posts fetched successfully", ['count' => count($result)]);
-            return $this::createSuccessResponse(11502, [$result]);
+            $this->logger->info('Posts fetched successfully', ['count' => \count($result)]);
 
+            return $this::createSuccessResponse(11502, [$result]);
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching Posts", [
+            $this->logger->error('Error fetching Posts', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this::respondWithError(41513);
         }
     }
@@ -525,50 +544,51 @@ class PostService
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
-        $userId = $args['userid'] ?? null;
-        $from = $args['from'] ?? null;
-        $to = $args['to'] ?? null;
-        $filterBy = $args['filterBy'] ?? [];
-        $Ignorlist = $args['IgnorList'] ?? null;
-        $sortBy = $args['sortBy'] ?? null;
-        $title = $args['title'] ?? null;
-        $tag = $args['tag'] ?? null;
-        $postId = $args['postid'] ?? null;
-        $titleConfig = ConstantsConfig::post()['TITLE'];
-        $inputConfig  = ConstantsConfig::input();
-        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
+        $userId          = $args['userid']    ?? null;
+        $from            = $args['from']      ?? null;
+        $to              = $args['to']        ?? null;
+        $filterBy        = $args['filterBy']  ?? [];
+        $Ignorlist       = $args['IgnorList'] ?? null;
+        $sortBy          = $args['sortBy']    ?? null;
+        $title           = $args['title']     ?? null;
+        $tag             = $args['tag']       ?? null;
+        $postId          = $args['postid']    ?? null;
+        $titleConfig     = ConstantsConfig::post()['TITLE'];
+        $inputConfig     = ConstantsConfig::input();
+        $controlPattern  = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
+        $commentOffset   = max((int) ($args['commentOffset'] ?? 0), 0);
+        $commentLimit    = min(max((int) ($args['commentLimit'] ?? 10), 1), 20);
 
-        if ($postId !== null && !self::isValidUUID($postId)) {
+        if (null !== $postId && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
         }
 
-        if ($userId !== null && !self::isValidUUID($userId)) {
+        if (null !== $userId && !self::isValidUUID($userId)) {
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if (null !== $title && (\strlen((string) $title) < $titleConfig['MIN_LENGTH'] || \strlen((string) $title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
-        if ($from !== null && !self::validateDate($from)) {
+        if (null !== $from && !self::validateDate($from)) {
             return $this::respondWithError(30212);
         }
 
-        if ($to !== null && !self::validateDate($to)) {
+        if (null !== $to && !self::validateDate($to)) {
             return $this::respondWithError(30213);
         }
 
-        if ($tag !== null) {
-            if (preg_match($controlPattern, $tag) === 1) {
+        if (null !== $tag) {
+            if (1 === preg_match($controlPattern, $tag)) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
+
                 return $this->respondWithError(30211);
             }
         }
 
-        if (!empty($filterBy) && is_array($filterBy)) {
+        if (!empty($filterBy) && \is_array($filterBy)) {
             $allowedTypes = ['IMAGE', 'AUDIO', 'VIDEO', 'TEXT', 'FOLLOWED', 'FOLLOWER', 'VIEWED', 'FRIENDS'];
 
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
@@ -578,22 +598,25 @@ class PostService
             }
         }
 
-        if ($Ignorlist !== null) {
+        if (null !== $Ignorlist) {
             $Ignorlisten = ['YES', 'NO'];
-            if (!in_array($Ignorlist, $Ignorlisten, true)) {
+
+            if (!\in_array($Ignorlist, $Ignorlisten, true)) {
                 return $this::respondWithError(30103);
             }
         }
 
-        $this->logger->debug("PostService.findPostser started");
+        $this->logger->debug('PostService.findPostser started');
         $contentFilterCase = ContentFilteringCases::postFeed;
 
         if ($title || $tag) {
             $contentFilterCase = ContentFilteringCases::searchByMeta;
         }
+
         if ($userId || $postId) {
             $contentFilterCase = ContentFilteringCases::searchById;
         }
+
         if ($userId && $userId === $this->currentUserId) {
             $contentFilterCase = ContentFilteringCases::myprofile;
         }
@@ -620,7 +643,7 @@ class PostService
         );
 
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
-        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+        $normalVisibilityStatusSpec             = new NormalVisibilityStatusSpec($contentFilterBy);
 
         $specs = [
             $excludeAdvertisementsForNormalFeedSpec,
@@ -628,12 +651,13 @@ class PostService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
         try {
             $results = $this->postMapper->findPostser($this->currentUserId, $specs, $args);
-            if (empty($results) && $postId != null) {
+
+            if (empty($results) && null != $postId) {
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
@@ -647,6 +671,7 @@ class PostService
             foreach ($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $specs);
             }
+
             return $postsEnriched;
         } catch (\Throwable $e) {
             // Log and fall back to original results
@@ -654,6 +679,7 @@ class PostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -662,9 +688,10 @@ class PostService
     {
         return array_map(
             function (Comment $comment) {
-                $commentArray = $comment->getArrayCopy();
-                $replies = $this->commentMapper->fetchAllByParentId($comment->getId());
+                $commentArray            = $comment->getArrayCopy();
+                $replies                 = $this->commentMapper->fetchAllByParentId($comment->getId());
                 $commentArray['replies'] = $this->mapCommentsWithReplies($replies);
+
                 return $commentArray;
             },
             $comments
@@ -711,9 +738,8 @@ class PostService
     //     return $this::respondWithError(41510);
     // }
 
-
     /**
-     * Check for If user eligibile to make a post or not
+     * Check for If user eligibile to make a post or not.
      *
      * @returns with Suggested PostId, JWT which will be valid for certain time
      */
@@ -727,52 +753,55 @@ class PostService
 
         $dailyFree = ConstantsConfig::dailyFree()['DAILY_FREE_ACTIONS'];
         $prices    = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
-        $actions = ConstantsConfig::wallet()['ACTIONS'];
+        $actions   = ConstantsConfig::wallet()['ACTIONS'];
 
         try {
             $dailyLimits = [
-                'like' => $dailyFree['like'],
+                'like'    => $dailyFree['like'],
                 'comment' => $dailyFree['comment'],
-                'post' => $dailyFree['post'],
+                'post'    => $dailyFree['post'],
                 'dislike' => $dailyFree['dislike'],
             ];
 
             $actionPrices = [
-                'like' => $prices['like'],
+                'like'    => $prices['like'],
                 'comment' => $prices['comment'],
-                'post' => $prices['post'],
+                'post'    => $prices['post'],
                 'dislike' => $prices['dislike'],
             ];
 
             $actionMaps = [
-                'like' => $actions['LIKE'],
+                'like'    => $actions['LIKE'],
                 'comment' => $actions['COMMENT'],
-                'post' => $actions['POST'],
+                'post'    => $actions['POST'],
                 'dislike' => $actions['DISLIKE'],
             ];
 
-            $limit = $dailyLimits['post'];
-            $price = $actionPrices['post'];
+            $limit     = $dailyLimits['post'];
+            $price     = $actionPrices['post'];
             $actionMap = $actionMaps['post'];
 
             $response = [
-                        'status' => 'error',
-                        'ResponseCode' => "40301", // Not eligible for upload for post
-                    ];
+                'status'       => 'error',
+                'ResponseCode' => '40301', // Not eligible for upload for post
+            ];
             $hasFreeDaily = false;
             $this->transactionManager->beginTransaction();
 
             $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+
             if ($DailyUsage < $limit) {
                 // generate PostId and JWT
                 $hasFreeDaily = true;
             }
 
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+
             // Return ResponseCode with Daily Free Code
             if ($balance < $price && !$hasFreeDaily) {
                 $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(51301);
             }
 
@@ -785,16 +814,16 @@ class PostService
             }
             $this->transactionManager->commit();
             $response = [
-                        'status' => 'success',
-                        'ResponseCode' => "10901", // You are eligible for post upload
-                    ];
+                'status'       => 'success',
+                'ResponseCode' => '10901', // You are eligible for post upload
+            ];
             $response['eligibilityToken'] = $eligibilityToken;
 
             return $response;
-
         } catch (ValidationException $e) {
             $this->transactionManager->rollback();
-            $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->warning('PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
@@ -802,37 +831,40 @@ class PostService
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
+
             return $this::respondWithError(40301);
         }
     }
 
     /**
-     * Get Interaction with post or comment
+     * Get Interaction with post or comment.
      */
     public function postInteractions(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->info("PostService.postInteractions failed due to authentication");
+            $this->logger->info('PostService.postInteractions failed due to authentication');
+
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug("PostService.postInteractions started");
+        $this->logger->debug('PostService.postInteractions started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit  = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
-        $getOnly = $args['getOnly'] ?? null;
+        $getOnly         = $args['getOnly']         ?? null;
         $postOrCommentId = $args['postOrCommentId'] ?? null;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
 
+        if (null == $getOnly || null == $postOrCommentId || !\in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
+            $this->logger->info('PostService.postInteractions failed due to empty or invalid arguments');
 
-        if ($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
-            $this->logger->info("PostService.postInteractions failed due to empty or invalid arguments");
             return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($postOrCommentId)) {
-            $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
+            $this->logger->info('PostService.postInteractions failed due to invalid postOrCommentId');
+
             return $this::respondWithError(30201);
         }
 
@@ -865,7 +897,7 @@ class PostService
             $systemUserSpec,
             $deletedUserSpec,
             $hiddenContentFilterSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
         try {
@@ -884,31 +916,33 @@ class PostService
                 ContentReplacer::placeholderProfile($user, $specs);
                 $usersArray[] = $user->getArrayCopy();
             }
-            $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
-            return $this::createSuccessResponse(11205, $usersArray);
+            $this->logger->info('Interaction fetched successfully', ['count' => \count($result)]);
 
+            return $this::createSuccessResponse(11205, $usersArray);
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching Posts", [
+            $this->logger->error('Error fetching Posts', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $this::respondWithError(41513);
         }
     }
+
     /**
-     * Get Guest List Post
+     * Get Guest List Post.
      */
     public function getGuestListPost(?array $args = []): array|false
     {
-        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
-        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
-        $postId = $args['postid'] ?? null;
+        $commentOffset = max((int) ($args['commentOffset'] ?? 0), 0);
+        $commentLimit  = min(max((int) ($args['commentLimit'] ?? 10), 1), 20);
+        $postId        = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
         }
 
-        $this->logger->debug("PostService.getGuestListPost started");
+        $this->logger->debug('PostService.getGuestListPost started');
 
         $contentFilterCase = ContentFilteringCases::searchById;
 
@@ -926,14 +960,14 @@ class PostService
             ContentType::post
         );
         $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
-        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec(null);
+        $normalVisibilityStatusSpec             = new NormalVisibilityStatusSpec(null);
 
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
             $deletedUserSpec,
             $excludeAdvertisementsForNormalFeedSpec,
-            $normalVisibilityStatusSpec
+            $normalVisibilityStatusSpec,
         ];
 
         try {
@@ -953,9 +987,11 @@ class PostService
                 $commentOffset,
                 $commentLimit
             );
+
             foreach ($postsEnriched as $post) {
                 ContentReplacer::placeholderPost($post, $specs);
             }
+
             return $postsEnriched;
         } catch (\Throwable $e) {
             // Log and fall back to original results
@@ -963,6 +999,7 @@ class PostService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }
@@ -971,11 +1008,10 @@ class PostService
      * Enrich a list of PostAdvanced with user profiles and return PostAdvancedWithUser objects.
      * Falls back gracefully if no profiles found.
      *
-     * @param PostAdvanced[] $posts Array of PostAdvanced
-     * @param \Fawaz\Services\ContentFiltering\Specs\Specification[] $specs Content filtering specs
-     * @param string $currentUserId Current/guest user id for profile fetch
-     * @param int $commentOffset
-     * @param int $commentLimit
+     * @param PostAdvanced[]                                         $posts         Array of PostAdvanced
+     * @param \Fawaz\Services\ContentFiltering\Specs\Specification[] $specs         Content filtering specs
+     * @param string                                                 $currentUserId Current/guest user id for profile fetch
+     *
      * @return PostAdvanced[]
      */
     private function enrichWithProfileAndComment(
@@ -983,9 +1019,8 @@ class PostService
         array $specs,
         string $currentUserId,
         int $commentOffset,
-        int $commentLimit
+        int $commentLimit,
     ): array {
-
         $userIdsFromPosts = array_values(
             array_unique(
                 array_filter(
@@ -1001,9 +1036,10 @@ class PostService
         $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $specs);
 
         $enriched = [];
+
         foreach ($posts as $post) {
-            $data = $post->getArrayCopy();
-            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $specs);
+            $data                            = $post->getArrayCopy();
+            $enrichedWithProfiles            = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $specs);
             $enrichedWithCommentsAndProfiles = $this->enrichAndPlaceholderWithComments(
                 $enrichedWithProfiles,
                 $specs,
@@ -1011,7 +1047,7 @@ class PostService
                 $commentLimit,
                 $currentUserId
             );
-            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [], false);
+            $post       = new PostAdvanced($enrichedWithCommentsAndProfiles, [], false);
             $enriched[] = $post;
         }
 
@@ -1027,12 +1063,14 @@ class PostService
             ContentReplacer::placeholderProfile($profile, $specs);
             $data['user'] = $profile->getArrayCopy();
         }
+
         return $data;
     }
 
     private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
     {
         $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'], $specs, $currentUserId, $commentOffset, $commentLimit);
+
         if (empty($comments)) {
             return $data;
         }
@@ -1049,18 +1087,19 @@ class PostService
             return $comments;
         }
 
-        $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
+        $profiles      = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
         $commentsArray = [];
 
         foreach ($comments as $comment) {
             if ($comment instanceof CommentAdvanced) {
                 ContentReplacer::placeholderComments($comment, $specs);
-                $dataComment = $comment->getArrayCopy();
+                $dataComment          = $comment->getArrayCopy();
                 $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $specs);
-                $commentsArray[] = $enrichedWithProfiles;
+                $commentsArray[]      = $enrichedWithProfiles;
             }
         }
         $data['comments'] = $commentsArray;
+
         return $data;
     }
 
@@ -1074,9 +1113,9 @@ class PostService
 
         try {
             return $this->postMapper->postExistsById($postId);
-
         } catch (\Throwable $e) {
             $this->logger->error('Failed fetch Post', ['postId' => $postId, 'exception' => $e]);
+
             return false;
         }
     }

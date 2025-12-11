@@ -11,11 +11,10 @@ class UserWelcomeMail implements EmailInterface
 {
     public function __construct(public array $data)
     {
-
     }
 
     /**
-     * Calculate content of email
+     * Calculate content of email.
      */
     public function content(): string
     {
@@ -55,13 +54,14 @@ class UserWelcomeMail implements EmailInterface
     }
 
     /**
-     * Should be calculate Content and send email to
+     * Should be calculate Content and send email to.
      */
     public function send(string $email): array
     {
-        $subject = "Welcome to Peer Network - You just Registered an Account";
+        $subject = 'Welcome to Peer Network - You just Registered an Account';
 
         $mailer = new SmtpMailer();
+
         return $mailer->sendEmail($email, $subject, $this->content());
     }
 }

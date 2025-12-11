@@ -11,6 +11,7 @@ interface HasVisibilityStatus
 {
     /** Returns the visibility status code for this subject. */
     public function visibilityStatus(): string;
+
     /** Sets the visibility status code for this subject. */
     public function setVisibilityStatus(string $status): void;
 }

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Utils\HashObject;
 
 class Comment extends Model implements Hashable
@@ -24,7 +23,6 @@ class Comment extends Model implements Hashable
     protected ?int $userstatus;
     protected string $visibilityStatus;
 
-
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
     {
@@ -32,13 +30,13 @@ class Comment extends Model implements Hashable
             $data = $this->validate($data, $elements);
         }
 
-        $this->commentid = $data['commentid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->postid = $data['postid'] ?? '';
-        $this->parentid = $data['parentid'] ?? null;
-        $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->userstatus = $data['userstatus'] ?? 0;
+        $this->commentid        = $data['commentid']         ?? '';
+        $this->userid           = $data['userid']            ?? '';
+        $this->postid           = $data['postid']            ?? '';
+        $this->parentid         = $data['parentid']          ?? null;
+        $this->content          = $data['content']           ?? '';
+        $this->createdat        = $data['createdat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->userstatus       = $data['userstatus']        ?? 0;
         $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
@@ -46,14 +44,15 @@ class Comment extends Model implements Hashable
     public function getArrayCopy(): array
     {
         $att = [
-            'commentid' => $this->commentid,
-            'userid' => $this->userid,
-            'postid' => $this->postid,
-            'parentid' => $this->parentid,
-            'content' => $this->content,
-            'createdat' => $this->createdat,
+            'commentid'         => $this->commentid,
+            'userid'            => $this->userid,
+            'postid'            => $this->postid,
+            'parentid'          => $this->parentid,
+            'content'           => $this->content,
+            'createdat'         => $this->createdat,
             'visibility_status' => $this->visibilityStatus,
         ];
+
         return $att;
     }
 
@@ -127,13 +126,15 @@ class Comment extends Model implements Hashable
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -142,46 +143,46 @@ class Comment extends Model implements Hashable
         $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'parentid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'content' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     [
-                        'name' => 'StringLength',
+                        'name'    => 'StringLength',
                         'options' => [
-                            'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
-                            'max' => $commentConfig['CONTENT']['MAX_LENGTH'],
+                            'min'       => $commentConfig['CONTENT']['MIN_LENGTH'],
+                            'max'       => $commentConfig['CONTENT']['MAX_LENGTH'],
                             'errorCode' => 30265,
-                            ]
                         ],
+                    ],
                     ['name' => 'IsString'],
                 ],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'visibility_status' => [
                 'required' => true,
-                'filters' => [
+                'filters'  => [
                     ['name' => 'StringTrim'],
                 ],
                 'validators' => [
@@ -191,16 +192,16 @@ class Comment extends Model implements Hashable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     public function getHashableContent(): string
     {
         return implode('|', [
-            $this->content
+            $this->content,
         ]);
     }
 
@@ -210,7 +211,7 @@ class Comment extends Model implements Hashable
     }
 
     /**
-     * Table name in the database
+     * Table name in the database.
      */
     public static function table(): string
     {

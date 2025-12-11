@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use PDO;
-use Fawaz\App\Wallet;
-use Fawaz\App\Wallett;
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class PoolMapper
 {
     use ResponseHelper;
-    private const DEFAULT_LIMIT = 20;
-    private const MAX_WHEREBY = 100;
+    private const DEFAULT_LIMIT  = 20;
+    private const MAX_WHEREBY    = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
@@ -25,20 +22,20 @@ class PoolMapper
     {
         $this->logger->debug('WalletMapper.fetchPool started');
 
-        $offset = max((int)($args['offset'] ?? 0), 0);
-        $limit = max((int)($args['limit'] ?? self::DEFAULT_LIMIT), 1);
+        $offset = max((int) ($args['offset'] ?? 0), 0);
+        $limit  = max((int) ($args['limit'] ?? self::DEFAULT_LIMIT), 1);
 
-        $conditions = ["whereby < " . self::MAX_WHEREBY];
+        $conditions  = ['whereby < '.self::MAX_WHEREBY];
         $queryParams = [];
 
         foreach ($args as $field => $value) {
-            if (in_array($field, self::ALLOWED_FIELDS, true)) {
-                $conditions[] = "$field = :$field";
+            if (\in_array($field, self::ALLOWED_FIELDS, true)) {
+                $conditions[]        = "$field = :$field";
                 $queryParams[$field] = $value;
             }
         }
 
-        $whereClause = implode(" AND ", $conditions);
+        $whereClause = implode(' AND ', $conditions);
 
         $sql = "SELECT postid, 
                        SUM(numbers) AS total_numbers, 
@@ -51,34 +48,35 @@ class PoolMapper
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->db->prepare($sql);
+
         foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+            $stmt->bindValue(":$param", $value, \is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
         }
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
         $stmt->execute();
 
         $results = [
-            'overall_total_numbers' => 0,
+            'overall_total_numbers'  => 0,
             'overall_total_numbersq' => 0,
-            'posts' => []
+            'posts'                  => [],
         ];
 
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             try {
-                if ($results['overall_total_numbers'] === 0) {
-                    $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
-                    $results['overall_total_numbersq'] = (int)$this->decimalToQ64_96($results['overall_total_numbers']);
+                if (0 === $results['overall_total_numbers']) {
+                    $results['overall_total_numbers']  = (float) ($row['overall_total_numbers'] ?? 0);
+                    $results['overall_total_numbersq'] = (int) $this->decimalToQ64_96($results['overall_total_numbers']);
                 }
 
-                $totalNumbers = (float)$row['total_numbers'];
-                $totalNumbersQ = (int)$this->decimalToQ64_96($totalNumbers);
+                $totalNumbers  = (float) $row['total_numbers'];
+                $totalNumbersQ = (int) $this->decimalToQ64_96($totalNumbers);
 
                 $results['posts'][] = [
-                    'postid' => $row['postid'],
-                    'total_numbers' => $totalNumbers,
-                    'total_numbersq' => $totalNumbersQ,
-                    'transaction_count' => (int)$row['transaction_count'],
+                    'postid'            => $row['postid'],
+                    'total_numbers'     => $totalNumbers,
+                    'total_numbersq'    => $totalNumbersQ,
+                    'transaction_count' => (int) $row['transaction_count'],
                 ];
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
@@ -86,7 +84,7 @@ class PoolMapper
         }
 
         if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
+            $this->logger->info('Fetched all transactions from database', ['count' => \count($results['posts'])]);
         } else {
             $this->logger->warning('No transactions found in database');
         }
@@ -97,7 +95,6 @@ class PoolMapper
     public function getTimeSorted()
     {
         try {
-
             $sql = "
                 SELECT 
                 COUNT(CASE WHEN createdat::date = CURRENT_DATE THEN 1 END) AS d0,
@@ -112,37 +109,37 @@ class PoolMapper
                 FROM gems
             ";
 
-            $stmt = $this->db->query($sql);
+            $stmt    = $this->db->query($sql);
             $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
+
             return $this::respondWithError(40301);
         }
 
         return $this::createSuccessResponse(11207, $entries, false);
-
     }
 
     public function getTimeSortedMatch(string $day = 'D0'): array
     {
-        \ignore_user_abort(true);
+        ignore_user_abort(true);
 
         $this->logger->debug('WalletMapper.getTimeSortedMatch started');
 
         $dayOptions = [
-            "D0" => "createdat::date = CURRENT_DATE",
-            "D1" => "createdat::date = CURRENT_DATE - INTERVAL '1 day'",
-            "D2" => "createdat::date = CURRENT_DATE - INTERVAL '2 day'",
-            "D3" => "createdat::date = CURRENT_DATE - INTERVAL '3 day'",
-            "D4" => "createdat::date = CURRENT_DATE - INTERVAL '4 day'",
-            "D5" => "createdat::date = CURRENT_DATE - INTERVAL '5 day'",
-            "W0" => "DATE_PART('week', createdat) = DATE_PART('week', CURRENT_DATE) AND EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)",
-            "M0" => "TO_CHAR(createdat, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')",
-            "Y0" => "EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)"
+            'D0' => 'createdat::date = CURRENT_DATE',
+            'D1' => "createdat::date = CURRENT_DATE - INTERVAL '1 day'",
+            'D2' => "createdat::date = CURRENT_DATE - INTERVAL '2 day'",
+            'D3' => "createdat::date = CURRENT_DATE - INTERVAL '3 day'",
+            'D4' => "createdat::date = CURRENT_DATE - INTERVAL '4 day'",
+            'D5' => "createdat::date = CURRENT_DATE - INTERVAL '5 day'",
+            'W0' => "DATE_PART('week', createdat) = DATE_PART('week', CURRENT_DATE) AND EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)",
+            'M0' => "TO_CHAR(createdat, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')",
+            'Y0' => 'EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)',
         ];
 
-        if (!array_key_exists($day, $dayOptions)) {
+        if (!\array_key_exists($day, $dayOptions)) {
             return $this::respondWithError(30223);
         }
 
@@ -182,25 +179,26 @@ class PoolMapper
             $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
+
             return $this::respondWithError(40301);
         }
 
         if (empty($data)) {
-            return $this::createSuccessResponse(21202); //'No records found for ' . $day
+            return $this::createSuccessResponse(21202); // 'No records found for ' . $day
         }
 
-        $totalGems = isset($data[0]['overall_total']) ? (string)$data[0]['overall_total'] : '0';
+        $totalGems = isset($data[0]['overall_total']) ? (string) $data[0]['overall_total'] : '0';
 
         $args = [];
 
         foreach ($data as $row) {
-            $userId = (string)$row['userid'];
+            $userId = (string) $row['userid'];
 
             if (!isset($args[$userId])) {
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => $row['total_numbers'],
-                    'pkey' => $row['pkey'] ?? '',
+                    'gems'   => $row['total_numbers'],
+                    'pkey'   => $row['pkey'] ?? '',
                 ];
             }
 
@@ -223,10 +221,10 @@ class PoolMapper
 
         if (!empty($data)) {
             return [
-                'status' => 'success',
-                'counter' => count($args) - 1,
-                'ResponseCode' => "11208",
-                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
+                'status'       => 'success',
+                'counter'      => \count($args) - 1,
+                'ResponseCode' => '11208',
+                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems],
             ];
         }
 
@@ -237,15 +235,16 @@ class PoolMapper
     {
         $scaleFactor = bcpow('2', '96');
 
-        $scaledValue = bcmul((string)$value, $scaleFactor, 0);
+        $scaledValue = bcmul((string) $value, $scaleFactor, 0);
 
         return $scaledValue;
     }
+
     public function fetchCurrentActionPrices(): ?array
     {
-        $sql = "SELECT post_price, like_price, dislike_price, comment_price
+        $sql = 'SELECT post_price, like_price, dislike_price, comment_price
                 FROM action_prices
-                LIMIT 1";
+                LIMIT 1';
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute();

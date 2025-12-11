@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\utils\ConstantsInjection;
 
-use Exception;
-use Fawaz\config\constants\ConstantsConfig;
-
 use function DI\string;
 
-require __DIR__ . '../../../../vendor/autoload.php';
+use Fawaz\config\constants\ConstantsConfig;
+
+require __DIR__.'../../../../vendor/autoload.php';
 
 class ConstantValuesInjectorImpl implements ConstantValuesInjector
 {
@@ -25,26 +24,29 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
      * Recursively injects constants into all string fields of any array/object.
      *
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
-    */
+     */
     public function injectConstants(array|string $data): array|string
     {
-        echo("ConfigGeneration: ConstantValuesInjectorImpl: injectConstants: start \n");
+        echo "ConfigGeneration: ConstantValuesInjectorImpl: injectConstants: start \n";
 
         return $this->processValue($data);
     }
 
     private function processValue(array|string $value): array|string
     {
-        if (is_string($value)) {
+        if (\is_string($value)) {
             return $this->replacePlaceholders($value);
         }
 
-        if (is_array($value)) {
+        if (\is_array($value)) {
             $processed = [];
+
             foreach ($value as $key => $subValue) {
                 $processed[$key] = $this->processValue($subValue);
             }
+
             return $processed;
         }
 
@@ -58,6 +60,7 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             '/\{([a-zA-Z0-9_.]+)\}/',
             function ($matches) {
                 $path = explode('.', $matches[1]);
+
                 return $this->getValueFromPath($this->constants, $path);
             },
             $text
@@ -67,38 +70,39 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     private function getValueFromPath(array $constants, array $path): string|int|float
     {
         if (empty($constants) || empty($path)) {
-            throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid input arguments ");
+            throw new \Exception('Error: ConstantValuesInjectorImpl: getValueFromPath: invalid input arguments ');
         }
+
         foreach ($path as $key) {
-            if (!is_array($constants) || !array_key_exists($key, $constants)) {
-                throw new Exception("Error: ConstantValuesInjectorImpl: getValueFromPath: invalid CONSTANTS: " . implode(",", $constants));
+            if (!\is_array($constants) || !\array_key_exists($key, $constants)) {
+                throw new \Exception('Error: ConstantValuesInjectorImpl: getValueFromPath: invalid CONSTANTS: '.implode(',', $constants));
             }
             $constants = $constants[$key];
         }
 
-
-        if (is_array($constants)) {
-            throw new Exception(
-                "Error: ConstantValuesInjectorImpl: getValueFromPath: invalid path or contants: constant value is not found by path:" . implode(" ", $path) . ", Faulty result: " . implode(",", $constants)
-            );
+        if (\is_array($constants)) {
+            throw new \Exception('Error: ConstantValuesInjectorImpl: getValueFromPath: invalid path or contants: constant value is not found by path:'.implode(' ', $path).', Faulty result: '.implode(',', $constants));
         }
+
         return $constants;
     }
 
     public static function injectSchemaPlaceholders(array $schemaFiles): array
     {
-        $suffix = '.graphql.generated';
+        $suffix    = '.graphql.generated';
         $constants = new ConstantsConfig()->getData();
-        $map = self::flattenConstantsMap($constants);
+        $map       = self::flattenConstantsMap($constants);
 
         $report = [];
+
         foreach ($schemaFiles as $in) {
             if (!is_file($in)) {
                 continue;
             }
 
             $sdl = file_get_contents($in);
-            if ($sdl === false) {
+
+            if (false === $sdl) {
                 throw new \RuntimeException("Cannot read schema: {$in}");
             }
 
@@ -110,19 +114,19 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
                         static fn (array $mm) => $map[$mm[1]] ?? $mm[0],
                         $m[1]
                     );
-                    return '"""' . $inner . '"""';
+
+                    return '"""'.$inner.'"""';
                 },
                 $sdl
             );
-
-
 
             if (preg_match('/\{[A-Z0-9_.]+\}/', $patched)) {
                 throw new \RuntimeException("Schema injection failed: unresolved placeholder(s) in {$in}");
             }
 
-            $out = $in . $suffix;
-            if (file_put_contents($out, $patched) === false) {
+            $out = $in.$suffix;
+
+            if (false === file_put_contents($out, $patched)) {
                 throw new \RuntimeException("Cannot write schema: {$out}");
             }
 
@@ -135,20 +139,22 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
     private static function flattenConstantsMap(array $data, string $prefix = ''): array
     {
         $out = [];
-        foreach ($data as $k => $v) {
-            $key = $prefix === '' ? (string)$k : $prefix . '.' . (string)$k;
 
-            if (is_array($v)) {
+        foreach ($data as $k => $v) {
+            $key = '' === $prefix ? (string) $k : $prefix.'.'.(string) $k;
+
+            if (\is_array($v)) {
                 $out += self::flattenConstantsMap($v, $key);
                 continue;
             }
 
-            if (is_bool($v)) {
+            if (\is_bool($v)) {
                 $out[$key] = $v ? 'true' : 'false';
             } else {
-                $out[$key] = addcslashes((string)$v, "\\\"");
+                $out[$key] = addcslashes((string) $v, '\\"');
             }
         }
+
         return $out;
     }
 }

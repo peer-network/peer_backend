@@ -4,27 +4,24 @@ declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
 
-use Exception;
-use Tests\utils\ConfigGeneration\JSONHandler;
 use Tests\utils\ConstantsInjection\ConstantsInjectionValidator;
 use Tests\utils\ConstantsInjection\ConstantValuesInjectorImpl;
 
-require __DIR__ . '../../../../vendor/autoload.php';
+require __DIR__.'../../../../vendor/autoload.php';
 
 class ResponseCodesConfig implements DataGeneratable
 {
     private array $data = [];
 
-
     public function __construct(string $filePath)
     {
         $decoded = JSONHandler::parseInputJson($filePath, true);
 
-        $injector = new ConstantValuesInjectorImpl();
+        $injector     = new ConstantValuesInjectorImpl();
         $injectedData = $injector->injectConstants($decoded);
 
         if (empty($injectedData)) {
-            throw new Exception("ResponseCodesConfig: injectConstantsToMessages: result is empty");
+            throw new \Exception('ResponseCodesConfig: injectConstantsToMessages: result is empty');
         }
 
         $this->data = $injectedData;

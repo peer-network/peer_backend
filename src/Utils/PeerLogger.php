@@ -25,6 +25,7 @@ class PeerLogger extends Logger implements PeerLoggerInterface
                 return $processor->getUid();
             }
         }
+
         return null;
     }
 }

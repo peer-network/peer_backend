@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
+use Fawaz\Utils\ResponseHelper;
 
-class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
 
@@ -17,10 +17,11 @@ class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStr
 
     public function __construct()
     {
-        $this::$mode = FeePolicyMode::NO_FEES;
-        $this->operationId = self::generateUUID();
+        $this::$mode         = FeePolicyMode::NO_FEES;
+        $this->operationId   = self::generateUUID();
         $this->transactionId = self::generateUUID();
     }
+
     public function getRecipientTransactionType(): string
     {
         return 'transferSenderToRecipient';

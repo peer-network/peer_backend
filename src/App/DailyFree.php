@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
 class DailyFree
@@ -22,23 +21,24 @@ class DailyFree
             $data = $this->validate($data, $elements);
         }
 
-        $this->userid = $data['userid'] ?? '';
-        $this->liken = $data['liken'] ?? 0;
-        $this->comments = $data['comments'] ?? 0;
-        $this->posten = $data['posten'] ?? 0;
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->userid    = $data['userid']    ?? '';
+        $this->liken     = $data['liken']     ?? 0;
+        $this->comments  = $data['comments']  ?? 0;
+        $this->posten    = $data['posten']    ?? 0;
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'userid' => $this->userid,
-            'liken' => $this->liken,
-            'comments' => $this->comments,
-            'posten' => $this->posten,
+            'userid'    => $this->userid,
+            'liken'     => $this->liken,
+            'comments'  => $this->comments,
+            'posten'    => $this->posten,
             'createdat' => $this->createdat,
         ];
+
         return $att;
     }
 
@@ -107,13 +107,15 @@ class DailyFree
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -121,37 +123,37 @@ class DailyFree
     {
         $specification = [
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'liken' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'comments' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'posten' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

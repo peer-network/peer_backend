@@ -11,11 +11,10 @@ class PasswordRestMail implements EmailInterface
 {
     public function __construct(public $data)
     {
-
     }
 
     /**
-     * Calculate content of email
+     * Calculate content of email.
      */
     public function content(): string
     {
@@ -32,13 +31,14 @@ class PasswordRestMail implements EmailInterface
     }
 
     /**
-     * Should be calculate Content and send email to
+     * Should be calculate Content and send email to.
      */
     public function send(string $email): array
     {
-        $subject = "Reset Your Password";
+        $subject = 'Reset Your Password';
 
         $mailer = new SmtpMailer();
+
         return $mailer->sendEmail($email, $subject, $this->content());
     }
 }

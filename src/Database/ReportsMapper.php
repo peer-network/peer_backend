@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-use PDO;
+use Fawaz\App\Models\ModerationTicket;
+use Fawaz\App\Models\UserReport;
+use Fawaz\config\constants\ConstantsModeration;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ReportTargetType;
-use DateTime;
-use Fawaz\App\Models\UserReport;
-use Fawaz\App\Models\ModerationTicket;
-use Fawaz\config\constants\ConstantsModeration;
 
 class ReportsMapper
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected \PDO $db)
     {
     }
 
@@ -22,14 +20,14 @@ class ReportsMapper
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff)
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0x0FFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF)
         );
     }
 
@@ -43,30 +41,28 @@ class ReportsMapper
         ReportTargetType $targettype,
         string $targetid,
         string $hash_content_sha256,
-        ?string $message = null
+        ?string $message = null,
     ): ?bool {
-
-        $this->logger->debug("ReportsMapper.addReports started");
+        $this->logger->debug('ReportsMapper.addReports started');
 
         $reportId = $this->generateUUID();
 
         $targetTypeString = $targettype->value;
-        $debugData = [
+        $debugData        = [
             'reporter_userid' => $reporter_userid,
-            'targetid' => $targetid,
-            'targettype' => $targetTypeString
+            'targetid'        => $targetid,
+            'targettype'      => $targetTypeString,
         ];
 
         try {
-
             // Check if the record already exists
-            $sqlCheck = "SELECT COUNT(*) 
+            $sqlCheck = 'SELECT COUNT(*) 
                 FROM user_reports 
                 WHERE reporter_userid = :reporter_userid
                     AND targetid = :targetid 
                     AND targettype = :targettype
                     AND hash_content_sha256 = :hash_content_sha256
-            ";
+            ';
             $stmtCheck = $this->db->prepare($sqlCheck);
             $stmtCheck->bindValue(':reporter_userid', $reporter_userid, \PDO::PARAM_STR);
             $stmtCheck->bindValue(':targetid', $targetid, \PDO::PARAM_STR);
@@ -75,18 +71,20 @@ class ReportsMapper
             $stmtCheck->execute();
 
             $exists = $stmtCheck->fetchColumn() > 0;
+
             if ($exists > 0) {
-                $this->logger->warning("User activity already exists", $debugData);
+                $this->logger->warning('User activity already exists', $debugData);
+
                 return true;
             }
 
-            $createdat = (string)new DateTime()->format('Y-m-d H:i:s.u');
+            $createdat = (string) new \DateTime()->format('Y-m-d H:i:s.u');
 
             // Add Ticket for reports
             $moderationTicketId = $this->getTicketId($targetid, $targetTypeString, $createdat);
 
             // Insert a new record
-            $sql = "INSERT INTO user_reports (
+            $sql = 'INSERT INTO user_reports (
                 reportid, 
                 reporter_userid, 
                 targetid, 
@@ -104,7 +102,7 @@ class ReportsMapper
                 :createdat,
                 :moderationticketid,
                 :hash_content_sha256
-            )";
+            )';
 
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':reportid', $reportId, \PDO::PARAM_STR);
@@ -119,21 +117,23 @@ class ReportsMapper
             $success = $stmt->execute();
 
             if ($success) {
-                $this->logger->info("ReportsMapper: addReport: Report added successfully", $debugData);
+                $this->logger->info('ReportsMapper: addReport: Report added successfully', $debugData);
+
                 return false;
             }
 
-            $this->logger->warning("ReportsMapper: addReport: Failed to add report", $debugData);
+            $this->logger->warning('ReportsMapper: addReport: Failed to add report', $debugData);
+
             return null;
         } catch (\Exception $e) {
-            $this->logger->error("ReportsMapper.addReport: Exception occurred", ['exception' => $e->getMessage()]);
+            $this->logger->error('ReportsMapper.addReport: Exception occurred', ['exception' => $e->getMessage()]);
+
             return null;
         }
     }
 
-
     /**
-     * Get TicketId by TargetId and TargetType
+     * Get TicketId by TargetId and TargetType.
      *
      * Check if a ticket already exists for the target (post, comment, user)
      * If exists, use the existing ticket ID
@@ -152,7 +152,7 @@ class ReportsMapper
 
             if ($ticketStatus) {
                 // Ticket is already open and awaiting review
-                $this->logger->info("ReportsMapper: addReport: Ticket already exists and is awaiting review");
+                $this->logger->info('ReportsMapper: addReport: Ticket already exists and is awaiting review');
                 $moderationTicketId = $existingTicket['moderationticketid'];
 
                 // Update the reports count
@@ -160,15 +160,13 @@ class ReportsMapper
                 ModerationTicket::query()->where('uid', $moderationTicketId)->updateColumns(['reportscount' => $reportsCount]);
             }
         } else {
-
-
             $data = [
-                'uid' => $moderationTicketId,
-                'status' => $status,
-                'reportscount' => 1,
-                'contenttype' => $targettype,
+                'uid'             => $moderationTicketId,
+                'status'          => $status,
+                'reportscount'    => 1,
+                'contenttype'     => $targettype,
                 'targetcontentid' => $targetid,
-                'createdat' => $createdat
+                'createdat'       => $createdat,
             ];
 
             ModerationTicket::query()->insert($data);
@@ -176,8 +174,9 @@ class ReportsMapper
 
         return $moderationTicketId;
     }
+
     /**
-     * Check if the target (post, comment, user) is already moderated
+     * Check if the target (post, comment, user) is already moderated.
      *
      * if it has a moderationid, it means it has been moderated: return true
      * if not, return false
@@ -186,7 +185,6 @@ class ReportsMapper
     {
         $reports = UserReport::query()->where('targetid', $targetid)->where('targettype', $targettype)->first();
 
-        return !empty($reports) && isset($reports['moderationid']) && $reports['moderationid'] != null;
+        return !empty($reports) && isset($reports['moderationid']) && null != $reports['moderationid'];
     }
-
 }

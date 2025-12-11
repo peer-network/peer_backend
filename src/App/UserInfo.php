@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class UserInfo extends Model
 {
@@ -33,41 +32,42 @@ class UserInfo extends Model
             $data = $this->validate($data, $elements);
         }
 
-        $this->userid = $data['userid'] ?? '';
-        $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->amountposts = $data['amountposts'] ?? 0;
+        $this->userid         = $data['userid']         ?? '';
+        $this->liquidity      = $data['liquidity']      ?? 0.0;
+        $this->amountposts    = $data['amountposts']    ?? 0;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
-        $this->amountfriends = $data['amountfriends'] ?? 0;
-        $this->amountblocked = $data['amountblocked'] ?? 0;
-        $this->isprivate = $data['isprivate'] ?? 0;
-        $this->activeReports = $data['reports'] ?? 0;
-        $this->totalreports = $data['totalreports'] ?? 0;
-        $this->invited = $data['invited'] ?? null;
-        $this->phone = $data['phone'] ?? null;
-        $this->pkey = $data['pkey'] ?? null;
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->amountfriends  = $data['amountfriends']  ?? 0;
+        $this->amountblocked  = $data['amountblocked']  ?? 0;
+        $this->isprivate      = $data['isprivate']      ?? 0;
+        $this->activeReports  = $data['reports']        ?? 0;
+        $this->totalreports   = $data['totalreports']   ?? 0;
+        $this->invited        = $data['invited']        ?? null;
+        $this->phone          = $data['phone']          ?? null;
+        $this->pkey           = $data['pkey']           ?? null;
+        $this->updatedat      = $data['updatedat']      ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'userid' => $this->userid,
-            'liquidity' => $this->liquidity,
-            'amountposts' => $this->amountposts,
+            'userid'         => $this->userid,
+            'liquidity'      => $this->liquidity,
+            'amountposts'    => $this->amountposts,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
-            'amountfriends' => $this->amountfriends,
-            'amountblocked' => $this->amountblocked,
-            'isprivate' => $this->isprivate,
-            'reports' => $this->activeReports,
-            'totalreports' => $this->totalreports,
-            'invited' => $this->invited,
-            'phone' => $this->phone,
-            'pkey' => $this->pkey,
-            'updatedat' => $this->updatedat,
+            'amountfriends'  => $this->amountfriends,
+            'amountblocked'  => $this->amountblocked,
+            'isprivate'      => $this->isprivate,
+            'reports'        => $this->activeReports,
+            'totalreports'   => $this->totalreports,
+            'invited'        => $this->invited,
+            'phone'          => $this->phone,
+            'pkey'           => $this->pkey,
+            'updatedat'      => $this->updatedat,
         ];
+
         return $att;
     }
 
@@ -76,6 +76,7 @@ class UserInfo extends Model
     {
         return $this->userid;
     }
+
     public function getLiquidity(): float
     {
         return $this->liquidity;
@@ -126,7 +127,7 @@ class UserInfo extends Model
         $this->amountfollowed = $amountfollowed;
     }
 
-    public function getAmountFriends(): int|null
+    public function getAmountFriends(): ?int
     {
         return $this->amountfriends;
     }
@@ -183,7 +184,7 @@ class UserInfo extends Model
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function getActiveReports(): int
@@ -200,6 +201,7 @@ class UserInfo extends Model
     {
         return $this->totalreports;
     }
+
     public function setTotalReports(int $totalreports): void
     {
         $this->totalreports = $totalreports;
@@ -219,91 +221,93 @@ class UserInfo extends Model
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $userConfig = ConstantsConfig::user();
+        $userConfig    = ConstantsConfig::user();
         $specification = [
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'liquidity' => [
-                'required' => false,
-                'filters' => [['name' => 'FloatSanitize']],
+                'required'   => false,
+                'filters'    => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => [
                         'min' => $userConfig['LIQUIDITY']['MIN_LENGTH'],
-                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH']
-                        ]],
+                        'max' => $userConfig['LIQUIDITY']['MAX_LENGTH'],
+                    ]],
                 ],
             ],
             'amountposts' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollower' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfollowed' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountfriends' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'amountblocked' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'isprivate' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1]],
                 ],
             ],
             'reports' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'invited' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'phone' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validatePhoneNumber'],
                 ],
             ],
             'pkey' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validatePkey'],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
@@ -311,14 +315,14 @@ class UserInfo extends Model
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     /**
-     * Table Name
+     * Table Name.
      */
     public static function table(): string
     {

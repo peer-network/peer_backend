@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
@@ -12,9 +13,8 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Utils\ResponseHelper;
 
 class PeerTokenService
 {
@@ -27,7 +27,7 @@ class PeerTokenService
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager,
         protected UserMapper $userMapper,
-        protected InteractionsPermissionsMapper $interactionsPermissionsMapper
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
     }
 
@@ -38,18 +38,18 @@ class PeerTokenService
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
     /**
-     * Make Transfer token to receipients
-     *
+     * Make Transfer token to receipients.
      */
-
     public function transferToken(array $args): array
     {
         $this->logger->debug('WalletService.transferToken started');
@@ -58,7 +58,7 @@ class PeerTokenService
             return $this::respondWithError(60501);
         }
 
-        $recipientid =  $args['recipient'];
+        $recipientid = $args['recipient'];
 
         if (!$this->userMapper->isUserExistById($recipientid)) {
             return $this::respondWithError(31007);
@@ -72,58 +72,65 @@ class PeerTokenService
         );
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
         ];
 
-        if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
+        if (false === $this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid)) {
             return $this::respondWithError(31203, ['recipientid' => $recipientid]);
         }
 
         try {
             $this->logger->debug('PeerTokenMapper.transferToken started');
 
-            $recipientId = (string) $args['recipient'];
+            $recipientId    = (string) $args['recipient'];
             $numberOfTokens = (string) $args['numberoftokens'];
 
             if (!self::isValidUUID($recipientId)) {
                 $this->logger->warning('Incorrect recipientId Exception.', [
                     'recipientId' => $recipientId,
                 ]);
+
                 return self::respondWithError(30201);
             }
 
             $userConfig  = ConstantsConfig::user();
             $inputConfig = ConstantsConfig::input();
-            $message = isset($args['message']) ? (string) $args['message'] : null;
-            if ($message !== null) {
+            $message     = isset($args['message']) ? (string) $args['message'] : null;
+
+            if (null !== $message) {
                 $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
                 $maxLength      = (int) $messageConfig['MAX_LENGTH'];
                 $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
                 $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/iu';
 
-                if (strlen($message) > $maxLength) {
+                if (\strlen($message) > $maxLength) {
                     $this->logger->warning('Transfer message length is too high', [
                         'maxLength' => $maxLength,
                     ]);
+
                     return self::respondWithError(30270);
                 }
-                if (preg_match($controlPattern, $message) === 1) {
+
+                if (1 === preg_match($controlPattern, $message)) {
                     $this->logger->warning('Transfer message contains control characters');
+
                     return self::respondWithError(30271);
                 }
-                if (preg_match($urlPattern, $message) === 1) {
+
+                if (1 === preg_match($urlPattern, $message)) {
                     $this->logger->warning('Transfer message contains URL/link');
+
                     return self::respondWithError(30271);
                 }
             }
             $transferConfig = $userConfig['TRANSACTION'];
-            $minAmount = (float) $transferConfig['MIN_AMOUNT'];
-            $maxDecimals = (int) $transferConfig['MAX_DECIMALS'];
+            $minAmount      = (float) $transferConfig['MIN_AMOUNT'];
+            $maxDecimals    = (int) $transferConfig['MAX_DECIMALS'];
 
             $parts = explode('.', (string) $numberOfTokens);
 
-            if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
+            if (isset($parts[1]) && \strlen($parts[1]) > $maxDecimals) {
                 return self::respondWithError(30264);
             }
 
@@ -132,52 +139,62 @@ class PeerTokenService
                     'numberOfTokens' => $numberOfTokens,
                     'minAmount'      => $minAmount,
                 ]);
+
                 return self::respondWithError(30264);
             }
 
             if ((string) $recipientId === $this->currentUserId) {
                 $this->logger->warning('Send and Receive Same Wallet Error.');
+
                 return self::respondWithError(31202);
             }
 
             // Strict numeric validation for decimals (e.g., "1", "1.0", "0.25")
-            $numRaw = (string)($args['numberoftokens'] ?? '');
+            $numRaw = (string) ($args['numberoftokens'] ?? '');
             // Accepts unsigned decimal numbers with optional fractional part
-            $isStrictDecimal = $numRaw !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw) === 1;
+            $isStrictDecimal = '' !== $numRaw && 1 === preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw);
+
             if (!$isStrictDecimal) {
                 return self::respondWithError(30264);
             }
 
             $receipientUserObj = $this->userMapper->loadById($recipientId);
+
             if (empty($receipientUserObj)) {
                 $this->logger->warning('Unknown Id Exception.');
+
                 return self::respondWithError(31007);
             }
 
             if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
                 $this->logger->warning('Unauthorized to send token');
+
                 return self::respondWithError(31203);
             }
 
             $this->transactionManager->beginTransaction();
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
+
             if (empty($currentBalance) || $currentBalance < $numberOfTokens) {
                 $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                     'Balance' => $currentBalance,
                 ]);
                 $this->transactionManager->rollback();
+
                 return self::respondWithError(51301);
             }
 
             $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($this->currentUserId, $numberOfTokens);
+
             if ($currentBalance < $requiredAmount) {
                 $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
-                    'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
+                    'senderId'       => $this->currentUserId,
+                    'Balance'        => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 $this->transactionManager->rollback();
+
                 return self::respondWithError(51301);
             }
 
@@ -190,34 +207,35 @@ class PeerTokenService
                 $transferStrategy,
                 $message
             );
-            if ($response['status'] === 'error') {
+
+            if ('error' === $response['status']) {
                 $this->transactionManager->rollback();
+
                 return $response;
             } else {
                 $this->logger->info('PeerTokenService.transferToken completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
+
                 return $this::createSuccessResponse(
                     11211,
                     [
-                        'tokenSend'                  => $response['tokenSend'],
+                        'tokenSend'                   => $response['tokenSend'],
                         'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
-                        'createdat'                  => $response['createdat'] ?? '',
+                        'createdat'                   => $response['createdat'] ?? '',
                     ],
                     false // no counter needed for associative array
                 );
-
             }
-
         } catch (\Exception $e) {
-            $this->logger->error("Error in PeerTokenService.transferToken", ['exception' => $e->getMessage()]);
+            $this->logger->error('Error in PeerTokenService.transferToken', ['exception' => $e->getMessage()]);
             $this->transactionManager->rollback();
+
             return $this::respondWithError(41229); // Failed to transfer token
         }
     }
 
     /**
-     * Get transcation history with Filter
-     *
+     * Get transcation history with Filter.
      */
     public function transactionsHistory(array $args): array
     {
@@ -233,17 +251,14 @@ class PeerTokenService
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
 
             return $this::createSuccessResponse(
-                (int)$results['ResponseCode'],
+                (int) $results['ResponseCode'],
                 $results['affectedRows'],
                 false // no counter needed for existing data
             );
-
         } catch (\Exception $e) {
-            $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
-            throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
+            $this->logger->error('Error in PeerTokenService.transactionsHistory', ['exception' => $e->getMessage()]);
+
+            throw new \RuntimeException('Database error while fetching transactions: '.$e->getMessage());
         }
-
     }
-
-
 }

@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Fawaz\Handler;
 
 use Fawaz\App\MultipartPostService;
-use Fawaz\App\PostService;
+use Fawaz\Utils\PeerLoggerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Fawaz\Utils\PeerLoggerInterface;
 use Slim\Psr7\Response;
 use Slim\Psr7\UploadedFile;
 
@@ -17,45 +16,46 @@ class MultipartPostHandler implements RequestHandlerInterface
 {
     public function __construct(
         protected PeerLoggerInterface $logger,
-        protected MultipartPostService $multipartPostService
+        protected MultipartPostService $multipartPostService,
     ) {
     }
 
     /**
-     * Handle Requests
-     *
+     * Handle Requests.
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->logger->info("PostFileHandler processing request.");
+        $this->logger->info('PostFileHandler processing request.');
 
         $authorizationHeader = $request->getHeader('Authorization');
-        $contentType = $request->getHeader('Content-Type');
-        $contentLength = $request->getHeader('Content-Length');
+        $contentType         = $request->getHeader('Content-Type');
+        $contentLength       = $request->getHeader('Content-Length');
 
         $responseBody = $this->multipartPostService->checkForBasicValidation(['contentType' => $contentType, 'contentLength' => $contentLength]);
 
         $bearerToken = null;
-        if (isset($responseBody['status']) && $responseBody['status'] != 'error') {
+
+        if (isset($responseBody['status']) && 'error' != $responseBody['status']) {
             if (!empty($authorizationHeader)) {
                 $parts = explode(' ', $authorizationHeader[0]);
-                if (count($parts) === 2 && strtolower($parts[0]) === 'bearer') {
+
+                if (2 === \count($parts) && 'bearer' === strtolower($parts[0])) {
                     $bearerToken = $parts[1];
                 }
             }
 
-            $rawBody = $request->getParsedBody();
+            $rawBody  = $request->getParsedBody();
             $rawFiles = $_FILES;
 
-
             $filesArray = [];
+
             if (isset($rawFiles['file'])) {
                 $filesArray = $this->normalizeFilesArray($rawFiles['file']);
             }
 
             $requestObj = [
                 'eligibilityToken' => (!empty($rawBody['eligibilityToken']) && isset($rawBody['eligibilityToken'])) ? $rawBody['eligibilityToken'] : '',
-                'media' => !empty($filesArray) ? $filesArray : [],
+                'media'            => !empty($filesArray) ? $filesArray : [],
             ];
 
             $this->multipartPostService->setCurrentUserId($bearerToken);
@@ -63,33 +63,31 @@ class MultipartPostHandler implements RequestHandlerInterface
             $responseBody = $this->multipartPostService->handleFileUpload($requestObj);
         }
 
-
         $response = new Response();
         $response->getBody()->write(json_encode($responseBody));
 
         $response = $response->withHeader('Content-Type', 'application/json');
 
-        if (!is_null($bearerToken)) {
-            $response = $response->withHeader('Authorization', 'Bearer ' . $bearerToken);
+        if (null !== $bearerToken) {
+            $response = $response->withHeader('Authorization', 'Bearer '.$bearerToken);
         }
 
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
-     * Normalize PHP's $_FILES array into a per-file format
+     * Normalize PHP's $_FILES array into a per-file format.
      */
     public function normalizeFilesArray(array $files): array
     {
         try {
-
             $normalized = [];
 
-            if (is_array($files['name']) && isset($files['name'][0]) && empty($files['name'][0])) {
+            if (\is_array($files['name']) && isset($files['name'][0]) && empty($files['name'][0])) {
                 return [];
             }
 
-            if (is_array($files['name']) && isset($files['name'][0]) && !empty($files['name'][0])) {
+            if (\is_array($files['name']) && isset($files['name'][0]) && !empty($files['name'][0])) {
                 foreach ($files['name'] as $index => $name) {
                     $normalized[] = [
                         'name'     => $name,
@@ -105,6 +103,7 @@ class MultipartPostHandler implements RequestHandlerInterface
             }
 
             $uploadedFilesObj = [];
+
             foreach ($normalized as $fileObj) {
                 $uploadedFilesObj[] = new UploadedFile(
                     $fileObj['tmp_name'],
@@ -117,9 +116,9 @@ class MultipartPostHandler implements RequestHandlerInterface
 
             return $uploadedFilesObj;
         } catch (\Exception $e) {
-            $this->logger->error("Error normalizing files array: " . $e->getMessage());
+            $this->logger->error('Error normalizing files array: '.$e->getMessage());
+
             return [];
         }
     }
-
 }

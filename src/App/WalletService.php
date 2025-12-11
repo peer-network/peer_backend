@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Wallet;
-use Fawaz\Database\WalletMapper;
-use Fawaz\Utils\PeerLoggerInterface;
-use Exception;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
-use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class WalletService
 {
@@ -24,7 +21,7 @@ class WalletService
         protected PeerLoggerInterface $logger,
         protected WalletMapper $walletMapper,
         protected PeerTokenMapper $peerTokenMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
     ) {
     }
 
@@ -35,10 +32,12 @@ class WalletService
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
@@ -52,50 +51,50 @@ class WalletService
         $postId = $args['postid'] ?? null;
         $fromId = $args['fromid'] ?? null;
 
-        if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
+        if (null === $postId && null === $fromId && !self::isValidUUID($userId)) {
             return $this::respondWithError(30102);
         }
 
-        if ($postId !== null && !self::isValidUUID($postId)) {
+        if (null !== $postId && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
         }
 
-        if ($fromId !== null && !self::isValidUUID($fromId)) {
+        if (null !== $fromId && !self::isValidUUID($fromId)) {
             return $this::respondWithError(30105);
         }
 
-        $this->logger->debug("WalletService.fetchWalletById started");
+        $this->logger->debug('WalletService.fetchWalletById started');
 
         try {
             $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
-            if ($wallets === false) {
+            if (false === $wallets) {
                 return $this::respondWithError(41216);
             }
 
             $walletData = array_map(
-                static fn(Wallet $wallet) => $wallet->getArrayCopy(),
+                static fn (Wallet $wallet) => $wallet->getArrayCopy(),
                 $wallets
             );
 
-            $this->logger->info("WalletService.fetchWalletById successfully fetched wallets", [
-                'count' => count($walletData),
+            $this->logger->info('WalletService.fetchWalletById successfully fetched wallets', [
+                'count' => \count($walletData),
             ]);
 
             $success = [
-                'status' => 'success',
-                'counter' => count($walletData),
-                'ResponseCode' => "11209",
-                'affectedRows' => $walletData
+                'status'       => 'success',
+                'counter'      => \count($walletData),
+                'ResponseCode' => '11209',
+                'affectedRows' => $walletData,
             ];
 
             return $success;
-
-        } catch (Exception $e) {
-            $this->logger->error("Error occurred in WalletService.fetchWalletById", [
+        } catch (\Exception $e) {
+            $this->logger->error('Error occurred in WalletService.fetchWalletById', [
                 'error' => $e->getMessage(),
-                'args' => $args,
+                'args'  => $args,
             ]);
+
             return $this::respondWithError(40301);
         }
     }
@@ -107,10 +106,10 @@ class WalletService
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
-        $day = $args['day'] ?? 'D0';
+        $day        = $args['day'] ?? 'D0';
 
         // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
+        if (!\in_array($day, $dayActions, true)) {
             return $this::respondWithError(30105);
         }
 
@@ -124,10 +123,10 @@ class WalletService
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
-        $day = $args['day'] ?? 'D0';
+        $day        = $args['day'] ?? 'D0';
 
         // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
+        if (!\in_array($day, $dayActions, true)) {
             return $this::respondWithError(30105);
         }
 
@@ -161,7 +160,7 @@ class WalletService
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'W0', 'M0', 'Y0'];
 
         // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
+        if (!\in_array($day, $dayActions, true)) {
             return $this::respondWithError(30105);
         }
 
@@ -174,22 +173,23 @@ class WalletService
             $userStatus = array_values($gemsters['affectedRows']['data']);
 
             $affectedRows = [
-                'winStatus' => $winstatus ?? [],
+                'winStatus'  => $winstatus ?? [],
                 'userStatus' => $userStatus,
             ];
 
             return [
-                'status' => $gemsters['status'],
-                'counter' => $gemsters['counter'] ?? 0,
+                'status'       => $gemsters['status'],
+                'counter'      => $gemsters['counter'] ?? 0,
                 'ResponseCode' => $gemsters['ResponseCode'],
-                'affectedRows' => $affectedRows
+                'affectedRows' => $affectedRows,
             ];
         }
+
         return [
-            'status' => $gemsters['status'],
-            'counter' => 0,
+            'status'       => $gemsters['status'],
+            'counter'      => 0,
             'ResponseCode' => $gemsters['ResponseCode'],
-            'affectedRows' => []
+            'affectedRows' => [],
         ];
     }
 
@@ -200,12 +200,13 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false) {
+            if (false !== $results) {
                 $success = [
-                    'status' => 'success',
-                    'ResponseCode' => "11204",
+                    'status'           => 'success',
+                    'ResponseCode'     => '11204',
                     'currentliquidity' => $results,
                 ];
+
                 return $success;
             }
 
@@ -233,16 +234,19 @@ class WalletService
         try {
             $this->transactionManager->beginTransaction();
             $response = $this->walletMapper->deductFromWallets($userId, $args);
-            if ($response['status'] === 'success') {
+
+            if ('success' === $response['status']) {
                 $this->transactionManager->commit();
+
                 return $response;
             } else {
                 $this->transactionManager->rollBack();
+
                 return $response;
             }
-
         } catch (\Exception $e) {
             $this->transactionManager->rollBack();
+
             return $this::respondWithError(40301);
         }
     }
@@ -253,13 +257,12 @@ class WalletService
 
         try {
             $response = $this->walletMapper->callUserMove($this->currentUserId);
+
             return $this::createSuccessResponse(
                 $response['ResponseCode'],
                 $response['affectedRows'],
                 false // no counter needed for existing data
             );
-
-
         } catch (\Exception $e) {
             return $this::respondWithError(41205);
         }
@@ -267,7 +270,7 @@ class WalletService
 
     /**
      * Transfer Tokens from User Wallet for Advertisement Actions
-     * Add logwins entry
+     * Add logwins entry.
      */
     public function performPayment(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
     {
@@ -276,9 +279,9 @@ class WalletService
         try {
             $this->transactionManager->beginTransaction();
 
-            $postId = $args['postid'] ?? null;
-            $art = $args['art'] ?? null;
-            $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
+            $postId  = $args['postid'] ?? null;
+            $art     = $args['art']    ?? null;
+            $prices  = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
             $actions = ConstantsConfig::wallet()['ACTIONS'];
 
             $mapping = [
@@ -293,38 +296,41 @@ class WalletService
             if (!isset($mapping[$art])) {
                 $this->logger->warning('Invalid art type provided.', ['art' => $art]);
                 $this->transactionManager->rollback();
+
                 return self::respondWithError(30105);
             }
 
-            $price = (!empty($args['price']) && (int)$args['price']) ? (int)$args['price'] : $mapping[$art]['price'];
+            $price   = (!empty($args['price']) && (int) $args['price']) ? (int) $args['price'] : $mapping[$art]['price'];
             $whereby = $mapping[$art]['whereby'];
-            $text = $mapping[$art]['text'];
+            $text    = $mapping[$art]['text'];
 
             $currentBalance = $this->getUserWalletBalance($userId);
-            $price = (string) $price;
+            $price          = (string) $price;
 
             // Determine required amount per fee policy mode
-            $mode = $transferStrategy->getFeePolicyMode();
-            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string)$price, $mode);
+            $mode           = $transferStrategy->getFeePolicyMode();
+            $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string) $price, $mode);
+
             if ($currentBalance < $requiredAmount) {
                 $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
-                    'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
+                    'senderId'       => $this->currentUserId,
+                    'Balance'        => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 $this->transactionManager->rollback();
+
                 return self::respondWithError(51301);
             }
 
             [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
-            $fromId = $args['fromid'] ?? $peerWallet;
+            $fromId                              = $args['fromid'] ?? $peerWallet;
 
             $args = [
-                'postid' => $postId,
-                'fromid' => $fromId,
-                'gems' => 0.0,
-                'numbers' => -abs((float)$price),
-                'whereby' => $whereby,
+                'postid'    => $postId,
+                'fromid'    => $fromId,
+                'gems'      => 0.0,
+                'numbers'   => -abs((float) $price),
+                'whereby'   => $whereby,
                 'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ];
 
@@ -337,27 +343,31 @@ class WalletService
             );
 
             $args['gemid'] = $transferStrategy->getOperationId();
-            $results = $this->walletMapper->insertWinToLog($userId, $args);
-            if ($results === false) {
+            $results       = $this->walletMapper->insertWinToLog($userId, $args);
+
+            if (false === $results) {
                 $this->transactionManager->rollBack();
-                $this->logger->error("Error occurred in performPayment.insertWinToLog", [
+                $this->logger->error('Error occurred in performPayment.insertWinToLog', [
                     'userId' => $userId,
-                    'args' => $args,
+                    'args'   => $args,
                 ]);
+
                 return self::respondWithError(41205);
             }
 
-            if ($response['status'] === 'success') {
+            if ('success' === $response['status']) {
                 $this->transactionManager->commit();
+
                 return $response;
             } else {
                 $this->transactionManager->rollBack();
+
                 return $response;
             }
-
         } catch (\Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
             $this->transactionManager->rollBack();
+
             return $this::respondWithError(40301);
         }
     }

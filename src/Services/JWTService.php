@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Fawaz\Services;
 
 use Fawaz\App\ValidationException;
+use Fawaz\Utils\PeerLoggerInterface;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\ExpiredException;
-use Fawaz\Utils\PeerLoggerInterface;
-use DateTime;
 
 class JWTService
 {
@@ -28,24 +27,24 @@ class JWTService
         string $refreshPublicKey,
         int $accessTokenValidity,
         int $refreshTokenValidity,
-        PeerLoggerInterface $logger
+        PeerLoggerInterface $logger,
     ) {
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
-        $this->refreshPrivateKey = $refreshPrivateKey;
-        $this->refreshPublicKey = $refreshPublicKey;
-        $this->accessTokenValidity = $accessTokenValidity;
+        $this->privateKey           = $privateKey;
+        $this->publicKey            = $publicKey;
+        $this->refreshPrivateKey    = $refreshPrivateKey;
+        $this->refreshPublicKey     = $refreshPublicKey;
+        $this->accessTokenValidity  = $accessTokenValidity;
         $this->refreshTokenValidity = $refreshTokenValidity;
-        $this->logger = $logger;
+        $this->logger               = $logger;
     }
 
     public function createAccessToken(array $data): string
     {
-        $issuedAt = time();
+        $issuedAt       = time();
         $expirationTime = $issuedAt + $this->accessTokenValidity;
-        $payload = array_merge($data, [
+        $payload        = array_merge($data, [
             'iat' => $issuedAt,
-            'exp' => $expirationTime
+            'exp' => $expirationTime,
         ]);
 
         $this->logger->info('Creating access token', ['uid' => $data['uid']]);
@@ -55,11 +54,11 @@ class JWTService
 
     public function createRefreshToken(array $data): string
     {
-        $issuedAt = time();
+        $issuedAt       = time();
         $expirationTime = $issuedAt + $this->refreshTokenValidity;
-        $payload = array_merge($data, [
+        $payload        = array_merge($data, [
             'iat' => $issuedAt,
-            'exp' => $expirationTime
+            'exp' => $expirationTime,
         ]);
 
         $this->logger->info('Creating refresh token.', ['uid' => $data['uid']]);
@@ -70,34 +69,35 @@ class JWTService
     public function validateToken(string $token, bool $isRefreshToken = false): object
     {
         try {
-            $key = $isRefreshToken ? $this->refreshPublicKey : $this->publicKey;
+            $key          = $isRefreshToken ? $this->refreshPublicKey : $this->publicKey;
             $decodedToken = JWT::decode($token, new Key($key, 'RS256'));
 
-            if (isset($decodedToken->iss) && $decodedToken->iss !== 'peerapp.de') {
+            if (isset($decodedToken->iss) && 'peerapp.de' !== $decodedToken->iss) {
                 $this->logger->warning('Invalid token issuer');
+
                 throw new \Exception('Invalid token issuer');
             }
 
-            if (isset($decodedToken->aud) && $decodedToken->aud !== 'peerapp.de') {
+            if (isset($decodedToken->aud) && 'peerapp.de' !== $decodedToken->aud) {
                 $this->logger->warning('Invalid token audience');
+
                 throw new \Exception('Invalid token audience');
             }
 
             return $decodedToken;
-
         } catch (ExpiredException $e) {
             $this->logger->info('Token has expired', ['exception' => $e->getMessage()]);
-            throw new ValidationException('Token validation failed');
 
+            throw new ValidationException('Token validation failed');
         } catch (\Exception $e) {
             $this->logger->error('Token validation failed', ['exception' => $e->getMessage()]);
+
             throw new ValidationException('Token validation failed');
         }
     }
 
-
     /**
-     * generate UUID
+     * generate UUID.
      *
      * @param $expiryAfter in seconds
      *
@@ -105,23 +105,23 @@ class JWTService
      */
     public function createAccessTokenWithCustomExpriy(string $userId, int $expiryAfter): string
     {
-        $issuedAt = time();
+        $issuedAt       = time();
         $expirationTime = $issuedAt + $expiryAfter;
 
         $payload = [
-            'iss' => 'peerapp.de',
-            'aud' => 'peerapp.de',
-            'uid' => $userId,
-            'iat' => $issuedAt,
-            'date' => new DateTime()->format('Y-m-d H:i:s.u'),
-            'jti' => bin2hex(random_bytes(20)),
-            'exp' => $expirationTime
+            'iss'  => 'peerapp.de',
+            'aud'  => 'peerapp.de',
+            'uid'  => $userId,
+            'iat'  => $issuedAt,
+            'date' => new \DateTime()->format('Y-m-d H:i:s.u'),
+            'jti'  => bin2hex(random_bytes(20)),
+            'exp'  => $expirationTime,
         ];
 
         $this->logger->info('Creating access token', ['uid' => $userId]);
 
         $token = JWT::encode($payload, $this->privateKey, 'RS256');
+
         return $token;
     }
-
 }

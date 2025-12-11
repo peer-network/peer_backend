@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
 class Tokenize
@@ -22,23 +21,24 @@ class Tokenize
             $data = $this->validate($data, $elements);
         }
 
-        $this->token = $data['token'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->attempt = $data['attempt'] ?? 0;
+        $this->token     = $data['token']     ?? '';
+        $this->userid    = $data['userid']    ?? '';
+        $this->attempt   = $data['attempt']   ?? 0;
         $this->expiresat = $data['expiresat'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'token' => $this->token,
-            'userid' => $this->userid,
-            'attempt' => $this->attempt,
+            'token'     => $this->token,
+            'userid'    => $this->userid,
+            'attempt'   => $this->attempt,
             'expiresat' => $this->expiresat,
-            'updatedat' => $this->updatedat
+            'updatedat' => $this->updatedat,
         ];
+
         return $att;
     }
 
@@ -106,16 +106,18 @@ class Tokenize
         $validationErrors = $inputFilter->getMessages();
 
         foreach ($validationErrors as $field => $errors) {
-            $errorMessages = [];
+            $errorMessages   = [];
             $errorMessages[] = "Validation errors for $field";
+
             foreach ($errors as $error) {
-                //$errorMessages[] = $error;
+                // $errorMessages[] = $error;
                 $errorMessages[] = ": $error";
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -123,30 +125,30 @@ class Tokenize
     {
         $specification = [
             'token' => [
-                'required' => true,
-                'filters' => [['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'HtmlEntities']],
                 'validators' => [['name' => 'validateActivationToken']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'attempt' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 3]],
                 ],
             ],
             'expiresat' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
-                    ['name' => 'validateIntRange', 'options' => ['min' => \time(), 'max' => \time() + 1800]],
+                    ['name' => 'validateIntRange', 'options' => ['min' => time(), 'max' => time() + 1800]],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
@@ -154,9 +156,9 @@ class Tokenize
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

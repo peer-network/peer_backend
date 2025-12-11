@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
 class Pool
@@ -25,29 +24,30 @@ class Pool
             $data = $this->validate($data, $elements);
         }
 
-        $this->token = $data['token'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->postid = $data['postid'] ?? '';
-        $this->fromid = $data['fromid'] ?? '';
-        $this->numbers = $data['numbers'] ?? 0.0;
-        $this->numbersq = $data['numbersq'] ?? 0;
-        $this->whereby = $data['whereby'] ?? 0;
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->token     = $data['token']     ?? '';
+        $this->userid    = $data['userid']    ?? '';
+        $this->postid    = $data['postid']    ?? '';
+        $this->fromid    = $data['fromid']    ?? '';
+        $this->numbers   = $data['numbers']   ?? 0.0;
+        $this->numbersq  = $data['numbersq']  ?? 0;
+        $this->whereby   = $data['whereby']   ?? 0;
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'token' => $this->token,
-            'userid' => $this->userid,
-            'postid' => $this->postid,
-            'fromid' => $this->fromid,
-            'numbers' => $this->numbers,
-            'numbersq' => $this->numbersq,
-            'whereby' => $this->whereby,
+            'token'     => $this->token,
+            'userid'    => $this->userid,
+            'postid'    => $this->postid,
+            'fromid'    => $this->fromid,
+            'numbers'   => $this->numbers,
+            'numbersq'  => $this->numbersq,
+            'whereby'   => $this->whereby,
             'createdat' => $this->createdat,
         ];
+
         return $att;
     }
 
@@ -146,13 +146,15 @@ class Pool
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -160,8 +162,8 @@ class Pool
     {
         $specification = [
             'token' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => 12,
@@ -171,51 +173,51 @@ class Pool
                 ],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'fromid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'numbers' => [
-                'required' => true,
-                'filters' => [['name' => 'FloatSanitize']],
+                'required'   => true,
+                'filters'    => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => ['min' => -5000.0, 'max' => 5000.0]],
                 ],
             ],
             'numbersq' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 99999999999999999999999999999]],
                 ],
             ],
             'whereby' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 1, 'max' => 100]],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

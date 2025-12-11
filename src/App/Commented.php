@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class Commented
 {
@@ -19,7 +18,7 @@ class Commented
     protected ?int $amountlikes;
     protected ?bool $isreported;
     protected ?bool $isliked;
-    protected ?array $user = [];
+    protected ?array $user        = [];
     protected ?array $subcomments = [];
     protected ?int $userstatus;
 
@@ -30,36 +29,37 @@ class Commented
             $data = $this->validate($data, $elements);
         }
 
-        $this->commentid = $data['commentid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->postid = $data['postid'] ?? '';
-        $this->parentid = $data['parentid'] ?? null;
-        $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->commentid   = $data['commentid']   ?? '';
+        $this->userid      = $data['userid']      ?? '';
+        $this->postid      = $data['postid']      ?? '';
+        $this->parentid    = $data['parentid']    ?? null;
+        $this->content     = $data['content']     ?? '';
+        $this->createdat   = $data['createdat']   ?? new \DateTime()->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
-        $this->isreported = $data['isreported'] ?? false;
-        $this->isliked = $data['isliked'] ?? false;
-        $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
-        $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
-        $this->userstatus = $data['userstatus'] ?? 0;
+        $this->isreported  = $data['isreported']  ?? false;
+        $this->isliked     = $data['isliked']     ?? false;
+        $this->user        = isset($data['user'])        && \is_array($data['user']) ? $data['user'] : [];
+        $this->subcomments = isset($data['subcomments']) && \is_array($data['subcomments']) ? $data['subcomments'] : [];
+        $this->userstatus  = $data['userstatus'] ?? 0;
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'commentid' => $this->commentid,
-            'userid' => $this->userid,
-            'postid' => $this->postid,
-            'parentid' => $this->parentid,
-            'content' => $this->content,
-            'createdat' => $this->createdat,
+            'commentid'   => $this->commentid,
+            'userid'      => $this->userid,
+            'postid'      => $this->postid,
+            'parentid'    => $this->parentid,
+            'content'     => $this->content,
+            'createdat'   => $this->createdat,
             'amountlikes' => $this->amountlikes,
-            'isreported' => $this->isreported,
-            'isliked' => $this->isliked,
-            'user' => $this->user,
+            'isreported'  => $this->isreported,
+            'isliked'     => $this->isliked,
+            'user'        => $this->user,
             'subcomments' => $this->subcomments,
         ];
+
         return $att;
     }
 
@@ -143,13 +143,15 @@ class Commented
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -158,24 +160,24 @@ class Commented
         $commentConfig = ConstantsConfig::comment();
         $specification = [
             'commentid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'parentid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'content' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $commentConfig['CONTENT']['MIN_LENGTH'],
@@ -185,35 +187,35 @@ class Commented
                 ],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'amountlikes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'isliked' => [
                 'required' => false,
-                'filters' => [['name' => 'Boolean']],
+                'filters'  => [['name' => 'Boolean']],
             ],
             'user' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'IsArray']],
             ],
             'subcomments' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'IsArray']],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

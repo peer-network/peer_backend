@@ -10,11 +10,9 @@ class ConstantsConfigGeneratable implements DataGeneratable
 {
     private array $data = [];
 
-
     public function __construct()
     {
-
-        $constants = new ConstantsConfig();
+        $constants  = new ConstantsConfig();
         $this->data = $constants->getData();
     }
 

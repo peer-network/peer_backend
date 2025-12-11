@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\Database\PostInfoMapper;
-use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Utils\ReportTargetType;
-use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\Database\PostMapper;
 use Fawaz\Database\ModerationMapper;
+use Fawaz\Database\PostInfoMapper;
+use Fawaz\Database\PostMapper;
+use Fawaz\Database\ReportsMapper;
+use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -26,7 +26,7 @@ class PostInfoService
         protected ReportsMapper $reportMapper,
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
-        protected ModerationMapper $moderationMapper
+        protected ModerationMapper $moderationMapper,
     ) {
     }
 
@@ -35,14 +35,14 @@ class PostInfoService
         $this->currentUserId = $userId;
     }
 
-
-
     protected function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
@@ -60,9 +60,11 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
-            return ['status' => 'success', 'ResponseCode' => "11509",];
+
+            return ['status' => 'success', 'ResponseCode' => '11509'];
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
+
             return $this::respondWithError(41509);
         }
     }
@@ -99,7 +101,8 @@ class PostInfoService
         $this->logger->debug('PostInfoService.likePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
+
+        if (null === $postInfo) {
             return $this::respondWithError(31602);
         }
 
@@ -114,6 +117,7 @@ class PostInfoService
 
             if (!$exists) {
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31501);
             }
 
@@ -121,15 +125,16 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
+
             return [
                 'status' => 'success',
                 // 'ResponseCode' => "11503",
-                'ResponseCode' => "11514",
-
+                'ResponseCode' => '11514',
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: likePost: Error while fetching post data', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
     }
@@ -147,7 +152,8 @@ class PostInfoService
         $this->logger->debug('PostInfoService.dislikePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
+
+        if (null === $postInfo) {
             return $this::respondWithError(31602);
         }
 
@@ -162,6 +168,7 @@ class PostInfoService
 
             if (!$exists) {
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31502);
             }
 
@@ -169,13 +176,15 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
+
             return [
-                'status' => 'success',
-                'ResponseCode' => "11504",
+                'status'       => 'success',
+                'ResponseCode' => '11504',
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: dislikePost: Error while fetching post data', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
     }
@@ -194,41 +203,51 @@ class PostInfoService
 
         try {
             $post = $this->postMapper->loadById($postId);
+
             if (!$post) {
                 $this->logger->warning('PostInfoService: reportPost: Post not found');
+
                 return $this->respondWithError(31510);
             }
 
             if ($this->moderationMapper->wasContentRestored($postId, 'post')) {
                 $this->logger->warning('PostInfoService: reportPost: User tries to report a restored post');
+
                 return $this->respondWithError(32104);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
-            if ($postInfo === null) {
+
+            if (null === $postInfo) {
                 $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
+
                 return $this->respondWithError(responseCode: 31602);
             }
         } catch (\Exception $e) {
             $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
-            $this->logger->warning("PostInfoService: reportPost: User tries to report on his own post");
+            $this->logger->warning('PostInfoService: reportPost: User tries to report on his own post');
+
             return $this::respondWithError(31508);
         }
 
         $contentHash = $post->hashValue();
+
         if (empty($contentHash)) {
             $this->logger->error('PostInfoService: reportPost: Failed to generate content hash of content');
+
             return $this::respondWithError(41505);
         }
 
         try {
             // Moderated items should not be reported again
             if ($this->reportMapper->isModerated($postId, ReportTargetType::POST->value)) {
-                $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
+                $this->logger->warning('PostInfoService: reportPost: User tries to report a moderated post');
+
                 return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
@@ -241,15 +260,17 @@ class PostInfoService
                 $contentHash
             );
 
-            if ($exists === null) {
+            if (null === $exists) {
                 $this->transactionManager->rollback();
-                $this->logger->error("PostInfoService: reportPost: Failed to add report");
+                $this->logger->error('PostInfoService: reportPost: Failed to add report');
+
                 return $this::respondWithError(41505);
             }
 
-            if ($exists === true) {
+            if (true === $exists) {
                 $this->transactionManager->rollback();
-                $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
+                $this->logger->warning('PostInfoService: reportPost: User tries to add duplicating report');
+
                 return $this::respondWithError(31503);
             }
 
@@ -258,13 +279,15 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
+
             return [
-                'status' => 'success',
-                'ResponseCode' => "11505",
+                'status'       => 'success',
+                'ResponseCode' => '11505',
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: reportPost: Error while adding report to db or updating _info data', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
     }
@@ -282,13 +305,15 @@ class PostInfoService
         $this->logger->debug('PostInfoService.viewPost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
+
+        if (null === $postInfo) {
             return $this::respondWithError(31602);
         }
 
         if ($postInfo->getOwnerId() === $this->currentUserId) {
             return $this::respondWithError(31509);
         }
+
         try {
             $this->transactionManager->beginTransaction();
 
@@ -296,6 +321,7 @@ class PostInfoService
 
             if (!$exists) {
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31505);
             }
 
@@ -303,13 +329,15 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
+
             return [
-                'status' => 'success',
-                'ResponseCode' => "11506",
+                'status'       => 'success',
+                'ResponseCode' => '11506',
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: viewPost: Error while fetching post data', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
     }
@@ -327,7 +355,8 @@ class PostInfoService
         $this->logger->debug('PostInfoService.sharePost started');
 
         $postInfo = $this->postInfoMapper->loadById($postId);
-        if ($postInfo === null) {
+
+        if (null === $postInfo) {
             return $this::respondWithError(31602);
         }
 
@@ -338,6 +367,7 @@ class PostInfoService
 
             if (!$exists) {
                 $this->transactionManager->rollback();
+
                 return $this::respondWithError(31504);
             }
 
@@ -345,13 +375,15 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             $this->transactionManager->commit();
+
             return [
-                'status' => 'success',
-                'ResponseCode' => "11507",
+                'status'       => 'success',
+                'ResponseCode' => '11507',
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
+
             return $this::respondWithError(41505);
         }
     }
@@ -372,15 +404,15 @@ class PostInfoService
 
         $response = $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
 
-        if (isset($response['status']) && $response['status'] === 'error') {
+        if (isset($response['status']) && 'error' === $response['status']) {
             $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
             $this->transactionManager->rollback();
+
             return $response;
         }
         $this->transactionManager->commit();
 
         return $response;
-
     }
 
     public function findPostInfo(string $postId): array
@@ -389,10 +421,11 @@ class PostInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug("PostInfoService.findPostInfo started");
+        $this->logger->debug('PostInfoService.findPostInfo started');
 
         $postinfo = $this->postInfoMapper->loadById($postId);
-        if ($postinfo === null) {
+
+        if (null === $postinfo) {
             return $this::respondWithError(31510);
         }
 

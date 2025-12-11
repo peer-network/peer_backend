@@ -14,11 +14,11 @@ class FileUploadDispatcher
 
     public function __construct()
     {
-        $this->coverPostService = new CoverPostService();
-        $this->imagePostService = new ImagePostService();
+        $this->coverPostService   = new CoverPostService();
+        $this->imagePostService   = new ImagePostService();
         $this->podcastPostService = new PodcastPostService();
-        $this->videoPostService = new VideoPostService();
-        $this->notesPostService = new NotesPostService();
+        $this->videoPostService   = new VideoPostService();
+        $this->notesPostService   = new NotesPostService();
     }
 
     private function argsToJsString($args)
@@ -39,7 +39,7 @@ class FileUploadDispatcher
                 continue;
             }
 
-            $identifier = count($files) > 1 ? "{$identifiers}_{$index}" : $identifiers;
+            $identifier = \count($files) > 1 ? "{$identifiers}_{$index}" : $identifiers;
 
             switch ($contentType) {
                 case 'image':
@@ -87,21 +87,21 @@ class FileUploadDispatcher
             'image' => $this->imagePostService,
             'audio' => $this->podcastPostService,
             'video' => $this->videoPostService,
-            'text' => $this->notesPostService,
+            'text'  => $this->notesPostService,
         ];
 
         if (!isset($serviceMap[$contentType])) {
             return ['success' => false, 'error' => 'Invalid contentType parameter provided'];
         }
 
-        $imageCount = count(array_filter($files));
+        $imageCount = \count(array_filter($files));
 
         foreach ($files as $index => $file) {
             if (!$file) {
                 continue;
             }
 
-            $identifier = ($imageCount > 1) ? "{$identifiers}_" . ($index + 1) : $identifiers;
+            $identifier = ($imageCount > 1) ? "{$identifiers}_".($index + 1) : $identifiers;
 
             $result = $serviceMap[$contentType]->handleFileUpload($file, $identifier);
 

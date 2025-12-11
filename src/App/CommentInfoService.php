@@ -8,16 +8,16 @@ use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\ModerationMapper;
+use Fawaz\Database\ReportsMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\ResponseHelper;
-use Fawaz\Utils\PeerLoggerInterface;
 
 class CommentInfoService
 {
@@ -31,7 +31,7 @@ class CommentInfoService
         protected CommentMapper $commentMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected ModerationMapper $moderationMapper
+        protected ModerationMapper $moderationMapper,
     ) {
     }
 
@@ -42,15 +42,17 @@ class CommentInfoService
 
     public static function isValidUUID(string $uuid): bool
     {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
+        return 1 === preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid);
     }
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
@@ -67,7 +69,7 @@ class CommentInfoService
         $this->logger->debug('CommentInfoService.deleteCommentInfo started');
 
         if ($this->commentMapper->delete($commentId)) {
-            return ['status' => 'success', 'ResponseCode' => "11606"];
+            return ['status' => 'success', 'ResponseCode' => '11606'];
         } else {
             return $this::respondWithError(41603);
         }
@@ -116,7 +118,6 @@ class CommentInfoService
             return $this::respondWithError(31606);
         }
 
-
         $contentFilterCase = ContentFilteringCases::searchById;
 
         $deletedUserSpec = new DeletedUserSpec(
@@ -136,15 +137,16 @@ class CommentInfoService
         $specs = [
             $illegalContentSpec,
             $systemUserSpec,
-            $deletedUserSpec
+            $deletedUserSpec,
         ];
 
-        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+        if (false === $this->interactionsPermissionsMapper->isInteractionAllowed(
             $specs,
             $commentId
-        ) === false) {
+        )) {
             return $this::respondWithError(31608, ['commentid' => $commentId]);
         }
+
         try {
             $this->transactionManager->beginTransaction();
 
@@ -163,6 +165,7 @@ class CommentInfoService
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while fetching comment data', ['exception' => $e]);
+
             return $this::respondWithError(41601);
         }
     }
@@ -181,13 +184,16 @@ class CommentInfoService
 
         try {
             $comment = $this->commentMapper->loadById($commentId);
+
             if (!$comment) {
                 $this->logger->warning('Comment not found');
+
                 return $this->respondWithError(31601);
             }
 
             if ($this->moderationMapper->wasContentRestored($commentId, 'comment')) {
                 $this->logger->warning('CommentInfoService: reportComment: User tries to report a restored comment');
+
                 return $this->respondWithError(32104);
             }
 
@@ -195,28 +201,34 @@ class CommentInfoService
 
             if (!$commentInfo) {
                 $this->logger->warning('Error while fetching comment data from db');
+
                 return $this->respondWithError(31601);
             }
         } catch (\Exception $e) {
             $this->logger->error('Error while fetching data for report generation ', ['exception' => $e]);
+
             return $this::respondWithError(41601);
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            $this->logger->warning("User tries to report on his own comment");
+            $this->logger->warning('User tries to report on his own comment');
+
             return $this::respondWithError(31607);
         }
 
         $contentHash = $comment->hashValue();
+
         if (empty($contentHash)) {
             $this->logger->error('Failed to generate content hash of content');
+
             return $this::respondWithError(41601);
         }
 
         try {
             // User Should NOT be possible to report the same
             if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
-                $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
+                $this->logger->warning('PostInfoService: reportComment: User tries to report a moderated comment');
+
                 return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
@@ -229,13 +241,15 @@ class CommentInfoService
                 $contentHash
             );
 
-            if ($exists === null) {
-                $this->logger->error("Failed to add report");
+            if (null === $exists) {
+                $this->logger->error('Failed to add report');
+
                 return $this::respondWithError(41601);
             }
 
-            if ($exists === true) {
+            if (true === $exists) {
                 $this->logger->warning('Comment report already exists');
+
                 return $this->respondWithError(31605);
             }
 
@@ -244,10 +258,12 @@ class CommentInfoService
             $this->commentInfoMapper->update($commentInfo);
 
             $this->transactionManager->commit();
+
             return $this::createSuccessResponse(11604);
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
             $this->logger->error('Error while adding report to db or updating info data', ['exception' => $e]);
+
             return $this::respondWithError(41601);
         }
     }
@@ -258,7 +274,7 @@ class CommentInfoService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug("CommentInfoService.findCommentInfo started");
+        $this->logger->debug('CommentInfoService.findCommentInfo started');
 
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 

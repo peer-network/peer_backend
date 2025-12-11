@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Contactus;
-use Fawaz\Database\ContactusMapper;
-use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\ContactusMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 
 class ContactusService
@@ -29,50 +28,53 @@ class ContactusService
     {
         return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff)
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0x0FFF) | 0x4000,
+            mt_rand(0, 0x3FFF) | 0x8000,
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF),
+            mt_rand(0, 0xFFFF)
         );
     }
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
-            $this->logger->warning("Unauthorized action attempted.");
+        if (null === $this->currentUserId) {
+            $this->logger->warning('Unauthorized action attempted.');
+
             return false;
         }
+
         return true;
     }
 
     private function isValidName(?string $Name): bool
     {
-        $contactConfig = ConstantsConfig::contact();
-        $inputConfig     = ConstantsConfig::input();
-        $controlPattern  = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
-        return $Name &&
-            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
-            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match($controlPattern, $Name) === 0; 
+        $contactConfig  = ConstantsConfig::contact();
+        $inputConfig    = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
+
+        return $Name
+            && \strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH']
+            && \strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH']
+            && 0 === preg_match($controlPattern, $Name);
     }
 
     private function validateRequiredFields(array $args, array $requiredFields): array
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                return $this::respondWithError(32017);//"$field is required"
+                return $this::respondWithError(32017); // "$field is required"
             }
         }
+
         return [];
     }
 
     public function insert(Contactus $contact): ?Contactus
     {
-
         try {
             $this->transactionManager->beginTransaction();
             $response = $this->contactUsMapper->insert($contact);
@@ -82,10 +84,11 @@ class ContactusService
             return $response;
         } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
-            $this->logger->error("Error occurred in ContactusService.insert", [
+            $this->logger->error('Error occurred in ContactusService.insert', [
                 'error' => $e->getMessage(),
                 'msgid' => $contact->getMsgId(),
             ]);
+
             return null;
         }
     }
@@ -100,6 +103,7 @@ class ContactusService
             if (!$response) {
                 $this->logger->info("Rate limit check failed for IP: $ip");
                 $this->transactionManager->rollBack();
+
                 return false;
             }
             $this->transactionManager->commit();
@@ -108,13 +112,13 @@ class ContactusService
         } catch (\Throwable $e) {
             $this->transactionManager->rollBack();
 
-            $this->logger->error("Error occurred in ContactusService.checkRateLimit", [
+            $this->logger->error('Error occurred in ContactusService.checkRateLimit', [
                 'error' => $e->getMessage(),
-                'ip' => $ip,
+                'ip'    => $ip,
             ]);
+
             return false;
         }
-
     }
 
     public function loadById(string $type, string $value): array
@@ -123,7 +127,7 @@ class ContactusService
             return $this::respondWithError(60501);
         }
 
-        if (!in_array($type, ['id', 'name'], true)) {
+        if (!\in_array($type, ['id', 'name'], true)) {
             return $this::respondWithError(30105);
         }
 
@@ -131,39 +135,38 @@ class ContactusService
             return $this::respondWithError(30102);
         }
 
-        if ($type === 'id') {
+        if ('id' === $type) {
             if (!ctype_digit($value)) {
                 return $this::respondWithError(30105);
             }
-            $value = (int)$value;
+            $value = (int) $value;
         }
 
-        $this->logger->debug("ContactusService.loadById started", [
-            'type' => $type,
+        $this->logger->debug('ContactusService.loadById started', [
+            'type'  => $type,
             'value' => $value,
         ]);
 
         try {
-            $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
+            $exist = ('id' === $type) ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
-            if ($exist === null) {
+            if (null === $exist) {
                 return $this::respondWithError(40401);
             }
 
             $existData = $exist->getArrayCopy();
 
-            $this->logger->info("ContactusService.loadById successfully fetched contact", [
-                'type' => $type,
+            $this->logger->info('ContactusService.loadById successfully fetched contact', [
+                'type'  => $type,
                 'value' => $value,
-                'count' => count($existData),
+                'count' => \count($existData),
             ]);
 
             return $existData;
-
         } catch (\Throwable $e) {
-            $this->logger->error("Error occurred in ContactusService.loadById", [
+            $this->logger->error('Error occurred in ContactusService.loadById', [
                 'error' => $e->getMessage(),
-                'type' => $type,
+                'type'  => $type,
                 'value' => $value,
             ]);
 
@@ -181,7 +184,7 @@ class ContactusService
             return $this::respondWithError(30101);
         }
 
-        $this->logger->debug("ContactusService.fetchAll started", [
+        $this->logger->debug('ContactusService.fetchAll started', [
             'args' => $args,
         ]);
 
@@ -194,17 +197,16 @@ class ContactusService
 
             $existData = array_map(fn (Contactus $contact) => $contact->getArrayCopy(), $exist);
 
-            $this->logger->info("ContactusService.loadById successfully fetched contact", [
-                'args' => $args,
-                'count' => count($existData),
+            $this->logger->info('ContactusService.loadById successfully fetched contact', [
+                'args'  => $args,
+                'count' => \count($existData),
             ]);
 
             return $existData;
-
         } catch (\Throwable $e) {
-            $this->logger->error("Error occurred in ContactusService.loadById", [
+            $this->logger->error('Error occurred in ContactusService.loadById', [
                 'error' => $e->getMessage(),
-                'args' => $args,
+                'args'  => $args,
             ]);
 
             return $this::respondWithError(40301);

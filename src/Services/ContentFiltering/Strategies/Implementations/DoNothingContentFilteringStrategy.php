@@ -15,13 +15,13 @@ class DoNothingContentFilteringStrategy extends AContentFilteringStrategy implem
             ContentType::user->value => null,
         ],
         ContentType::post->value => [
-            ContentType::post->value => null,
+            ContentType::post->value    => null,
             ContentType::comment->value => null,
-            ContentType::user->value => null,
+            ContentType::user->value    => null,
         ],
         ContentType::comment->value => [
             ContentType::comment->value => null,
-            ContentType::user->value => null,
+            ContentType::user->value    => null,
         ],
     ];
 }

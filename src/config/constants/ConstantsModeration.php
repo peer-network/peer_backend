@@ -7,20 +7,18 @@ namespace Fawaz\config\constants;
 class ConstantsModeration
 {
     /**
-    * @return array{
-    *     CONTENT_SEVERITY_LEVELS: array<int,string>,
-    *     REPORTS_COUNT_TO_HIDE_CONTENT: array<'POST'|'COMMENT'|'USER', int>,
-    * }
-    */
+     * @return array{
+     *     CONTENT_SEVERITY_LEVELS: array<int,string>,
+     *     REPORTS_COUNT_TO_HIDE_CONTENT: array<'POST'|'COMMENT'|'USER', int>,
+     * }
+     */
     public static function contentFiltering()
     {
         return self::CONTENT_FILTERING;
     }
 
     /**
-     * Get content moderation status
-     *
-     * @return array
+     * Get content moderation status.
      */
     public static function contentModerationStatus(): array
     {
@@ -29,69 +27,68 @@ class ConstantsModeration
 
     private const CONTENT_FILTERING = [
         'CONTENT_SEVERITY_LEVELS' => [
-            0 => 'MYGRANDMALIKES',
-            10 => 'MYGRANDMAHATES'
+            0  => 'MYGRANDMALIKES',
+            10 => 'MYGRANDMAHATES',
         ],
         'REPORTS_COUNT_TO_HIDE_CONTENT' => [
-            'POST' => 5,
+            'POST'    => 5,
             'COMMENT' => 5,
-            'USER' => 5,
-        ]
+            'USER'    => 5,
+        ],
     ];
 
     /**
-     * Content moderation status
+     * Content moderation status.
      *
      * @var array
      */
     private const CONTENT_MODERATION_STATUS = [
         'waiting_for_review' => 'Waiting for review',
-        'hidden' => 'Hidden',
-        'restored' => 'Restored',
-        'illegal' => 'Illegal',
+        'hidden'             => 'Hidden',
+        'restored'           => 'Restored',
+        'illegal'            => 'Illegal',
     ];
 
     /**
-     * Content Target Types
+     * Content Target Types.
      *
      * @var array
      */
     public const CONTENT_MODERATION_TARGETS = [
-        'post' => 'Post',
+        'post'    => 'Post',
         'comment' => 'Comment',
-        'user' => 'User',
+        'user'    => 'User',
     ];
 
     /**
-     * Moderation Tickets Status
+     * Moderation Tickets Status.
      *
      * @var string
      */
-    public const MODERATION_TICKETS_STATUS_OPEN = 'open';
+    public const MODERATION_TICKETS_STATUS_OPEN   = 'open';
     public const MODERATION_TICKETS_STATUS_CLOSED = 'closed';
 
     /**
-     * Post Statuses
+     * Post Statuses.
      */
     /**
      * Post Status: published
-     * Applies same as in ConstantsConfig::post()['STATUS']['PUBLISHED']
+     * Applies same as in ConstantsConfig::post()['STATUS']['PUBLISHED'].
      */
     public const POST_STATUS_PUBLISHED = 0;
 
     /**
      * Post Status: advertised
-     * Applies same as in ConstantsConfig::post()['STATUS']['ADVERTISED']
+     * Applies same as in ConstantsConfig::post()['STATUS']['ADVERTISED'].
      */
     public const POST_STATUS_ADVERTISED = 1;
 
-
     /**
-     * Entity VisibilityStatuses
+     * Entity VisibilityStatuses.
      */
     public const VISIBILITY_STATUS = [
         'normal',
         'hidden', // Hidden logic of entity (post/user/comment) is not Handled/Defined through this Status flag,
-        'illegal' // It will apply the `illegal` status of the entity (post/user/comment) through Moderation.
+        'illegal', // It will apply the `illegal` status of the entity (post/user/comment) through Moderation.
     ];
 }

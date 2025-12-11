@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use Fawaz\App\Pool;
 use Fawaz\Database\PoolMapper;
-use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Utils\ResponseHelper;
 
 class PoolService
 {
@@ -25,10 +24,12 @@ class PoolService
 
     private function checkAuthentication(): bool
     {
-        if ($this->currentUserId === null) {
+        if (null === $this->currentUserId) {
             $this->logger->warning('Unauthorized access attempt');
+
             return false;
         }
+
         return true;
     }
 
@@ -38,9 +39,10 @@ class PoolService
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug("WalletService.fetchPool started");
+        $this->logger->debug('WalletService.fetchPool started');
 
         $fetchPool = $this->poolMapper->fetchPool($args);
+
         return $fetchPool;
     }
 
@@ -61,7 +63,7 @@ class PoolService
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
-        if (!in_array($day, $dayActions, true)) {
+        if (!\in_array($day, $dayActions, true)) {
             return $this::respondWithError(30223);
         }
 
@@ -71,15 +73,18 @@ class PoolService
     public function getActionPrices(): ?array
     {
         $this->logger->info('PoolService.getActionPrices: Calling fetchCurrentActionPrices');
+
         try {
             $prices = $this->poolMapper->fetchCurrentActionPrices();
             $this->logger->info('PoolService.getActionPrices: Retrieved prices', $prices ?: []);
+
             return $prices;
         } catch (\Throwable $e) {
             $this->logger->error('PoolService.getActionPrices exception', [
                 'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString()
+                'trace'   => $e->getTraceAsString(),
             ]);
+
             return null;
         }
     }

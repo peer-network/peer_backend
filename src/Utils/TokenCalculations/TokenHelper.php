@@ -18,21 +18,22 @@ class TokenHelper
     /**
      * Calculates the total number of Peer Tokens required including all applicable fees.
      *
-     * @param string $numberOfTokens Base amount of tokens.
-     * @param string $peerFee Percentage fee for Peer.
-     * @param string $burnFee Percentage of tokens to be burned.
-     * @param string $inviterFee Optional percentage for inviter reward.
-     * @return string Total required tokens including all fees.
+     * @param string $numberOfTokens base amount of tokens
+     * @param string $peerFee        percentage fee for Peer
+     * @param string $burnFee        percentage of tokens to be burned
+     * @param string $inviterFee     optional percentage for inviter reward
+     *
+     * @return string total required tokens including all fees
      */
     public static function calculateTokenRequiredAmount(
         string $numberOfTokens,
         string $peerFee,
         string $burnFee,
-        string $inviterFee = '0'
+        string $inviterFee = '0',
     ): string {
         $allFees1 = self::addRc('1', $peerFee);
         $allFees1 = self::addRc($allFees1, $burnFee);
-        $allFees = self::addRc($allFees1, $inviterFee);
+        $allFees  = self::addRc($allFees1, $inviterFee);
 
         $requiredAmount = self::mulRc($numberOfTokens, $allFees);
 
@@ -42,29 +43,32 @@ class TokenHelper
     /**
      * Sums up all the fee-related amounts to calculate the total amount a sender must provide in a swap.
      *
-     * @param string $feeAmount Network or service fee.
-     * @param string $peerAmount Actual token amount.
-     * @param string $burnAmount Burned token amount.
-     * @param string $inviterAmount Optional amount for inviter reward.
-     * @return string Total required from sender including all parts.
+     * @param string $feeAmount     network or service fee
+     * @param string $peerAmount    actual token amount
+     * @param string $burnAmount    burned token amount
+     * @param string $inviterAmount optional amount for inviter reward
+     *
+     * @return string total required from sender including all parts
      */
     public static function calculateSwapTokenSenderRequiredAmountIncludingFees(
         string $feeAmount,
         string $peerAmount,
         string $burnAmount,
-        string $inviterAmount = '0'
+        string $inviterAmount = '0',
     ): string {
-        $cal1 =  self::addRc($feeAmount, $peerAmount);
-        $cal2 =  self::addRc($burnAmount, $inviterAmount);
+        $cal1 = self::addRc($feeAmount, $peerAmount);
+        $cal2 = self::addRc($burnAmount, $inviterAmount);
+
         return self::addRc($cal1, $cal2);
     }
 
     /**
      * Adds two values.
      *
-     * @param string $value1 First  value.
-     * @param string $value2 Second  value.
-     * @return string Sum of the two  values, as a  string.
+     * @param string $value1 first  value
+     * @param string $value2 second  value
+     *
+     * @return string sum of the two  values, as a  string
      */
     public static function addRc(string $value1, string $value2): string
     {
@@ -72,9 +76,10 @@ class TokenHelper
 
         $result = $runtIns->add_decimal($value1, $value2);
 
-        if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        if (false === is_numeric($result)) {
+            throw new \RuntimeException('Error in addition operation, result is not numeric.');
         }
+
         return $result;
     }
 
@@ -88,19 +93,20 @@ class TokenHelper
 
         $result = $ffi->truncate_decimal($number);
 
-        if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in truncation operation, result is not numeric.");
+        if (false === is_numeric($result)) {
+            throw new \RuntimeException('Error in truncation operation, result is not numeric.');
         }
+
         return $result;
     }
-
 
     /**
      * Multiply two values.
      *
-     * @param string $value1 First value.
-     * @param string $value2 Second value.
-     * @return string Sum of the two values, as a string.
+     * @param string $value1 first value
+     * @param string $value2 second value
+     *
+     * @return string sum of the two values, as a string
      */
     public static function mulRc(string $value1, string $value2): string
     {
@@ -108,19 +114,20 @@ class TokenHelper
 
         $result = $runtIns->multiply_decimal($value1, $value2);
 
-        if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        if (false === is_numeric($result)) {
+            throw new \RuntimeException('Error in addition operation, result is not numeric.');
         }
-        return $result;
 
+        return $result;
     }
 
     /**
      * divide two values.
      *
-     * @param string $value1 First  value.
-     * @param string $value2 Second  value.
-     * @return string Sum of the two  values, as a  string.
+     * @param string $value1 first  value
+     * @param string $value2 second  value
+     *
+     * @return string sum of the two  values, as a  string
      */
     public static function divRc(string $value1, string $value2): string
     {
@@ -128,18 +135,20 @@ class TokenHelper
 
         $result = $runtIns->divide_decimal($value1, $value2);
 
-        if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        if (false === is_numeric($result)) {
+            throw new \RuntimeException('Error in addition operation, result is not numeric.');
         }
+
         return $result;
     }
 
     /**
      * Substract two  values.
      *
-     * @param string $value1 First  value.
-     * @param string $value2 Second  value.
-     * @return string Sum of the two  values, as a  string.
+     * @param string $value1 first  value
+     * @param string $value2 second  value
+     *
+     * @return string sum of the two  values, as a  string
      */
     public static function subRc(string $value1, string $value2): string
     {
@@ -147,9 +156,10 @@ class TokenHelper
 
         $result = $runtIns->subtract_decimal($value1, $value2);
 
-        if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+        if (false === is_numeric($result)) {
+            throw new \RuntimeException('Error in addition operation, result is not numeric.');
         }
+
         return $result;
     }
 
@@ -158,26 +168,23 @@ class TokenHelper
      */
     public static function initRc()
     {
-
-        if (PHP_OS_FAMILY === 'Windows') {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
-        } elseif (PHP_OS_FAMILY === 'Darwin') {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.dylib';
+        if (\PHP_OS_FAMILY === 'Windows') {
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/tokencalculation.dll';
+        } elseif (\PHP_OS_FAMILY === 'Darwin') {
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/libtokencalculation.dylib';
         } else {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/libtokencalculation.so';
         }
 
-
         // Load FFI bindings for core arithmetic only
-        $ffi = FFI::cdef("
+        $ffi = \FFI::cdef('
 			const char* add_decimal(const char* a, const char* b);
 			const char* subtract_decimal(const char* a, const char* b);
 			const char* multiply_decimal(const char* a, const char* b);
 			const char* divide_decimal(const char* a, const char* b);
-		", $relativePath);
+		', $relativePath);
 
         return $ffi;
-
     }
 
     /**
@@ -186,19 +193,19 @@ class TokenHelper
      */
     private static function initTruncateRc()
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/tokencalculation.dll';
-        } elseif (PHP_OS_FAMILY === 'Darwin') {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.dylib';
+        if (\PHP_OS_FAMILY === 'Windows') {
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/tokencalculation.dll';
+        } elseif (\PHP_OS_FAMILY === 'Darwin') {
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/libtokencalculation.dylib';
         } else {
-            $relativePath = dirname(__DIR__, 3) . DIRECTORY_SEPARATOR . 'tokencalculation/target/release/libtokencalculation.so';
+            $relativePath = \dirname(__DIR__, 3).\DIRECTORY_SEPARATOR.'tokencalculation/target/release/libtokencalculation.so';
         }
 
         try {
-            return FFI::cdef("
+            return \FFI::cdef('
 				const char* truncate_decimal(const char* a);
-			", $relativePath);
-        } catch (\FFI\Exception $e) {
+			', $relativePath);
+        } catch (FFI\Exception $e) {
             throw new \RuntimeException('truncate_decimal not available in native library. Please rebuild and deploy tokencalculation with that export.', 0, $e);
         }
     }

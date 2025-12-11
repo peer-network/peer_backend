@@ -12,7 +12,7 @@ class LastGithubPullRequestNumberProvider
         $cmd = "git log --merges --grep='Merge pull request #' -i --pretty=format:'%s'";
         exec($cmd, $output, $return_var);
 
-        if ($return_var !== 0) {
+        if (0 !== $return_var) {
             // echo "Error: Failed to run git log command.\n";
             return null;
         }
@@ -21,6 +21,7 @@ class LastGithubPullRequestNumberProvider
         foreach ($output as $line) {
             if (preg_match('/#(\d+)/', $line, $matches)) {
                 $prNumber = $matches[1];
+
                 return $prNumber;
                 // echo "Last merged PR number: $prNumber\n";
             }

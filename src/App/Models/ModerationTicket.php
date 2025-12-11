@@ -13,7 +13,7 @@ use Fawaz\App\Models\Core\Model;
 class ModerationTicket extends Model
 {
     /**
-     * Table name in the database
+     * Table name in the database.
      */
     protected static function table(): string
     {

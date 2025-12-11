@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class Wallett
 {
@@ -23,23 +22,24 @@ class Wallett
             $data = $this->validate($data, $elements);
         }
 
-        $this->userid = $data['userid'] ?? '';
+        $this->userid    = $data['userid']    ?? '';
         $this->liquidity = $data['liquidity'] ?? 0.0;
         $this->liquiditq = $data['liquiditq'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'userid' => $this->userid,
+            'userid'    => $this->userid,
             'liquidity' => $this->liquidity,
             'liquiditq' => $this->liquiditq,
             'updatedat' => $this->updatedat,
             'createdat' => $this->createdat,
         ];
+
         return $att;
     }
 
@@ -91,7 +91,7 @@ class Wallett
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Validation and Array Filtering methods (Unchanged)
@@ -108,46 +108,48 @@ class Wallett
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $wallettConst = ConstantsConfig::wallett();
+        $wallettConst  = ConstantsConfig::wallett();
         $specification = [
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'liquidity' => [
-                'required' => true,
-                'filters' => [['name' => 'FloatSanitize']],
+                'required'   => true,
+                'filters'    => [['name' => 'FloatSanitize']],
                 'validators' => [
                     ['name' => 'ValidateFloat', 'options' => ['min' => $wallettConst['LIQUIDITY']['MIN'], 'max' => $wallettConst['LIQUIDITY']['MAX']]],
                 ],
             ],
             'liquiditq' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => $wallettConst['LIQUIDITQ']['MIN'], 'max' => $wallettConst['LIQUIDITQ']['MAX']]],
                 ],
             ],
             'updatedat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
@@ -155,9 +157,9 @@ class Wallett
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

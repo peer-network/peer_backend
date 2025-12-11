@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
-use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Filter\PeerInputFilter;
 
 class Contactus
 {
@@ -24,25 +23,26 @@ class Contactus
             $data = $this->validate($data, $elements);
         }
 
-        $this->msgid = $data['msgid'] ?? 0;
-        $this->email = $data['email'] ?? '';
-        $this->name = $data['name'] ?? '';
-        $this->message = $data['message'] ?? '';
-        $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->msgid     = $data['msgid']     ?? 0;
+        $this->email     = $data['email']     ?? '';
+        $this->name      = $data['name']      ?? '';
+        $this->message   = $data['message']   ?? '';
+        $this->ip        = $data['ip']        ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'msgid' => $this->msgid,
-            'email' => $this->email,
-            'name' => $this->name,
-            'message' => $this->message,
-            'ip' => $this->ip,
+            'msgid'     => $this->msgid,
+            'email'     => $this->email,
+            'name'      => $this->name,
+            'message'   => $this->message,
+            'ip'        => $this->ip,
             'createdat' => $this->createdat,
         ];
+
         return $att;
     }
 
@@ -94,7 +94,7 @@ class Contactus
 
     public function setIp(?string $ip = null): void
     {
-        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->ip = filter_var($ip, \FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getCreatedAt(): string
@@ -121,13 +121,15 @@ class Contactus
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -136,20 +138,20 @@ class Contactus
         $contactConfig = ConstantsConfig::contact();
         $specification = [
             'msgid' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [['name' => 'ToInt']],
             ],
             'email' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
                 ],
             ],
             'name' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $contactConfig['NAME']['MIN_LENGTH'],
@@ -159,8 +161,8 @@ class Contactus
                 ],
             ],
             'message' => [
-                'required' => true,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $contactConfig['MESSAGE']['MIN_LENGTH'],
@@ -170,24 +172,24 @@ class Contactus
                 ],
             ],
             'ip' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
                 ],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

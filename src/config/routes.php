@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 use Fawaz\Handler\GraphQLHandler;
 use Fawaz\Handler\HealthHandler;
-use Fawaz\Handler\NotFoundHandler;
 use Fawaz\Handler\MultipartPostHandler;
+use Fawaz\Handler\NotFoundHandler;
 use Slim\App;
 
 return static function (App $app) {
     $app->add(function ($request, $handler) {
         $response = $handler->handle($request);
+
         return $response
             // Security Headers
             ->withHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; object-src 'none';")
@@ -19,7 +20,7 @@ return static function (App $app) {
             ->withHeader('X-XSS-Protection', '1; mode=block')
             ->withHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload')
             ->withHeader('Referrer-Policy', 'no-referrer')
-            ->withHeader('Permissions-Policy', "geolocation=(), microphone=(), camera=()")
+            ->withHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
 
             // CORS & Cache Headers
             ->withHeader('Access-Control-Allow-Origin', '*')

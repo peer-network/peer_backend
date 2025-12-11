@@ -11,21 +11,18 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 class ContentFilterServiceImpl
 {
     public function __construct(
-        private ContentType $targetContent
+        private ContentType $targetContent,
     ) {
     }
 
-    /**
-    * @param ContentType $showingContent
-    * @return ContentFilteringAction|null
-    */
     public function getContentFilterAction(
         ContentType $showingContent,
         ?ContentFilteringStrategy $strategy,
     ): ?ContentFilteringAction {
-        if ($strategy === null) {
+        if (null === $strategy) {
             return null;
         }
+
         return $strategy::getAction($this->targetContent, $showingContent);
     }
 }

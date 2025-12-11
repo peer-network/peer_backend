@@ -11,14 +11,13 @@ class Rechnen
     // @return string
     public static function format_percentage(float $percentage, int $precision = 2): string
     {
-
-        return round($percentage, $precision) . '%';
+        return round($percentage, $precision).'%';
     }
 
     // @return float val
     public static function calculate_percentage(float $number, float $total): float
     {
-        if ($total == 0) {
+        if (0 == $total) {
             return 0;
         }
 
@@ -34,71 +33,76 @@ class Rechnen
     // @return float val
     public static function calculate_account_stand(float $cost = 0, float $account = 0): float
     {
-        if ($cost == 0 || $account == 0) {
+        if (0 == $cost || 0 == $account) {
             return 0;
         }
 
-        return ($account - $cost);
+        return $account - $cost;
     }
 
     // @return float val
     public static function calculate_cost_plus_feesum(float $price = 1, float $sum = 1): float
     {
-        if ($price == 0 || $sum == 0) {
+        if (0 == $price || 0 == $sum) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+        $tax = (float) ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+
         return ($price * $sum) + (($price * $sum) * $tax);
     }
 
     // @return float val
     public static function calculate_cost_to_wallet(float $price = 1, float $sum = 1): float
     {
-        if ($price == 0 || $sum == 0) {
+        if (0 == $price || 0 == $sum) {
             return 0;
         }
 
-        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+        $tax       = (float) ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         $sales_tax = $tax;
+
         return ($price * $sum) - (($price * $sum) * $sales_tax);
     }
 
     // @return float val
     public static function calculate_total_feesum(float $price = 1, float $sum = 1): float
     {
-        if ($price == 0 || $sum == 0) {
+        if (0 == $price || 0 == $sum) {
             return 0;
         }
 
-        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+        $tax       = (float) ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         $sales_tax = $tax;
+
         return ($sum * $price) * $sales_tax;
     }
 
     // @return float val
     public static function calculate_feesum_once(float $price = 1, float $sum = 1): float
     {
-        if ($price == 0 || $sum == 0) {
+        if (0 == $price || 0 == $sum) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
-        return ((($sum * $price) * $tax) / $sum);
+        $tax = (float) ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+
+        return (($sum * $price) * $tax) / $sum;
     }
 
     // @return float val
     public static function calculate_total_burn_feesum(float $price = 1, float $sum = 1): float
     {
-        if ($price == 0 || $sum == 0) {
+        if (0 == $price || 0 == $sum) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+        $tax = (float) ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
+
         return ($price * $sum) * $tax;
     }
 
     // @return float val
     public static function calculate_percentage_of_num(float $percentage, float $total): float
     {
-        if ($percentage == 0 || $total == 0) {
+        if (0 == $percentage || 0 == $total) {
             return 0;
         }
 
@@ -112,7 +116,7 @@ class Rechnen
             return 0.0;
         }
 
-        $result = bcdiv((string)$daily_token, (string)$daily_gems, $precision);
+        $result = bcdiv((string) $daily_token, (string) $daily_gems, $precision);
 
         return (float) $result;
     }
@@ -120,7 +124,7 @@ class Rechnen
     // @return float val
     public static function calculate_gems_preis(float $d_token = 0, float $d_gems = 0, float $t_price = 0): float
     {
-        if ($d_token == 0 || $d_gems == 0 || $t_price == 0) {
+        if (0 == $d_token || 0 == $d_gems || 0 == $t_price) {
             return 0;
         }
 
@@ -130,12 +134,13 @@ class Rechnen
     // @return float val
     public static function calculate_user_win(float $d_token = 0, float $d_gems = 0, float $user_gems = 0): float
     {
-        if ($d_token == 0 || $d_gems == 0 || $user_gems == 0) {
+        if (0 == $d_token || 0 == $d_gems || 0 == $user_gems) {
             return 0;
         }
 
         $token_preis = self::calculate_token_preis($d_token, $d_gems);
-        return ($token_preis * $user_gems);
+
+        return $token_preis * $user_gems;
     }
 
     // @return float val i make it to get sum by user of $auth->callsetExange();
@@ -144,7 +149,7 @@ class Rechnen
         $sum = 0;
 
         if (isset($arr[$usercol]) && $arr[$usercol] === $userid) {
-            $sum += \array_sum((array) $arr[$sumcol]); // Cast to array to handle different data types
+            $sum += array_sum((array) $arr[$sumcol]); // Cast to array to handle different data types
         }
 
         foreach ($arr as $child) {
@@ -152,7 +157,7 @@ class Rechnen
                 if (!isset($child[$sumcol])) {
                     $sum = self::sum_any_by_col_by_name($child, $sumcol, $usercol, $userid);
                 } elseif (isset($child[$usercol]) && $child[$usercol] === $userid) {
-                    $sum += \array_sum((array) $child[$sumcol]);
+                    $sum += array_sum((array) $child[$sumcol]);
                 }
             }
         }
@@ -166,7 +171,7 @@ class Rechnen
         $sum = $x;
 
         if (isset($arr[$sumcol])) {
-            $sum += \array_sum((array) $arr[$sumcol]); // Cast to array to ensure summing works correctly
+            $sum += array_sum((array) $arr[$sumcol]); // Cast to array to ensure summing works correctly
         }
 
         foreach ($arr as $child) {
@@ -174,7 +179,7 @@ class Rechnen
                 if (!isset($child[$sumcol])) {
                     $sum = self::sum_all_by_col($child, $sumcol, $sum);
                 } else {
-                    $sum += \array_sum((array) $child[$sumcol]);
+                    $sum += array_sum((array) $child[$sumcol]);
                 }
             }
         }
@@ -185,7 +190,7 @@ class Rechnen
     // @return float val i make it to get sum by user of $auth->callsetExange();
     public static function array_all_by_col(array $arr, string $sumcol): array
     {
-        return array_values(\array_unique(\array_column($arr, $sumcol)));
+        return array_values(array_unique(array_column($arr, $sumcol)));
     }
 
     private function __construct()

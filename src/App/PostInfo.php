@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
@@ -28,33 +27,34 @@ class PostInfo extends Model
             $data = $this->validate($data, $elements);
         }
 
-        $this->postid = $data['postid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->likes = $data['likes'] ?? 0;
-        $this->dislikes = $data['dislikes'] ?? 0;
-        $this->activeReports = $data['reports'] ?? 0;
-        $this->totalreports = $data['totalreports'] ?? 0;
-        $this->views = $data['views'] ?? 0;
-        $this->saves = $data['saves'] ?? 0;
-        $this->shares = $data['shares'] ?? 0;
-        $this->comments = $data['comments'] ?? 0;
+        $this->postid        = $data['postid']       ?? '';
+        $this->userid        = $data['userid']       ?? '';
+        $this->likes         = $data['likes']        ?? 0;
+        $this->dislikes      = $data['dislikes']     ?? 0;
+        $this->activeReports = $data['reports']      ?? 0;
+        $this->totalreports  = $data['totalreports'] ?? 0;
+        $this->views         = $data['views']        ?? 0;
+        $this->saves         = $data['saves']        ?? 0;
+        $this->shares        = $data['shares']       ?? 0;
+        $this->comments      = $data['comments']     ?? 0;
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'postid' => $this->postid,
-            'userid' => $this->userid,
-            'likes' => $this->likes,
-            'dislikes' => $this->dislikes,
-            'reports' => $this->activeReports,
+            'postid'       => $this->postid,
+            'userid'       => $this->userid,
+            'likes'        => $this->likes,
+            'dislikes'     => $this->dislikes,
+            'reports'      => $this->activeReports,
             'totalreports' => $this->totalreports,
-            'views' => $this->views,
-            'saves' => $this->saves,
-            'shares' => $this->shares,
-            'comments' => $this->comments,
+            'views'        => $this->views,
+            'saves'        => $this->saves,
+            'shares'       => $this->shares,
+            'comments'     => $this->comments,
         ];
+
         return $att;
     }
 
@@ -119,7 +119,6 @@ class PostInfo extends Model
         $this->totalreports = $totalreports;
     }
 
-
     public function getViews(): int
     {
         return $this->views;
@@ -174,13 +173,15 @@ class PostInfo extends Model
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -188,57 +189,56 @@ class PostInfo extends Model
     {
         $specification = [
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'likes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'dislikes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'reports' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'views' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'saves' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'shares' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'comments' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
-
 
     // Table name
     public static function table(): string

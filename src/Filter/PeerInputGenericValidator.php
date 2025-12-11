@@ -4,22 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\Filter;
 
-use Exception;
-use DateTime;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
-
-use function trim;
-use function preg_match;
-use function strlen;
-use function filter_var;
-use function in_array;
-use function method_exists;
 
 class PeerInputGenericValidator
 {
     protected array $specification;
-    protected array $data = [];
+    protected array $data   = [];
     protected array $errors = [];
 
     public function __construct(array $specification)
@@ -50,8 +41,9 @@ class PeerInputGenericValidator
                 // Apply filters (transformers) first, if any
                 foreach ($rules['filters'] ?? [] as $filter) {
                     $filterName = $filter['name'];
-                    $options = $filter['options'] ?? [];
-                    if (method_exists($this, $filterName)) {
+                    $options    = $filter['options'] ?? [];
+
+                    if (\method_exists($this, $filterName)) {
                         $this->data[$field] = $this->$filterName($this->data[$field], $options);
                     } else {
                         throw new ValidationException("Filter method $filterName does not exist.");
@@ -61,13 +53,15 @@ class PeerInputGenericValidator
                 // Then run validators
                 foreach ($rules['validators'] ?? [] as $validator) {
                     $validatorName = $validator['name'];
-                    $options = $validator['options'] ?? [];
+                    $options       = $validator['options'] ?? [];
+
                     // Ensure validators know which field to record errors under
                     if (!isset($options['field'])) {
                         $options['field'] = $field;
                     }
+
                     // Debug output removed
-                    if (method_exists($this, $validatorName)) {
+                    if (\method_exists($this, $validatorName)) {
                         if (!$this->$validatorName($this->data[$field], $options)) {
                             // Respect chain breaking if provided; individual validators push specific errors
                             if (!empty($validator['break_chain_on_failure'])) {
@@ -97,21 +91,25 @@ class PeerInputGenericValidator
      */
     public function getErrorCodes(): array
     {
-        $codes = [];
+        $codes   = [];
         $extract = function ($value) use (&$codes, &$extract): void {
-            if (is_int($value)) {
+            if (\is_int($value)) {
                 $codes[] = $value;
+
                 return;
             }
-            if (is_string($value) && ctype_digit($value)) {
-                $codes[] = (int)$value;
+
+            if (\is_string($value) && ctype_digit($value)) {
+                $codes[] = (int) $value;
+
                 return;
             }
-            if (is_array($value)) {
+
+            if (\is_array($value)) {
                 foreach ($value as $v) {
                     $extract($v);
                 }
-            } elseif (is_object($value)) {
+            } elseif (\is_object($value)) {
                 foreach (get_object_vars($value) as $v) {
                     $extract($v);
                 }
@@ -135,8 +133,9 @@ class PeerInputGenericValidator
     protected function pushError(array $options, string $defaultField, string $defaultCode): void
     {
         $fieldKey = $options['field'] ?? $defaultField;
-        if ($options['errorCode'] !== 0) {
-            $code = (string)($options['errorCode']);
+
+        if (0 !== $options['errorCode']) {
+            $code = (string) $options['errorCode'];
         } else {
             $code = $defaultCode;
         }
@@ -147,17 +146,22 @@ class PeerInputGenericValidator
     protected function Uuid(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'uuid';
-        if ($value !== null && $value === '') {
+
+        if (null !== $value && '' === $value) {
             return false;
         }
-        if (!is_string($value)) {
+
+        if (!\is_string($value)) {
             $this->pushError($options, $fieldKey, '30201');
+
             return false;
         }
-        if (preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value) === 1) {
+
+        if (1 === \preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value)) {
             return true;
         }
         $this->pushError($options, $fieldKey, '30201');
+
         return false;
     }
 
@@ -168,22 +172,23 @@ class PeerInputGenericValidator
 
         $format = $options['format'] ?? 'Y-m-d H:i:s.u';
 
-        if (preg_match('/\.\d+$/', $value, $matches)) {
+        if (\preg_match('/\.\d+$/', $value, $matches)) {
             $microseconds = $matches[0];
-            if (strlen($microseconds) < 7) {
+
+            if (\strlen($microseconds) < 7) {
                 $value = str_replace($microseconds, str_pad($microseconds, 7, '0'), $value);
             }
         }
 
-        $dateTime = DateTime::createFromFormat($format, $value);
+        $dateTime = \DateTime::createFromFormat($format, $value);
 
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn ($matches) => '.'.str_pad($matches[1], 6, '0'), $formatted);
 
-            $value = trim($value);
-            $formatted = trim($formatted);
+            $value     = \trim($value);
+            $formatted = \trim($formatted);
 
             if ($formatted === $value) {
                 return true;
@@ -191,6 +196,7 @@ class PeerInputGenericValidator
         }
 
         $this->pushError($options, $fieldKey, '30258');
+
         return false;
     }
 
@@ -199,10 +205,12 @@ class PeerInputGenericValidator
         $fieldKey = $options['field'] ?? 'email';
         // Type guard: must be string
 
-        if (filter_var($value, FILTER_VALIDATE_EMAIL) == false) {
+        if (false == \filter_var($value, \FILTER_VALIDATE_EMAIL)) {
             $this->pushError($options, $fieldKey, '30224');
+
             return false;
         }
+
         return true;
     }
 
@@ -213,44 +221,52 @@ class PeerInputGenericValidator
     protected function ContentFilter(mixed $value, array $options = []): bool
     {
         // Treat empty values as valid (optional field semantics)
-        if ($value === null || $value === '' || $value === []) {
+        if (null === $value || '' === $value || [] === $value) {
             return true;
         }
 
         // Delegate validation to the service implementation
         $isValid = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($value);
-        if ($isValid === false) {
-            $this->errors['contentFilterBy'][] = "30103";
+
+        if (false === $isValid) {
+            $this->errors['contentFilterBy'][] = '30103';
+
             return false;
         }
+
         return true;
     }
 
     protected function IsIp(string $value, array $options = []): bool
     {
         $flags = 0;
+
         if (!empty($options['ipv4'])) {
-            $flags |= FILTER_FLAG_IPV4;
+            $flags |= \FILTER_FLAG_IPV4;
         }
+
         if (!empty($options['ipv6'])) {
-            $flags |= FILTER_FLAG_IPV6;
+            $flags |= \FILTER_FLAG_IPV6;
         }
-        return filter_var($value, FILTER_VALIDATE_IP, $flags) !== false;
+
+        return false !== \filter_var($value, \FILTER_VALIDATE_IP, $flags);
     }
 
     protected function isImage(string $value, array $options = []): bool
     {
         $allowedExtensions = $options['extensions'] ?? ['jpg', 'jpeg', 'png', 'gif', 'heic', 'heif', 'tiff', 'webp'];
-        $allowedMimeTypes = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff', 'image/webp'];
+        $allowedMimeTypes  = $options['mime_types'] ?? ['image/jpeg', 'image/png', 'image/gif', 'image/heic', 'image/heif', 'image/tiff', 'image/webp'];
 
-        $extension = pathinfo($value, PATHINFO_EXTENSION);
-        if (!in_array(strtolower($extension), $allowedExtensions)) {
+        $extension = pathinfo($value, \PATHINFO_EXTENSION);
+
+        if (!\in_array(strtolower($extension), $allowedExtensions)) {
             return false;
         }
 
         if (file_exists($value)) {
             $mimeType = mime_content_type($value);
-            if (!in_array($mimeType, $allowedMimeTypes)) {
+
+            if (!\in_array($mimeType, $allowedMimeTypes)) {
                 return false;
             }
         }
@@ -260,21 +276,24 @@ class PeerInputGenericValidator
 
     protected function validatePassword(string $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'password';
+        $fieldKey       = $options['field'] ?? 'password';
         $passwordConfig = ConstantsConfig::user()['PASSWORD'];
 
-        if ($value === '') {
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, '30101');
+
             return false;
         }
 
-        if (strlen($value) < $passwordConfig['MIN_LENGTH'] || strlen($value) > $passwordConfig['MAX_LENGTH']) {
+        if (\strlen($value) < $passwordConfig['MIN_LENGTH'] || \strlen($value) > $passwordConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30226');
+
             return false;
         }
 
-        if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $value)) {
+        if (!\preg_match('/'.$passwordConfig['PATTERN'].'/u', $value)) {
             $this->pushError($options, $fieldKey, '30226');
+
             return false;
         }
 
@@ -289,7 +308,8 @@ class PeerInputGenericValidator
         // - accept common typo 'litim' as 'limit'
         // - accept snake_case by removing underscores (e.g., post_offset)
         $field = $options['field'] ?? null;
-        if (is_string($field)) {
+
+        if (\is_string($field)) {
             $normalized = strtolower($field);
             // remove underscores to support snake_case variants
             $field = $normalized;
@@ -297,72 +317,80 @@ class PeerInputGenericValidator
             $options['field'] = $field;
         }
 
-        $paging = ConstantsConfig::paging();
-        $minOffset = (int)$paging['OFFSET']['MIN'];
-        $maxOffset = (int)$paging['OFFSET']['MAX'];
-        $minPostOffset = (int)$paging['POST_OFFSET']['MIN'];
-        $maxPostOffset = (int)$paging['POST_OFFSET']['MAX'];
-        $minLimit = (int)$paging['LIMIT']['MIN'];
-        $maxLimit = (int)$paging['LIMIT']['MAX'];
-        $minPostLimit = (int)$paging['POST_LIMIT']['MIN'];
-        $maxPostLimit = (int)$paging['POST_LIMIT']['MAX'];
+        $paging        = ConstantsConfig::paging();
+        $minOffset     = (int) $paging['OFFSET']['MIN'];
+        $maxOffset     = (int) $paging['OFFSET']['MAX'];
+        $minPostOffset = (int) $paging['POST_OFFSET']['MIN'];
+        $maxPostOffset = (int) $paging['POST_OFFSET']['MAX'];
+        $minLimit      = (int) $paging['LIMIT']['MIN'];
+        $maxLimit      = (int) $paging['LIMIT']['MAX'];
+        $minPostLimit  = (int) $paging['POST_LIMIT']['MIN'];
+        $maxPostLimit  = (int) $paging['POST_LIMIT']['MAX'];
 
-        $num = (int)$value;
+        $num = (int) $value;
 
         // Determine range and error code based on the specific field
         switch (true) {
-            case $field === 'offset':
+            case 'offset' === $field:
                 if ($num < $minOffset || $num > $maxOffset) {
                     $this->pushError($options, $field, '30203');
+
                     return false;
                 }
                 break;
 
-            case $field === 'limit':
+            case 'limit' === $field:
                 if ($num < $minLimit || $num > $maxLimit) {
                     $this->pushError($options, $field, '30204');
+
                     return false;
                 }
                 break;
 
-            case $field === 'postoffset':
+            case 'postoffset' === $field:
                 if ($num < $minPostOffset || $num > $maxPostOffset) {
                     $this->pushError($options, $field, '30214');
+
                     return false;
                 }
                 break;
 
-            case $field === 'postlimit':
+            case 'postlimit' === $field:
                 if ($num < $minPostLimit || $num > $maxPostLimit) {
                     $this->pushError($options, $field, '30205');
+
                     return false;
                 }
                 break;
 
-            case $field === 'commentoffset':
+            case 'commentoffset' === $field:
                 if ($num < $minOffset || $num > $maxOffset) {
                     $this->pushError($options, $field, '30215');
+
                     return false;
                 }
                 break;
 
-            case $field === 'commentlimit':
+            case 'commentlimit' === $field:
                 if ($num < $minLimit || $num > $maxLimit) {
                     $this->pushError($options, $field, '30216');
+
                     return false;
                 }
                 break;
 
-            case $field === 'messageoffset':
+            case 'messageoffset' === $field:
                 if ($num < $minOffset || $num > $maxOffset) {
                     $this->pushError($options, $field, '30219');
+
                     return false;
                 }
                 break;
 
-            case $field === 'messagelimit':
+            case 'messagelimit' === $field:
                 if ($num < $minLimit || $num > $maxLimit) {
                     $this->pushError($options, $field, '30220');
+
                     return false;
                 }
                 break;
@@ -376,32 +404,37 @@ class PeerInputGenericValidator
 
     protected function validateUsername(string $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'username';
+        $fieldKey           = $options['field'] ?? 'username';
         $forbiddenUsernames = ['moderator', 'admin', 'owner', 'superuser', 'root', 'master', 'publisher', 'manager', 'developer'];
-        $usernameConfig = ConstantsConfig::user()['USERNAME'];
+        $usernameConfig     = ConstantsConfig::user()['USERNAME'];
 
-        if ($value === '') {
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, '30202');
+
             return false;
         }
 
-        if (strlen($value) < $usernameConfig['MIN_LENGTH'] || strlen($value) > $usernameConfig['MAX_LENGTH']) {
+        if (\strlen($value) < $usernameConfig['MIN_LENGTH'] || \strlen($value) > $usernameConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30202');
+
             return false;
         }
 
-        if (!preg_match('/' . $usernameConfig['PATTERN'] . '/u', $value)) {
+        if (!\preg_match('/'.$usernameConfig['PATTERN'].'/u', $value)) {
             $this->pushError($options, $fieldKey, '30202');
+
             return false;
         }
 
-        if (!preg_match('/[a-zA-Z]/', $value)) {
+        if (!\preg_match('/[a-zA-Z]/', $value)) {
             $this->pushError($options, $fieldKey, '30202');
+
             return false;
         }
 
-        if (in_array(strtolower($value), $forbiddenUsernames, true)) {
+        if (\in_array(strtolower($value), $forbiddenUsernames, true)) {
             $this->pushError($options, $fieldKey, '31002');
+
             return false;
         }
 
@@ -410,44 +443,50 @@ class PeerInputGenericValidator
 
     protected function validateTagName(string $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'tag';
+        $fieldKey  = $options['field'] ?? 'tag';
         $tagConfig = ConstantsConfig::post()['TAG'];
 
-        if ($value === '') {
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, '30101');
+
             return false;
         }
 
-        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
+        if (\strlen($value) < $tagConfig['MIN_LENGTH'] || \strlen($value) > $tagConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30103');
+
             return false;
         }
 
-        if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $value)) {
+        if (!\preg_match('/'.$tagConfig['PATTERN'].'/u', $value)) {
             $this->pushError($options, $fieldKey, '30103');
+
             return false;
         }
 
         return true;
     }
 
-
     protected function validatePkey(string $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'pkey';
-        if ($value === '') {
+
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, '30103');
+
             return false;
         }
         $walletConst = ConstantsConfig::wallet();
 
-        if (strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
+        if (\strlen($value) < $walletConst['SOLANA_PUBKEY']['MIN_LENGTH'] || \strlen($value) > $walletConst['SOLANA_PUBKEY']['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30254');
+
             return false;
         }
 
-        if (!preg_match('/' . $walletConst['SOLANA_PUBKEY']['PATTERN'] . '/u', $value)) {
+        if (!\preg_match('/'.$walletConst['SOLANA_PUBKEY']['PATTERN'].'/u', $value)) {
             $this->pushError($options, $fieldKey, '30254');
+
             return false;
         }
 
@@ -456,17 +495,18 @@ class PeerInputGenericValidator
 
     protected function validatePhoneNumber(string $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'phone';
+        $fieldKey    = $options['field'] ?? 'phone';
         $phoneConfig = ConstantsConfig::user()['PHONENUMBER'];
 
-        if ($value === '') {
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, '30103');
+
             return false;
         }
 
-
-        if (!preg_match('/' . $phoneConfig['PATTERN'] . '/u', $value)) {
+        if (!\preg_match('/'.$phoneConfig['PATTERN'].'/u', $value)) {
             $this->pushError($options, $fieldKey, '30253');
+
             return false;
         }
 
@@ -476,18 +516,22 @@ class PeerInputGenericValidator
     protected function validateActivationToken(string $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'activation_token';
-        if ($value === '') {
+
+        if ('' === $value) {
             $this->pushError($options, $fieldKey, 'Activation token is required.');
+
             return false;
         }
 
-        if (strlen($value) !== 64) {
+        if (64 !== \strlen($value)) {
             $this->pushError($options, $fieldKey, 'Activation token must be exactly 64 characters.');
+
             return false;
         }
 
-        if (!preg_match('/^[a-f0-9]{64}$/i', $value)) {
+        if (!\preg_match('/^[a-f0-9]{64}$/i', $value)) {
             $this->pushError($options, $fieldKey, 'Invalid activation token format.');
+
             return false;
         }
 

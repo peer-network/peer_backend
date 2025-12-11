@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace Fawaz\config\constants;
 
-use Fawaz\config\constants\ConstantsModeration;
-
-
 /*
- 
 
 
-DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES  
 
-all changes MUST be BACKWARDS COMPATITABLE 
+DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES
+
+all changes MUST be BACKWARDS COMPATITABLE
  otherwise front will crash💥
 
 
@@ -27,21 +24,22 @@ class ConstantsConfig implements ConstantsConfigInterface
     public function getData()
     {
         return [
-            "POST" => self::post(),
-            "COMMENT" => self::comment(),
-            "USER" => self::user(),
-            "CHAT" => self::chat(),
-            "CONTACT" => self::contact(),
-            "PAGING" => self::paging(),
-            "WALLET" => self::wallet(),
-            "WALLETT" => self::wallett(),
-            "ONBOARDING" => self::onboarding(),
-            "DAILY_FREE" => self::dailyFree(),
-            "TOKENOMICS" => self::tokenomics(),
-            "MINTING" => self::minting(),
-            "INPUT" => self::input(),
+            'POST'       => self::post(),
+            'COMMENT'    => self::comment(),
+            'USER'       => self::user(),
+            'CHAT'       => self::chat(),
+            'CONTACT'    => self::contact(),
+            'PAGING'     => self::paging(),
+            'WALLET'     => self::wallet(),
+            'WALLETT'    => self::wallett(),
+            'ONBOARDING' => self::onboarding(),
+            'DAILY_FREE' => self::dailyFree(),
+            'TOKENOMICS' => self::tokenomics(),
+            'MINTING'    => self::minting(),
+            'INPUT'      => self::input(),
         ];
     }
+
     /**
      * @return array{
      *     AVAILABLE_ONBOARDINGS: string[]
@@ -49,8 +47,9 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function onboarding(): array
     {
-        return ConstantsConfig::ONBOARDING;
+        return self::ONBOARDING;
     }
+
     /**
      * @return array{
      *     CONTENT: array{MIN_LENGTH: int, MAX_LENGTH: int}
@@ -58,8 +57,9 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function comment()
     {
-        return ConstantsConfig::COMMENT;
+        return self::COMMENT;
     }
+
     /**
      * @return array{
      *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int},
@@ -83,7 +83,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function post(): array
     {
-        return ConstantsConfig::POST;
+        return self::POST;
     }
 
     /**
@@ -98,7 +98,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function wallet()
     {
-        return ConstantsConfig::WALLET;
+        return self::WALLET;
     }
 
     /**
@@ -109,7 +109,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function wallett()
     {
-        return ConstantsConfig::WALLETT;
+        return self::WALLETT;
     }
 
     /**
@@ -128,7 +128,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function user()
     {
-        return ConstantsConfig::USER;
+        return self::USER;
     }
 
     /**
@@ -142,7 +142,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function chat()
     {
-        return ConstantsConfig::CHAT;
+        return self::CHAT;
     }
 
     /**
@@ -153,7 +153,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function contact()
     {
-        return ConstantsConfig::CONTACT;
+        return self::CONTACT;
     }
 
     /**
@@ -166,7 +166,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function paging(): array
     {
-        return ConstantsConfig::PAGING;
+        return self::PAGING;
     }
 
     /**
@@ -177,7 +177,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function transaction()
     {
-        return ConstantsConfig::TRANSACTION;
+        return self::TRANSACTION;
     }
 
     public static function contentFiltering()
@@ -192,9 +192,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function dailyFree(): array
     {
-        return ConstantsConfig::DAILY_FREE;
+        return self::DAILY_FREE;
     }
-
 
     /**
      * @return array{
@@ -227,15 +226,17 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function tokenomics(): array
     {
-        return ConstantsConfig::TOKENOMICS;
+        return self::TOKENOMICS;
     }
+
     /**
      * @return array{ DAILY_NUMBER_TOKEN: float }
      */
     public static function minting(): array
     {
-        return ConstantsConfig::MINTING;
+        return self::MINTING;
     }
+
     /**
      * @return array{
      *     FORBID_CONTROL_CHARS_PATTERN: string
@@ -243,7 +244,7 @@ class ConstantsConfig implements ConstantsConfigInterface
      */
     public static function input(): array
     {
-        return ConstantsConfig::INPUT;
+        return self::INPUT;
     }
 
     private const ONBOARDING = [
@@ -265,11 +266,11 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     private const TOKENOMICS = [
         'ACTION_TOKEN_PRICES' => [
-            'post'    => 20.0,
-            'like'    => 3.0,
-            'dislike' => 3.0,
-            'comment' => 1.0,
-            'advertisementBasic' => 50.0,
+            'post'                => 20.0,
+            'like'                => 3.0,
+            'dislike'             => 3.0,
+            'comment'             => 1.0,
+            'advertisementBasic'  => 50.0,
             'advertisementPinned' => 200.0,
         ],
         'ACTION_GEMS_RETURNS' => [
@@ -309,7 +310,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
     ];
 
-
     private const POST = [
         'TITLE' => [
             'MIN_LENGTH' => 2,
@@ -320,7 +320,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX_LENGTH' => 500,
         ],
         'COVER' => [
-            'MAX_COUNT' => 1,
+            'MAX_COUNT'  => 1,
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 1000,
         ],
@@ -335,28 +335,28 @@ class ConstantsConfig implements ConstantsConfigInterface
         'MEDIALIMIT' => [
             'AUDIO' => 1,
             'IMAGE' => 5,
-            'TEXT' => 1,
+            'TEXT'  => 1,
             'VIDEO' => 2,
         ],
         'COVERLIMIT' => [
             'AUDIO' => 1,
             'IMAGE' => 1,
-            'TEXT' => 1,
+            'TEXT'  => 1,
             'VIDEO' => 1,
         ],
         'TAG' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
-            'PATTERN' => '^[a-zA-Z0-9_]+$',
-            'MAX_COUNT' => [
+            'PATTERN'    => '^[a-zA-Z0-9_]+$',
+            'MAX_COUNT'  => [
                 'CREATE' => 10,
                 'SEARCH' => 5,
             ],
         ],
         'STATUS' => [
-            'PUBLISHED' => 0,
+            'PUBLISHED'  => 0,
             'ADVERTISED' => 1,
-            'ILLEGAL' => 2,
+            'ILLEGAL'    => 2,
         ],
     ];
 
@@ -364,7 +364,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         'SOLANA_PUBKEY' => [
             'MIN_LENGTH' => 43,
             'MAX_LENGTH' => 44,
-            'PATTERN' => '^[1-9A-HJ-NP-Za-km-z]{43,44}$',
+            'PATTERN'    => '^[1-9A-HJ-NP-Za-km-z]{43,44}$',
         ],
         'TOKEN' => [
             'LENGTH' => 12,
@@ -383,23 +383,23 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         // Mapping of human-readable action names to action codes (whereby)
         'ACTIONS' => [
-            'VIEW' => 1,
-            'LIKE' => 2,
-            'DISLIKE' => 3,
-            'COMMENT' => 4,
-            'POST' => 5,
-            'POSTINVESTBASIC' => 6,
+            'VIEW'              => 1,
+            'LIKE'              => 2,
+            'DISLIKE'           => 3,
+            'COMMENT'           => 4,
+            'POST'              => 5,
+            'POSTINVESTBASIC'   => 6,
             'POSTINVESTPREMIUM' => 7,
-            'REPORT' => 8,
-            'INVITATION' => 11,
-            'OWNSHARED' => 12,
-            'OTHERSHARED' => 13,
-            'DIRECTDEBIT' => 14,
-            'CREDIT' => 15,
-            'TRANSFER' => 18,
-            'FREELIKE' => 30,
-            'FREECOMMENT' => 31,
-            'FREEPOST' => 32,
+            'REPORT'            => 8,
+            'INVITATION'        => 11,
+            'OWNSHARED'         => 12,
+            'OTHERSHARED'       => 13,
+            'DIRECTDEBIT'       => 14,
+            'CREDIT'            => 15,
+            'TRANSFER'          => 18,
+            'FREELIKE'          => 30,
+            'FREECOMMENT'       => 31,
+            'FREEPOST'          => 32,
         ],
     ];
 
@@ -428,14 +428,14 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX_LENGTH' => 100,
         ],
         'IS_PUBLIC' => [
-            'MIN' => 0,
-            'MAX' => 10,
+            'MIN'       => 0,
+            'MAX'       => 10,
             'SUSPENDED' => 9,
         ],
         'ACCESS_LEVEL' => [
-            'MIN' => 0,
-            'MAX' => 10,
-            'USER' => 0,
+            'MIN'   => 0,
+            'MAX'   => 10,
+            'USER'  => 0,
             'ADMIN' => 10,
         ],
     ];
@@ -480,12 +480,12 @@ class ConstantsConfig implements ConstantsConfigInterface
         'PASSWORD' => [
             'MIN_LENGTH' => 8,
             'MAX_LENGTH' => 128,
-            "PATTERN" => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+            'PATTERN'    => '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$',
         ],
         'USERNAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 23,
-            'PATTERN' => '^[a-zA-Z0-9_-]+$',
+            'PATTERN'    => '^[a-zA-Z0-9_-]+$',
         ],
         'BIOGRAPHY' => [
             'MIN_LENGTH' => 3,
@@ -494,7 +494,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         'PHONENUMBER' => [
             'MIN_LENGTH' => 9,
             'MAX_LENGTH' => 21,
-            'PATTERN' => '^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$',
+            'PATTERN'    => '^\+?[1-9]\d{0,2}[\s.-]?\(?\d{1,4}\)?[\s.-]?\d{1,4}[\s.-]?\d{1,9}$',
         ],
         'IMAGE' => [
             'MIN_LENGTH' => 0,
@@ -512,13 +512,13 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX_SIZE_MB' => 5,
         ],
         'TRANSFER_MESSAGE' => [
-            'MIN_LENGTH' => 0,
-            'MAX_LENGTH' => 500,
+            'MIN_LENGTH'  => 0,
+            'MAX_LENGTH'  => 500,
             'PATTERN_URL' => '(:\/\/|www\.)',
         ],
         'TRANSACTION' => [
-            'MIN_AMOUNT' => 0.00000001,
-            'MAX_DECIMALS' => 8, 
+            'MIN_AMOUNT'   => 0.00000001,
+            'MAX_DECIMALS' => 8,
         ],
     ];
 }

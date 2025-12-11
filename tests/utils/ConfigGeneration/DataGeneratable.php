@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\utils\ConfigGeneration;
 
-require __DIR__ . '../../../../vendor/autoload.php';
+require __DIR__.'../../../../vendor/autoload.php';
 
 interface DataGeneratable
 {

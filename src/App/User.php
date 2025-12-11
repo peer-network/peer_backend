@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
-use Fawaz\Filter\PeerInputFilter;
-use Fawaz\Database\Interfaces\Hashable;
-use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Utils\HashObject;
 
 class User extends Model implements Hashable, ProfileReplaceable
 {
@@ -41,22 +40,22 @@ class User extends Model implements Hashable, ProfileReplaceable
             $data = $this->validate($data, $elements);
         }
 
-        $this->uid = $data['uid'] ?? '';
-        $this->email = $data['email'] ?? '';
-        $this->username = $data['username'] ?? '';
-        $this->password = $data['password'] ?? '';
-        $this->status = $data['status'] ?? 0;
-        $this->verified = $data['verified'] ?? 0;
-        $this->slug = $data['slug'] ?? 0;
-        $this->roles_mask = $data['roles_mask'] ?? 0;
-        $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
-        $this->img = $data['img'] ?? '';
-        $this->biography = $data['biography'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
-        $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-        $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
-        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->uid                     = $data['uid']               ?? '';
+        $this->email                   = $data['email']             ?? '';
+        $this->username                = $data['username']          ?? '';
+        $this->password                = $data['password']          ?? '';
+        $this->status                  = $data['status']            ?? 0;
+        $this->verified                = $data['verified']          ?? 0;
+        $this->slug                    = $data['slug']              ?? 0;
+        $this->roles_mask              = $data['roles_mask']        ?? 0;
+        $this->ip                      = $data['ip']                ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->img                     = $data['img']               ?? '';
+        $this->biography               = $data['biography']         ?? '';
+        $this->createdat               = $data['createdat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat               = $data['updatedat']         ?? new \DateTime()->format('Y-m-d H:i:s.u');
+        $this->referral_uuid           = $data['referral_uuid']     ?? $this->uid;
+        $this->activeReports           = $data['user_reports']      ?? ($data['reports'] ?? null);
+        $this->visibilityStatus        = $data['visibility_status'] ?? 'normal';
         $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
@@ -64,23 +63,24 @@ class User extends Model implements Hashable, ProfileReplaceable
     public function getArrayCopy(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'email' => $this->email,
-            'username' => $this->username,
-            'password' => $this->password,
-            'status' => $this->status,
-            'verified' => $this->verified,
-            'slug' => $this->slug,
-            'roles_mask' => $this->roles_mask,
-            'ip' => $this->ip,
-            'img' => $this->img,
-            'biography' => $this->biography,
-            'createdat' => $this->createdat,
-            'updatedat' => $this->updatedat,
+            'uid'               => $this->uid,
+            'email'             => $this->email,
+            'username'          => $this->username,
+            'password'          => $this->password,
+            'status'            => $this->status,
+            'verified'          => $this->verified,
+            'slug'              => $this->slug,
+            'roles_mask'        => $this->roles_mask,
+            'ip'                => $this->ip,
+            'img'               => $this->img,
+            'biography'         => $this->biography,
+            'createdat'         => $this->createdat,
+            'updatedat'         => $this->updatedat,
             'visibility_status' => $this->visibilityStatusForUser,
-            'hasActiveReports' => $this->hasActiveReports(),
-            'isHiddenForUsers' => $this->isHiddenForUsers(),
+            'hasActiveReports'  => $this->hasActiveReports(),
+            'isHiddenForUsers'  => $this->isHiddenForUsers(),
         ];
+
         return $att;
     }
 
@@ -88,11 +88,12 @@ class User extends Model implements Hashable, ProfileReplaceable
     public function getUpdatePass(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'password' => $this->password,
-            'ip' => $this->ip,
-            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
+            'uid'       => $this->uid,
+            'password'  => $this->password,
+            'ip'        => $this->ip,
+            'updatedat' => new \DateTime()->format('Y-m-d H:i:s.u'),
         ];
+
         return $att;
     }
 
@@ -100,16 +101,17 @@ class User extends Model implements Hashable, ProfileReplaceable
     public function getArrayProfile(): array
     {
         $att = [
-            'uid' => $this->uid,
-            'username' => $this->username,
-            'status' => $this->status,
-            'slug' => $this->slug,
-            'img' => $this->img,
-            'biography' => $this->biography,
+            'uid'               => $this->uid,
+            'username'          => $this->username,
+            'status'            => $this->status,
+            'slug'              => $this->slug,
+            'img'               => $this->img,
+            'biography'         => $this->biography,
             'visibility_status' => $this->visibilityStatusForUser,
-            'hasActiveReports' => $this->hasActiveReports(),
-            'isHiddenForUsers' => $this->isHiddenForUsers(),
+            'hasActiveReports'  => $this->hasActiveReports(),
+            'isHiddenForUsers'  => $this->isHiddenForUsers(),
         ];
+
         return $att;
     }
 
@@ -118,7 +120,7 @@ class User extends Model implements Hashable, ProfileReplaceable
     {
         $data = $this->validate($data, ['img', 'biography', 'isprivate']);
 
-        $this->img = $data['img'] ?? $this->img;
+        $this->img       = $data['img']       ?? $this->img;
         $this->biography = $data['biography'] ?? $this->biography;
     }
 
@@ -128,7 +130,7 @@ class User extends Model implements Hashable, ProfileReplaceable
         $data = $this->validate($data, ['username', 'email', 'password']);
 
         $this->username = $data['username'] ?? $this->username;
-        $this->email = $data['email'] ?? $this->email;
+        $this->email    = $data['email']    ?? $this->email;
         $this->password = $data['password'] ?? $this->password;
     }
 
@@ -216,10 +218,10 @@ class User extends Model implements Hashable, ProfileReplaceable
     // ProfileReplaceable: roles mask accessor with expected name
     public function getRolesmask(): int
     {
-        return (int)$this->roles_mask;
+        return (int) $this->roles_mask;
     }
 
-    public function getRoles(): int|null
+    public function getRoles(): ?int
     {
         return $this->roles_mask;
     }
@@ -236,7 +238,7 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     public function setIp(?string $ip = null): void
     {
-        $this->ip = filter_var($ip, FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+        $this->ip = filter_var($ip, \FILTER_VALIDATE_IP) ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
 
     public function getImg(): ?string
@@ -268,13 +270,14 @@ class User extends Model implements Hashable, ProfileReplaceable
     // Computed property: hidden for others when hidden or many reports
     public function isHiddenForUsers(): bool
     {
-        $reports = (int)($this->activeReports ?? 0);
-        return $this->visibilityStatus === 'hidden' || $reports > 4;
+        $reports = (int) ($this->activeReports ?? 0);
+
+        return 'hidden' === $this->visibilityStatus || $reports > 4;
     }
 
     public function hasActiveReports(): bool
     {
-        return (int)($this->activeReports ?? 0) > 0;
+        return (int) ($this->activeReports ?? 0) > 0;
     }
 
     public function visibilityStatus(): string
@@ -314,17 +317,15 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Password Verify methods
     public function verifyPassword(string $password): bool
     {
-        if (\password_verify($password, $this->password)) {
-
-            if (\password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
-
-                $newHash = \password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
+        if (password_verify($password, $this->password)) {
+            if (password_needs_rehash($this->password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1])) {
+                $newHash = password_hash($password, \PASSWORD_ARGON2ID, ['memory_cost' => 2048, 'time_cost' => 4, 'threads' => 1]);
 
                 $this->password = $newHash;
             }
@@ -357,85 +358,87 @@ class User extends Model implements Hashable, ProfileReplaceable
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
     protected function createInputFilter(array $elements = []): PeerInputFilter
     {
-        $userConfig = ConstantsConfig::user();
+        $userConfig    = ConstantsConfig::user();
         $specification = [
             'uid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'email' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'EmailAddress'],
                     ['name' => 'isString'],
                 ],
             ],
             'username' => [
-                'required' => true,
-                'filters' => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => true,
+                'filters'    => [['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'validateUsername'],
                 ],
             ],
             'password' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'validatePassword'],
                 ],
             ],
             'status' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 10]],
                 ],
             ],
             'verified' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1]],
                 ],
             ],
             'slug' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => [
                         'min' => $userConfig['SLUG']['MIN_LENGTH'],
-                        'max' => $userConfig['SLUG']['MAX_LENGTH']
-                        ]],
+                        'max' => $userConfig['SLUG']['MAX_LENGTH'],
+                    ]],
                 ],
             ],
             'roles_mask' => [
-                'required' => true,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => true,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [
                     ['name' => 'validateIntRange', 'options' => ['min' => 0, 'max' => 1048576]],
                 ],
             ],
             'ip' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'IsIp', 'options' => ['ipv4' => true, 'ipv6' => true]],
                 ],
             ],
             'img' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $userConfig['IMAGE']['MIN_LENGTH'],
@@ -445,8 +448,8 @@ class User extends Model implements Hashable, ProfileReplaceable
                 ],
             ],
             'biography' => [
-                'required' => false,
-                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
+                'required'   => false,
+                'filters'    => [['name' => 'StringTrim'], ['name' => 'StripTags'], ['name' => 'EscapeHtml'], ['name' => 'HtmlEntities']],
                 'validators' => [
                     ['name' => 'StringLength', 'options' => [
                         'min' => $userConfig['BIOGRAPHY']['MIN_LENGTH'],
@@ -456,20 +459,20 @@ class User extends Model implements Hashable, ProfileReplaceable
                 ],
             ],
             'createdat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
             'updatedat' => [
-                'required' => false,
+                'required'   => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
             'visibility_status' => [
                 'required' => true,
-                'filters' => [
+                'filters'  => [
                     ['name' => 'StringTrim'],
                 ],
                 'validators' => [
@@ -479,10 +482,10 @@ class User extends Model implements Hashable, ProfileReplaceable
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     public function getHashableContent(): string
@@ -491,8 +494,9 @@ class User extends Model implements Hashable, ProfileReplaceable
             $this->email,
             $this->img,
             $this->username,
-            $this->biography
+            $this->biography,
         ]);
+
         return $content;
     }
 
@@ -506,5 +510,4 @@ class User extends Model implements Hashable, ProfileReplaceable
     {
         return 'users';
     }
-
 }

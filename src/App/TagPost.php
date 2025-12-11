@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 
 class TagPost
@@ -20,17 +19,17 @@ class TagPost
             $data = $this->validate($data, $elements);
         }
 
-        $this->tagid = $data['tagid'] ?? 0;
-        $this->postid = $data['postid'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->tagid     = $data['tagid']     ?? 0;
+        $this->postid    = $data['postid']    ?? '';
+        $this->createdat = $data['createdat'] ?? new \DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         return [
-            'tagid' => $this->tagid,
-            'postid' => $this->postid,
+            'tagid'     => $this->tagid,
+            'postid'    => $this->postid,
             'createdat' => $this->createdat,
         ];
     }
@@ -70,13 +69,15 @@ class TagPost
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -84,28 +85,28 @@ class TagPost
     {
         $specification = [
             'tagid' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'postid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Uuid']],
             ],
             'createdat' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new \DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-use DateTime;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 
@@ -24,25 +23,26 @@ class CommentInfo extends Model
             $data = $this->validate($data, $elements);
         }
 
-        $this->commentid = $data['commentid'] ?? '';
-        $this->userid = $data['userid'] ?? '';
-        $this->likes = $data['likes'] ?? 0;
-        $this->activeReports = $data['reports'] ?? 0;
-        $this->totalreports = $data['totalreports'] ?? 0;
-        $this->comments = $data['comments'] ?? 0;
+        $this->commentid     = $data['commentid']    ?? '';
+        $this->userid        = $data['userid']       ?? '';
+        $this->likes         = $data['likes']        ?? 0;
+        $this->activeReports = $data['reports']      ?? 0;
+        $this->totalreports  = $data['totalreports'] ?? 0;
+        $this->comments      = $data['comments']     ?? 0;
     }
 
     // Array Copy methods
     public function getArrayCopy(): array
     {
         $att = [
-            'commentid' => $this->commentid,
-            'userid' => $this->userid,
-            'likes' => $this->likes,
-            'reports' => $this->activeReports,
+            'commentid'    => $this->commentid,
+            'userid'       => $this->userid,
+            'likes'        => $this->likes,
+            'reports'      => $this->activeReports,
             'totalreports' => $this->totalreports,
-            'comments' => $this->comments,
+            'comments'     => $this->comments,
         ];
+
         return $att;
     }
 
@@ -91,10 +91,12 @@ class CommentInfo extends Model
     {
         return $this->totalreports;
     }
+
     public function setTotalReports(int $totalreports): void
     {
         $this->totalreports = $totalreports;
     }
+
     public function getComments(): int
     {
         return $this->comments;
@@ -119,13 +121,15 @@ class CommentInfo extends Model
 
         foreach ($validationErrors as $errors) {
             $errorMessages = [];
+
             foreach ($errors as $error) {
                 $errorMessages[] = $error;
             }
-            $errorMessageString = implode("", $errorMessages);
+            $errorMessageString = implode('', $errorMessages);
 
             throw new ValidationException($errorMessageString);
         }
+
         return false;
     }
 
@@ -133,35 +137,35 @@ class CommentInfo extends Model
     {
         $specification = [
             'commentid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'userid' => [
-                'required' => true,
+                'required'   => true,
                 'validators' => [['name' => 'Uuid']],
             ],
             'likes' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'reports' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
             'comments' => [
-                'required' => false,
-                'filters' => [['name' => 'ToInt']],
+                'required'   => false,
+                'filters'    => [['name' => 'ToInt']],
                 'validators' => [['name' => 'IsInt']],
             ],
         ];
 
         if ($elements) {
-            $specification = array_filter($specification, fn ($key) => in_array($key, $elements, true), ARRAY_FILTER_USE_KEY);
+            $specification = array_filter($specification, fn ($key) => \in_array($key, $elements, true), \ARRAY_FILTER_USE_KEY);
         }
 
-        return (new PeerInputFilter($specification));
+        return new PeerInputFilter($specification);
     }
 
     // Table name

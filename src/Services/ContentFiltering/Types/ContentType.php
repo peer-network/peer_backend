@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Services\ContentFiltering\Types;
 
 /**
- * Enum ContentType
+ * Enum ContentType.
  *
  * Represents the type of content in the system.
  *
@@ -15,7 +15,7 @@ namespace Fawaz\Services\ContentFiltering\Types;
  */
 enum ContentType: string
 {
-    case user = 'USER' ;
-    case post = 'POST';
+    case user    = 'USER';
+    case post    = 'POST';
     case comment = 'COMMENT';
 }

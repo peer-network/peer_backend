@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Services;
 
-use getID3;
-
 class Base64FileHandler
 {
     private array $errors = [];
@@ -20,15 +18,15 @@ class Base64FileHandler
         return match ($contentType) {
             'image' => [
                 'image/webp', 'image/jpeg', 'image/png', 'image/gif',
-                'image/heic', 'image/heif', 'image/tiff'
+                'image/heic', 'image/heif', 'image/tiff',
             ],
             'video' => [
                 'video/mp4', 'video/quicktime', 'video/x-m4v',
-                'video/x-msvideo', 'video/3gpp', 'video/x-matroska'
+                'video/x-msvideo', 'video/3gpp', 'video/x-matroska',
             ],
-            'audio' => ['audio/mpeg', 'audio/wav','audio/ogg', 'audio/x-wav'],
-            'text' => ['text/plain'],
-            default => []
+            'audio' => ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-wav'],
+            'text'  => ['text/plain'],
+            default => [],
         };
     }
 
@@ -38,37 +36,36 @@ class Base64FileHandler
             'image' => ['webp', 'jpeg', 'jpg', 'png', 'gif', 'heic', 'heif', 'tiff'],
             'video' => ['mp4', 'mov', 'avi', 'm4v', 'mkv', '3gp', 'quicktime'],
             'audio' => ['mp3', 'wav', 'ogg'],
-            'text' => ['txt'],
-            default => []
+            'text'  => ['txt'],
+            default => [],
         };
     }
 
     private function getSubfolder(string $contentType, ?string $defaultSubfolder = null): string
     {
-
-        if ($defaultSubfolder !== null && $defaultSubfolder !== '') {
+        if (null !== $defaultSubfolder && '' !== $defaultSubfolder) {
             return $defaultSubfolder;
         }
 
-        return match($contentType) {
-            'audio' => 'audio',
-            'chat' => 'chat',
-            'cover' => 'cover',
-            'image' => 'image',
-            'profile' => 'profile',
-            'text' => 'text',
+        return match ($contentType) {
+            'audio'    => 'audio',
+            'chat'     => 'chat',
+            'cover'    => 'cover',
+            'image'    => 'image',
+            'profile'  => 'profile',
+            'text'     => 'text',
             'userData' => 'userData',
-            'video' => 'video',
-            default => 'other'
+            'video'    => 'video',
+            default    => 'other',
         };
     }
 
     private function formatDuration(float $durationInSeconds): string
     {
-        $hours = (int) \floor($durationInSeconds / 3600);
-        $minutes = (int) \floor(fmod($durationInSeconds, 3600) / 60);
-        $seconds = (int) \floor(fmod($durationInSeconds, 60));
-        $milliseconds = (int) \round(($durationInSeconds - \floor($durationInSeconds)) * 100);
+        $hours        = (int) floor($durationInSeconds / 3600);
+        $minutes      = (int) floor(fmod($durationInSeconds, 3600) / 60);
+        $seconds      = (int) floor(fmod($durationInSeconds, 60));
+        $milliseconds = (int) round(($durationInSeconds - floor($durationInSeconds)) * 100);
 
         return \sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
@@ -78,9 +75,9 @@ class Base64FileHandler
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         $index = 0;
 
-        while ($bytes >= 1024 && $index < count($units) - 1) {
+        while ($bytes >= 1024 && $index < \count($units) - 1) {
             $bytes /= 1024;
-            $index++;
+            ++$index;
         }
 
         return \sprintf('%.2f %s', $bytes, $units[$index]);
@@ -88,26 +85,27 @@ class Base64FileHandler
 
     private function getMediaDuration(string $filePath): ?array
     {
-        if (!\file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             return null;
         }
 
         try {
-            $getID3 = new getID3();
-            $fileInfo = $getID3->analyze($filePath);
+            $getID3      = new \getID3();
+            $fileInfo    = $getID3->analyze($filePath);
             $information = [];
 
             if (!empty($fileInfo['video']['resolution_x']) && !empty($fileInfo['video']['resolution_y'])) {
-                $width = $fileInfo['video']['resolution_x'];
+                $width  = $fileInfo['video']['resolution_x'];
                 $height = $fileInfo['video']['resolution_y'];
 
                 if (!is_numeric($width) || !is_numeric($height)) {
-                    \error_log(
-                        'Invalid video resolution values from getID3: ' .
-                        'resolution_x=' . $width .
-                        ', resolution_y=' . $height .
-                        ', file=' . $filePath
+                    error_log(
+                        'Invalid video resolution values from getID3: '.
+                        'resolution_x='.$width.
+                        ', resolution_y='.$height.
+                        ', file='.$filePath
                     );
+
                     return null;
                 }
 
@@ -117,31 +115,34 @@ class Base64FileHandler
                 // Check for Orientation
                 if (isset($fileInfo['jpg']['exif']['IFD0']['Orientation'])) {
                     $Orientation = $fileInfo['jpg']['exif']['IFD0']['Orientation'] ??= 1;
+
                     // Handle image rotation based on EXIF Orientation
-                    if ($Orientation == 6 || $Orientation == 8) {
-                        $width = $fileInfo['video']['resolution_y'];
+                    if (6 == $Orientation || 8 == $Orientation) {
+                        $width  = $fileInfo['video']['resolution_y'];
                         $height = $fileInfo['video']['resolution_x'];
                     }
                 } elseif (isset($fileInfo['video']['rotate'])) {
                     $Orientation = $fileInfo['video']['rotate'] ??= 0;
+
                     // Handle video rotation
-                    if ($Orientation == 90 || $Orientation == 270) {
-                        $width = $fileInfo['video']['resolution_y'];
+                    if (90 == $Orientation || 270 == $Orientation) {
+                        $width  = $fileInfo['video']['resolution_y'];
                         $height = $fileInfo['video']['resolution_x'];
                     }
                 }
-                $gcd = gmp_intval(gmp_gcd($width, $height));
-                $ratio = ($width / $gcd) . ':' . ($height / $gcd);
+                $gcd   = gmp_intval(gmp_gcd($width, $height));
+                $ratio = ($width / $gcd).':'.($height / $gcd);
                 $auflg = "{$width}x{$height}";
             }
 
-            $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-            $information['ratiofrm'] = $ratio ?? null;
+            $information['duration']   = isset($fileInfo['playtime_seconds']) ? (float) $fileInfo['playtime_seconds'] : null;
+            $information['ratiofrm']   = $ratio ?? null;
             $information['resolution'] = $auflg ?? null;
 
             return $information;
         } catch (\Exception $e) {
-            \error_log("getID3 Error: " . $e->getMessage());
+            error_log('getID3 Error: '.$e->getMessage());
+
             return null;
         }
     }
@@ -151,8 +152,9 @@ class Base64FileHandler
         if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
             return $matches[0];
         } else {
-            $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
+            $this->errors['Base64'][] = 'Invalid Base64 format: '.substr($input, 0, 100);
         }
+
         return $input;
     }
 
@@ -164,7 +166,7 @@ class Base64FileHandler
             if (preg_match('/data:[a-zA-Z0-9+.-]+\/([a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+\/=\r\n]+)/', $input, $matches)) {
                 $sanitizedBase64Array[] = $matches[0];
             } else {
-                $this->errors['Base64'][] = 'Invalid Base64 format: ' . substr($input, 0, 100);
+                $this->errors['Base64'][] = 'Invalid Base64 format: '.substr($input, 0, 100);
             }
         }
 
@@ -174,49 +176,56 @@ class Base64FileHandler
     public function isValidBase64Media(string $base64File, string $contentType, array $options = []): bool
     {
         $maxFileSize = $options['max_size'] ?? 79 * 1024 * 1024;
-        $base64File = $this->sanitizeBase64Input($base64File);
+        $base64File  = $this->sanitizeBase64Input($base64File);
 
         $pattern = '#^data:(?<type>[a-z]+)/(?<extension>[a-z0-9]+);base64,(?<content>[A-Za-z0-9+/=\r\n]+)#i';
 
         if (!preg_match($pattern, $base64File, $matches)) {
             $this->errors['unknown'][] = 'No valid Base64 media found in the input.';
+
             return false;
         }
 
         $extension = strtolower($matches['extension']);
 
-        if ($contentType === 'audio' && $extension === 'mpeg') {
+        if ('audio' === $contentType && 'mpeg' === $extension) {
             $extension = 'mp3';
         }
-        if ($contentType === 'text' && $extension === 'plain') {
+
+        if ('text' === $contentType && 'plain' === $extension) {
             $extension = 'txt';
         }
 
-        if (!in_array($extension, $this->getAllowedExtensions($contentType))) {
-            $this->errors[$contentType][] = "Invalid extension ($extension). Allowed: " . implode(', ', $this->getAllowedExtensions($contentType));
+        if (!\in_array($extension, $this->getAllowedExtensions($contentType))) {
+            $this->errors[$contentType][] = "Invalid extension ($extension). Allowed: ".implode(', ', $this->getAllowedExtensions($contentType));
+
             return false;
         }
 
         $base64String = preg_replace('/\s+/', '', $matches['content']);
-        $decodedFile = base64_decode($base64String, true);
+        $decodedFile  = base64_decode($base64String, true);
 
-        if ($decodedFile === false) {
+        if (false === $decodedFile) {
             $this->errors[$contentType][] = 'Failed to decode the Base64 media.';
+
             return false;
         }
 
-        if (strlen($decodedFile) > $maxFileSize) {
-            $this->errors[$contentType][] = ucfirst($contentType) . " size exceeds the max limit of " . ($maxFileSize / 1024 / 1024) . " MB.";
+        if (\strlen($decodedFile) > $maxFileSize) {
+            $this->errors[$contentType][] = ucfirst($contentType).' size exceeds the max limit of '.($maxFileSize / 1024 / 1024).' MB.';
+
             return false;
         }
 
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $finfo    = finfo_open(\FILEINFO_MIME_TYPE);
         $mimeType = finfo_buffer($finfo, $decodedFile);
         finfo_close($finfo);
 
         $allowedMimeTypes = $this->getAllowedMimeTypes($contentType);
-        if (!in_array($mimeType, $allowedMimeTypes)) {
-            $this->errors[$contentType][] = "Invalid MIME type ($mimeType). Allowed: " . implode(', ', $allowedMimeTypes);
+
+        if (!\in_array($mimeType, $allowedMimeTypes)) {
+            $this->errors[$contentType][] = "Invalid MIME type ($mimeType). Allowed: ".implode(', ', $allowedMimeTypes);
+
             return false;
         }
 
@@ -230,72 +239,78 @@ class Base64FileHandler
         }
 
         $base64String = preg_replace('/\s+/', '', explode(',', $base64File, 2)[1] ?? '');
-        $decodedFile = base64_decode($base64String, true);
+        $decodedFile  = base64_decode($base64String, true);
 
-        if ($decodedFile === false || strlen($decodedFile) === 0) {
+        if (false === $decodedFile || '' === $decodedFile) {
             $this->errors[$contentType][] = 'Failed to decode Base64 data or empty file.';
+
             return ['success' => false, 'error' => $this->errors];
         }
 
         $fileExtension = explode('/', explode(';', explode(',', $base64File)[0])[0])[1] ?? '';
 
-        if ($contentType === 'audio' && $fileExtension === 'mpeg') {
+        if ('audio' === $contentType && 'mpeg' === $fileExtension) {
             $fileExtension = 'mp3';
         }
-        if ($contentType === 'text' && $fileExtension === 'plain') {
+
+        if ('text' === $contentType && 'plain' === $fileExtension) {
             $fileExtension = 'txt';
         }
 
-        if (!$fileExtension || !in_array($fileExtension, $this->getAllowedExtensions($contentType))) {
+        if (!$fileExtension || !\in_array($fileExtension, $this->getAllowedExtensions($contentType))) {
             $this->errors[$contentType][] = 'Could not determine file extension or extension not allowed.';
+
             return ['success' => false, 'error' => $this->errors];
         }
 
-        $subfolder = $this->getSubfolder($contentType, $defaultSubfolder);
-        $directoryPath = __DIR__ . "/../../runtime-data/media/$subfolder";
+        $subfolder     = $this->getSubfolder($contentType, $defaultSubfolder);
+        $directoryPath = __DIR__."/../../runtime-data/media/$subfolder";
 
         if (!is_dir($directoryPath)) {
-            $this->errors[$contentType][] = 'Could not create directory: ' . $subfolder;
+            $this->errors[$contentType][] = 'Could not create directory: '.$subfolder;
+
             return ['success' => false, 'error' => $this->errors];
         }
 
         $filePath = "$directoryPath/$identifier.$fileExtension";
 
-        if (file_put_contents($filePath, $decodedFile) === false) {
+        if (false === file_put_contents($filePath, $decodedFile)) {
             $this->errors[$contentType][] = 'Could not save file.';
+
             return ['success' => false, 'error' => $this->errors];
         }
 
         $getfileinfo = $this->getMediaDuration($filePath);
 
         $duration = $ratiofrm = $resolution = null;
-        $size = $this->formatBytes(\strlen($decodedFile));
+        $size     = $this->formatBytes(\strlen($decodedFile));
 
-        if (in_array($contentType, ['audio', 'video'])) {
+        if (\in_array($contentType, ['audio', 'video'])) {
             $duration = $getfileinfo['duration'] ?? null;
         }
 
-        if ($contentType === 'video') {
+        if ('video' === $contentType) {
             $ratiofrm = $getfileinfo['ratiofrm'] ?? null;
         }
 
-        if (in_array($contentType, ['image', 'video'])) {
+        if (\in_array($contentType, ['image', 'video'])) {
             $resolution = $getfileinfo['resolution'] ?? null;
         }
 
         $options = array_filter([
-            'size' => $size,
-            'duration' => $duration ? $this->formatDuration($duration) : null,
-            'ratio' => $ratiofrm,
-            'resolution' => $resolution
+            'size'       => $size,
+            'duration'   => $duration ? $this->formatDuration($duration) : null,
+            'ratio'      => $ratiofrm,
+            'resolution' => $resolution,
         ]);
 
         return array_filter([
             'success' => true,
-            'path' => "/$subfolder/$identifier.$fileExtension",
-            'options' => $options ?: null
+            'path'    => "/$subfolder/$identifier.$fileExtension",
+            'options' => $options ?: null,
         ]);
     }
+
     public function encodeFileToBase64(string $filePath, string $mimeType): string
     {
         if (!is_file($filePath)) {
@@ -303,11 +318,13 @@ class Base64FileHandler
         }
 
         $binary = file_get_contents($filePath);
-        if ($binary === false) {
+
+        if (false === $binary) {
             throw new \RuntimeException("Failed to read file: $filePath");
         }
 
         $base64 = base64_encode($binary);
-        return "data:$mimeType;base64," . $base64;
+
+        return "data:$mimeType;base64,".$base64;
     }
 }

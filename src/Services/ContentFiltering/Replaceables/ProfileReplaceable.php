@@ -14,12 +14,19 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasVisibilityStatus;
 interface ProfileReplaceable extends HasVisibilityStatus, HasActiveReports, HasUserId
 {
     public function getStatus(): int;
+
     public function getRolesmask(): int;
+
     public function getName(): string;
+
     public function getImg(): ?string;
+
     public function getBiography(): ?string;
+
     /** Setters for masking/updating values */
     public function setName(string $name): void;
+
     public function setImg(?string $img): void;
+
     public function setBiography(?string $biography): void;
 }
