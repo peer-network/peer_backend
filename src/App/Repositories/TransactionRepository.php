@@ -7,6 +7,7 @@ namespace Fawaz\App\Repositories;
 use Fawaz\App\Models\Transaction;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class TransactionRepository
 {
@@ -33,21 +34,21 @@ class TransactionRepository
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':transactionId', $transaction->getTransactionId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':operationId', $transaction->getOperationId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transactionType', $transaction->getTransactionType(), \PDO::PARAM_STR);
-            $stmt->bindValue(':senderId', $transaction->getSenderId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':recipientId', $transaction->getRecipientId(), \PDO::PARAM_STR);
-            $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), \PDO::PARAM_STR);
-            $stmt->bindValue(':transferAction', $transaction->geTtransferAction(), \PDO::PARAM_STR);
-            $stmt->bindValue(':message', $transaction->getMessage(), \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $transaction->getCreatedat(), \PDO::PARAM_STR);
+            $stmt->bindValue(':transactionId', $transaction->getTransactionId(), PDO::PARAM_STR);
+            $stmt->bindValue(':operationId', $transaction->getOperationId(), PDO::PARAM_STR);
+            $stmt->bindValue(':transactionType', $transaction->getTransactionType(), PDO::PARAM_STR);
+            $stmt->bindValue(':senderId', $transaction->getSenderId(), PDO::PARAM_STR);
+            $stmt->bindValue(':recipientId', $transaction->getRecipientId(), PDO::PARAM_STR);
+            $stmt->bindValue(':tokenAmount', $transaction->getTokenAmount(), PDO::PARAM_STR);
+            $stmt->bindValue(':transferAction', $transaction->geTtransferAction(), PDO::PARAM_STR);
+            $stmt->bindValue(':message', $transaction->getMessage(), PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $transaction->getCreatedat(), PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->info("Inserted new transaction into database");
 
             return $transaction;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "TransactionRepository.saveTransaction: Exception occurred while inserting transaction",
                 [
