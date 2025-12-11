@@ -184,7 +184,29 @@ class ModerationMapper
                 $item['targetcontent']['post'] = $postData;
             }
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
+        $commentRow = Comment::query()
+            ->where('commentid', $item['targetid'])
+            ->first();
+
+        if ($commentRow) {
+            $commentEntity = new Comment($commentRow, [], false);
+            $commentData = $commentEntity->getArrayCopy();
+
+            $authorData = [];
+            if (!empty($commentRow['userid'])) {
+                $authorRow = User::query()
+                    ->where('uid', $commentRow['userid'])
+                    ->first();
+
+                if ($authorRow) {
+                    $authorEntity = new User($authorRow, [], false);
+                    $authorData = $authorEntity->getArrayCopy();
+                }
+            }
+
+            $commentData['user'] = $authorData;
+            $item['targetcontent']['comment'] = $commentData;
+        }
         } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],

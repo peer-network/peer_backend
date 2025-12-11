@@ -23,35 +23,11 @@ jobs:
   check_branch_sync:
     name: Check if PR Branch is Behind Base
     needs: [auto_update_branch]
-    runs-on: ubuntu-latest
-    outputs:
-      is_behind: ${{ steps.check.outputs.is_behind }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
- 
-      - name: Fetch all branches
-        run: |
-          git fetch --all
- 
-      - id: check
-        run: |
-          base_branch="${{ github.event.pull_request.base.ref }}"
-          pr_branch="${{ github.event.pull_request.head.ref }}"
- 
-          echo "Comparing $pr_branch against $base_branch"
-          behind=$(git rev-list --left-right --count origin/${base_branch}...origin/${pr_branch} | awk '{print $1}')
- 
-          if [ "$behind" -gt 0 ]; then
-            echo "Branch is behind!"
-            echo "is_behind=true" >> $GITHUB_OUTPUT
-          else
-            echo "Branch is up-to-date."
-            echo "is_behind=false" >> $GITHUB_OUTPUT
-          fi
- 
+    uses: peer-network/.github/.github/workflows/check-branch-sync.yml@main
+    with:
+      base_branch: ${{ github.event.pull_request.base.ref }}
+      pr_branch: ${{ github.event.pull_request.head.ref }}
+
   fail_outdated_branch:
     name: Block CI Due to Outdated Branch
     runs-on: ubuntu-latest
@@ -816,10 +792,13 @@ jobs:
           phpstan_result="${{ needs.phpstan_analysis.result }}"
           sql_result="${{ needs.validate_sql_files.result }}"
           gitleaks_result="${{ needs.gitleaks_scan_staged.result }}"
+          trivy_result="${{ needs.trivy_scan.result }}"
 
           type="none"
           if [ "$is_behind" == "true" ]; then
             type="behind"
+          elif [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
+            type="merge_conflict"
           elif [ "$sql_result" == "failure" ]; then
             type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
@@ -848,6 +827,24 @@ jobs:
           RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           case "${{ steps.decide.outputs.type }}" in
+            merge_conflict)
+              MESSAGE=":warning: **Merge Conflict Detected During Auto-Update**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="Link: <$PR_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n\n"
+              MESSAGE+="GitHub could not automatically merge the base branch into this PR.\n"
+              MESSAGE+="Please pull the latest changes from \`${{ github.event.pull_request.base.ref }}\`\n"
+              MESSAGE+="and resolve the conflict **locally** or use GitHub's **Resolve conflicts** button:\n"
+              MESSAGE+="\`\`\`\n"
+              MESSAGE+="git fetch origin\n"
+              MESSAGE+="git checkout ${{ github.event.pull_request.head.ref }}\n"
+              MESSAGE+="git merge origin/${{ github.event.pull_request.base.ref }}\n"
+              MESSAGE+="# resolve conflicts\n"
+              MESSAGE+="git add .\n"
+              MESSAGE+="git commit\n"
+              MESSAGE+="git push\n"
+              MESSAGE+="\`\`\`\n"
+              ;;
             behind)
               MESSAGE=":warning: **PR Branch is Behind the Base Branch**\n"
               MESSAGE+="**PR:** $PR_TITLE\n"
