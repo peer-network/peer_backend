@@ -418,7 +418,7 @@ class PeerInputGenericValidator
             return false;
         }
 
-        if (strlen($value) <= $tagConfig['MIN_LENGTH'] || strlen($value) >= $tagConfig['MAX_LENGTH']) {
+        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30103');
             return false;
         }
