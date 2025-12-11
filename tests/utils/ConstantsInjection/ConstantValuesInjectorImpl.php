@@ -40,16 +40,11 @@ class ConstantValuesInjectorImpl implements ConstantValuesInjector
             return $this->replacePlaceholders($value);
         }
 
-        if (is_array($value)) {
-            $processed = [];
-            foreach ($value as $key => $subValue) {
-                $processed[$key] = $this->processValue($subValue);
-            }
-            return $processed;
+        $processed = [];
+        foreach ($value as $key => $subValue) {
+            $processed[$key] = $this->processValue($subValue);
         }
-
-        // Non-string scalars (int, float, bool, null) stay untouched
-        return $value;
+        return $processed;
     }
 
     private function replacePlaceholders(string $text): string
