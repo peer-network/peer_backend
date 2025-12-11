@@ -146,7 +146,7 @@ class MintServiceImpl implements MintService
 
             $mintid = $this->generateUUID();
 
-            // get gems to collect
+            // ALL uncollected gems
             $uncollectedGems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
 
             if (empty($uncollectedGems)) {

@@ -145,4 +145,20 @@ final class MintServiceImplTest extends TestCase
         $this->assertSame('4.25', $result->totalGems);
     }
 
+    public function testCalculateGemsInToken_twoUsers_one_with_zero_sum(): void
+    {
+
+        $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
+            'u1' => [-3, 2, 5, 0.25],
+            'u2' => [-3, 2,0.25,0.25,0.25,0.25],
+        ]);
+
+        // u1: sum of gems is negative => u1 gems = 0
+        // so sum of tokens = u1 tokens = 4.25
+        /** @var GemsInTokenResult $result */
+        $result = $this->calculateGemsInToken->invoke(null, $uncollected);
+
+        $this->assertSame('4.25', $result->totalGems);
+    }
+
 }
