@@ -221,16 +221,12 @@ class PoolMapper
             $whereby = $mapping[$whereby]['text'];
         }
 
-        if (!empty($data)) {
-            return [
-                'status' => 'success',
-                'counter' => count($args) - 1,
-                'ResponseCode' => "11208",
-                'affectedRows' => ['data' => array_values($args), 'totalGems' => $totalGems]
-            ];
-        }
-
-        return $this::respondWithError(40301);
+        return $this->createSuccessResponse(
+            11208, 
+            ['data' => array_values($args), 'totalGems' => $totalGems,'counter' => count($args) - 1 ], 
+            true, 
+            'counter'
+        );
     }
 
     private function decimalToQ64_96(float $value): string

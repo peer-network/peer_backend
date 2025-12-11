@@ -200,16 +200,11 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false) {
-                $success = [
-                    'status' => 'success',
-                    'ResponseCode' => "11204",
-                    'currentliquidity' => $results,
-                ];
-                return $success;
-            }
-
-            return $this::createSuccessResponse(21203);
+            return [
+                'status' => 'success',
+                'ResponseCode' => "11204",
+                'currentliquidity' => $results,
+            ];
         } catch (\Exception $e) {
             return $this::respondWithError(41204);
         }
