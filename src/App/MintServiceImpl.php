@@ -86,7 +86,7 @@ class MintServiceImpl implements MintService
         }
     }
 
-    private function calculateGemsInToken(UncollectedGemsResult $uncollectedGems): GemsInTokenResult {
+    private static function calculateGemsInToken(UncollectedGemsResult $uncollectedGems): GemsInTokenResult {
         $totalGems = $uncollectedGems->overallTotal;
         $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
@@ -100,7 +100,6 @@ class MintServiceImpl implements MintService
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInToken
     ): array {
-        //---------------- Build an internal per-user token totals array without changing the response
         $tokenTotals = [];
 
         foreach ($uncollectedGems->rows as $row) {
@@ -147,6 +146,7 @@ class MintServiceImpl implements MintService
 
             $mintid = $this->generateUUID();
 
+            // get gems to collect
             $uncollectedGems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
 
             if (empty($uncollectedGems)) {
@@ -154,7 +154,7 @@ class MintServiceImpl implements MintService
                 return self::createSuccessResponse(21206);
             }
 
-            $gemsInTokenResult = $this->calculateGemsInToken(
+            $gemsInTokenResult = $this::calculateGemsInToken(
                 $uncollectedGems
             );
             
@@ -201,39 +201,11 @@ class MintServiceImpl implements MintService
         }
     }
 
-    /**
-     * Returns true if a mint was performed for the given day action.
-     * Exceptions are handled here (service layer), repository allowed to throw.
-     */
-    public function mintWasPerformedForDay(string $dayAction = 'D0'): bool
-    {
-        if (!$this->checkAuthentication()) {
-            return false;
-        }
-
-        $valid = ['D0','D1','D2','D3','D4','D5','D6','D7','W0','M0','Y0'];
-        if (!in_array($dayAction, $valid, true)) {
-            return false;
-        }
-
-        try {
-            return $this->mintRepository->mintWasPerformedForDay($dayAction);
-        } catch (\Throwable $e) {
-            $this->logger->error('MintService.mintWasPerformedForDay failed', [
-                'error' => $e->getMessage(),
-                'dayAction' => $dayAction,
-            ]);
-            return false;
-        }
-    }
-
-
     private function transferMintTokens(
         array $tokensPerUser,
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInTokenResult
     ): array {
-        //---------------- After marking gems collected, transfer tokens from MintAccount to each user
         $mintAccount = $this->mintAccountRepository->getDefaultAccount();
 
         if ($mintAccount === null) {
