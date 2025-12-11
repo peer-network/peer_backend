@@ -2186,14 +2186,18 @@ class GraphQLSchemaBuilder
                     'dislike' => new PaidDislikeTransferStrategy(),
                 };
 
-                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
+                $deducted = $this->walletService->performPayment(
+                    $this->currentUserId,
+                     $transferStrategy,
+                      $args
+                );
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
                     return $deducted;
                 }
 
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
-                    return $this::respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError(40301);
                 }
 
                 return $response;

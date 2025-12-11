@@ -255,7 +255,7 @@ class AdvertisementService
 
                 if (!$deducted) {
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError($deducted['ResponseCode']);
+                    return $this->respondWithError(40301);
                 }
 
                 return $response;
