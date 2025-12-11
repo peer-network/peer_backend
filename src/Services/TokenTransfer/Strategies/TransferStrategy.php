@@ -21,10 +21,5 @@ interface TransferStrategy
     public function getTransactionId(): string;
     public function getOperationId(): string;
 
-    /**
-     * Fee policy mode for this transfer.
-     * ADDED: price is net, fees added on top.
-     * INCLUDED: price is gross, recipient gets net.
-     */
     public function getFeePolicyMode(): FeePolicyMode;
 }

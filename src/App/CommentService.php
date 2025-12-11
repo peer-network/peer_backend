@@ -114,7 +114,6 @@ class CommentService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
             $commentId = $this->generateUUID();
 
             $commentData = [
@@ -141,14 +140,12 @@ class CommentService
 
             if (!$result) {
                 $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
-                $this->transactionManager->rollback();
                 return $this::respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
                 $this->logger->warning('PostInfo not found for postId', ['postId' => $postId]);
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31602);
             }
 
@@ -181,7 +178,6 @@ class CommentService
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
             $response = [$commentResponse];
 
-            $this->transactionManager->commit();
             $this->logger->info('CommentService.createComment completed successfully');
             return [
                 'status' => 'success',
@@ -190,7 +186,6 @@ class CommentService
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('Error occurred while creating comment', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
