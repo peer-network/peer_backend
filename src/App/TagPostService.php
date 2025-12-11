@@ -59,23 +59,6 @@ class TagPostService
             preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
-    private function validateTagName(string $tagName): array|bool
-    {
-        if ($tagName === '') {
-            return $this::respondWithError(30101);
-        }
-
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
-
-        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
-            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
-            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
-            return $this::respondWithError(30255);
-        }
-
-        return true;
-    }
-
     public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {

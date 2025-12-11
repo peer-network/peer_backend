@@ -12,6 +12,8 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use function hexdec;
+use function strlen;
 
 const TABLESTOGEMS = true;
 
@@ -570,7 +572,7 @@ class WalletMapper
         $bits = (int)$log + 1;
         $filter = (int)(1 << $bits) - 1;
         do {
-            $rnd = \hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
+            $rnd = hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
             $rnd &= $filter;
         } while ($rnd >= $range);
         return $min + $rnd;
@@ -581,7 +583,7 @@ class WalletMapper
         $token = '';
         $codeAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for ($i = 0; $i < $length; $i++) {
-            $token .= $codeAlphabet[$this->crypto_rand_secure(0, \strlen($codeAlphabet))];
+            $token .= $codeAlphabet[$this->crypto_rand_secure(0, strlen($codeAlphabet))];
         }
         return $token;
     }
@@ -1402,22 +1404,6 @@ class WalletMapper
 
         return $scaledValue;
     }
-
-    /*private function q64_96ToDecimal(string $qValue): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-
-        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
-
-        return (string) round((float) $decimalValue, 2);
-    }*/
-
-    private function addQ64_96(string $qValue1, string $qValue2): string
-    {
-        return \bcadd($qValue1, $qValue2);
-    }
-
-
 
     /**
      * To Defend against Atomicity issues in concurrent debit operations

@@ -129,41 +129,6 @@ class UserInfoMapper
         }
     }
 
-    private function fetchFriends(string $userid): array
-    {
-        $this->logger->debug("UserInfoMapper.fetchFriends started", ['userid' => $userid]);
-
-        try {
-            $sql = "SELECT u.uid, u.username, u.slug, u.updatedat, u.biography, u.img 
-                    FROM follows f1 
-                    INNER JOIN follows f2 ON f1.followedid = f2.followerid 
-                    INNER JOIN users u ON f1.followedid = u.uid 
-                    WHERE f1.followerid = :userid 
-                    AND f2.followedid = :userid";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in fetchFriends: " . $e->getMessage(), ['userid' => $userid]);
-            return [];
-        }
-    }
-
-    private function getFriends(string $currentUserId): array|null
-    {
-        $this->logger->debug('UserInfoMapper.getFriends started');
-        $users = $this->fetchFriends($currentUserId);
-
-        if ($users) {
-            return $users;
-        }
-
-        return null;
-    }
-
     public function toggleUserFollow(string $followerid, string $followeduserid): array
     {
         $this->logger->info('UserInfoMapper.toggleUserFollow started', ['follower_id' => $followerid,
