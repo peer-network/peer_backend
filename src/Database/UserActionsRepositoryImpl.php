@@ -13,8 +13,6 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\Database\UserMapper;
 
-const TABLESTOGEMS = true;
-
 class UserActionsRepositoryImpl implements UserActionsRepository
 {
     use ResponseHelper;

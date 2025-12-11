@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use DateTime;
 use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\Repositories\MintAccountRepository;
@@ -128,7 +129,7 @@ class MintServiceImpl implements MintService
             return $this::respondWithError(60501);
         }
 
-        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'W0', 'M0', 'Y0'];
+        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
@@ -137,12 +138,14 @@ class MintServiceImpl implements MintService
 
         try {
             // Prevent duplicate minting for the selected period
-            if ($this->mintRepository->mintWasPerformedForDay($day)) {
+            if ($this->mintRepository->getMintForDay($day)) {
                 $this->logger->error('Mint already performed for selected period', ['day' => $day]);
                 return $this::respondWithError(40301);
             }
 
             $this->transactionManager->beginTransaction();
+
+            $mintid = $this->generateUUID();
 
             $uncollectedGems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
 
@@ -160,12 +163,22 @@ class MintServiceImpl implements MintService
                 $gemsInTokenResult
             );
 
-            $this->gemsRepository->setGemsAsCollected($uncollectedGems);
-
             $args = $this->transferMintTokens(
                 $tokensPerUser,
                 $uncollectedGems,
                 $gemsInTokenResult
+            );
+            
+            $this->mintRepository->insertMint(
+                $mintid,
+                new DateTime()->format('Y-m-d'),
+                $gemsInTokenResult->gemsInToken
+            );
+
+            $this->gemsRepository->applyMintInfo(
+                $mintid,
+                $uncollectedGems,
+                $args
             );
 
             $this->transactionManager->commit();
@@ -297,15 +310,12 @@ class MintServiceImpl implements MintService
                 'createdat' => $row->createdat
             ];
 
-            $item = new MintLogItem(
+            $args[$userId]['logItem'] = new MintLogItem(
                 $row->gemid,
                 $args[$row->userid]['transactionId'],
                 $args[$row->userid]['operationId'],
                 $rowgems2token
             );
-            // $this->walletMapper->insertWinToLog($userId, end($args[$userId]['details']));
-
-            $this->mintRepository->insertMintLog($item);
         }
 
         return $args;

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace Fawaz\Database;
+use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
 use PDO;
@@ -13,11 +14,20 @@ class GemsRepositoryImpl implements GemsRepository
 {
     use ResponseHelper;
 
+    /**
+     * @param PeerLoggerInterface $logger Logger instance
+     * @param PDO                 $db     Database connection
+     */
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected PDO $db,
     ) {}
 
+    /**
+     * Aggregated stats for uncollected gems across common time windows.
+     *
+     * @return array Associative array with keys like d0..d7, w0, m0, y0
+     */
     public function fetchUncollectedGemsStats(): array
     {
         try {
@@ -48,6 +58,14 @@ class GemsRepositoryImpl implements GemsRepository
         return $this::createSuccessResponse(11207, $entries, false);
     }
 
+    /**
+     * Aggregated per-user gems for a given day filter.
+     *
+     * Supported filters: D0..D5, W0, M0, Y0
+     *
+     * @param string $day Day filter (e.g., 'D0', 'W0', 'M0', 'Y0')
+     * @return array List of per-user aggregates and totals
+     */
     public function fetchAllGemsForDay(string $day = 'D0'): array
     {
         \ignore_user_abort(true);
@@ -148,7 +166,13 @@ class GemsRepositoryImpl implements GemsRepository
         ];
     }
 
-    public function fetchUncollectedGemsForMint(string $day = 'D0'): array
+    /**
+     * Raw uncollected gems rows for a given window, suitable for minting.
+     *
+     * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
+     * @return array List of associative rows including userid, gemid, postid, etc.
+     */
+    private function fetchUncollectedGemsForMint(string $day = 'D0'): array
     {
         $dayOptionsRaw = [
             'D0' => "createdat::date = CURRENT_DATE",
@@ -208,6 +232,12 @@ class GemsRepositoryImpl implements GemsRepository
      * Immutable DTO variant of fetchUncollectedGemsForMint result.
      * Does not alter existing callers that expect an array.
      */
+    /**
+     * Immutable DTO result for uncollected gems over a time window.
+     *
+     * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
+     * @return UncollectedGemsResult DTO containing rows and overall total
+     */
     public function fetchUncollectedGemsForMintResult(string $day = 'D0'): UncollectedGemsResult
     {
         $rows = $this->fetchUncollectedGemsForMint($day);
@@ -235,25 +265,14 @@ class GemsRepositoryImpl implements GemsRepository
         return new UncollectedGemsResult($mapped, $overall);
     }
 
-    public function setGemsAsCollected(UncollectedGemsResult $uncollectedGems) {
-        $gemIds = array_column(
-            $uncollectedGems->rows, 
-            'gemid'
-        );
-        $quotedGemIds = array_map(
-            fn ($gemId) => $this->db->quote($gemId), 
-            $gemIds
-        );
-        $this->db->query(
-            '
-                UPDATE 
-                    gems 
-                SET 
-                    collected = 1 
-                WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')'
-        );
-    }
-
+    /**
+     * Insert global win entries into gems and mark source rows as collected.
+     *
+     * @param string $tableName Source table name (e.g., 'likes', 'views')
+     * @param int    $winType   Win type code to store in whereby
+     * @param float  $factor    Gems amount factor to insert
+     * @return array Result payload including insertCount
+     */
     public function setGlobalWins(string $tableName, int $winType, float $factor): array
     {
         \ignore_user_abort(true);
@@ -322,5 +341,51 @@ class GemsRepositoryImpl implements GemsRepository
             'status' => 'success',
             'insertCount' => $insertCount
         ];
+    }
+
+    /**
+     * Apply mint metadata and mark corresponding gems as collected.
+     *
+     * @param string                $mintId          The mint operation identifier
+     * @param UncollectedGemsResult $uncollectedGems The result set to apply
+     * @param array<string,array<string, mixed>>    $mintLogItems     Map of userId => log item (contains transactionId)
+     * @return void
+     */
+    public function applyMintInfo(
+        string $mintId, 
+        UncollectedGemsResult $uncollectedGems, 
+        array $mintLogItems
+    ): void {
+
+        $this->logger->debug('GemsRepositoryImpl.applyMintInfo started', [
+            'mintId' => $mintId,
+            'rows' => count($uncollectedGems->rows),
+            'users' => count($mintLogItems),
+        ]);
+
+        if (empty($uncollectedGems->rows)) {
+            $this->logger->error('list of uncollected gems is empty');
+            throw new \RuntimeException("list of uncollected gems is empty", 40301);
+        }
+
+
+        $sql = 'UPDATE gems SET mintid = :mintid, transactionid = :tx, collected = 1 WHERE gemid = :gemid';
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($uncollectedGems->rows as $row) {
+            $userId = (string)$row->userid;
+            $transactionId = (string)$mintLogItems[$userId]['logItem']->transactionid;
+
+            if (!$transactionId) {
+                $this->logger->error('mintlogItem for userid not found. Revert.', ['userId' => $userId]);
+                throw new \RuntimeException("mintlogItem for userid not found. Revert.", 40301);
+            }
+            $stmt->bindValue(':mintid', $mintId, PDO::PARAM_STR);
+            $stmt->bindValue(':tx', $transactionId, PDO::PARAM_STR);
+            $stmt->bindValue(':gemid', (string)$row->gemid, PDO::PARAM_STR);
+            $stmt->execute();
+        }
+        
+        $this->logger->info('GemsRepositoryImpl.applyMintInfo succeeded');
     }
 }

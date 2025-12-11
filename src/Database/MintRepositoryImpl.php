@@ -6,12 +6,9 @@ namespace Fawaz\Database;
 
 
 use PDO;
-use Fawaz\App\DTO\MintLogItem;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Repositories\MintAccountRepository;
-
-const TABLESTOGEMS = true;
 
 class MintRepositoryImpl implements MintRepository
 {
@@ -78,43 +75,72 @@ class MintRepositoryImpl implements MintRepository
         return (bool) $stmt->fetchColumn();
     }
 
-    public function insertMintLog(MintLogItem $item): void
+    public function insertMint(string $mintId, string $day, string $gemsInTokenRatio): void
     {
-        $this->insertMintLogs([$item]);
+        $this->logger->debug('MintRepositoryImpl.insertMint started', [
+            'mintId' => $mintId,
+            'day' => $day,
+            'gemsInTokenRatio' => $gemsInTokenRatio,
+        ]);
+
+        $sql = 'INSERT INTO mints (mintid, day, gems_in_token_ratio) VALUES (:mintid, :day, :ratio)';
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':mintid', $mintId, PDO::PARAM_STR);
+        $stmt->bindValue(':day', $day, PDO::PARAM_STR);
+        $stmt->bindValue(':ratio', $gemsInTokenRatio, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $this->logger->info('MintRepositoryImpl.insertMint succeeded', [
+            'mintId' => $mintId,
+            'day' => $day,
+            'ratio' => $gemsInTokenRatio
+        ]);
     }
 
-    public function insertMintLogs(array $items): void
+    /**
+     * Get a mint row for a concrete date (YYYY-MM-DD) if it exists.
+     *
+     * @param string $dateYYYYMMDD Date in ISO format (e.g., 2025-12-03)
+     * @return array|null Associative row of mint data or null if none
+     */
+    public function getMintForDate(string $dateYYYYMMDD): ?array
     {
-        \ignore_user_abort(true);
-
-        $this->logger->debug('MintRepositoryImpl.insertMintLogs started', ['count' => count($items)]);
-
-        if (empty($items)) {
-            return;
-        }
-
-        $sqlWithCreated = 'INSERT INTO mint_info (gemid, operationid, transactionid, tokenamount, createdat) VALUES (:gemid, :operationid, :transactionid, :tokenamount, :createdat)';
-        
-        $stmtWith = $this->db->prepare($sqlWithCreated);
-
-        foreach ($items as $item) {
-            if (!$item instanceof MintLogItem) {
-                throw new \InvalidArgumentException('All items must be instances of MintLogItem');
-            }
-
-            $stmt = $stmtWith;
-
-            $stmt->bindValue(':gemid', $item->gemid, PDO::PARAM_STR);
-            $stmt->bindValue(':operationid', $item->operationid, PDO::PARAM_STR);
-            $stmt->bindValue(':transactionid', $item->transactionid, PDO::PARAM_STR);
-            $stmt->bindValue(':tokenamount', $item->tokenamount, PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $item->createdat ?? (new \DateTime())->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
-
-            $stmt->execute();
-        }
-
-        $this->logger->info('MintRepositoryImpl.insertMintLogs succeeded', [
-            'count' => count($items),
+        $this->logger->debug('MintRepositoryImpl.getMintForDate started', [
+            'day' => $dateYYYYMMDD,
         ]);
+
+        $sql = 'SELECT mintid, day, gems_in_token_ratio FROM mints WHERE day = :day LIMIT 1';
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':day', $dateYYYYMMDD, PDO::PARAM_STR);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
+    /**
+     * Resolve a day token (e.g., D0..D7) to a concrete date and fetch its mint.
+     *
+     * Supported tokens: D0..D7. Other tokens are not supported for a single-day mint lookup.
+     *
+     * @param string $day Day token (default 'D0')
+     * @return array|null Associative row of mint data or null if none
+     */
+    public function getMintForDay(string $day = 'D0'): ?array
+    {
+        $supported = ['D0','D1','D2','D3','D4','D5','D6','D7'];
+        if (!in_array($day, $supported, true)) {
+            throw new \InvalidArgumentException('Unsupported day token for single-day lookup');
+        }
+
+        // Convert token to date string using the database to ensure timezone parity
+        $offset = (int) substr($day, 1);
+        $sql = "SELECT TO_CHAR((CURRENT_DATE - INTERVAL '$offset day'), 'YYYY-MM-DD') AS d";
+        $stmt = $this->db->query($sql);
+        $date = $stmt->fetchColumn();
+        if (!is_string($date) || $date === '') {
+            return null;
+        }
+
+        return $this->getMintForDate($date);
     }
 }
