@@ -25,21 +25,6 @@ class ContactusService
         $this->currentUserId = $userId;
     }
 
-    private function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff)
-        );
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -47,27 +32,6 @@ class ContactusService
             return false;
         }
         return true;
-    }
-
-    private function isValidName(?string $Name): bool
-    {
-        $contactConfig = ConstantsConfig::contact();
-        $inputConfig     = ConstantsConfig::input();
-        $controlPattern  = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
-        return $Name &&
-            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
-            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match($controlPattern, $Name) === 0; 
-    }
-
-    private function validateRequiredFields(array $args, array $requiredFields): array
-    {
-        foreach ($requiredFields as $field) {
-            if (empty($args[$field])) {
-                return $this::respondWithError(32017);//"$field is required"
-            }
-        }
-        return [];
     }
 
     public function insert(Contactus $contact): ?Contactus

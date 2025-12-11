@@ -85,11 +85,6 @@ class PostService
         return json_encode($args);
     }
 
-    private function argsToString($args)
-    {
-        return serialize($args);
-    }
-
     private function validateCoverCount(array $args, string $contenttype): array
     {
         if (!is_array($args['cover'])) {
@@ -657,59 +652,6 @@ class PostService
             return false;
         }
     }
-
-    private function mapCommentsWithReplies(array $comments): array
-    {
-        return array_map(
-            function (Comment $comment) {
-                $commentArray = $comment->getArrayCopy();
-                $replies = $this->commentMapper->fetchAllByParentId($comment->getId());
-                $commentArray['replies'] = $this->mapCommentsWithReplies($replies);
-                return $commentArray;
-            },
-            $comments
-        );
-    }
-
-    // public function deletePost(string $id): array
-    // {
-    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-    //         return $this::respondWithError('Invalid feed ID');
-    //     }
-
-    //     if (!self::isValidUUID($id)) {
-    //         return $this::respondWithError(30209);
-    //     }
-
-    //     $this->logger->debug('PostService.deletePost started');
-
-    //     $posts = $this->postMapper->loadById($id);
-    //     if (!$posts) {
-    //         return $this::createSuccessResponse(21516);
-    //     }
-
-    //     $post = $posts->getArrayCopy();
-
-    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-    //         return $this::respondWithError('Unauthorized: You can only delete your own posts.');
-    //     }
-
-    //     try {
-    //         $postid = $this->postMapper->delete($id);
-
-    //         if ($postid) {
-    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-    //             return [
-    //                 'status' => 'success',
-    //                 'ResponseCode' => "11510",
-    //             ];
-    //         }
-    //     } catch (\Throwable $e) {
-    //         return $this::respondWithError(41510);
-    //     }
-
-    //     return $this::respondWithError(41510);
-    // }
 
 
     /**
