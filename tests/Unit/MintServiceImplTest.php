@@ -10,6 +10,13 @@ use Fawaz\App\DTO\UncollectedGemsRow;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\UncollectedGemsFactory;
 
+/**
+ * Unit tests for MintServiceImpl::calculateGemsInToken.
+ *
+ * Covers scenarios with single and multiple users, mixed positive/negative
+ * gem events, and verifies computed fields: totalGems, gemsInToken, and
+ * confirmation. Assumes DAILY_NUMBER_TOKEN is 5000 for expected values.
+ */
 final class MintServiceImplTest extends TestCase
 {
     private const DELTA = 0.00000001;
@@ -24,7 +31,6 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_singleUser_quarterGem(): void
     {
-        // Arrange
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [0.25]
         ]);
@@ -44,7 +50,6 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_twoUsers_quarterEach(): void
     {
-        // Arrange: two users, each with 0.25 gems => total 0.5
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [0.25],
             'u2' => [0.25],
@@ -64,7 +69,6 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_twoUsers_mixedGems(): void
     {
-        // Arrange: u1 = 0.25, u2 = 0.25 + 2 + 5 => total = 7.5
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [0.25],
             'u2' => [0.25, 2.0, 5.0],
@@ -81,7 +85,6 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_threeUsers_mixedGems(): void
     {
-        // Arrange: u1 = 0.25, u2 = 0.25 + 2 + 5 = 7.25, u3 = 0.25 => total = 7.75
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [0.25],
             'u2' => [0.25, 2.0, 5.0],
@@ -99,11 +102,14 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_oneUser_dislikeAndView(): void
     {
-        // Arrange: u1 = 0.25, u2 = 0.25 + 2 + 5 = 7.25, u3 = 0.25 => total = 7.75
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [-3, 0.25],
         ]);
 
+        // Assert:
+        // totalGems = 0.0, negative amount of gems per user > 0
+        // DAILY_NUMBER_TOKEN = 5000; gemsInToken = 5000 / 0.5 = 10000
+        // confirmation = totalGems * gemsInToken = 0.5 * 10000 = 5000
         /** @var GemsInTokenResult $result */
         $result = $this->calculateGemsInToken->invoke(null, $uncollected);
 
@@ -112,11 +118,11 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_oneUser_like_dislike_comment_view(): void
     {
-        // Arrange: u1 = 0.25, u2 = 0.25 + 2 + 5 = 7.25, u3 = 0.25 => total = 7.75
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [-3, 2, 5, 0.25],
         ]);
 
+        // sum of all gems is positive, result = sum of gems
         /** @var GemsInTokenResult $result */
         $result = $this->calculateGemsInToken->invoke(null, $uncollected);
 
@@ -125,12 +131,14 @@ final class MintServiceImplTest extends TestCase
 
     public function testCalculateGemsInToken_twoUsers_one_with_negative_gems_amount(): void
     {
-        // Arrange: u1 = 0.25, u2 = 0.25 + 2 + 5 = 7.25, u3 = 0.25 => total = 7.75
+
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
             'u1' => [-3, 2, 5, 0.25],
             'u2' => [-3, 0.25],
         ]);
 
+        // u1: sum of gems is negative => u1 gems = 0
+        // so sum of tokens = u1 tokens = 4.25
         /** @var GemsInTokenResult $result */
         $result = $this->calculateGemsInToken->invoke(null, $uncollected);
 
