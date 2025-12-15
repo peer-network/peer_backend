@@ -171,8 +171,8 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: String!
+  tokensSubstractedFromWallet: String
   createdat: String
 }
 
