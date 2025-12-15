@@ -430,7 +430,7 @@ class PostService
         foreach ($tags as $tagName) {
             $tagName = !empty($tagName) ? trim((string) $tagName) : '';
 
-            if (strlen($tagName) <= $minLength || strlen($tagName) >= $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
+            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
             }
 
