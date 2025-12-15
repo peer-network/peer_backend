@@ -191,8 +191,10 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: Decimal @deprecated(reason: "Use tokenSendFormatted")
+  tokensSubstractedFromWallet: Decimal @deprecated(reason: "Use tokensSubstractedFromWalletFormatted")
+  tokenSendFormatted: String!
+  tokensSubstractedFromWalletFormatted: String!
   createdat: String
 }
 
