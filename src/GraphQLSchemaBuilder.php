@@ -1390,7 +1390,7 @@ class GraphQLSchemaBuilder
                 'fees' => function (array $root): ?array {
                     return $root['fees'] ?? null;
                 },
-                'transactionCategory' => function (array $root): string {
+                'transactionCategory' => function (array $root): ?string {
                     return $root['transactioncategory'] ?? null;
                 },
             ],
@@ -2833,8 +2833,7 @@ class GraphQLSchemaBuilder
         }
 
         try {
-            $validation['transactionCategory'] = TransactionCategory::tryFrom($args['transactionCategory']);
-            
+            // $validation['transactionCategory'] = TransactionCategory::tryFrom("hahss");
             $entitiesArray = $this->peerTokenService->transactionsHistoryItems($validation);
             $resultArray = array_map(fn (TransactionHistoryItem $item) => $item->getArrayCopy(),$entitiesArray);
             return $this::createSuccessResponse(11215, $resultArray);

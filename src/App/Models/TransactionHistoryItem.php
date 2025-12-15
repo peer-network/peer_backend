@@ -16,7 +16,7 @@ class TransactionHistoryItem implements HasUserRefs
 {
     private string $operationid;
     private string $transactiontype;
-    protected TransactionCategory $transactioncategory;
+    protected ?TransactionCategory $transactioncategory;
     private float $tokenamount; // gross = net + fees total
     private float $netTokenAmount;
     private ?string $message;
@@ -34,7 +34,7 @@ class TransactionHistoryItem implements HasUserRefs
     {
         $this->operationid = (string)($data['operationid'] ?? '');
         $this->transactiontype = (string)($data['transactiontype'] ?? '');
-        $this->transactioncategory = TransactionCategory::tryFrom($data['transactioncategory']);
+        $this->transactioncategory = TransactionCategory::tryFrom($data['transactioncategory']) ?? null;
         $this->tokenamount = (float)($data['tokenamount'] ?? 0);
         $this->netTokenAmount = (float)($data['netTokenAmount'] ?? 0);
         $this->message = isset($data['message']) ? (string)$data['message'] : null;
