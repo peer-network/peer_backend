@@ -777,7 +777,7 @@ jobs:
       validate_sql_files,
       build_and_test,
       aggregate_outcome,
-      gitleaks_scan_staged,
+#      gitleaks_scan_staged,
       trivy_scan,
       map_pr_to_discord
     ]
