@@ -42,9 +42,7 @@ type Query {
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
   
   transactionHistory(
-    transactionCategory:TransactionCategory,
     type: TokenMovementFilterType,
-    direction: DirectionFilterType,
     start_date: String,
     end_date: String,
     limit: Int,
