@@ -7,7 +7,7 @@ namespace Fawaz\App\Models;
 enum TransactionCategory: string
 {
     case P2P_TRANSFER = 'P2P_TRANSFER';
-    case ADVERTISEMENT = 'ADVERTISEMENT';
+    case AD_PINNED = 'AD_PINNED';
     case POST_CREATE = 'POST_CREATE';
     case LIKE = 'LIKE';
     case DISLIKE = 'DISLIKE';

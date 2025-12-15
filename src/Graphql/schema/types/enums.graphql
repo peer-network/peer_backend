@@ -128,7 +128,7 @@ enum DayFilterType {
 
 enum TransactionCategory {
   P2P_TRANSFER
-  ADVERTISEMENT
+  AD_PINNED
   POST_CREATE
   LIKE
   DISLIKE

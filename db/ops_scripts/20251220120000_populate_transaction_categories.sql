@@ -9,7 +9,7 @@ WHERE transactioncategory IS NULL
   );
 
 UPDATE transactions
-SET transactioncategory = 'ADVERTISEMENT'
+SET transactioncategory = 'AD_PINNED'
 WHERE transactioncategory IS NULL
   AND transactiontype IN ('transferForAds');
 

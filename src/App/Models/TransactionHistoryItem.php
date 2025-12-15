@@ -30,13 +30,20 @@ class TransactionHistoryItem implements HasUserRefs
     private ?Profile $sender = null;
     private ?Profile $recipient = null;
 
-    public function __construct(array $data)
+    public function __construct(array $data, string $currentUserId)
     {
+        $tokenamount = (float)($data['tokenamount'] ?? 0);
+        $netTokenAmount = (float)($data['netTokenAmount'] ?? 0);
+        if( $currentUserId === (string)$data['senderid']) {
+            $tokenamount = -$tokenamount;
+            $netTokenAmount = -$netTokenAmount;
+        } 
+
         $this->operationid = (string)($data['operationid'] ?? '');
         $this->transactiontype = (string)($data['transactiontype'] ?? '');
         $this->transactioncategory = TransactionCategory::tryFrom($data['transactioncategory']) ?? null;
-        $this->tokenamount = (float)($data['tokenamount'] ?? 0);
-        $this->netTokenAmount = (float)($data['netTokenAmount'] ?? 0);
+        $this->tokenamount = $tokenamount;
+        $this->netTokenAmount = $netTokenAmount;
         $this->message = isset($data['message']) ? (string)$data['message'] : null;
         $this->createdat = (string)($data['createdat'] ?? '');
         $this->senderid = (string)($data['senderid'] ?? '');

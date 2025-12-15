@@ -665,7 +665,7 @@ class PeerTokenMapper
                     'inviter' => (float)$row['inviter_fee'] ?: null,
                 ],
             ];
-            $items[] = new TransactionHistoryItem($tiData);
+            $items[] = new TransactionHistoryItem($tiData,$userId);
         }
 
         return $items;
