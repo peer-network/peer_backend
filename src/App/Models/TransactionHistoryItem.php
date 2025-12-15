@@ -8,6 +8,8 @@ use Fawaz\App\Contracts\HasUserRefs;
 use Fawaz\App\Profile;
 use Fawaz\App\ReadModels\UserRef;
 
+use function DI\string;
+
 /**
  * Lightweight read model for a grouped transaction history item.
  * Represents one logical operation with aggregated fees.
@@ -17,8 +19,8 @@ class TransactionHistoryItem implements HasUserRefs
     private string $operationid;
     private string $transactiontype;
     protected ?TransactionCategory $transactioncategory;
-    private float $tokenamount; // gross = net + fees total
-    private float $netTokenAmount;
+    private string $tokenamount; // gross = net + fees total
+    private string $netTokenAmount;
     private ?string $message;
     private string $createdat;
     private string $senderid;
@@ -32,11 +34,11 @@ class TransactionHistoryItem implements HasUserRefs
 
     public function __construct(array $data, string $currentUserId)
     {
-        $tokenamount = (float)($data['tokenamount'] ?? 0);
-        $netTokenAmount = (float)($data['netTokenAmount'] ?? 0);
+        $tokenamount = (string)$data['tokenamount'];
+        $netTokenAmount = (string)$data['netTokenAmount'];
         if( $currentUserId === (string)$data['senderid']) {
-            $tokenamount = -$tokenamount;
-            $netTokenAmount = -$netTokenAmount;
+            $tokenamount = '-' . $tokenamount;
+            $netTokenAmount = '-' . $netTokenAmount;
         } 
 
         $this->operationid = (string)($data['operationid'] ?? '');
@@ -48,7 +50,7 @@ class TransactionHistoryItem implements HasUserRefs
         $this->createdat = (string)($data['createdat'] ?? '');
         $this->senderid = (string)($data['senderid'] ?? '');
         $this->recipientid = (string)($data['recipientid'] ?? '');
-        $this->fees = $data['fees'] ?? ['total' => 0.0, 'burn' => null, 'peer' => null, 'inviter' => null];
+        $this->fees = $data['fees'] ?? ['total' => '0.0', 'burn' => null, 'peer' => null, 'inviter' => null];
         // Optional pre-attached profiles if provided
         $this->sender = $data['sender'] ?? null;
         $this->recipient = $data['recipient'] ?? null;

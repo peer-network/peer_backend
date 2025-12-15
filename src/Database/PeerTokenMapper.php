@@ -644,9 +644,14 @@ class PeerTokenMapper
 
         $items = [];
         foreach ($rows as $row) {
-            $feesTotal = (float)$row['peer_fee'] + (float)$row['burn_fee'] + (float)$row['inviter_fee'];
-            $netTokenAmount = (float)($row['net_amount'] ?? 0);
-            $grossAmount = $netTokenAmount + $feesTotal;
+            $peerFee = (string)($row['peer_fee'] ?? '0');
+            $burnFee = (string)($row['burn_fee'] ?? '0');
+            $inviterFee = (string)($row['inviter_fee'] ?? '0');
+            $netTokenAmount = (string)($row['net_amount'] ?? '0');
+
+            $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
+            $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
+            $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
 
             $tiData = [
                 'operationid' => (string)($row['operationid'] ?? ''),
@@ -660,9 +665,9 @@ class PeerTokenMapper
                 'recipientid' => (string)($row['recipientid'] ?? ''),
                 'fees' => [
                     'total' => $feesTotal,
-                    'burn' => (float)$row['burn_fee'] ?: null,
-                    'peer' => (float)$row['peer_fee'] ?: null,
-                    'inviter' => (float)$row['inviter_fee'] ?: null,
+                    'burn' => (string)$row['burn_fee'] ?: null,
+                    'peer' => (string)$row['peer_fee'] ?: null,
+                    'inviter' => (string)$row['inviter_fee'] ?: null,
                 ],
             ];
             $items[] = new TransactionHistoryItem($tiData,$userId);

@@ -1369,11 +1369,11 @@ class GraphQLSchemaBuilder
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
                 },
-                'tokenamount' => function (array $root): float {
-                    return (float)($root['tokenamount'] ?? 0.0);
+                'tokenamount' => function (array $root): string {
+                    return $root['tokenamount'] ?? '';
                 },
-                'netTokenAmount' => function (array $root): float {
-                    return (float)($root['netTokenAmount'] ?? 0.0);
+                'netTokenAmount' => function (array $root): string {
+                    return $root['netTokenAmount'] ?? '';
                 },
                 'message' => function (array $root): string {
                     return $root['message'] ?? '';
@@ -1395,17 +1395,17 @@ class GraphQLSchemaBuilder
                 },
             ],
             'TransactionFeeSummary' => [
-                'total' => function (array $root): ?float {
-                    return isset($root['total']) ? (float)$root['total'] : null;
+                'total' => function (array $root): ?string {
+                    return isset($root['total']) ? $root['total'] : null;
                 },
-                'burn' => function (array $root): ?float {
-                    return isset($root['burn']) ? (float)$root['burn'] : null;
+                'burn' => function (array $root): ?string {
+                    return isset($root['burn']) ? $root['burn'] : null;
                 },
-                'peer' => function (array $root): ?float {
-                    return isset($root['peer']) ? (float)$root['peer'] : null;
+                'peer' => function (array $root): ?string {
+                    return isset($root['peer']) ? $root['peer'] : null;
                 },
-                'inviter' => function (array $root): ?float {
-                    return isset($root['inviter']) ? (float)$root['inviter'] : null;
+                'inviter' => function (array $root): ?string {
+                    return isset($root['inviter']) ? $root['inviter'] : null;
                 },
             ],
             'TransferTokenResponse' => [
