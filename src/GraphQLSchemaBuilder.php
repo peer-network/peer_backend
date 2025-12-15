@@ -1360,11 +1360,10 @@ class GraphQLSchemaBuilder
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
             'TransferToken' => [
-                'tokenSend' => fn(array $root): string => (string) ($root['tokenSend'] ?? '0'),
-                'tokensSubstractedFromWallet' => fn(array $root): string => (string) ($root['tokensSubstractedFromWallet'] ?? '0'),
+                'tokenSend' => fn(array $root): float => $root['tokenSend'] ?? 0.0,
+                'tokensSubstractedFromWallet' => fn(array $root): float => $root['tokensSubstractedFromWallet'] ?? 0.0,
                 'tokenSendFormatted' => fn(array $root): string => (string) ($root['tokenSend'] ?? '0'),
                 'tokensSubstractedFromWalletFormatted' => fn(array $root): string => (string) ($root['tokensSubstractedFromWallet'] ?? '0'),
-
                 'createdat' => fn(array $root): string => (string) ($root['createdat'] ?? ''),
             ],
             'Transaction' => [
