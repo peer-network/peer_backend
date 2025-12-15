@@ -1361,7 +1361,7 @@ class GraphQLSchemaBuilder
             ],
             'TransferToken' => [
                 'tokenSend' => fn(array $root): string => (string) ($root['tokenSend'] ?? '0'),
-                'tokensSubstractedFromWallet' => fn(array $root): string => (string)$root['tokensSubstractedFromWallet'] ?? '0',
+                'tokensSubstractedFromWallet' => fn(array $root): string => (string)($root['tokensSubstractedFromWallet'] ?? '0'),
                 'createdat' => fn(array $root): string => $root['createdat'] ?? '',
             ],
             'Transaction' => [
