@@ -1,5 +1,6 @@
-type TransactionHistotyItem {
+type TransactionHistoryItem {
   operationid: String!
+  transactionCategory: TransactionCategory
   transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
   tokenamount: Decimal! #sum with all fees transactions
   netTokenAmount: Decimal! #value of CREDIT transaction

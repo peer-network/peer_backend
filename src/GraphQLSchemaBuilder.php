@@ -58,6 +58,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
+use Fawaz\App\Models\TransactionCategory;
 
 class GraphQLSchemaBuilder
 {
@@ -1348,7 +1349,7 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => fn(array $root): string => isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '',
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
-            'TransactionHistotyResponse' => [
+            'TransactionHistoryResponse' => [
                 'meta' => function (array $root): array {
                     return [
                         'status' => $root['status'] ?? '',
@@ -1361,7 +1362,7 @@ class GraphQLSchemaBuilder
                     return $root['affectedRows'] ?? [];
                 },
             ],
-            'TransactionHistotyItem' => [
+            'TransactionHistoryItem' => [
                 'operationid' => function (array $root): string {
                     return $root['operationid'] ?? '';
                 },
@@ -1388,6 +1389,9 @@ class GraphQLSchemaBuilder
                 },
                 'fees' => function (array $root): ?array {
                     return $root['fees'] ?? null;
+                },
+                'transactionCategory' => function (array $root): string {
+                    return $root['transactioncategory'] ?? null;
                 },
             ],
             'TransactionFeeSummary' => [
@@ -2827,7 +2831,9 @@ class GraphQLSchemaBuilder
         }
 
         try {
-            $entitiesArray = $this->peerTokenService->transactionsHistoryItems($args);
+            $validation['transactionCategory'] = TransactionCategory::tryFrom($args['transactionCategory']);
+            
+            $entitiesArray = $this->peerTokenService->transactionsHistoryItems($validation);
             $resultArray = array_map(fn (TransactionHistoryItem $item) => $item->getArrayCopy(),$entitiesArray);
             return $this::createSuccessResponse(11215, $resultArray);
         } catch (\Throwable $e) {

@@ -5,9 +5,9 @@ type DefaultResponse {
   ResponseMessage: String
 }
 
-type TransactionHistotyResponse {
+type TransactionHistoryResponse {
   meta: DefaultResponse
-  affectedRows: [TransactionHistotyItem!]
+  affectedRows: [TransactionHistoryItem!]
 }
 
 type ListAdvertisementPostsResponse {

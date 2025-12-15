@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\App\Models\Transaction;
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\App\User;
@@ -279,7 +280,8 @@ class PeerTokenMapper
                     'recipientid' => $recipientId,
                     'tokenamount' => $netRecipientAmount,
                     'message' => $message,
-                    'transferaction' => 'CREDIT'
+                    'transferaction' => 'CREDIT',
+                    'transactioncategory' => $strategy->getTransactionCategory()->value
                 ];
                 $transactionId = $strategy->getTransactionId();
                 if (!empty($transactionId)) {
@@ -299,7 +301,8 @@ class PeerTokenMapper
                     'senderid' => $senderId,
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
-                    'transferaction' => 'INVITER_FEE'
+                    'transferaction' => 'INVITER_FEE',
+                    'transactioncategory' => TransactionCategory::FEE->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
                 $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
@@ -315,7 +318,8 @@ class PeerTokenMapper
                     'senderid' => $senderId,
                     'recipientid' => $this->peerWallet,
                     'tokenamount' => $peerFeeAmount,
-                    'transferaction' => 'PEER_FEE'
+                    'transferaction' => 'PEER_FEE',
+                    'transactioncategory' => TransactionCategory::FEE->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->peerWallet, $peerFeeAmount);
                 $this->walletMapper->credit($this->peerWallet, $peerFeeAmount);
@@ -330,7 +334,8 @@ class PeerTokenMapper
                     'senderid' => $senderId,
                     'recipientid' => $this->burnWallet,
                     'tokenamount' => $burnFeeAmount,
-                    'transferaction' => 'BURN_FEE'
+                    'transferaction' => 'BURN_FEE',
+                    'transactioncategory' => TransactionCategory::FEE->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->burnWallet, $burnFeeAmount);
                 $this->walletMapper->credit($this->burnWallet, $burnFeeAmount);
@@ -548,7 +553,7 @@ class PeerTokenMapper
 
     /**
      * Build grouped transaction history items by operationid with aggregated fees.
-     * Returns data shaped for TransactionHistotyItem/TransactionFeeSummary.
+     * Returns data shaped for TransactionHistoryItem/TransactionFeeSummary.
      */
     public function getTransactionHistoryItems(string $userId, array $args, array $specs): array
     {
@@ -613,6 +618,7 @@ class PeerTokenMapper
                 SELECT 
                     r.operationid,
                     r.transactiontype,
+                    r.transactioncategory,
                     r.senderid,
                     r.recipientid,
                     r.message,
@@ -645,6 +651,7 @@ class PeerTokenMapper
             $tiData = [
                 'operationid' => (string)($row['operationid'] ?? ''),
                 'transactiontype' => (string)($row['transactiontype'] ?? ''),
+                'transactioncategory' => (string)($row['transactioncategory'] ?? ''),
                 'tokenamount' => $grossAmount,
                 'netTokenAmount' => $netTokenAmount,
                 'message' => (string)($row['message'] ?? ''),

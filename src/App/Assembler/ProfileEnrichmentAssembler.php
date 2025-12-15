@@ -13,7 +13,7 @@ final class ProfileEnrichmentAssembler {
     /**
      * @param array  $items             Array of transaction rows
      * @param array  $specs             Content filtering specifications
-     * @param int    $currentUserId     For privacy logic
+     * @param string    $currentUserId     For privacy logic
      * @param array  $mappings          Field → profileKey mapping
      * 
      * Example:
@@ -92,10 +92,6 @@ final class ProfileEnrichmentAssembler {
         $idIndex = [];
         $attachments = [];
         foreach ($items as $idx => $item) {
-            if (!$item instanceof HasUserRefs) {
-                // Skip unknown inputs silently to be defensive
-                continue;
-            }
             foreach ($item->getUserRefs() as $ref) {
                 $userId = $ref->userId();
                 $key = $ref->key();
