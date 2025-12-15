@@ -7,7 +7,7 @@ namespace Fawaz\Services\TokenTransfer\Strategies;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 use Fawaz\Utils\ResponseHelper;
 
-class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
     public string $operationId;

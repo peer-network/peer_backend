@@ -253,7 +253,7 @@ class UserInfoService
         ];
 
         try {
-            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs, $offset, $limit);
 
             $blockedBy = $lists['blockedBy'] ?? [];
             $iBlocked = $lists['iBlocked'] ?? [];
@@ -290,7 +290,7 @@ class UserInfoService
             return $this::respondWithError(41008);
         }
     }
-    
+
     /* ----- unused function --------
         public function toggleProfilePrivacy(): array
         {
