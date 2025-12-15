@@ -7,8 +7,7 @@ ALTER TABLE transactions
     ADD CONSTRAINT transactions_transactioncategory_check CHECK (
         transactioncategory IS NULL OR transactioncategory IN (
             'P2P_TRANSFER',
-            'AD_PINNED',
-            'AD_BASIC',
+            'ADVERTISEMENT',
             'POST_CREATE',
             'LIKE',
             'DISLIKE',

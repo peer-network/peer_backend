@@ -25,7 +25,7 @@ class AdsTransferStrategy extends BaseTransferStrategy implements TransferStrate
 
     public function getTransactionCategory(): TransactionCategory
     {
-        return TransactionCategory::AD_PINNED;
+        return TransactionCategory::ADVERTISEMENT;
     }
 
     public function getRecipientTransactionType(): string

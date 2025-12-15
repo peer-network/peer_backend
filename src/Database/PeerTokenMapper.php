@@ -685,7 +685,7 @@ class PeerTokenMapper
         ];
         $directionMap = [
             'INCOME' => ['CREDIT'],
-            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'POOL_FEE', 'PEER_FEE', 'INVITER_FEE'],
+            'DEDUCTION' => ['DEDUCT', 'BURN_FEE', 'PEER_FEE', 'INVITER_FEE'],
         ];
 
         $transactionTypes = [];
