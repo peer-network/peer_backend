@@ -531,7 +531,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v6
  
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: docker-image-${{ matrix.php-version }}
           path: .
@@ -600,7 +600,7 @@ jobs:
     outputs:
       final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           pattern: outcome-*
           path: outcomes
@@ -640,7 +640,7 @@ jobs:
       newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
     steps:
       - name: Download All Newman Failure Markers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: newman_flags
  
@@ -721,7 +721,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Download PHP 8.4 HTMLExtra report
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: docker_newman_report-8.4
           path: reports/php-8.4
