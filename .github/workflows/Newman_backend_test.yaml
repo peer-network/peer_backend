@@ -55,7 +55,7 @@ jobs:
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
     with:
       config: ".security/gitleaks.toml"
-    screts: inherit
+    secrets: inherit
     if: always()
 
   phpstan_analysis:
