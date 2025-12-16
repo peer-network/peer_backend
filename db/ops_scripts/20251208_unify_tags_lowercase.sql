@@ -52,6 +52,4 @@ USING tag_groups tg
 WHERE t.name = tg.name
   AND t.tagid <> tg.primary_tagid;
 
-CREATE UNIQUE INDEX IF NOT EXISTS tags_name_unique_idx ON tags (name);
-
 COMMIT;
