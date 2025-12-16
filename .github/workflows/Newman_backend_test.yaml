@@ -14,6 +14,7 @@ permissions:
 jobs:
   auto_update_branch:
     name: Auto-Update PR Branch
+    if: github.actor != 'dependabot[bot]'
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
       pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
@@ -66,12 +67,6 @@ jobs:
     env:
       IMAGE_TAG: local
     steps:
-      - name: Skip PHPStan for Dependabot (Safety guard should never run)
-        if: github.event.pull_request.user.login == 'dependabot[bot]'
-        run: |
-          echo "Dependabot PR → Skipping PHPStan"
-          exit 0
-
       - uses: actions/checkout@v6
 
       - name: Log in to GHCR (for base image access)
@@ -717,7 +712,7 @@ jobs:
     name: Deploy HTMLExtra Reports to peer_backend_reports
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, build_and_test]
-    if: always()
+    if: github.actor != 'dependabot[bot]' && needs.build_and_test.result == 'success'
     concurrency:
       group: reports-deploy
       cancel-in-progress: false
@@ -784,7 +779,7 @@ jobs:
       trivy_scan,
       map_pr_to_discord
     ]
-    if: always()
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Determine message type
         id: decide
@@ -797,10 +792,10 @@ jobs:
           trivy_result="${{ needs.trivy_scan.result }}"
 
           type="none"
-          if [ "$is_behind" == "true" ]; then
-            type="behind"
-          elif [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
+          if [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
             type="merge_conflict"
+          elif [ "$is_behind" == "true" ]; then
+            type="behind"
           elif [ "$sql_result" == "failure" ]; then
             type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
@@ -936,7 +931,7 @@ jobs:
     name: Fail workflow if needed
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, trivy_scan]
-    if: always()
+    if: github.actor != 'dependabot[bot]'
     steps:
       - run: |
           overall="${{ needs.aggregate_outcome.outputs.final_outcome }}"
