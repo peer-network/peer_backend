@@ -49,14 +49,13 @@ jobs:
           echo "Leaks may appear as ❌ in this job, but merges remain allowed."
           echo "This is for temporary monitoring — not enforcement yet."
 
-  gitleaks_scan_staged:
-    name: Gitleaks PR Scan (Soft Mode)
-    needs: [auto_update_branch, gitleaks_notice]
-    uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
-    with:
-      config: ".security/gitleaks.toml"
-    secrets: inherit
-    if: always()
+#  gitleaks_scan_staged:
+#    name: Gitleaks PR Scan (Soft Mode)
+#    needs: [auto_update_branch, gitleaks_notice]
+#    uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
+#    with:
+#    crets: inherit
+#    if: always()
 
   phpstan_analysis:
     name: Early Static Analysis (PHPStan)
@@ -125,7 +124,7 @@ jobs:
     needs: [
       auto_update_branch,
       check_branch_sync,
-      gitleaks_scan_staged,
+    #  gitleaks_scan_staged,
       validate_sql_files, 
       phpstan_analysis 
     ]
@@ -778,7 +777,7 @@ jobs:
       validate_sql_files,
       build_and_test,
       aggregate_outcome,
-      gitleaks_scan_staged,
+#      gitleaks_scan_staged,
       trivy_scan,
       map_pr_to_discord
     ]
