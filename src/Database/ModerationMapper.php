@@ -120,6 +120,29 @@ class ModerationMapper
 
             $targetContent = $this->mapTargetContent($userReport);
 
+            // Get moderator info
+            $moderatedBy = null;
+
+            $moderationRow = Moderation::query()
+                ->join('users', 'moderations.moderatorid', '=', 'users.uid')
+                ->select(
+                    'users.uid',
+                    'users.username',
+                    'users.email',
+                    'users.img',
+                    'users.slug',
+                    'users.status as userstatus',
+                    'users.biography',
+                    'users.updatedat',
+                    'users.visibility_status',
+                )
+                ->where('moderations.moderationticketid', $item['uid'])
+                ->latest() 
+                ->first();
+
+            if ($moderationRow) {
+                $moderatedBy = (new User($moderationRow, [], false))->getArrayCopy();
+            }
             // Get all reporters for the ModerationTicket
             $reporters = UserReport::query()
                                     ->join('users', 'user_reports.reporter_userid', '=', 'users.uid')
@@ -142,6 +165,7 @@ class ModerationMapper
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
+            $item['moderatedBy'] = $moderatedBy;
 
             return $item;
         }, $items['data']);
@@ -160,10 +184,53 @@ class ModerationMapper
         $item['targetcontent']['user'] = null;
 
         if ($item['targettype'] === 'post') {
-            $item['postid'] = $item['targetid']; // Temporary fix, need to refactor this later
-            $item['targetcontent']['post'] = new Post($item, [], false)->getArrayCopy();
+            $postRow = Post::query()
+                ->where('postid', $item['targetid'])
+                ->first();
+
+            if ($postRow) {
+                $postEntity = new Post($postRow, [], false);
+                $postData = $postEntity->getArrayCopy();
+
+                $authorData = [];
+                if (!empty($postRow['userid'])) {
+                    $authorRow = User::query()
+                        ->where('uid', $postRow['userid'])
+                        ->first();
+
+                    if ($authorRow) {
+                        $authorEntity = new User($authorRow, [], false);
+                        $authorData = $authorEntity->getArrayCopy();
+                    }
+                }
+
+                $postData['user'] = $authorData;
+                $item['targetcontent']['post'] = $postData;
+            }
         } elseif ($item['targettype'] === 'comment') {
-            $item['targetcontent']['comment'] = new Comment($item, [], false)->getArrayCopy();
+        $commentRow = Comment::query()
+            ->where('commentid', $item['targetid'])
+            ->first();
+
+        if ($commentRow) {
+            $commentEntity = new Comment($commentRow, [], false);
+            $commentData = $commentEntity->getArrayCopy();
+
+            $authorData = [];
+            if (!empty($commentRow['userid'])) {
+                $authorRow = User::query()
+                    ->where('uid', $commentRow['userid'])
+                    ->first();
+
+                if ($authorRow) {
+                    $authorEntity = new User($authorRow, [], false);
+                    $authorData = $authorEntity->getArrayCopy();
+                }
+            }
+
+            $commentData['user'] = $authorData;
+            $item['targetcontent']['comment'] = $commentData;
+        }
         } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],

@@ -896,7 +896,9 @@ class GraphQLSchemaBuilder
             'TransferToken' => [
                 'tokenSend' => fn(array $root): float => $root['tokenSend'] ?? 0.0,
                 'tokensSubstractedFromWallet' => fn(array $root): float => $root['tokensSubstractedFromWallet'] ?? 0.0,
-                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+                'tokenSendFormatted' => fn(array $root): string => (string) ($root['tokenSend'] ?? '0'),
+                'tokensSubstractedFromWalletFormatted' => fn(array $root): string => (string) ($root['tokensSubstractedFromWallet'] ?? '0'),
+                'createdat' => fn(array $root): string => ($root['createdat'] ?? ''),
             ],
             'Transaction' => [
                 'transactionid' => fn(array $root): string => $root['transactionid'] ?? '',
@@ -1030,6 +1032,7 @@ class GraphQLSchemaBuilder
                 'targetcontent' => fn(array $root): array => $root['targetcontent'] ?? [],
                 'reporters' => fn(array $root): array => $root['reporters'] ?? [],
                 'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+                'moderatedBy' => fn(array $root): ?array => $root['moderatedBy'] ?? null,
             ],
             'TargetContent' => [
                 'post' => fn(array|null $root): ?array => $root['post'] ?? null,

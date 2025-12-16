@@ -15,7 +15,6 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
-use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
@@ -306,6 +305,8 @@ class UserService
         $this->userMapper->logLoginDaten($id);
         $this->logger->info('User registered successfully.', ['userid' => $id]);
 
+        // Welcome email switch off
+        /*
         try {
             $data = [
                 'username' => $username
@@ -314,6 +315,7 @@ class UserService
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
+        */
         $this->transactionManager->commit();
         return [
             'status' => 'success',

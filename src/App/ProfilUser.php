@@ -16,6 +16,8 @@ class ProfilUser
     protected ?string $img;
     protected ?bool $isfollowed;
     protected ?bool $isfollowing;
+    protected ?bool $iFollowThisUser;
+    protected ?bool $thisUserFollowsMe;
     protected int $status;
 
     // Constructor
@@ -31,6 +33,8 @@ class ProfilUser
         $this->img = $data['img'] ?? '';
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->iFollowThisUser = $data['iFollowThisUser'] ?? $this->isfollowing ?? false;
+        $this->thisUserFollowsMe = $data['thisUserFollowsMe'] ?? $this->isfollowed ?? false;
     }
 
     // Array Copy methods
@@ -43,6 +47,8 @@ class ProfilUser
             'img' => $this->img,
             'isfollowed' => $this->isfollowed,
             'isfollowing' => $this->isfollowing,
+            'iFollowThisUser' => $this->iFollowThisUser,
+            'thisUserFollowsMe' => $this->thisUserFollowsMe,
         ];
         return $att;
     }
@@ -148,6 +154,14 @@ class ProfilUser
                 'filters' => [['name' => 'Boolean']],
             ],
             'isfollowing' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'iFollowThisUser' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'thisUserFollowsMe' => [
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
