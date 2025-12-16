@@ -27,7 +27,7 @@ regexes = [
 ]
 
 # --- Global Allowlist (approved exceptions ONLY) ---
-[[allowlist]]
+[allowlist]
 description = "Ignore known UUIDs, hashes, and Postman/test data"
 regexes = [
   '''85d5f836-b1f5-4c4e-9381-1b058e13df93''',
@@ -51,6 +51,10 @@ regexes = [
   '''tmp(file|dir|token)'''
 ]
 
+paths = [
+  "tests/postman_collection/.*"
+]
+
 # --- Path denylist (ignore noisy generated/test files) ---
 [pathDenylist]
 description = "Exclude noisy generated/test files"
@@ -63,10 +67,4 @@ regexes = [
   '''^vendor/.*''',
   '''^storage/.*''',
   '''^node_modules/.*'''
-]
-
-[[allowlist]]
-description = "Exclude Postman test collections only"
-paths = [
-  "tests/postman_collection/.*"
 ]
