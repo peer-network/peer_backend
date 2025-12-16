@@ -8,6 +8,7 @@ use DateTime;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\config\SettingsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
@@ -238,7 +239,8 @@ class Post extends Model implements Hashable
         if (empty($this->postid)) {
             return '';
         }
-        return getenv('WEB_APP_URL') . '/post/' . $this->postid;
+        return SettingsConfig::load()->webAppUrl . '/post/' . $this->postid;
+        // return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
 
     // Table name
