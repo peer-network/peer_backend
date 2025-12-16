@@ -282,12 +282,12 @@ class WalletService
             $actions = ConstantsConfig::wallet()['ACTIONS'];
 
             $mapping = [
-                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => 'Buy like'],
-                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => 'Buy dislike'],
-                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => 'Buy comment'],
-                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => 'Buy post'],
-                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => 'Buy advertise basic'],
-                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => 'Buy advertise pinned'],
+                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => ''],
+                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => ''],
+                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => ''],
+                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => ''],
+                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => ''],
+                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => ''],
             ];
 
             if (!isset($mapping[$art])) {
