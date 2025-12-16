@@ -60,9 +60,13 @@ regexes = [
   '''^sql_files_for_import/.*''',
   '''^etc/busybox-paths\.d/.*''',
   '''^etc/ssl/openssl\.cnf(\.dist)?$''',
-  '''^tests/.*''',
-  '''^postman_collections?/.*''',
   '''^vendor/.*''',
   '''^storage/.*''',
   '''^node_modules/.*'''
+]
+
+[[allowlist]]
+description = "Exclude Postman test collections only"
+paths = [
+  "tests/postman_collection/.*"
 ]
