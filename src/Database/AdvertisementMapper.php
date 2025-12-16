@@ -400,6 +400,13 @@ class AdvertisementMapper
             $comments = [];
         }
 
+        $rawVisibilityStatus = (string)($row['post_visibility_status'] ?? 'NORMAL');
+        $visibilityStatus    = strtoupper($rawVisibilityStatus);
+        $postReports = (int)($row['amountreports'] ?? 0);
+        $activeReports = ($visibilityStatus === 'NORMAL') ? $postReports : 0;
+        $hasActiveReports = $activeReports > 0;
+        $isHiddenForUsers = $visibilityStatus !== 'NORMAL';
+
         return [
             'advertisementid' => (string)$row['advertisementid'],
             'createdat'       => (string)$row['createdat'],
@@ -448,7 +455,11 @@ class AdvertisementMapper
                 'issaved'         => (bool)$row['issaved'],
                 'url'             => (string)getenv('WEB_APP_URL') . '/post/' . $row['postid'],
                 'tags'            => $tags,
-                'visibility_status' => (string)$row['post_visibility_status'],
+                'visibility_status' => $visibilityStatus,
+                'amountreports' => $postReports,
+                'reports' => $activeReports,
+                'hasActiveReports' => $hasActiveReports,
+                'isHiddenForUsers' => $isHiddenForUsers,
                 'user' => [
                     'uid'         => (string)$row['post_owner_id'],
                     'username'    => (string)$row['post_username'],
