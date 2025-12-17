@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "eafd0ed3-37ee-4d48-8b5f-a4e35d2f17fb",
+		"_postman_id": "a6d8d817-35f3-44fe-9dcb-da292d84c865",
 		"name": "002_posts_wallet_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-eafd0ed3-37ee-4d48-8b5f-a4e35d2f17fb?action=share&source=collection_link&creator=32542010"
+		"_exporter_id": "43606001",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-a6d8d817-35f3-44fe-9dcb-da292d84c865?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -156,6 +156,125 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t3}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let liquidity = response.data.balance.currentliquidity;",
+							"pm.environment.set(\"liquidity1\", liquidity);",
+							"console.log(\"Saved liquidity:\", liquidity);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2154,53 +2273,53 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-						"pm.test(\"ResponseCode is correct\", function () {",
-						"    pm.expect(pm.response.text()).to.include(\"11701\");",
-						"});",
-						"",
-						"pm.test(\"Status is correct\", function () {",
-						"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-						"});",
-						"",
-						"pm.test(\"listTags.affectedRows is array of Tag objects\", function () {",
-						"    let body;",
-						"",
-						"    try {",
-						"        body = pm.response.json();",
-						"    } catch (e) {",
-						"        throw new Error(\"Response is not valid JSON\");",
-						"    }",
-						"",
-						"    const listTags = body?.data?.listTags;",
-						"    pm.expect(listTags, \"data.listTags should exist\").to.exist;",
-						"",
-						"    const rows = listTags?.affectedRows;",
-						"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
-						"",
-						"    rows.forEach((t, i) => {",
-						"        pm.expect(t, `Tag at index ${i} should be an object`).to.be.an(\"object\");",
-						"        pm.expect(t, `Tag at index ${i} should have name`).to.have.property(\"name\");",
-						"        pm.expect(t.name, `Tag.name at index ${i} should be string`).to.be.a(\"string\");",
-						"    });",
-						"});",
-						"",
-						"pm.test(\"All tag names are lowercase\", function () {",
-						"    let body;",
-						"",
-						"    try {",
-						"        body = pm.response.json();",
-						"    } catch (e) {",
-						"        throw new Error(\"Response is not valid JSON\");",
-						"    }",
-						"",
-						"    const rows = body?.data?.listTags?.affectedRows;",
-						"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
-						"",
-						"    rows.forEach(t => {",
-						"        pm.expect(t.name, `Tag \\\"${t.name}\\\" should be lowercase`).to.equal(t.name.toLowerCase());",
-						"    });",
-						"});",
-						""
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11701\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"listTags.affectedRows is array of Tag objects\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listTags = body?.data?.listTags;",
+							"    pm.expect(listTags, \"data.listTags should exist\").to.exist;",
+							"",
+							"    const rows = listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach((t, i) => {",
+							"        pm.expect(t, `Tag at index ${i} should be an object`).to.be.an(\"object\");",
+							"        pm.expect(t, `Tag at index ${i} should have name`).to.have.property(\"name\");",
+							"        pm.expect(t.name, `Tag.name at index ${i} should be string`).to.be.a(\"string\");",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"All tag names are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const rows = body?.data?.listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach(t => {",
+							"        pm.expect(t.name, `Tag \\\"${t.name}\\\" should be lowercase`).to.equal(t.name.toLowerCase());",
+							"    });",
+							"});",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {},
