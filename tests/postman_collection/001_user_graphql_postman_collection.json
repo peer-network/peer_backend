@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "a40b17f9-b5eb-4469-9a0d-70f64940572a",
+		"_postman_id": "ab5ee80c-df0f-430f-966b-11771974b459",
 		"name": "001_user_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-a40b17f9-b5eb-4469-9a0d-70f64940572a?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-ab5ee80c-df0f-430f-966b-11771974b459?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -2778,7 +2778,7 @@
 			"response": []
 		},
 		{
-			"name": "Listposts (confirm tags)",
+			"name": "Listposts (confirm tags and link)",
 			"event": [
 				{
 					"listen": "test",
@@ -2821,7 +2821,27 @@
 							"",
 							"    console.log(\"Tags for post\", postId, \":\", tags);",
 							"});",
-							""
+							"pm.test(\"Post URL matches postid\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response?.data?.listPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'postid' is not set.\");",
+							"    }",
+							"",
+							"    pm.expect(posts.length, \"Posts list should not be empty\").to.be.above(0);",
+							"",
+							"    const post = posts.find(p => p.id === expectedPostId);",
+							"",
+							"    if (!post) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    const expectedUrl = `http://localhost:8888/post/${expectedPostId}`;",
+							"",
+							"    pm.expect(post.url, \"Post URL should match expected format\").to.eql(expectedUrl);",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {},
