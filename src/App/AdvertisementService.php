@@ -497,7 +497,7 @@ class AdvertisementService
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } else {
                 $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
-                return self::respondWithError(responseCode: 32005); // Fehler, Falsche CostPlan angegeben.
+                return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
             }
 
             $data = $resp->getArrayCopy();
