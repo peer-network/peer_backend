@@ -1,5 +1,9 @@
-name: CI
- 
+# backend Newman regression + quality gates used by Gihhub Actions CI
+#
+# peer_backend/docs/guidlines/How-to-CI.md doc is described based on this file 
+#
+
+name: CI 
 on:
   pull_request:
     branches:
