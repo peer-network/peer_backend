@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "10ab27db-cb53-4670-8dca-d3da7253bdfb",
-		"name": "005_moderation_graphql",
+		"_postman_id": "92a33dec-1b7d-49f8-a25e-cb18574f5b4d",
+		"name": "005_moderation_graphql Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-10ab27db-cb53-4670-8dca-d3da7253bdfb?source=collection_link"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-92a33dec-1b7d-49f8-a25e-cb18574f5b4d?action=share&source=collection_link&creator=32542010"
 	},
 	"item": [
 		{
@@ -10291,8 +10291,23 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"12102\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"moderatedBy is null for all moderation items\", function () {",
+							"    const response = pm.response.json();",
+							"    const items = response.data?.moderationItems?.affectedRows || [];",
+							"",
+							"    pm.expect(items, \"affectedRows should be an array\").to.be.an(\"array\");",
+							"",
+							"    items.forEach((item, index) => {",
+							"        pm.expect(",
+							"            item.moderatedBy,",
+							"            `affectedRows[${index}].moderatedBy must be null`",
+							"        ).to.eql(null);",
+							"    });",
 							"});",
 							"",
 							"pm.test(\"Save moderationTicketIds by env IDs\", function () {",
@@ -10340,7 +10355,6 @@
 							"",
 							"    items.forEach(item => {",
 							"        const type = item.targettype;",
-							"        const id = item.moderationTicketId;",
 							"",
 							"        if (type === \"post\" && item.targetcontent?.post?.id === postIdEnv) {",
 							"            pm.expect(item.status, `Post ${postIdEnv} status`).to.eql(\"waiting_for_review\");",
@@ -10355,7 +10369,8 @@
 							"            }",
 							"        }",
 							"    });",
-							"});"
+							"});",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -10390,7 +10405,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ModerationItems {\n    moderationItems {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n        }\n    }\n}\n",
+						"query": "query ModerationItems {\n    moderationItems {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n             moderatedBy {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }    \n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -10647,6 +10662,86 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation PerformModeration {\n    performModeration(moderationTicketId: \"{{moderationTicketIdT03}}\", moderationAction: hidden) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Moderation items(moderatedby)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode + status OK\", function () {",
+							"  pm.expect(pm.response.text()).to.include(\"12102\");",
+							"  pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"T03 item has moderatedBy = w_userid_t1\", function () {",
+							"  const r = pm.response.json();",
+							"  const items = r.data?.moderationItems?.affectedRows || [];",
+							"",
+							"  const ticketId = pm.environment.get(\"moderationTicketIdT03\");",
+							"  const expectedModeratorId = pm.environment.get(\"w_userid_t1\");",
+							"",
+							"  if (!ticketId || !expectedModeratorId) {",
+							"    throw new Error(\"Env vars missing: moderationTicketIdT03 or w_userid_t1\");",
+							"  }",
+							"",
+							"  const item = items.find(x => x.moderationTicketId === ticketId);",
+							"",
+							"  pm.expect(item, `Moderation item not found for ticket ${ticketId}`).to.exist;",
+							"  pm.expect(item.moderatedBy, \"moderatedBy must not be null after moderation\").to.exist;",
+							"  pm.expect(item.moderatedBy.userid, \"moderatedBy.userid mismatch\").to.eql(expectedModeratorId);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ModerationItems {\n    moderationItems {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            targetContentId\n            moderationTicketId\n            moderationTicketId\n            targettype\n            reportscount\n            status\n            createdat\n            targetcontent {\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            isfollowed\n                            isfollowing\n                            isfriend\n                        }\n                    }\n                }\n                comment {\n                    commentid\n                    userid\n                    postid\n                    parentid\n                    content\n                    createdat\n                    amountlikes\n                    amountreplies\n                    amountreports\n                    isliked\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        isfollowed\n                        isfollowing\n                        isfriend\n                    }\n                }\n                user {\n                    userid\n                    img\n                    username\n                    slug\n                    biography\n                    updatedat\n                }\n            }\n            reporters {\n                userid\n                img\n                username\n                slug\n                biography\n                updatedat\n            }\n             moderatedBy {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }    \n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
