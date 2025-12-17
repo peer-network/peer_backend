@@ -414,7 +414,7 @@ jobs:
           fi
  
       - name: Upload Newman Failure Marker
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: newman-failed-${{ matrix.php-version }}
           path: newman_failed.txt
@@ -452,19 +452,19 @@ jobs:
           fi
  
       - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-runtime-log-${{ matrix.php-version }}
           path: logs/runtime
  
       - name: Upload backend error log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-error-log-${{ matrix.php-version }}
           path: logs/error/errorlog.txt
           
       - name: Upload Newman Report for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docker_newman_report-${{ matrix.php-version }}
           path: ${{ github.workspace }}/newman/reports/report.html
@@ -502,7 +502,7 @@ jobs:
  
       - name: Upload build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: outcome-${{ matrix.php-version }}
           path: outcome.txt
@@ -510,7 +510,7 @@ jobs:
       - name: Save Docker image as artifact
         run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
  
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: docker-image-${{ matrix.php-version }}
           path: peer-backend.tar
@@ -569,7 +569,7 @@ jobs:
  
       - name: Upload Trivy build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
@@ -582,7 +582,7 @@ jobs:
           trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
           trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
  
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
