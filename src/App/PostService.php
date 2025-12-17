@@ -292,13 +292,12 @@ class PostService
                     if (isset($response['status']) && $response['status'] === 'success') {
                         $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
 
-                        if ($incrementResult) {
-                            $this->logger->info('Daily usage incremented successfully', ['userId' => $this->currentUserId]);
-                        } else {
-                            $this->logger->warning('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                        if ($incrementResult === false) {
+                            $this->logger->error('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                            $this->transactionManager->rollback();
+                            return $this::respondWithError(40301);
                         }
 
-                        $DailyUsage += 1;
                         $this->transactionManager->commit();
                         return $response;
                     }
