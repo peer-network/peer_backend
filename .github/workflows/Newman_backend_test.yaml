@@ -779,8 +779,18 @@ jobs:
       trivy_scan,
       map_pr_to_discord
     ]
-    if: github.actor != 'dependabot[bot]'
+    if: always()
     steps:
+      - name: Skip noisy Dependabot failures
+        run: |
+          actor="${{ github.actor }}"
+          outcome="${{ needs.aggregate_outcome.outputs.final_outcome }}"
+
+          if [ "$actor" = "dependabot[bot]" ] && [ "$outcome" != "success" ]; then
+            echo "Dependabot PR with non-success outcome → no Discord notification"
+            exit 0
+          fi
+
       - name: Determine message type
         id: decide
         run: |
@@ -806,10 +816,10 @@ jobs:
             type="newman_failed"
           elif [ "$outcome" == "other_failure" ]; then
             type="other_failure"
-          elif [ "$outcome" == "success" ]; then
-            type="success"
           elif [ "$trivy_result" == "failure" ]; then
             type="trivy_failed"
+          elif [ "$outcome" == "success" ]; then
+            type="success"
           fi
 
           echo "type=$type" >> $GITHUB_OUTPUT
@@ -931,7 +941,7 @@ jobs:
     name: Fail workflow if needed
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, trivy_scan]
-    if: github.actor != 'dependabot[bot]'
+    if: always()
     steps:
       - run: |
           overall="${{ needs.aggregate_outcome.outputs.final_outcome }}"
