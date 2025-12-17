@@ -14,6 +14,7 @@ permissions:
 jobs:
   auto_update_branch:
     name: Auto-Update PR Branch
+    if: github.actor != 'dependabot[bot]'
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
       pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
@@ -791,10 +792,10 @@ jobs:
           trivy_result="${{ needs.trivy_scan.result }}"
 
           type="none"
-          if [ "$is_behind" == "true" ]; then
-            type="behind"
-          elif [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
+          if [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
             type="merge_conflict"
+          elif [ "$is_behind" == "true" ]; then
+            type="behind"
           elif [ "$sql_result" == "failure" ]; then
             type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
