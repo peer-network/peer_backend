@@ -220,6 +220,7 @@ jobs:
           APP_ENV="${{ vars.APP_ENV }}"
           APP_NAME="${{ vars.APP_NAME }}"
           APP_URL="${{ vars.APP_URL }}"
+          WEB_APP_URL="${{ vars.WEB_APP_URL }}"
           MEDIA_SERVER_URL="${{ vars.MEDIA_SERVER_URL }}"
           TIME_ZONE="${{ vars.TIME_ZONE }}"
           GRAPHQL_ENDPOINT="${{ vars.GRAPHQL_ENDPOINT }}"
