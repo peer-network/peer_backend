@@ -36,3 +36,4 @@ changelog
 *.generated
 *.cache
 .gitleaksignore
+settings.json

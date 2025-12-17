@@ -11635,6 +11635,58 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Double Gemsters(Fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Gemsters {\n    gemsters(day: D0) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            winStatus {\n                totalGems\n                gemsintoken\n                bestatigung\n            }\n            userStatus {\n                userid\n                gems\n                tokens\n                percentage\n                details {\n                    gemid\n                    userid\n                    postid\n                    fromid\n                    gems\n                    numbers\n                    whereby\n                    createdat\n                }\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [

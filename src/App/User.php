@@ -8,11 +8,12 @@ use DateTime;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
 use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class User extends Model implements Hashable, ProfileReplaceable
+class User extends Model implements Hashable, ProfileReplaceable, HasWalletId
 {
     use HashObject;
 
@@ -134,6 +135,11 @@ class User extends Model implements Hashable, ProfileReplaceable
 
     // Getter and Setter
     public function getUserId(): string
+    {
+        return $this->uid;
+    }
+
+    public function getWalletId(): string
     {
         return $this->uid;
     }

@@ -44,16 +44,16 @@ class PoolService
         return $fetchPool;
     }
 
-    public function callGemster(): array
+    public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        return $this->poolMapper->getTimeSorted();
+        return $this->poolMapper->fetchGemsStats();
     }
 
-    public function callGemsters(string $day = 'D0'): array
+    public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
@@ -65,7 +65,7 @@ class PoolService
             return $this::respondWithError(30223);
         }
 
-        return $this->poolMapper->getTimeSortedMatch($day);
+        return $this->poolMapper->fetchAllGemsForDay($day);
     }
 
     public function getActionPrices(): ?array

@@ -14,6 +14,7 @@ use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\PoolService;
+use Fawaz\App\Interfaces\GemsService;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
 use Fawaz\App\PostService;
@@ -21,12 +22,9 @@ use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
+use Fawaz\App\MintService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
-use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\JWTService;
 use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -55,6 +53,8 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalConten
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\AlphaMintService;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\UserActionsRepository;
 
 class GraphQLSchemaBuilder
 {
@@ -74,6 +74,7 @@ class GraphQLSchemaBuilder
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
+        protected GemsService $gemsService,
         protected PostInfoService $postInfoService,
         protected PostService $postService,
         protected CommentService $commentService,
@@ -81,11 +82,13 @@ class GraphQLSchemaBuilder
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
         protected AdvertisementService $advertisementService,
+        protected MintService $mintService,
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected TransactionManager $transactionManager
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -205,6 +208,7 @@ class GraphQLSchemaBuilder
         $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
+        $this->gemsService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
         $this->postInfoService->setCurrentUserId($userid);
         $this->commentService->setCurrentUserId($userid);
@@ -214,6 +218,7 @@ class GraphQLSchemaBuilder
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
+        $this->mintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -325,6 +330,19 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+            ],
+            'MintAccountResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'mintAccount' => function (array $root): array {
+                    return $root['affectedRows'];
+                },
             ],
             'ReferralInfo' => [
                 'uid' => function (array $root): string {
@@ -885,6 +903,21 @@ class GraphQLSchemaBuilder
                 'currentliquidity' => function (array $root): float {
                     $this->logger->debug('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
+                },
+            ],
+            'MintAccount' => [
+                'accountid' => function (array $root): string {
+                    $this->logger->debug('Query.MintAccount Resolvers');
+                    return $root['accountid'] ?? '';
+                },
+                'initialBalance' => function (array $root): string {
+                    return (string)$root['initial_balance'];
+                },
+                'currentBalance' => function (array $root): string {
+                    return (string)$root['current_balance'];
+                },
+                'updatedat' => function (array $root): string {
+                    return $root['updatedat'] ?? '';
                 },
             ],
             'UserInfo' => [
@@ -1558,17 +1591,17 @@ class GraphQLSchemaBuilder
             'listTags' => fn (mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn (mixed $root, array $args) => $this->resolveTagsearch($args),
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'gemster' => fn (mixed $root, array $args) => $this->walletService->callGemster(),
+            'gemster' => fn (mixed $root, array $args) => $this->gemsService->gemsStats(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn (mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
-            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
+            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->mintService->listTodaysInteractions(),
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
-            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),
-            'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->gemsStats(),
+            'dailygemsresults' => fn (mixed $root, array $args) => $this->gemsService->allGemsForDay($args['day']),
             'getReferralInfo' => fn (mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
@@ -1578,7 +1611,8 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
         ];
     }
 
@@ -1606,13 +1640,13 @@ class GraphQLSchemaBuilder
             'reportComment' => fn (mixed $root, array $args) => $this->commentInfoService->reportComment($args['commentid']),
             'reportUser' => fn (mixed $root, array $args) => $this->userInfoService->reportUser($args['userid']),
             'contactus' => fn (mixed $root, array $args) => $this->ContactUs($args),
-            'createComment' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
-            'createPost' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
-            'resolvePostAction' => fn (mixed $root, array $args) => $this->resolveActionPost($args),
+            'createComment' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
+            'createPost' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
+            'resolvePostAction' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
-            'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
-            'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
+            'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
+            'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
@@ -1995,223 +2029,6 @@ class GraphQLSchemaBuilder
 
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
-    }
-    protected function resolveActionPost(?array $args = []): ?array
-    {
-        $tokenomicsConfig = ConstantsConfig::tokenomics();
-        $dailyfreeConfig = ConstantsConfig::dailyFree();
-        $actions = ConstantsConfig::wallet()['ACTIONS'];
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('Query.resolveActionPost started');
-
-        $postId = $args['postid'] ?? null;
-        $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
-
-        $freeActions = ['report', 'save', 'share', 'view'];
-
-        if (!empty($postId) && !self::isValidUUID($postId)) {
-            return $this::respondWithError(30209, ['postid' => $postId]);
-        }
-
-        if ($postId) {
-            $contentFilterCase = ContentFilteringCases::searchById;
-
-            $deletedUserSpec = new DeletedUserSpec(
-                $contentFilterCase,
-                ContentType::post
-            );
-            $systemUserSpec = new SystemUserSpec(
-                $contentFilterCase,
-                ContentType::post
-            );
-
-            $illegalContentSpec = new IllegalContentFilterSpec(
-                $contentFilterCase,
-                ContentType::post
-            );
-
-            $specs = [
-                $illegalContentSpec,
-                $systemUserSpec,
-                $deletedUserSpec,
-            ];
-
-            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
-                $specs,
-                $postId
-            ) === false) {
-                return $this::respondWithError(31513, ['postid' => $postId]);
-            }
-        }
-
-        if (in_array($action, $freeActions, true)) {
-            $response = $this->postInfoService->{$action . 'Post'}($postId);
-            return $response;
-        }
-
-        $paidActions = ['like', 'dislike', 'comment', 'post'];
-
-        if (!in_array($action, $paidActions, true)) {
-            return $this::respondWithError(30105);
-        }
-
-        $dailyLimits = [
-            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
-            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
-            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
-            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
-        ];
-
-        $actionPrices = [
-            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
-            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
-            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
-            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
-        ];
-
-        $actionMaps = [
-            'like' => $actions['LIKE'],
-            'comment' => $actions['COMMENT'],
-            'post' => $actions['POST'],
-            'dislike' => $actions['DISLIKE'],
-        ];
-
-        // Validations
-        if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
-            $this->logger->warning('Invalid action parameter', ['action' => $action]);
-            return $this::respondWithError(30105);
-        }
-
-        $limit = $dailyLimits[$action];
-        $price = $actionPrices[$action];
-        $actionMap = $args['art'] = $actionMaps[$action];
-
-        try {
-            if ($limit > 0) {
-                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
-
-                // Return ResponseCode with Daily Free Code
-                if ($DailyUsage < $limit) {
-                    if ($action === 'comment') {
-                        $response = $this->commentService->createComment($args);
-                        if (isset($response['status']) && $response['status'] === 'error') {
-                            return $response;
-                        }
-                        $response['ResponseCode'] = "11608";
-
-                    } elseif ($action === 'post') {
-                        $response = $this->postService->createPost($args['input']);
-                        if (isset($response['status']) && $response['status'] === 'error') {
-                            return $response;
-                        }
-                        $response['ResponseCode'] = "11513";
-                    } elseif ($action === 'like') {
-                        $response = $this->postInfoService->likePost($postId);
-                        if (isset($response['status']) && $response['status'] === 'error') {
-                            return $response;
-                        }
-                        $response['ResponseCode'] = "11514";
-                    } else {
-                        return $this::respondWithError(30105);
-                    }
-
-                    if (isset($response['status']) && $response['status'] === 'success') {
-                        $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
-
-                        if ($incrementResult) {
-                            $this->logger->info('Daily usage incremented successfully', ['userId' => $this->currentUserId]);
-                        } else {
-                            $this->logger->warning('Failed to increment daily usage', ['userId' => $this->currentUserId]);
-                        }
-
-                        $DailyUsage += 1;
-                        return $response;
-                    }
-
-                    $this->logger->error("{$action}Post failed", ['response' => $response]);
-                    $response['affectedRows'] = $args;
-                    return $response;
-                }
-            }
-            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
-
-            // Return ResponseCode with Daily Free Code
-
-            if ($balance < $price) {
-                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
-                return $this::respondWithError(51301);
-            }
-
-            
-            if ($action === 'comment') {
-                $response = $this->commentService->createComment($args);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = "11605";
-            } elseif ($action === 'post') {
-                $response = $this->postService->createPost($args['input']);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = "11508";
-
-                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
-                    unset($args['input'], $args['action']);
-                    $args['postid'] = $response['affectedRows']['postid'];
-                }
-            } elseif ($action === 'like') {
-                $response = $this->postInfoService->likePost($postId);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = "11503";
-            } elseif ($action === 'dislike') {
-                $response = $this->postInfoService->dislikePost($postId);
-                if (isset($response['status']) && $response['status'] === 'error') {
-                    return $response;
-                }
-                $response['ResponseCode'] = "11504";
-            } else {
-                return $this::respondWithError(30105);
-            }
-
-            if (isset($response['status']) && $response['status'] === 'success') {
-                assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
-            
-                $transferStrategy = match($action) {
-                    'post' => new PaidPostTransferStrategy(),
-                    'like' => new PaidLikeTransferStrategy(),
-                    'comment' => new PaidCommentTransferStrategy(),
-                    'dislike' => new PaidDislikeTransferStrategy(),
-                };
-
-                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
-                if (isset($deducted['status']) && $deducted['status'] === 'error') {
-                    return $deducted;
-                }
-
-                if (!$deducted) {
-                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
-                    return $this::respondWithError($deducted['ResponseCode']);
-                }
-
-                return $response;
-            }
-
-            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
-            $response['affectedRows'] = $args;
-            return $response;
-        } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error in resolveActionPost', [
-                'exception' => $e->getMessage(),
-                'args' => $args,
-            ]);
-            return $this::respondWithError(40301);
-        }
     }
 
     protected function resolveComments(array $args): array
