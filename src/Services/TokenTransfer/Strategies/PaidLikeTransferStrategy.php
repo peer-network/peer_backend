@@ -24,7 +24,7 @@ class PaidLikeTransferStrategy extends BaseTransferStrategy implements TransferS
 
     public function getTransactionCategory(): TransactionCategory
     {
-        return TransactionCategory::DISLIKE;
+        return TransactionCategory::LIKE;
     }
     public function getRecipientTransactionType(): string
     {
