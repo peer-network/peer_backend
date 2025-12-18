@@ -25,17 +25,27 @@ jobs:
       mode: soft
       label_config: |
         {
-          "backend/.*": "backend",
           "src/.*": "backend",
           "composer.*": "backend",
-          "android/.*": "android",
-          "ios/.*": "ios",
-          "web/.*": "web",
+          "phpstan.neon": "backend",
+          "rector.php": "backend",
+
           "sql_files_for_import/.*": "database",
+          "db/.*": "database",
+
           ".github/workflows/.*": "ci",
+          ".githooks/.*": "ci",
+          "Makefile": "ci",
+
+          ".security/.*": "security",
+
           "Dockerfile.*": "docker",
+          "docker-compose.*": "docker",
+
+          "tests/.*": "tests",
+
           "docs/.*": "documentation",
-          "README.md": "documentation"
+          "README.*": "documentation"
         }
 
   auto_update_branch:
