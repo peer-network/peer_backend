@@ -32,20 +32,27 @@ class LogRedactor {
 
         $this-> patterns = [ 
 
-             // Email addresses
-            '/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/' => '[REDACTED]',
+            // Redact entire requestPayload content (handles escaped JSON strings)
+            '/"requestPayload"\s*:\s*"(?:[^"\\\\]|\\\\.)+"/' => '"requestPayload":"[REDACTED_REQUEST_PAYLOAD]"',
             
-            // JWT tokens (full redaction)
+            // Email addresses
+            '/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/' => '[REDACTED]',
+           
+            
+            // JWT tokens 
             '/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/' => '[REDACTED]',
             
             // Verification tokens in verificationData context (partial masking)
             '/(verificationData[^}]*["\']token["\']\s*[:=]\s*["\'])([a-fA-F0-9]{6})([a-fA-F0-9]+)(["\'])/i' => 'MASK_VERIFICATION_TOKEN',
             
-            // Password fields with values
-            '/(password["\']?\s*[:=]\s*["\']?)([^"\'}\s,]+)(["\'}},]?)/i' => '$1[REDACTED]$3',
+            // Password hashes (full hash)
+            '/\$argon2id?\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+\/=]+\$[A-Za-z0-9+\/=]+/' => '[REDACTED_HASH]',
             
-            // Password hashes (bcrypt, argon2)
-            '/\$(?:2[aby]|argon2i?)\$[^\s"\'}{]{40,}/' => '[REDACTED]',
+            '/\[REDACTED\],t=\d+,p=\d+\$[A-Za-z0-9+\/=]+\$[A-Za-z0-9+\/=]+/' => '[REDACTED_HASH]',
+            
+            '/\$2[aby]\$\d{2}\$[A-Za-z0-9.\/]{53}/' => '[REDACTED_HASH]',
+            
+            '/(password["\']?\s*[:=]\s*["\']?)([^"\'}\s,]+)(["\'}},]?)/i' => '$1[REDACTED_HASH]$3',
             
             // API keys
             '/(api[_-]?key["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9_-]{20,})(["\'}},]?)/i' => '$1[REDACTED]$3',
@@ -55,6 +62,8 @@ class LogRedactor {
             
             // Access/refresh tokens
             '/(["\']?(?:access|refresh)_?token["\']?\s*[:=]\s*["\']?)([a-zA-Z0-9._-]{20,})(["\'}},]?)/i' => '$1[REDACTED]$3',
+            
+            '/(["\'\\\\]?token["\'\\\\]?\s*[:=]\s*["\'\\\\]?)([a-fA-F0-9]{32,})(["\'}},]?)/i' => '$1[REDACTED_TOKEN]$3',
         ];
     }
 
@@ -198,6 +207,14 @@ class LogRedactor {
                     if ($replacement === 'MASK_VERIFICATION_TOKEN') {
                         $maskLength = strlen($matches[3]);
                         return $matches[1] . $matches[2] . str_repeat('*', $maskLength) . $matches[4];
+                    }
+                    
+                    if ($replacement === 'MASK_BROWSER') {
+                        // Keep first 20 chars for debugging, mask the rest
+                        $keepPart = $matches[2];
+                        $maskPart = $matches[3];
+                        $masked = strlen($maskPart) > 0 ? '***' : '';
+                        return $matches[1] . $keepPart . $masked . $matches[4];
                     }
                     
                     // Handle $1, $2, $3 replacements
