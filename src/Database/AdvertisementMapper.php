@@ -237,7 +237,7 @@ class AdvertisementMapper
 			LEFT JOIN posts p         ON p.postid   = al.postid
 			LEFT JOIN users u         ON u.uid      = al.userid
 			LEFT JOIN users pu        ON pu.uid     = p.userid
-            LEFT JOIN post_info pi    ON p.userid   = pi.userid
+            LEFT JOIN post_info pi    ON p.postid   = pi.postid
 
 			LEFT JOIN LATERAL (
 			  SELECT
