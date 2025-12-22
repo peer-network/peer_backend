@@ -3,7 +3,7 @@
 The `CI` workflow defined in `.github/workflows/Newman_backend_test.yaml` runs automatically for every pull request targeting `development` or `main`. Use the checklist below to replicate what CI executes and to diagnose failures quickly.
 
 ## 1. Keep your branch up to date
-- `auto_update_branch`, `check_branch_sync`, and `fail_outdated_branch` ensure the PR branch contains the latest base commits before any tests run.
+- `check_branch_sync`, and `fail_outdated_branch` ensure the PR branch contains the latest base commits before any tests run.
 - Always rebase/merge from `origin/development` before opening or updating a PR. 
 Locally: `git fetch origin && git rebase origin/development`.
 - If the auto-update job reports conflicts, resolve them locally and push again; otherwise the workflow hard-fails before any other job.
