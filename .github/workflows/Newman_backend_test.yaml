@@ -16,15 +16,6 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto_update_branch:
-    name: Auto-Update PR Branch
-    if: github.actor != 'dependabot[bot]'
-    uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
-    with:
-      pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
-      pr_head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || '' }}
-    secrets: inherit
-
   check_branch_sync:
     name: Check if PR Branch is Behind Base
     uses: peer-network/.github/.github/workflows/check-branch-sync.yml@main
@@ -121,7 +112,6 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      # auto_update_branch,
       check_branch_sync,
       gitleaks_scan_staged,
       validate_sql_files, 
@@ -771,7 +761,6 @@ jobs:
     name: Unified Discord Notification
     runs-on: ubuntu-latest
     needs: [
-      # auto_update_branch,
       check_branch_sync,
       phpstan_analysis,
       validate_sql_files,
