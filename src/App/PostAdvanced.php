@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\config\SettingsConfig;
+use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 
 class PostAdvanced implements PostReplaceable

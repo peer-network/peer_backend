@@ -6,7 +6,6 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
-use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\config\constants\ConstantsConfig;
@@ -34,17 +33,11 @@ use Fawaz\Services\FileUploadDispatcher;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\config\ContentLimitsPerPost;
-use Fawaz\Services\JWTService;
-use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Database\Interfaces\ProfileRepository;
-use Fawaz\Database\UserMapper;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
 use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
+use Fawaz\Utils\ResponseHelper;
 
 class PostService
 {
@@ -618,8 +611,6 @@ class PostService
 
             $data         = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            return $this::createSuccessResponse(11513, $data);
-
             return $this::createSuccessResponse(11513, $data);
         } catch (\Throwable $e) {
             if (isset($args['uploadedFiles'])) {
