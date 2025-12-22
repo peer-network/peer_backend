@@ -79,25 +79,13 @@ class UserMapper
             $rawInput = \file_get_contents('php://input');
             $input = \json_decode($rawInput, true);
 
-            $requestPayload = null;
-            if ($input !== null) {
-                try {
-                    $requestPayload = json_encode($input, JSON_THROW_ON_ERROR);
-                } catch (\JsonException $e) {
-                    $this->logger->error('JSON encoding error during request payload processing', [
-                        'error' => $e->getMessage(),
-                        'rawInput' => $rawInput
-                    ]);
-                }
-            }
-
             $authStatus = 'success';
 
             $sql = "
                 INSERT INTO logdaten 
-                (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, request_payload, auth_status)
+                (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, auth_status)
                 VALUES 
-                (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :request_payload, :auth_status)
+                (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :auth_status)
             ";
 
             $stmt = $this->db->prepare($sql);
@@ -111,7 +99,6 @@ class UserMapper
             $stmt->bindValue(':response_time', $responseTime, \PDO::PARAM_INT);
             $stmt->bindValue(':location', $location, \PDO::PARAM_STR);
             $stmt->bindValue(':action_type', $actionType, \PDO::PARAM_STR);
-            $stmt->bindValue(':request_payload', $requestPayload, \PDO::PARAM_STR);
             $stmt->bindValue(':auth_status', $authStatus, \PDO::PARAM_STR);
 
             $stmt->execute();

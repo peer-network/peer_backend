@@ -752,7 +752,6 @@ class AdvertisementMapper
 
             $this->logger->info("Inserted new PostAdvertisement into both tables");
             return new Advertisements($data);
-
         } catch (\Throwable $e) {
             $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to insert PostAdvertisement: " . $e->getMessage());
