@@ -171,8 +171,10 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: Decimal @deprecated(reason: "Use tokenSendFormatted")
+  tokensSubstractedFromWallet: Decimal @deprecated(reason: "Use tokensSubstractedFromWalletFormatted")
+  tokenSendFormatted: String!
+  tokensSubstractedFromWalletFormatted: String!
   createdat: String
 }
 
@@ -520,6 +522,7 @@ type ModerationItem {
   createdat: String!
   targetcontent: TargetContent!
   reporters: [BasicUserInfo!]!
+  moderatedBy: BasicUserInfo
 }
 
 type TargetContent {
