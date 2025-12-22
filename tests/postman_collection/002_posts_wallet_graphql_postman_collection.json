@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "77d1bb9f-731d-4c8e-95a1-21fc87a51179",
+		"_postman_id": "a6d8d817-35f3-44fe-9dcb-da292d84c865",
 		"name": "002_posts_wallet_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-77d1bb9f-731d-4c8e-95a1-21fc87a51179?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-a6d8d817-35f3-44fe-9dcb-da292d84c865?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -156,6 +156,125 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t3}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let liquidity = response.data.balance.currentliquidity;",
+							"pm.environment.set(\"liquidity1\", liquidity);",
+							"console.log(\"Saved liquidity:\", liquidity);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -393,7 +512,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -403,7 +523,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -423,7 +544,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] \n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -688,7 +904,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -698,7 +915,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -718,7 +936,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            cover: \"{{new_profile_pic}}\"\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            cover: \"{{new_profile_pic}}\"\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] \n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -905,7 +1218,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -915,7 +1229,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -935,7 +1250,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\", tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"]  },) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1128,7 +1538,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1138,7 +1549,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1158,7 +1570,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\",tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1373,7 +1880,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1383,7 +1891,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1403,7 +1912,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{base64_video}}\"]\n            contenttype: video\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n    }\n}\n\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{base64_video}}\"]\n            contenttype: video\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"]\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n    }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1672,12 +2276,54 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11701\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
+							"});",
+							"",
+							"pm.test(\"listTags.affectedRows is array of Tag objects\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listTags = body?.data?.listTags;",
+							"    pm.expect(listTags, \"data.listTags should exist\").to.exist;",
+							"",
+							"    const rows = listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach((t, i) => {",
+							"        pm.expect(t, `Tag at index ${i} should be an object`).to.be.an(\"object\");",
+							"        pm.expect(t, `Tag at index ${i} should have name`).to.have.property(\"name\");",
+							"        pm.expect(t.name, `Tag.name at index ${i} should be string`).to.be.a(\"string\");",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"All tag names are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const rows = body?.data?.listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach(t => {",
+							"        pm.expect(t.name, `Tag \\\"${t.name}\\\" should be lowercase`).to.equal(t.name.toLowerCase());",
+							"    });",
+							"});",
+							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1697,7 +2343,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListTags {\n    listTags(offset: 20, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            name\n        }\n    }\n}\n",
+						"query": "query ListTags {\n    listTags(offset: 0, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            name\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
