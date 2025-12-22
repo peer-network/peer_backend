@@ -51,6 +51,10 @@ regexes = [
   '''tmp(file|dir|token)'''
 ]
 
+paths = [
+  "tests/postman_collection/.*"
+]
+
 # --- Path denylist (ignore noisy generated/test files) ---
 [pathDenylist]
 description = "Exclude noisy generated/test files"
@@ -60,8 +64,6 @@ regexes = [
   '''^sql_files_for_import/.*''',
   '''^etc/busybox-paths\.d/.*''',
   '''^etc/ssl/openssl\.cnf(\.dist)?$''',
-  '''^tests/.*''',
-  '''^postman_collections?/.*''',
   '''^vendor/.*''',
   '''^storage/.*''',
   '''^node_modules/.*'''
