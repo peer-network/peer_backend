@@ -15,6 +15,8 @@ use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 
+use function DI\string;
+
 const TABLESTOGEMS = true;
 
 class WalletMapper
@@ -572,7 +574,7 @@ class WalletMapper
                  *
                  * Reason behind keeping -$numBers is to, Add to Burn Account Positively
                  */
-                $this->saveWalletEntry($this->burnWallet, -$numBers);
+                $this->saveWalletEntry($this->burnWallet, (string) $numBers, 'DEBIT');
             }
             
             
