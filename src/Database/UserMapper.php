@@ -84,7 +84,7 @@ class UserMapper
                 (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, auth_status)
                 VALUES 
                 (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :auth_status)
-            ";
+            ';
 
             $stmt = $this->db->prepare($sql);
 
