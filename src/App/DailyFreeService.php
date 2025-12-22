@@ -24,7 +24,7 @@ class DailyFreeService
         $this->currentUserId = $userId;
     }
 
-    
+
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {

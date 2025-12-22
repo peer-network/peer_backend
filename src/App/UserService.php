@@ -920,7 +920,7 @@ class UserService
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {

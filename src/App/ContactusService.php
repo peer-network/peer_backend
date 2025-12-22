@@ -57,7 +57,7 @@ class ContactusService
         return $Name &&
             strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
             strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match($controlPattern, $Name) === 0; 
+            preg_match($controlPattern, $Name) === 0;
     }
 
     private function validateRequiredFields(array $args, array $requiredFields): array

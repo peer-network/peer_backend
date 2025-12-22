@@ -251,10 +251,10 @@ class PeerTokenMapper
             }
             $mode = $strategy->getFeePolicyMode();
             [
-                $requiredAmount, 
-                $netRecipientAmount, 
-                $peerFeeAmount, 
-                $burnFeeAmount, 
+                $requiredAmount,
+                $netRecipientAmount,
+                $peerFeeAmount,
+                $burnFeeAmount,
                 $inviteFeeAmount
             ] = $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
 
