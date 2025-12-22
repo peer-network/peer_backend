@@ -80,40 +80,27 @@ class UserMapper
             $rawInput = \file_get_contents('php://input');
             $input = \json_decode($rawInput, true);
 
-            $requestPayload = null;
-            if ($input !== null) {
-                try {
-                    $requestPayload = json_encode($input, JSON_THROW_ON_ERROR);
-                } catch (\JsonException $e) {
-                    $this->logger->error('JSON encoding error during request payload processing', [
-                        'error' => $e->getMessage(),
-                        'rawInput' => $rawInput
-                    ]);
-                }
-            }
-
             $authStatus = 'success';
 
             $sql = "
                 INSERT INTO logdaten 
-                (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, request_payload, auth_status)
+                (userid, ip, browser, url, http_method, status_code, response_time, location, action_type, auth_status)
                 VALUES 
-                (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :request_payload, :auth_status)
+                (:userid, :ip, :browser, :url, :http_method, :status_code, :response_time, :location, :action_type, :auth_status)
             ";
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
-            $stmt->bindValue(':browser', $browser, PDO::PARAM_STR);
-            $stmt->bindValue(':url', $url, PDO::PARAM_STR);
-            $stmt->bindValue(':http_method', $httpMethod, PDO::PARAM_STR);
-            $stmt->bindValue(':status_code', $statusCode, PDO::PARAM_INT);
-            $stmt->bindValue(':response_time', $responseTime, PDO::PARAM_INT);
-            $stmt->bindValue(':location', $location, PDO::PARAM_STR);
-            $stmt->bindValue(':action_type', $actionType, PDO::PARAM_STR);
-            $stmt->bindValue(':request_payload', $requestPayload, PDO::PARAM_STR);
-            $stmt->bindValue(':auth_status', $authStatus, PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
+            $stmt->bindValue(':browser', $browser, \PDO::PARAM_STR);
+            $stmt->bindValue(':url', $url, \PDO::PARAM_STR);
+            $stmt->bindValue(':http_method', $httpMethod, \PDO::PARAM_STR);
+            $stmt->bindValue(':status_code', $statusCode, \PDO::PARAM_INT);
+            $stmt->bindValue(':response_time', $responseTime, \PDO::PARAM_INT);
+            $stmt->bindValue(':location', $location, \PDO::PARAM_STR);
+            $stmt->bindValue(':action_type', $actionType, \PDO::PARAM_STR);
+            $stmt->bindValue(':auth_status', $authStatus, \PDO::PARAM_STR);
 
             $stmt->execute();
 
