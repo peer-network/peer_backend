@@ -208,6 +208,7 @@ class AdvertisementMapper
 			  (m.isdisliked   )::int           AS isdisliked,
 			  (m.issaved      )::int           AS issaved,
 			  tg.tags                          AS tags,
+              pi.reports                       AS reports,
 
 			  cm.comments                      AS comments,
 
@@ -236,6 +237,7 @@ class AdvertisementMapper
 			LEFT JOIN posts p         ON p.postid   = al.postid
 			LEFT JOIN users u         ON u.uid      = al.userid
 			LEFT JOIN users pu        ON pu.uid     = p.userid
+            LEFT JOIN post_info pi    ON p.postid   = pi.postid
 
 			LEFT JOIN LATERAL (
 			  SELECT
@@ -430,6 +432,7 @@ class AdvertisementMapper
 
             'post' => [
                 'postid'          => (string)$row['postid'],
+                'userid'          => (string)$row['post_owner_id'],
                 'contenttype'     => (string)$row['contenttype'],
                 'title'           => (string)$row['title'],
                 'media'           => (string)$row['media'],
@@ -440,6 +443,8 @@ class AdvertisementMapper
                 'amountviews'     => (int)$row['amountviews'],
                 'amountcomments'  => (int)$row['amountcomments'],
                 'amountdislikes'  => (int)$row['amountdislikes'],
+                'amountreports'  => (int)$row['amountreports'],
+                'reports'        =>   (int)$row['reports'],
                 'amounttrending'  => (int)$row['amounttrending'],
                 'isliked'         => (bool)$row['isliked'],
                 'isviewed'        => (bool)$row['isviewed'],
@@ -709,8 +714,6 @@ class AdvertisementMapper
                    (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
 
         try {
-            $this->db->beginTransaction();
-
             // Statement 1
             $stmt1 = $this->db->prepare($query1);
             if (!$stmt1) {
@@ -747,13 +750,9 @@ class AdvertisementMapper
 
             $stmt3->execute();
 
-            $this->db->commit();
-
             $this->logger->info("Inserted new PostAdvertisement into both tables");
             return new Advertisements($data);
-
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to insert PostAdvertisement: " . $e->getMessage());
         }
@@ -775,7 +774,6 @@ class AdvertisementMapper
                     VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
 
         try {
-            $this->db->beginTransaction();
 
             $stmt1 = $this->db->prepare($query1);
             $stmt1->bindValue(':timestart', $data['timestart'], \PDO::PARAM_STR);
@@ -792,13 +790,11 @@ class AdvertisementMapper
             }
             $stmt2->execute();
 
-            $this->db->commit();
 
             $this->logger->info("Updated Post Advertisement & inserted into Log");
             return new Advertisements($data);
 
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error("update: Exception occurred while updating", ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to update PostAdvertisement: " . $e->getMessage());
         }

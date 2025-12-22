@@ -269,8 +269,6 @@ class WalletService
         $this->logger->debug('WalletService.performPayment started');
 
         try {
-            $this->transactionManager->beginTransaction();
-
             $postId = $args['postid'] ?? null;
             $art = $args['art'] ?? null;
             $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
@@ -287,7 +285,6 @@ class WalletService
 
             if (!isset($mapping[$art])) {
                 $this->logger->warning('Invalid art type provided.', ['art' => $art]);
-                $this->transactionManager->rollback();
                 return self::respondWithError(30105);
             }
 
@@ -307,7 +304,6 @@ class WalletService
                     'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
-                $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
@@ -334,7 +330,6 @@ class WalletService
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
-                $this->transactionManager->rollBack();
                 $this->logger->error("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
@@ -343,16 +338,13 @@ class WalletService
             }
 
             if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
                 return $response;
             } else {
-                $this->transactionManager->rollBack();
                 return $response;
             }
 
         } catch (\Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
-            $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
     }
