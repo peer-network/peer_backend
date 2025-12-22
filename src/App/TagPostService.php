@@ -67,8 +67,8 @@ class TagPostService
 
         $tagNameConfig = ConstantsConfig::post()['TAG'];
 
-        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
-            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
+        if (strlen($tagName) <= $tagNameConfig['MIN_LENGTH'] ||
+            strlen($tagName) >= $tagNameConfig['MAX_LENGTH'] ||
             !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
             return $this::respondWithError(30255);
         }
@@ -87,8 +87,14 @@ class TagPostService
             return $this::respondWithError(30211);
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = trim($tagName);
+            $tagName = strtolower(trim((string) $tagName));
+
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
                 return $this::respondWithError(30255);
@@ -117,7 +123,7 @@ class TagPostService
 
         $this->logger->debug('TagService.createTag started');
 
-        $tagName = trim($tagName);
+        $tagName = strtolower(trim($tagName));
         if (!$this->isValidTagName($tagName)) {
             return $this::respondWithError(30255);
         }

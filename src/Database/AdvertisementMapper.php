@@ -430,6 +430,7 @@ class AdvertisementMapper
 
             'post' => [
                 'postid'          => (string)$row['postid'],
+                'userid'          => (string)$row['post_owner_id'],
                 'contenttype'     => (string)$row['contenttype'],
                 'title'           => (string)$row['title'],
                 'media'           => (string)$row['media'],
@@ -709,8 +710,6 @@ class AdvertisementMapper
                    (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING";
 
         try {
-            $this->db->beginTransaction();
-
             // Statement 1
             $stmt1 = $this->db->prepare($query1);
             if (!$stmt1) {
@@ -747,13 +746,10 @@ class AdvertisementMapper
 
             $stmt3->execute();
 
-            $this->db->commit();
-
             $this->logger->info("Inserted new PostAdvertisement into both tables");
             return new Advertisements($data);
 
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to insert PostAdvertisement: " . $e->getMessage());
         }
@@ -775,7 +771,6 @@ class AdvertisementMapper
                     VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)";
 
         try {
-            $this->db->beginTransaction();
 
             $stmt1 = $this->db->prepare($query1);
             $stmt1->bindValue(':timestart', $data['timestart'], PDO::PARAM_STR);
@@ -792,13 +787,11 @@ class AdvertisementMapper
             }
             $stmt2->execute();
 
-            $this->db->commit();
 
             $this->logger->info("Updated Post Advertisement & inserted into Log");
             return new Advertisements($data);
 
         } catch (\Throwable $e) {
-            $this->db->rollBack();
             $this->logger->error("update: Exception occurred while updating", ['error' => $e->getMessage()]);
             throw new \RuntimeException("Failed to update PostAdvertisement: " . $e->getMessage());
         }

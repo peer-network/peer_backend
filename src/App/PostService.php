@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
@@ -33,7 +34,12 @@ use Fawaz\Services\JWTService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 
 class PostService
 {
@@ -57,6 +63,8 @@ class PostService
         protected TransactionManager $transactionManager,
         protected ProfileRepository $profileRepository,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected PostInfoService $postInfoService,
+        protected CommentService $commentService,
     ) {
     }
 
@@ -152,6 +160,241 @@ class PostService
             return ['success' => true, 'error' => null];
         }
     }
+    public function resolveActionPost(?array $args = []): ?array
+    {
+        $tokenomicsConfig = ConstantsConfig::tokenomics();
+        $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveActionPost started');
+
+        $postId = $args['postid'] ?? null;
+        $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
+
+        $freeActions = ['report', 'save', 'share', 'view'];
+
+        if (!empty($postId) && !self::isValidUUID($postId)) {
+            return $this::respondWithError(30209, ['postid' => $postId]);
+        }
+
+        if ($postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $deletedUserSpec = new DeletedUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $illegalContentSpec = new IllegalContentFilterSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $specs = [
+                $illegalContentSpec,
+                $systemUserSpec,
+                $deletedUserSpec,
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31513, ['postid' => $postId]);
+            }
+        }
+
+        if (in_array($action, $freeActions, true)) {
+            $response = $this->postInfoService->{$action . 'Post'}($postId);
+            return $response;
+        }
+
+        $paidActions = ['like', 'dislike', 'comment', 'post'];
+
+        if (!in_array($action, $paidActions, true)) {
+            return $this::respondWithError(30105);
+        }
+
+        $dailyLimits = [
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
+        ];
+
+        $actionPrices = [
+            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
+            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
+            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
+            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
+        ];
+
+        $actionMaps = [
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
+        ];
+
+        // Validations
+        if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
+            $this->logger->warning('Invalid action parameter', ['action' => $action]);
+            return $this::respondWithError(30105);
+        }
+
+        $limit = $dailyLimits[$action];
+        $price = $actionPrices[$action];
+        $actionMap = $args['art'] = $actionMaps[$action];
+
+        $this->transactionManager->beginTransaction();
+        
+        try {
+            if ($limit > 0) {
+                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+
+                // Return ResponseCode with Daily Free Code
+                if ($DailyUsage < $limit) {
+                    if ($action === 'comment') {
+                        $response = $this->commentService->createComment($args);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11608";
+
+                    } elseif ($action === 'post') {
+                        $response = $this->createPost($args['input']);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11513";
+                    } elseif ($action === 'like') {
+                        $response = $this->postInfoService->likePost($postId);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        
+                        $response['ResponseCode'] = "11514";
+                    } else {
+                        $this->transactionManager->rollback();
+                        return $this::respondWithError(30105);
+                    }
+
+                    if (isset($response['status']) && $response['status'] === 'success') {
+                        $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
+
+                        if ($incrementResult === false) {
+                            $this->logger->error('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                            $this->transactionManager->rollback();
+                            return $this::respondWithError(40301);
+                        }
+
+                        $this->transactionManager->commit();
+                        return $response;
+                    }
+
+                    $this->logger->error("{$action}Post failed", ['response' => $response]);
+                    $response['affectedRows'] = $args;
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+            }
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+
+            // Return ResponseCode with Daily Free Code
+
+            if ($balance < $price) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->transactionManager->rollback();
+                return $this::respondWithError(51301);
+            }
+
+            
+            if ($action === 'comment') {
+                $response = $this->commentService->createComment($args);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11605";
+            } elseif ($action === 'post') {
+                $response = $this->createPost($args['input']);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11508";
+
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
+                    unset($args['input'], $args['action']);
+                    $args['postid'] = $response['affectedRows']['postid'];
+                }
+            } elseif ($action === 'like') {
+                $response = $this->postInfoService->likePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11503";
+            } elseif ($action === 'dislike') {
+                $response = $this->postInfoService->dislikePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11504";
+            } else {
+                $this->transactionManager->rollback();
+                return $this::respondWithError(30105);
+            }
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+                assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
+            
+                $transferStrategy = match($action) {
+                    'post' => new PaidPostTransferStrategy(),
+                    'like' => new PaidLikeTransferStrategy(),
+                    'comment' => new PaidCommentTransferStrategy(),
+                    'dislike' => new PaidDislikeTransferStrategy(),
+                };
+
+                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $deducted;
+                }
+
+                if (!$deducted) {
+                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
+                    $this->transactionManager->rollback();
+                    return $this::respondWithError($deducted['ResponseCode']);
+                }
+                $this->transactionManager->commit();
+                return $response;
+            }
+
+            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+            $response['affectedRows'] = $args;
+            $this->transactionManager->rollback();
+            return $response;
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in resolveActionPost', [
+                'exception' => $e->getMessage(),
+                'args' => $args,
+            ]);
+            $this->transactionManager->rollback();
+            return $this::respondWithError(40301);
+        }
+    }
 
     public function createPost(array $args = []): array
     {
@@ -189,7 +432,6 @@ class PostService
         ];
 
         try {
-            $this->transactionManager->beginTransaction();
             // Media Upload
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
@@ -287,7 +529,6 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 $this->logger->error('Failed to create post', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
@@ -335,7 +576,6 @@ class PostService
                     $this->handleTags($args['tags'], $postId, $createdAt);
                 }
             } catch (\Throwable $e) {
-                $this->transactionManager->rollback();
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
@@ -359,11 +599,9 @@ class PostService
 
             $data = $post->getArrayCopy();
             $data['tags'] = $tagNames;
-            $this->transactionManager->commit();
             return $this::createSuccessResponse(11513, $data);
 
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             if (isset($args['uploadedFiles'])) {
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
@@ -427,8 +665,14 @@ class PostService
             throw new \Exception('Maximum tag limit exceeded');
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = !empty($tagName) ? trim((string) $tagName) : '';
+            $tagName = strtolower(trim((string) $tagName));
+
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
 
             if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
@@ -468,6 +712,7 @@ class PostService
 
     private function createTag(string $tagName): Tag|false
     {
+        $tagName = strtolower(trim($tagName));
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
 

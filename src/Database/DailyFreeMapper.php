@@ -208,38 +208,27 @@ class DailyFreeMapper
             throw new InvalidArgumentException('Invalid art type provided.');
         }
 
-        $column = $columnMap[$artType];
+        $query = "
+            INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
+            VALUES (:userId, :liken, :comments, :posten, NOW())
+            ON CONFLICT (userid) 
+            DO UPDATE 
+            SET 
+                liken = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.liken ELSE 0 END + :liken,
+                comments = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.comments ELSE 0 END + :comments,
+                posten = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.posten ELSE 0 END + :posten,
+                createdat = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.createdat ELSE NOW() END
+        ";
 
-        try {
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+        $stmt->bindValue(':liken', $artType === $actions['LIKE'] ? 1 : 0, \PDO::PARAM_INT);
+        $stmt->bindValue(':comments', $artType === $actions['COMMENT'] ? 1 : 0, \PDO::PARAM_INT);
+        $stmt->bindValue(':posten', $artType === $actions['POST'] ? 1 : 0, \PDO::PARAM_INT);
 
-            $query = "
-                INSERT INTO dailyfree (userid, liken, comments, posten, createdat)
-                VALUES (:userId, :liken, :comments, :posten, NOW())
-                ON CONFLICT (userid) 
-                DO UPDATE 
-                SET 
-                    liken = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.liken ELSE 0 END + :liken,
-                    comments = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.comments ELSE 0 END + :comments,
-                    posten = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.posten ELSE 0 END + :posten,
-                    createdat = CASE WHEN dailyfree.createdat::date = CURRENT_DATE THEN dailyfree.createdat ELSE NOW() END
-            ";
+        $success = $stmt->execute();
 
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':liken', $artType === $actions['LIKE'] ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $artType === $actions['COMMENT'] ? 1 : 0, PDO::PARAM_INT);
-            $stmt->bindValue(':posten', $artType === $actions['POST'] ? 1 : 0, PDO::PARAM_INT);
-
-            $success = $stmt->execute();
-
-            return $success;
-        } catch (PDOException $e) {
-            $this->logger->error('Database error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
-            return false;
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
-            return false;
-        }
+        return $success;
     }
 
     public function incrementUserDailyUsagee(string $userId, int $artType): bool

@@ -136,8 +136,10 @@ type ProfileUser {
   visibilityStatus: ContentVisibilityStatus!
   isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
-  isfollowed: Boolean
-  isfollowing: Boolean
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
   isreported: Boolean
   isfriend: Boolean
 }
@@ -169,8 +171,10 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: Decimal @deprecated(reason: "Use tokenSendFormatted")
+  tokensSubstractedFromWallet: Decimal @deprecated(reason: "Use tokensSubstractedFromWalletFormatted")
+  tokenSendFormatted: String!
+  tokensSubstractedFromWalletFormatted: String!
   createdat: String
 }
 
@@ -239,8 +243,10 @@ type Profile {
   visibilityStatus: ContentVisibilityStatus!
   isHiddenForUsers: Boolean!
   hasActiveReports: Boolean!
-  isfollowed: Boolean
-  isfollowing: Boolean
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
   isreported: Boolean
   amountposts: Int
   amounttrending: Int
@@ -516,6 +522,7 @@ type ModerationItem {
   createdat: String!
   targetcontent: TargetContent!
   reporters: [BasicUserInfo!]!
+  moderatedBy: BasicUserInfo
 }
 
 type TargetContent {
