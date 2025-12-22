@@ -213,6 +213,7 @@ class AdvertisementMapper
 			  (m.isdisliked   )::int           AS isdisliked,
 			  (m.issaved      )::int           AS issaved,
 			  tg.tags                          AS tags,
+              pi.reports                       AS reports,
 
 			  cm.comments                      AS comments,
 
@@ -241,6 +242,7 @@ class AdvertisementMapper
 			LEFT JOIN posts p         ON p.postid   = al.postid
 			LEFT JOIN users u         ON u.uid      = al.userid
 			LEFT JOIN users pu        ON pu.uid     = p.userid
+            LEFT JOIN post_info pi    ON p.postid   = pi.postid
 
 			LEFT JOIN LATERAL (
 			  SELECT
@@ -449,6 +451,8 @@ class AdvertisementMapper
                 'amountviews'     => (int)$row['amountviews'],
                 'amountcomments'  => (int)$row['amountcomments'],
                 'amountdislikes'  => (int)$row['amountdislikes'],
+                'amountreports'  => (int)$row['amountreports'],
+                'reports'        =>   (int)$row['reports'],
                 'amounttrending'  => (int)$row['amounttrending'],
                 'isliked'         => (bool)$row['isliked'],
                 'isviewed'        => (bool)$row['isviewed'],
@@ -765,8 +769,6 @@ class AdvertisementMapper
             $stmt3->execute();
 
             $this->logger->info("Inserted new PostAdvertisement into both tables");
-            return new Advertisements($data);
-
             return new Advertisements($data);
         } catch (\Throwable $e) {
             $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
