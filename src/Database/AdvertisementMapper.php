@@ -437,35 +437,36 @@ class AdvertisementMapper
             ],
 
             'post' => [
-                'postid'            => (string) $row['postid'],
-                'contenttype'       => (string) $row['contenttype'],
-                'title'             => (string) $row['title'],
-                'media'             => (string) $row['media'],
-                'cover'             => (string) $row['cover'],
-                'mediadescription'  => (string) $row['mediadescription'],
-                'createdat'         => (string) $row['post_createdat'],
-                'amountlikes'       => (int) $row['amountlikes'],
-                'amountviews'       => (int) $row['amountviews'],
-                'amountcomments'    => (int) $row['amountcomments'],
-                'amountdislikes'    => (int) $row['amountdislikes'],
-                'amounttrending'    => (int) $row['amounttrending'],
-                'isliked'           => (bool) $row['isliked'],
-                'isviewed'          => (bool) $row['isviewed'],
-                'isreported'        => (bool) $row['isreported'],
-                'isdisliked'        => (bool) $row['isdisliked'],
-                'issaved'           => (bool) $row['issaved'],
-                'url'               => (string) getenv('WEB_APP_URL').'/post/'.$row['postid'],
-                'tags'              => $tags,
-                'visibility_status' => (string) $row['post_visibility_status'],
-                'user'              => [
-                    'uid'               => (string) $row['post_owner_id'],
-                    'username'          => (string) $row['post_username'],
-                    'slug'              => (int) $row['post_slug'],
-                    'img'               => (string) $row['post_userimg'],
-                    'isfollowed'        => (bool) $row['isfollowed'],
-                    'isfollowing'       => (bool) $row['isfollowing'],
-                    'isfriend'          => (bool) $row['isfriend'],
-                    'visibility_status' => (string) $row['post_user_visibility_status'],
+                'postid'          => (string)$row['postid'],
+                'userid'          => (string)$row['post_owner_id'],
+                'contenttype'     => (string)$row['contenttype'],
+                'title'           => (string)$row['title'],
+                'media'           => (string)$row['media'],
+                'cover'           => (string)$row['cover'],
+                'mediadescription' => (string)$row['mediadescription'],
+                'createdat'       => (string)$row['post_createdat'],
+                'amountlikes'     => (int)$row['amountlikes'],
+                'amountviews'     => (int)$row['amountviews'],
+                'amountcomments'  => (int)$row['amountcomments'],
+                'amountdislikes'  => (int)$row['amountdislikes'],
+                'amounttrending'  => (int)$row['amounttrending'],
+                'isliked'         => (bool)$row['isliked'],
+                'isviewed'        => (bool)$row['isviewed'],
+                'isreported'      => (bool)$row['isreported'],
+                'isdisliked'      => (bool)$row['isdisliked'],
+                'issaved'         => (bool)$row['issaved'],
+                'url'             => (string)getenv('WEB_APP_URL') . '/post/' . $row['postid'],
+                'tags'            => $tags,
+                'visibility_status' => (string)$row['post_visibility_status'],
+                'user' => [
+                    'uid'         => (string)$row['post_owner_id'],
+                    'username'    => (string)$row['post_username'],
+                    'slug'        => (int)$row['post_slug'],
+                    'img'         => (string)$row['post_userimg'],
+                    'isfollowed'  => (bool)$row['isfollowed'],
+                    'isfollowing' => (bool)$row['isfollowing'],
+                    'isfriend'    => (bool)$row['isfriend'],
+                    'visibility_status' => (string)$row['post_user_visibility_status'],
                 ],
                 'comments' => $comments,
             ],
@@ -724,8 +725,6 @@ class AdvertisementMapper
                    (:advertisementid, :postid, :userid, :updatedat, :createdat) ON CONFLICT (advertisementid) DO NOTHING';
 
         try {
-            $this->db->beginTransaction();
-
             // Statement 1
             $stmt1 = $this->db->prepare($query1);
 
@@ -765,16 +764,13 @@ class AdvertisementMapper
 
             $stmt3->execute();
 
-            $this->db->commit();
-
-            $this->logger->info('Inserted new PostAdvertisement into both tables');
+            $this->logger->info("Inserted new PostAdvertisement into both tables");
+            return new Advertisements($data);
 
             return new Advertisements($data);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $this->logger->error('insert: Exception occurred while insertng', ['error' => $e->getMessage()]);
-
-            throw new \RuntimeException('Failed to insert PostAdvertisement: '.$e->getMessage());
+            $this->logger->error("insert: Exception occurred while insertng", ['error' => $e->getMessage()]);
+            throw new \RuntimeException("Failed to insert PostAdvertisement: " . $e->getMessage());
         }
     }
 
@@ -794,7 +790,6 @@ class AdvertisementMapper
                     VALUES (:advertisementid, :operationid, :postid, :userid, :status, :timestart, :timeend, :tokencost, :eurocost,:createdat)';
 
         try {
-            $this->db->beginTransaction();
 
             $stmt1 = $this->db->prepare($query1);
             $stmt1->bindValue(':timestart', $data['timestart'], \PDO::PARAM_STR);
@@ -812,16 +807,13 @@ class AdvertisementMapper
             }
             $stmt2->execute();
 
-            $this->db->commit();
 
             $this->logger->info('Updated Post Advertisement & inserted into Log');
 
             return new Advertisements($data);
         } catch (\Throwable $e) {
-            $this->db->rollBack();
-            $this->logger->error('update: Exception occurred while updating', ['error' => $e->getMessage()]);
-
-            throw new \RuntimeException('Failed to update PostAdvertisement: '.$e->getMessage());
+            $this->logger->error("update: Exception occurred while updating", ['error' => $e->getMessage()]);
+            throw new \RuntimeException("Failed to update PostAdvertisement: " . $e->getMessage());
         }
     }
 

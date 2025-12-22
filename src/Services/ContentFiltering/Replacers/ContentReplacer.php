@@ -72,8 +72,7 @@ class ContentReplacer
         if ($pattern->postTitle()) {
             $post->setTitle($pattern->postTitle());
         }
-
-        if ($pattern->postDescription()) {
+        if ($pattern->postDescription() !== null) {
             $post->setDescription($pattern->postDescription());
         }
 

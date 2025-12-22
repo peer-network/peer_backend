@@ -758,12 +758,10 @@ class PeerInputFilter
             return false;
         }
 
-        $value = \trim($value);
-        $value = \htmlspecialchars($value, \ENT_QUOTES, 'UTF-8');
-
-        if (\strlen($value) < $tagConfig['MIN_LENGTH'] || \strlen($value) > $tagConfig['MAX_LENGTH']) {
-            $this->errors['tag'][] = '30103';
-
+        $value = trim($value);
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
+            $this->errors['tag'][] = "30103";
             return false;
         }
 

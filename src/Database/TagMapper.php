@@ -93,8 +93,8 @@ class TagMapper
         $offset = max((int) ($args['offset'] ?? 0), 0);
         $limit  = min(max((int) ($args['limit'] ?? 10), 1), 20);
 
-        $name = strtolower($args['tagName']);
-        $sql  = 'SELECT * FROM tags WHERE name ILIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset';
+        $name = strtolower(trim((string) ($args['tagName'] ?? '')));
+        $sql = "SELECT * FROM tags WHERE name ILIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
         try {
             $stmt = $this->db->prepare($sql);

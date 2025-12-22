@@ -111,20 +111,15 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
-
                 return $this::respondWithError(31501);
             }
 
             $postInfo->setLikes($postInfo->getLikes() + 1);
             $this->postInfoMapper->update($postInfo);
-
-            $this->transactionManager->commit();
 
             return [
                 'status' => 'success',
@@ -132,7 +127,6 @@ class PostInfoService
                 'ResponseCode' => '11514',
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: likePost: Error while fetching post data', ['exception' => $e]);
 
             return $this::respondWithError(41505);
@@ -162,27 +156,21 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('dislikePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
-
                 return $this::respondWithError(31502);
             }
 
             $postInfo->setDislikes($postInfo->getDislikes() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
-
             return [
                 'status'       => 'success',
                 'ResponseCode' => '11504',
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: dislikePost: Error while fetching post data', ['exception' => $e]);
 
             return $this::respondWithError(41505);
@@ -251,8 +239,6 @@ class PostInfoService
                 return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
-            $this->transactionManager->beginTransaction();
-
             $exists = $this->reportMapper->addReport(
                 $this->currentUserId,
                 ReportTargetType::POST,
@@ -260,17 +246,13 @@ class PostInfoService
                 $contentHash
             );
 
-            if (null === $exists) {
-                $this->transactionManager->rollback();
-                $this->logger->error('PostInfoService: reportPost: Failed to add report');
-
+            if ($exists === null) {
+                $this->logger->error("PostInfoService: reportPost: Failed to add report");
                 return $this::respondWithError(41505);
             }
 
-            if (true === $exists) {
-                $this->transactionManager->rollback();
-                $this->logger->warning('PostInfoService: reportPost: User tries to add duplicating report');
-
+            if ($exists === true) {
+                $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
                 return $this::respondWithError(31503);
             }
 
@@ -278,14 +260,11 @@ class PostInfoService
             $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
-
             return [
                 'status'       => 'success',
                 'ResponseCode' => '11505',
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: reportPost: Error while adding report to db or updating _info data', ['exception' => $e]);
 
             return $this::respondWithError(41505);
@@ -315,27 +294,21 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('viewPost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
-
                 return $this::respondWithError(31505);
             }
 
             $postInfo->setViews($postInfo->getViews() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
-
             return [
                 'status'       => 'success',
                 'ResponseCode' => '11506',
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: viewPost: Error while fetching post data', ['exception' => $e]);
 
             return $this::respondWithError(41505);
@@ -361,27 +334,21 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('sharePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
-
                 return $this::respondWithError(31504);
             }
 
             $postInfo->setShares($postInfo->getShares() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
-
             return [
                 'status'       => 'success',
                 'ResponseCode' => '11507',
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
 
             return $this::respondWithError(41505);
@@ -400,17 +367,13 @@ class PostInfoService
 
         $this->logger->debug('PostInfoService.savePost started');
 
-        $this->transactionManager->beginTransaction();
 
         $response = $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
 
         if (isset($response['status']) && 'error' === $response['status']) {
             $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
-            $this->transactionManager->rollback();
-
             return $response;
         }
-        $this->transactionManager->commit();
 
         return $response;
     }

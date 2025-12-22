@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\Filter\PeerInputFilter;
+use Fawaz\config\SettingsConfig;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
 
 class PostAdvanced implements PostReplaceable
@@ -245,8 +245,8 @@ class PostAdvanced implements PostReplaceable
         if (empty($this->postid)) {
             return '';
         }
-
-        return getenv('WEB_APP_URL').'/post/'.$this->postid;
+        return SettingsConfig::load()->webAppUrl . '/post/' . $this->postid;
+        // return getenv('WEB_APP_URL') . '/post/' . $this->postid;
     }
 
     // Renew Validation and Array Filtering methods
