@@ -542,12 +542,6 @@ class PostService
                 ]);
 
                 return $this::respondWithError(30263);
-
-                if (isset($args['uploadedFiles'])) {
-                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
-                }
-
-                return $this::respondWithError($e->getMessage());
             }
             $this->postMapper->insert(post: $post);
 
