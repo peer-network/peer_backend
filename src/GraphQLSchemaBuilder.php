@@ -1738,10 +1738,10 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
+            $this->logger->warning('Query.resolveFetchWinsLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
-        
         return $this::createSuccessResponse(11203, $response);
     }
 
@@ -1768,6 +1768,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
+            $this->logger->warning('Query.resolveFetchPaysLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
