@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class UserAdvanced
+class UserAdvanced implements ProfileReplaceable
 {
     protected string $uid;
     protected string $email;
@@ -25,6 +26,9 @@ class UserAdvanced
     protected ?int $amounttrending;
     protected ?int $isprivate;
     protected ?bool $isfollowed;
+    protected ?bool $isreported;
+    protected ?bool $iFollowThisUser;
+    protected ?bool $thisUserFollowsMe;
     protected ?bool $isfollowing;
     protected ?int $amountfollower;
     protected ?int $amountfollowed;
@@ -32,6 +36,9 @@ class UserAdvanced
     protected ?float $liquidity;
     protected ?string $createdat;
     protected ?string $updatedat;
+    protected ?int $activeReports;
+    protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -54,20 +61,20 @@ class UserAdvanced
         $this->amountposts = $data['amountposts'] ?? 0;
         $this->amounttrending = $data['amounttrending'] ?? 0;
         $this->isprivate = $data['isprivate'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isfollowed = $data['isfollowed'] ?? false;
         $this->isfollowing = $data['isfollowing'] ?? false;
+        $this->iFollowThisUser = $data['iFollowThisUser'] ?? $this->isfollowing ?? false;
+        $this->thisUserFollowsMe = $data['thisUserFollowsMe'] ?? $this->isfollowed ?? false;
         $this->amountfollower = $data['amountfollower'] ?? 0;
         $this->amountfollowed = $data['amountfollowed'] ?? 0;
         $this->amountfriends = $data['amountfriends'] ?? 0;
         $this->liquidity = $data['liquidity'] ?? 0.0;
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-
-        if ($this->status == 6) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->activeReports = $data['user_reports'] ?? 0;
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -89,13 +96,20 @@ class UserAdvanced
             'amounttrending' => $this->amounttrending,
             'isprivate' => $this->isprivate,
             'isfollowed' => $this->isfollowed,
+            'isreported' => $this->isreported,
             'isfollowing' => $this->isfollowing,
+            'iFollowThisUser' => $this->iFollowThisUser,
+            'thisUserFollowsMe' => $this->thisUserFollowsMe,
             'amountfollower' => $this->amountfollower,
             'amountfollowed' => $this->amountfollowed,
             'amountfriends' => $this->amountfriends,
             'liquidity' => $this->liquidity,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
+            'reports' => $this->activeReports,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -107,7 +121,7 @@ class UserAdvanced
             'uid' => $this->uid,
             'password' => $this->password,
             'ip' => $this->ip,
-            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
         ];
         return $att;
     }
@@ -277,6 +291,28 @@ class UserAdvanced
         $this->img = $imgPath;
     }
 
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatusForUser;
+    }
+
+    public function setVisibilityStatus(string $status): void
+    {
+        $this->visibilityStatusForUser = $status;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
     public function getAmountPosts(): int|null
     {
         return $this->amountposts;
@@ -354,8 +390,20 @@ class UserAdvanced
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
+
+    public function getActiveReports(): int
+    {
+        return $this->activeReports;
+    }
+
+    public function getRolesmask(): int
+    {
+        return $this->roles_mask;
+    }
+
+
 
     // Password Verify methods
     public function verifyPassword(string $password): bool
@@ -519,6 +567,14 @@ class UserAdvanced
                 'required' => false,
                 'filters' => [['name' => 'Boolean']],
             ],
+            'iFollowThisUser' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
+            'thisUserFollowsMe' => [
+                'required' => false,
+                'filters' => [['name' => 'Boolean']],
+            ],
             'amountfollower' => [
                 'required' => false,
                 'filters' => [['name' => 'ToInt']],
@@ -548,14 +604,14 @@ class UserAdvanced
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'updatedat' => [
                 'required' => true,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
         ];

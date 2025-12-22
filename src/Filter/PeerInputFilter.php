@@ -249,9 +249,7 @@ class PeerInputFilter
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', function ($matches) {
-                return '.' . str_pad($matches[1], 6, '0');
-            }, $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
             $formatted = trim($formatted);
@@ -551,7 +549,7 @@ class PeerInputFilter
                isset($chatmessage->chatid) && $this->Uuid($chatmessage->chatid) &&
                isset($chatmessage->userid) && $this->Uuid($chatmessage->userid) &&
                isset($chatmessage->content) && $this->StringLength($chatmessage->content, ['min' => $chatConfig['MESSAGE']['MIN_LENGTH'], 'max' => $chatConfig['MESSAGE']['MAX_LENGTH']]) &&
-               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($chatmessage->createdat) && $this->LessThan($chatmessage->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidateParticipants(array $participants, array $options = []): bool
@@ -637,7 +635,7 @@ class PeerInputFilter
                isset($profilepost->title) && $this->StringLength($profilepost->title, ['min' => $postConst['TITLE']['MIN_LENGTH'], 'max' => $postConst['TITLE']['MAX_LENGTH']]) &&
                isset($profilepost->contenttype) && $this->InArray($profilepost->contenttype, ['haystack' => ['image', 'text', 'video', 'audio', 'imagegallery', 'videogallery', 'audiogallery']]) &&
                isset($profilepost->media) && $this->StringLength($profilepost->media, ['min' => $postConst['MEDIA']['MIN_LENGTH'], 'max' => $postConst['MEDIA']['MAX_LENGTH']]) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function ValidatePostPure(array $profileposts, array $options = []): bool
@@ -672,7 +670,7 @@ class PeerInputFilter
                isset($profilepost->amountdislikes) && $this->IsNumeric($profilepost->amountdislikes) &&
                isset($profilepost->amountviews) && $this->IsNumeric($profilepost->amountviews) &&
                isset($profilepost->amountcomments) && $this->IsNumeric($profilepost->amountcomments) &&
-               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
+               isset($profilepost->createdat) && $this->LessThan($profilepost->createdat, ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]);
     }
 
     protected function validatePassword(string $value, array $options = []): bool
@@ -741,7 +739,6 @@ class PeerInputFilter
 
         $value = trim($value);
         $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-
         if (strlen($value) < $tagConfig['MIN_LENGTH'] || strlen($value) > $tagConfig['MAX_LENGTH']) {
             $this->errors['tag'][] = "30103";
             return false;

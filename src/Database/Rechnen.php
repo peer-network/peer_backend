@@ -47,7 +47,7 @@ class Rechnen
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         return ($price * $sum) + (($price * $sum) * $tax);
     }
 
@@ -58,7 +58,7 @@ class Rechnen
             return 0;
         }
 
-        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         $sales_tax = $tax;
         return ($price * $sum) - (($price * $sum) * $sales_tax);
     }
@@ -70,7 +70,7 @@ class Rechnen
             return 0;
         }
 
-        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         $sales_tax = $tax;
         return ($sum * $price) * $sales_tax;
     }
@@ -81,7 +81,7 @@ class Rechnen
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         return ((($sum * $price) * $tax) / $sum);
     }
 
@@ -91,7 +91,7 @@ class Rechnen
         if ($price == 0 || $sum == 0) {
             return 0;
         }
-        $tax = (float)ConstantsConfig::tokenomics()['FEES']['PEER'];
+        $tax = (float)ConstantsConfig::tokenomics()['FEES_STRING']['PEER'];
         return ($price * $sum) * $tax;
     }
 

@@ -33,17 +33,17 @@ class MultipartPostService
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                    // Validate that the provided bearer access token exists in DB and is not expired
-                    // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                    //     $this->logger->warning('Access token not found or expired for user', [
-                    //         'userId' => $decodedToken->uid,
-                    //     ]);
-                    //     $this->currentUserId = null;
-                    //     return;
-                    // }
+                // Validate that the provided bearer access token exists in DB and is not expired
+                // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                //     $this->logger->warning('Access token not found or expired for user', [
+                //         'userId' => $decodedToken->uid,
+                //     ]);
+                //     $this->currentUserId = null;
+                //     return;
+                // }
 
-                    $this->currentUserId = $decodedToken->uid;
-                    $this->logger->debug('Query.setCurrentUserId started');
+                $this->currentUserId = $decodedToken->uid;
+                $this->logger->debug('Query.setCurrentUserId started');
             } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
@@ -83,7 +83,7 @@ class MultipartPostService
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -137,7 +137,7 @@ class MultipartPostService
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -182,11 +182,11 @@ class MultipartPostService
         if (empty($requestObj['token'])) {
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
-        
+
         try {
             $this->tokenService->validateToken($requestObj['token']);
 
-        
+
             $sql = "SELECT 1 FROM eligibility_token WHERE token = :token AND status IN ('FILE_UPLOADED', 'POST_CREATED')";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':token', $requestObj['token']);

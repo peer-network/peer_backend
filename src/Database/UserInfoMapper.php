@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\Profile;
+use Fawaz\Services\ContentFiltering\Specs\Specification;
+use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
@@ -26,7 +30,7 @@ class UserInfoMapper
 
         try {
             $stmt = $this->db->prepare(
-                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, 
+                'SELECT userid, liquidity, amountposts, amountblocked, amountfollower, reports, 
                         amountfollowed, amountfriends, isprivate, invited, updatedat 
                  FROM users_info 
                  WHERE userid = :id'
@@ -77,6 +81,7 @@ class UserInfoMapper
                           amountblocked = :amountblocked, 
                           isprivate = :isprivate, 
                           reports = :reports, 
+                          totalreports = :totalreports, 
                           invited = :invited,
                           phone = :phone,                          
                           pkey = :pkey,
@@ -92,6 +97,7 @@ class UserInfoMapper
             $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
             $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
             $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
             $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
             $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
             $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
@@ -120,104 +126,6 @@ class UserInfoMapper
                 'error' => $e->getMessage()
             ]);
             throw $e;
-        }
-    }
-
-    public function loadById(string $id): User|false
-    {
-        $this->logger->debug('UserInfoMapper.loadById started', ['id' => $id]);
-
-        try {
-            $stmt = $this->db->prepare(
-                'SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, updatedat, createdat 
-                 FROM users 
-                 WHERE uid = :id'
-            );
-
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
-            $stmt->execute();
-
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-            if ($data !== false) {
-                $this->logger->info('User loaded successfully', ['id' => $id, 'user' => $data]);
-                return new User($data);
-            } else {
-                $this->logger->warning("No user found with the given ID", ['id' => $id]);
-                return false;
-            }
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error in loadById", [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            return false;
-        } catch (\Exception $e) {
-            $this->logger->error("Unexpected error in loadById", [
-                'id' => $id,
-                'error' => $e->getMessage()
-            ]);
-            return false;
-        }
-    }
-
-    public function updateUsers(User $user): ?User
-    {
-        $this->logger->debug('UserInfoMapper.updateUsers started');
-
-        try {
-            $user->setUpdatedAt();
-            $user->setIp();
-            $data = $user->getArrayCopy();
-
-            $query = "UPDATE users 
-                      SET email = :email, 
-                          username = :username, 
-                          password = :password, 
-                          status = :status, 
-                          verified = :verified, 
-                          slug = :slug, 
-                          roles_mask = :roles_mask, 
-                          ip = :ip, 
-                          img = :img, 
-                          biography = :biography, 
-                          updatedat = :updatedat, 
-                          createdat = :createdat 
-                      WHERE uid = :uid";
-
-            $stmt = $this->db->prepare($query);
-
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':username', $data['username'], \PDO::PARAM_STR);
-            $stmt->bindValue(':password', $data['password'], \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $data['status'], \PDO::PARAM_INT);
-            $stmt->bindValue(':verified', $data['verified'], \PDO::PARAM_INT);
-            $stmt->bindValue(':slug', $data['slug'], \PDO::PARAM_INT);
-            $stmt->bindValue(':roles_mask', $data['roles_mask'], \PDO::PARAM_INT);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':img', $data['img'], \PDO::PARAM_STR);
-            $stmt->bindValue(':biography', $data['biography'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':uid', $data['uid'], \PDO::PARAM_STR);
-
-            $stmt->execute();
-
-            $this->logger->info("User updated successfully", ['user' => $data]);
-
-            return new User($data);
-        } catch (\PDOException $e) {
-            $this->logger->error('Database error in updateUsers', [
-                'error' => $e->getMessage()
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error in updateUsers', [
-                'error' => $e->getMessage()
-            ]);
-
-            return null;
         }
     }
 
@@ -446,73 +354,96 @@ class UserInfoMapper
         }
     }
 
-    public function getBlockRelations(string $myUserId, int $offset = 0, int $limit = 10): array
-    {
-        $this->logger->info('Fetching block relationships', ['myUserId' => $myUserId]);
+    public function getBlockRelations(
+        string $myUserId,
+        array $specifications,
+        int $offset = 0,
+        int $limit = 10
+    ): array {
+        $this->logger->info('Fetching block relationships', [
+            'myUserId' => $myUserId,
+        ]);
 
-        $query = "
+        // Build WHERE/params from specs, targeting users as alias `u`
+        $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+        $allSpecs = SpecificationSQLData::merge($specsSQL);
+
+        // BlockedBy: who blocked me -> select blocker user as `u`
+        $blockedByWhere = $allSpecs->whereClauses;
+        $blockedByWhere[] = 'ub.blockedid = :myUserId';
+        $blockedByWhereStr = implode(' AND ', $blockedByWhere);
+        $blockedByParams = $allSpecs->paramsToPrepare;
+        $blockedByParams['myUserId'] = $myUserId;
+        $blockedByParams['limit'] = $limit;
+        $blockedByParams['offset'] = $offset;
+
+        // IBlocked: whom I blocked -> select blocked user as `u`
+        $iBlockedWhere = $allSpecs->whereClauses;
+        $iBlockedWhere[] = 'ub.blockerid = :myUserId';
+        $iBlockedWhereStr = implode(' AND ', $iBlockedWhere);
+        $iBlockedParams = $allSpecs->paramsToPrepare;
+        $iBlockedParams['myUserId'] = $myUserId;
+        $iBlockedParams['limit'] = $limit;
+        $iBlockedParams['offset'] = $offset;
+
+        // Query for users who blocked me
+        $sqlBlockedBy = "
             SELECT 
-                ub.blockerid, blocker.slug AS blocker_slug, blocker.img AS blocker_img, blocker.username AS blocker_username, 
-                ub.blockedid, blocked.slug AS blocked_slug, blocked.img AS blocked_img, blocked.username AS blocked_username
+                u.uid,
+                u.username,
+                u.slug,
+                u.status,
+                u.img,
+                u.roles_mask,
+                u.verified,
+                ui.reports AS user_reports,
+                u.visibility_status
             FROM user_block_user ub
-            JOIN users blocker ON ub.blockerid = blocker.uid
-            JOIN users blocked ON ub.blockedid = blocked.uid
-            WHERE ub.blockerid = :myUserId OR ub.blockedid = :myUserId
+            JOIN users u ON ub.blockerid = u.uid
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE $blockedByWhereStr
             ORDER BY ub.createdat DESC
-            LIMIT :limit OFFSET :offset";
+            LIMIT :limit OFFSET :offset
+        ";
+        $stmt = $this->db->prepare($sqlBlockedBy);
+        $stmt->execute($blockedByParams);
+        $blockedByRows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
 
-        try {
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':myUserId', $myUserId, \PDO::PARAM_STR);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->execute();
+        // Query for users I blocked
+        $sqlIBlocked = "
+            SELECT 
+                u.uid,
+                u.username,
+                u.slug,
+                u.status,
+                u.img,
+                u.roles_mask,
+                u.verified,
+                ui.reports AS user_reports,
+                u.visibility_status
+            FROM user_block_user ub
+            JOIN users u ON ub.blockedid = u.uid
+            LEFT JOIN users_info ui ON ui.userid = u.uid
+            WHERE $iBlockedWhereStr
+            ORDER BY ub.createdat DESC
+            LIMIT :limit OFFSET :offset
+        ";
+        $stmt = $this->db->prepare($sqlIBlocked);
+        $stmt->execute($iBlockedParams);
+        $iBlockedRows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
 
-            $blockedBy = [];
-            $iBlocked = [];
+        $blockedBy = array_map(fn ($row) => new Profile($row), $blockedByRows);
 
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                if ($row['blockedid'] === $myUserId) {
-                    $blockedBy[] = [
-                        'userid' => $row['blockerid'],
-                        'img' => $row['blocker_img'],
-                        'username' => $row['blocker_username'],
-                        'slug' => $row['blocker_slug'],
-                    ];
-                } elseif ($row['blockerid'] === $myUserId) {
-                    $iBlocked[] = [
-                        'userid' => $row['blockedid'],
-                        'img' => $row['blocked_img'],
-                        'username' => $row['blocked_username'],
-                        'slug' => $row['blocked_slug'],
-                    ];
-                }
-            }
+        $iBlocked = array_map(fn ($row) => new Profile($row), $iBlockedRows);
+        $this->logger->info('Fetched block relationships', [
+            'blockedByCount' => count($blockedBy),
+            'iBlockedCount' => count($iBlocked),
+            'total' => count($blockedBy) + count($iBlocked)
+        ]);
 
-            $counter = count($blockedBy) + count($iBlocked);
-
-            $this->logger->info("Fetched block relationships", [
-                'blockedByCount' => count($blockedBy),
-                'iBlockedCount' => count($iBlocked),
-                'total' => $counter
-            ]);
-
-            return [
-                'status' => 'success',
-                'counter' => $counter,
-                'ResponseCode' => "11107",
-                'affectedRows' => [
-                    'blockedBy' => $blockedBy,
-                    'iBlocked' => $iBlocked
-                ]
-            ];
-        } catch (\PDOException $e) {
-            $this->logger->error("Database error while fetching block relationships", ['error' => $e->getMessage()]);
-            return [
-                'status' => 'error',
-                'ResponseCode' => "41108",
-                'affectedRows' => []
-            ];
-        }
+        return [
+            'blockedBy' => $blockedBy,
+            'iBlocked' => $iBlocked,
+        ];
     }
 }

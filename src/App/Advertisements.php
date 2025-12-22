@@ -6,10 +6,12 @@ namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 
-class Advertisements
+class Advertisements implements HasUserId
 {
     protected string $advertisementid;
+    protected string $operationid;
     protected string $postid;
     protected string $userid;
     protected string $status;
@@ -38,11 +40,12 @@ class Advertisements
         }
 
         $this->advertisementid = $data['advertisementid'] ?? '';
+        $this->operationid = $data['operationid'] ?? '';
         $this->postid = $data['postid'] ?? '';
         $this->userid = $data['userid'] ?? '';
         $this->status = $data['status'] ?? 'basic';
-        $this->timestart = $data['timestart'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->timeend = $data['timeend'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->timestart = $data['timestart'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->timeend = $data['timeend'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->tokencost = $data['tokencost'] ?? 0.0;
         $this->eurocost = $data['eurocost'] ?? 0.0;
         $this->gemsearned = $data['gemsearned'] ?? 0.0;
@@ -51,8 +54,8 @@ class Advertisements
         $this->amountcomments = $data['amountcomments'] ?? 0;
         $this->amountdislikes = $data['amountdislikes'] ?? 0;
         $this->amountreports = $data['amountreports'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->post = isset($data['post']) && is_array($data['post']) ? $data['post'] : [];
     }
@@ -62,6 +65,7 @@ class Advertisements
     {
         $att = [
             'advertisementid' => $this->advertisementid,
+            'operationid' => $this->operationid,
             'postid' => $this->postid,
             'userid' => $this->userid,
             'status' => $this->status,
@@ -149,6 +153,14 @@ class Advertisements
         $this->eurocost = $eurocost;
     }
 
+    public function getOperationId(): string
+    {
+        return $this->operationid;
+    }
+    public function setOperationId(string $operationid): void
+    {
+        $this->operationid = $operationid;
+    }
     // Validation and Array Filtering methods
     public function validate(array $data, array $elements = []): array
     {
@@ -269,7 +281,7 @@ class Advertisements
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                     ['name' => 'isString'],
                 ],
             ],
@@ -277,7 +289,7 @@ class Advertisements
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                     ['name' => 'isString'],
                 ],
             ],

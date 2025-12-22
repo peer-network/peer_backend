@@ -17,6 +17,7 @@ class Commented
     protected string $content;
     protected string $createdat;
     protected ?int $amountlikes;
+    protected ?bool $isreported;
     protected ?bool $isliked;
     protected ?array $user = [];
     protected ?array $subcomments = [];
@@ -34,16 +35,13 @@ class Commented
         $this->postid = $data['postid'] ?? '';
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->amountlikes = $data['amountlikes'] ?? 0;
+        $this->isreported = $data['isreported'] ?? false;
         $this->isliked = $data['isliked'] ?? false;
         $this->user = isset($data['user']) && is_array($data['user']) ? $data['user'] : [];
         $this->subcomments = isset($data['subcomments']) && is_array($data['subcomments']) ? $data['subcomments'] : [];
         $this->userstatus = $data['userstatus'] ?? 0;
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
     }
 
     // Array Copy methods
@@ -57,6 +55,7 @@ class Commented
             'content' => $this->content,
             'createdat' => $this->createdat,
             'amountlikes' => $this->amountlikes,
+            'isreported' => $this->isreported,
             'isliked' => $this->isliked,
             'user' => $this->user,
             'subcomments' => $this->subcomments,
@@ -189,7 +188,7 @@ class Commented
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
                 ],
             ],
             'amountlikes' => [

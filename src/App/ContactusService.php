@@ -40,11 +40,6 @@ class ContactusService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -57,10 +52,12 @@ class ContactusService
     private function isValidName(?string $Name): bool
     {
         $contactConfig = ConstantsConfig::contact();
+        $inputConfig     = ConstantsConfig::input();
+        $controlPattern  = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
         return $Name &&
             strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
             strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
+            preg_match($controlPattern, $Name) === 0; 
     }
 
     private function validateRequiredFields(array $args, array $requiredFields): array
@@ -87,7 +84,7 @@ class ContactusService
             $this->transactionManager->rollBack();
             $this->logger->error("Error occurred in ContactusService.insert", [
                 'error' => $e->getMessage(),
-                'contact' => $contact->getArrayCopy(),
+                'msgid' => $contact->getMsgId(),
             ]);
             return null;
         }

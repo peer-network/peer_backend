@@ -6,6 +6,22 @@ namespace Fawaz\config\constants;
 
 use Fawaz\config\constants\ConstantsModeration;
 
+
+/*
+ 
+
+
+DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES  
+
+all changes MUST be BACKWARDS COMPATITABLE 
+ otherwise front will crash💥
+
+
+
+all changes through adding new fields
+
+*/
+
 class ConstantsConfig implements ConstantsConfigInterface
 {
     public function getData()
@@ -23,6 +39,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             "DAILY_FREE" => self::dailyFree(),
             "TOKENOMICS" => self::tokenomics(),
             "MINTING" => self::minting(),
+            "INPUT" => self::input(),
         ];
     }
     /**
@@ -45,7 +62,7 @@ class ConstantsConfig implements ConstantsConfigInterface
     }
     /**
      * @return array{
-     *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     TITLE: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     MEDIADESCRIPTION: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     COVER: array{MAX_COUNT: int, MIN_LENGTH: int, MAX_LENGTH: int},
      *     MEDIA: array{MIN_LENGTH: int, MAX_LENGTH: int},
@@ -60,7 +77,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *             CREATE: int,
      *             SEARCH: int
      *         }
-     *     }
+     *     },
+     *     STATUS: array{PUBLISHED: int, ADVERTISED: int, ILLEGAL: int}
      * }
      */
     public static function post(): array
@@ -104,7 +122,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     SLUG: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     LIQUIDITY: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     AVATAR: array{MAX_SIZE_MB: int},
-     *     TRANSACTION: array{MIN_TOKENS: int}
+     *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN_URL: string},
+     *     TRANSACTION: array{MIN_AMOUNT: float, MAX_DECIMALS: int}
      * }
      */
     public static function user()
@@ -128,7 +147,7 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     /**
      * @return array{
-     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN: string},
+     *     NAME: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int}
      * }
      */
@@ -140,10 +159,12 @@ class ConstantsConfig implements ConstantsConfigInterface
     /**
      * @return array{
      *     OFFSET: array{MIN: int, MAX: int},
+     *     POST_OFFSET: array{MIN: int, MAX: int},
+     *     POST_LIMIT: array{MIN: int, MAX: int},
      *     LIMIT: array{MIN: int, MAX: int}
      * }
      */
-    public static function paging()
+    public static function paging(): array
     {
         return ConstantsConfig::PAGING;
     }
@@ -196,7 +217,12 @@ class ConstantsConfig implements ConstantsConfigInterface
      *         POOL: float,
      *         PEER: float,
      *         BURN: float
-     *     }
+     *     },
+     *     FEES_STRING: array{
+     *         INVITATION: string,
+     *         PEER: string,
+     *         BURN: string
+     *     },
      * }
      */
     public static function tokenomics(): array
@@ -209,6 +235,15 @@ class ConstantsConfig implements ConstantsConfigInterface
     public static function minting(): array
     {
         return ConstantsConfig::MINTING;
+    }
+    /**
+     * @return array{
+     *     FORBID_CONTROL_CHARS_PATTERN: string
+     * }
+     */
+    public static function input(): array
+    {
+        return ConstantsConfig::INPUT;
     }
 
     private const ONBOARDING = [
@@ -249,6 +284,11 @@ class ConstantsConfig implements ConstantsConfigInterface
             'PEER'       => 0.02,
             'BURN'       => 0.01,
         ],
+        'FEES_STRING' => [
+            'INVITATION' => '0.01',
+            'PEER'       => '0.02',
+            'BURN'       => '0.01',
+        ],
     ];
 
     private const COMMENT = [
@@ -274,7 +314,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TITLE' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 63,
-            'PATTERN' => '^[a-zA-Z0-9_]+$'
         ],
         'MEDIADESCRIPTION' => [
             'MIN_LENGTH' => 3,
@@ -308,11 +347,16 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TAG' => [
             'MIN_LENGTH' => 2,
             'MAX_LENGTH' => 53,
-            'PATTERN' => '[a-zA-Z]+',
+            'PATTERN' => '^[a-zA-Z0-9_]+$',
             'MAX_COUNT' => [
                 'CREATE' => 10,
                 'SEARCH' => 5,
             ],
+        ],
+        'STATUS' => [
+            'PUBLISHED' => 0,
+            'ADVERTISED' => 1,
+            'ILLEGAL' => 2,
         ],
     ];
 
@@ -400,7 +444,6 @@ class ConstantsConfig implements ConstantsConfigInterface
         'NAME' => [
             'MIN_LENGTH' => 3,
             'MAX_LENGTH' => 53,
-            'PATTERN' => '^[a-zA-Z]+$',
         ],
         'MESSAGE' => [
             'MIN_LENGTH' => 3,
@@ -413,10 +456,24 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MIN' => 0,
             'MAX' => 2147483647,
         ],
+        'POST_OFFSET' => [
+            'MIN' => 0,
+            'MAX' => 2147483647,
+        ],
+        'POST_LIMIT' => [
+            'MIN' => 0,
+            'MAX' => 20,
+        ],
         'LIMIT' => [
             'MIN' => 1,
             'MAX' => 20,
         ],
+    ];
+    // ASCII control chars + zero-width Unicode chars
+    private const CONTROL_CHARS_PATTERN = '[\x00-\x08\x0B-\x1F\x7F\x{200B}\x{200C}\x{200D}\x{FEFF}\x{00A0}]';
+
+    private const INPUT = [
+        'FORBID_CONTROL_CHARS_PATTERN' => self::CONTROL_CHARS_PATTERN,
     ];
 
     private const USER = [
@@ -454,8 +511,14 @@ class ConstantsConfig implements ConstantsConfigInterface
         'AVATAR' => [
             'MAX_SIZE_MB' => 5,
         ],
+        'TRANSFER_MESSAGE' => [
+            'MIN_LENGTH' => 0,
+            'MAX_LENGTH' => 500,
+            'PATTERN_URL' => '(:\/\/|www\.)',
+        ],
         'TRANSACTION' => [
-            'MIN_TOKENS' => 10,
+            'MIN_AMOUNT' => 0.00000001,
+            'MAX_DECIMALS' => 8, 
         ],
     ];
 }

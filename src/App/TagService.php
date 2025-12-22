@@ -40,11 +40,6 @@ class TagService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -76,7 +71,7 @@ class TagService
         }
 
         $this->logger->debug('TagService.createTag started');
-        $tagName = !empty($tagName) ? trim($tagName) : null;
+        $tagName = !empty($tagName) ? strtolower(trim($tagName)) : null;
 
         try {
             $this->transactionManager->beginTransaction();
@@ -137,6 +132,7 @@ class TagService
         try {
 
             if (isset($args['tagName']) && !empty($args['tagName'])) {
+                $args['tagName'] = strtolower(trim((string) $args['tagName']));
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {

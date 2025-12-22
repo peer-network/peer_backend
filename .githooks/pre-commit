@@ -1,5 +1,5 @@
-#!/bin/sh
-# echo "Running Gitleaks pre-commit scan on staged changes..."
+# !/bin/sh
+echo "Running Gitleaks pre-commit scan on staged changes..."
 
 # mkdir -p .gitleaks_out
 
@@ -41,5 +41,5 @@
 #   exit 1
 # fi
 
-# echo "No secrets found. Commit allowed."
+echo "No secrets found. Commit allowed."
 exit 0

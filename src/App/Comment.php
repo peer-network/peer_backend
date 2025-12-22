@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\Hashable;
 use Fawaz\Utils\HashObject;
 
-class Comment implements Hashable
+class Comment extends Model implements Hashable
 {
     use HashObject;
 
@@ -21,6 +22,7 @@ class Comment implements Hashable
     protected string $content;
     protected string $createdat;
     protected ?int $userstatus;
+    protected string $visibilityStatus;
 
 
     // Constructor
@@ -35,13 +37,9 @@ class Comment implements Hashable
         $this->postid = $data['postid'] ?? '';
         $this->parentid = $data['parentid'] ?? null;
         $this->content = $data['content'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->userstatus = $data['userstatus'] ?? 0;
-
-        if ($this->userstatus == 6) {
-            $this->content = "Comment by deleted Account";
-        }
-
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -54,6 +52,7 @@ class Comment implements Hashable
             'parentid' => $this->parentid,
             'content' => $this->content,
             'createdat' => $this->createdat,
+            'visibility_status' => $this->visibilityStatus,
         ];
         return $att;
     }
@@ -177,7 +176,16 @@ class Comment implements Hashable
                 'required' => false,
                 'validators' => [
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
-                    ['name' => 'LessThan', 'options' => ['max' => (new DateTime())->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                    ['name' => 'LessThan', 'options' => ['max' => new DateTime()->format('Y-m-d H:i:s.u'), 'inclusive' => true]],
+                ],
+            ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
                 ],
             ],
         ];
@@ -199,5 +207,13 @@ class Comment implements Hashable
     public function hashValue(): string
     {
         return $this->hashObject($this);
+    }
+
+    /**
+     * Table name in the database
+     */
+    public static function table(): string
+    {
+        return 'comments';
     }
 }
