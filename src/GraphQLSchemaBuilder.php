@@ -1712,12 +1712,7 @@ class GraphQLSchemaBuilder
             return $this::createSuccessResponse(11107, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $response;
-        }
-
-        $this->logger->error('Query.resolveBlocklist No data found');
-        return $this::respondWithError(41105);
+        return $response;
     }
 
     protected function resolveFetchWinsLog(array $args): ?array
@@ -1743,15 +1738,11 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
+            $this->logger->warning('Query.resolveFetchWinsLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this::createSuccessResponse(11203, $response);
-        }
-
-        $this->logger->warning('Query.resolveFetchWinsLog No records found');
-        return $this::createSuccessResponse(21202);
+        return $this::createSuccessResponse(11203, $response);
     }
 
     protected function resolveFetchPaysLog(array $args): ?array
@@ -1777,15 +1768,11 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
+            $this->logger->warning('Query.resolveFetchPaysLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
-        if (is_array($response) || !empty($response)) {
-            return $this::createSuccessResponse(11203, $response);
-        }
-
-        $this->logger->warning('Query.resolveFetchPaysLog No records found');
-        return $this::createSuccessResponse(21202);
+        return $this::createSuccessResponse(11203, $response);
     }
 
     protected function resolveReferralInfo(): ?array
@@ -2019,11 +2006,7 @@ class GraphQLSchemaBuilder
 
         $results = array_map(fn (CommentAdvanced $comment) => $comment->getArrayCopy(), $comments);
 
-        if (is_array($results) || !empty($results)) {
-            return $this::createSuccessResponse(11607, $results);
-        }
-
-        return $this::createSuccessResponse(21601);
+        return $this::createSuccessResponse(11607, $results);
     }
 
     protected function resolveListComments(array $args): array
@@ -2129,13 +2112,8 @@ class GraphQLSchemaBuilder
             return $this::createSuccessResponse(21601, [], false);
         }
 
-        if (is_array($comments) || !empty($comments)) {
-            $this->logger->info('Query.resolveTags successful');
-
-            return $this::createSuccessResponse(11601, $comments);
-        }
-
-        return $this::createSuccessResponse(21601);
+        $this->logger->info('Query.resolveTags successful');
+        return $this::createSuccessResponse(11601, $comments);
     }
 
     protected function resolveTags(array $args): ?array
