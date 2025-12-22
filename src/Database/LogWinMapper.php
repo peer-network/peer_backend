@@ -831,7 +831,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = -3; // Each extra like will cost 3 Gems
+                    $numBers = 3; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -881,7 +881,7 @@ class LogWinMapper
 
             return false;
         } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID', 41401);
+            throw new \RuntimeException('Failed to generate logwins ID'. $e->getMessage(), 41401);
         }
     }
 
@@ -1116,7 +1116,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = -5; // Each extra dislike will cost 5 Gems
+                    $numBers = 5; // Each extra dislike will cost 5 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -1225,7 +1225,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = -20; // Each extra like will cost 3 Gems
+                    $numBers = 20; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -1334,7 +1334,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = -0.5; // Each extra like will cost 0.5 Gems
+                    $numBers = 0.5; // Each extra like will cost 0.5 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
