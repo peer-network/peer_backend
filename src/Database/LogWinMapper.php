@@ -136,7 +136,7 @@ class LogWinMapper
 
                     if ($transferType === 'BURN') {
                         // Credit burn account (we stored negative numbers earlier)
-                        $this->saveWalletEntry($this->burnWallet, -$numBers);
+                        $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
                     }
 
 
@@ -286,7 +286,7 @@ class LogWinMapper
 
                     if ($transferType === 'BURN') {
                         // Credit burn account (we stored negative numbers earlier)
-                        $this->saveWalletEntry($this->burnWallet, -$numBers);
+                        $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
                     }
 
 
@@ -861,7 +861,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -963,7 +963,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($recipientid, $numBers);
+                    $this->saveWalletEntry($recipientid, $numBers, 'CREDIT');
 
                     $this->transactionManager->commit();
 
@@ -1146,7 +1146,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -1255,7 +1255,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -1364,7 +1364,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, -$numBers);
+                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -1489,10 +1489,10 @@ class LogWinMapper
 
                 
                 $totalGems = isset($gemAllDays[0]['overall_total']) ? (string)$gemAllDays[0]['overall_total'] : '0';
-                $dailyToken = (float) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
+                $dailyToken =  (string) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
-                $gemsintoken = TokenHelper::divRc((float)$dailyToken, (float)$totalGems);
-                $bestatigungInitial = TokenHelper::mulRc((float)$totalGems, (float)$gemsintoken);
+                $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
+                $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
 
                 $args = [
                     'winstatus' => [
@@ -1517,7 +1517,7 @@ class LogWinMapper
                             continue;
                         }
 
-                        $rowgems2token = TokenHelper::mulRc((float) $row['gems'], (float) $gemsintoken);
+                        $rowgems2token = TokenHelper::mulRc((string) $row['gems'],  $gemsintoken);
 
                         $args = [
                             'gemid' => $row['gemid'],
@@ -1584,7 +1584,7 @@ class LogWinMapper
                             ]);
 
                             if ($transferType === 'BURN') {
-                                $this->saveWalletEntry($this->burnWallet, -$numBers);
+                                $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
                             }
 
                             $this->logger->info('Inserted into logwins successfully', [
@@ -1711,10 +1711,10 @@ class LogWinMapper
     }
 
 
-    public function saveWalletEntry(string $userId, float $liquidity): float
+        public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): float
     {
         \ignore_user_abort(true);
-        $this->logger->info('WalletMapper.saveWalletEntry started');
+        $this->logger->debug('WalletMapper.saveWalletEntry started');
 
         try {
             $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
@@ -1724,22 +1724,33 @@ class LogWinMapper
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
-                $newLiquidity = abs($liquidity);
-                $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
+                $newLiquidity = $liquidity;
+                $liquiditq = (float)$this->decimalToQ64_96($liquidity);
 
                 $stmt = $this->db->prepare(
                     "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                     VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
                 );
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
-                $currentBalance = (float)$row['liquidity'];
-                $newLiquidity = TokenHelper::addRc($currentBalance, $liquidity);
+                $currentBalance = (string)$row['liquidity'];
+
+                if ($liquidity < 0) {
+                    $liquidity = (string) (abs((float)$liquidity));
+                    $type = 'DEBIT';
+                }
+
+                if ($type === 'CREDIT') {
+                    $newLiquidity = TokenHelper::addRc($currentBalance, (string) $liquidity);
+                } else {
+                    $newLiquidity = TokenHelper::subRc($currentBalance, (string) $liquidity);
+                }
+
                 $liquiditq = (float)$this->decimalToQ64_96($newLiquidity);
 
                 $stmt = $this->db->prepare(
@@ -1750,7 +1761,7 @@ class LogWinMapper
                 $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
                 $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', (new \DateTime())->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
 
                 $stmt->execute();
             }
@@ -1758,12 +1769,13 @@ class LogWinMapper
             $this->logger->info('Wallet entry saved successfully', ['newLiquidity' => $newLiquidity]);
             $this->updateUserLiquidity($userId, $newLiquidity);
 
-            return $newLiquidity;
+            return  (float) $newLiquidity;
         } catch (\Throwable $e) {
-            $this->logger->error('Database error in saveWalletEntry: ' . $e->getMessage());
+            $this->logger->error('Database error in saveWalletEntry: ' . $e);
             throw new \RuntimeException('Unable to save wallet entry');
         }
     }
+
 
 
     public function updateUserLiquidity(string $userId, float $liquidity): bool
