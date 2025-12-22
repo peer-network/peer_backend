@@ -1,5 +1,9 @@
-name: CI
- 
+# backend Newman regression + quality gates used by Gihhub Actions CI
+#
+# peer_backend/docs/guidlines/How-to-CI.md doc is described based on this file 
+#
+
+name: CI 
 on:
   pull_request:
     branches:
@@ -14,6 +18,7 @@ permissions:
 jobs:
   auto_update_branch:
     name: Auto-Update PR Branch
+    if: github.actor != 'dependabot[bot]'
     uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
     with:
       pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
@@ -22,7 +27,6 @@ jobs:
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
-    needs: [auto_update_branch]
     uses: peer-network/.github/.github/workflows/check-branch-sync.yml@main
     with:
       base_branch: ${{ github.event.pull_request.base.ref }}
@@ -31,7 +35,7 @@ jobs:
   fail_outdated_branch:
     name: Block CI Due to Outdated Branch
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     if: needs.check_branch_sync.outputs.is_behind == 'true'
     steps:
       - run: |
@@ -41,7 +45,6 @@ jobs:
   gitleaks_notice:
     name: Gitleaks Scan Notice (Soft Mode)
     runs-on: ubuntu-latest
-    needs: [auto_update_branch]
     steps:
       - name: Display Soft Mode Notice
         run: |
@@ -51,26 +54,21 @@ jobs:
 
   gitleaks_scan_staged:
     name: Gitleaks PR Scan (Soft Mode)
-    needs: [auto_update_branch, gitleaks_notice]
+    needs: [gitleaks_notice]
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
     with:
-      config: "gitleaks.toml"
+      config: ".security/gitleaks.toml"
     secrets: inherit
     if: always()
 
   phpstan_analysis:
     name: Early Static Analysis (PHPStan)
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     env:
       IMAGE_TAG: local
     steps:
-      - name: Skip PHPStan for Dependabot
-        if: github.event.pull_request.user.login == 'dependabot[bot]'
-        run: |
-          echo "Dependabot PR → Skipping PHPStan"
-          exit 0
-
       - uses: actions/checkout@v6
 
       - name: Log in to GHCR (for base image access)
@@ -88,7 +86,7 @@ jobs:
   validate_sql_files:
     name: Ensure Only Valid SQL Files Are Changed
     runs-on: ubuntu-latest
-    needs: [auto_update_branch, check_branch_sync]
+    needs: [check_branch_sync]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -123,13 +121,14 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      auto_update_branch,
+      # auto_update_branch,
       check_branch_sync,
       gitleaks_scan_staged,
       validate_sql_files, 
       phpstan_analysis 
     ]
     if: ${{ 
+      github.actor != 'dependabot[bot]' &&
       needs.check_branch_sync.outputs.is_behind == 'false' && 
       needs.validate_sql_files.result == 'success' }}
     strategy:
@@ -417,7 +416,7 @@ jobs:
           fi
  
       - name: Upload Newman Failure Marker
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: newman-failed-${{ matrix.php-version }}
           path: newman_failed.txt
@@ -455,19 +454,19 @@ jobs:
           fi
  
       - name: Upload backend runtime log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-runtime-log-${{ matrix.php-version }}
           path: logs/runtime
  
       - name: Upload backend error log for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-error-log-${{ matrix.php-version }}
           path: logs/error/errorlog.txt
           
       - name: Upload Newman Report for PHP ${{ matrix.php-version }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: docker_newman_report-${{ matrix.php-version }}
           path: ${{ github.workspace }}/newman/reports/report.html
@@ -505,7 +504,7 @@ jobs:
  
       - name: Upload build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: outcome-${{ matrix.php-version }}
           path: outcome.txt
@@ -513,7 +512,7 @@ jobs:
       - name: Save Docker image as artifact
         run: docker save -o peer-backend.tar peer-backend:${{ github.sha }}
  
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: docker-image-${{ matrix.php-version }}
           path: peer-backend.tar
@@ -531,7 +530,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v6
  
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: docker-image-${{ matrix.php-version }}
           path: .
@@ -572,7 +571,7 @@ jobs:
  
       - name: Upload Trivy build outcome marker
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: outcome-${{ matrix.php-version }}-${{ github.run_attempt }}
           path: outcome.txt
@@ -585,7 +584,7 @@ jobs:
           trivy fs . --format table --scanners vuln --output trivy_reports/filesystem_vuln.txt
           trivy fs . --format table --scanners secret --output trivy_reports/secrets.txt
  
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: trivy-security-reports-${{ matrix.php-version }}-${{ github.run_attempt }}
@@ -600,7 +599,7 @@ jobs:
     outputs:
       final_outcome: ${{ steps.aggregate.outputs.final_outcome }}
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           pattern: outcome-*
           path: outcomes
@@ -640,7 +639,7 @@ jobs:
       newman_failed_any: ${{ steps.setflag.outputs.newman_failed_any }}
     steps:
       - name: Download All Newman Failure Markers
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: newman_flags
  
@@ -715,13 +714,13 @@ jobs:
     name: Deploy HTMLExtra Reports to peer_backend_reports
     runs-on: ubuntu-latest
     needs: [aggregate_outcome, build_and_test]
-    if: always()
+    if: github.actor != 'dependabot[bot]' && needs.build_and_test.result == 'success'
     concurrency:
       group: reports-deploy
       cancel-in-progress: false
     steps:
       - name: Download PHP 8.4 HTMLExtra report
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: docker_newman_report-8.4
           path: reports/php-8.4
@@ -772,7 +771,7 @@ jobs:
     name: Unified Discord Notification
     runs-on: ubuntu-latest
     needs: [
-      auto_update_branch,
+      # auto_update_branch,
       check_branch_sync,
       phpstan_analysis,
       validate_sql_files,
@@ -784,6 +783,16 @@ jobs:
     ]
     if: always()
     steps:
+      - name: Skip noisy Dependabot failures
+        run: |
+          actor="${{ github.actor }}"
+          outcome="${{ needs.aggregate_outcome.outputs.final_outcome }}"
+
+          if [ "$actor" = "dependabot[bot]" ] && [ "$outcome" != "success" ]; then
+            echo "Dependabot PR with non-success outcome → no Discord notification"
+            exit 0
+          fi
+
       - name: Determine message type
         id: decide
         run: |
@@ -797,8 +806,6 @@ jobs:
           type="none"
           if [ "$is_behind" == "true" ]; then
             type="behind"
-          elif [ "${{ needs.auto_update_branch.outputs.auto_update_conflict }}" == "true" ]; then
-            type="merge_conflict"
           elif [ "$sql_result" == "failure" ]; then
             type="invalid_sql"
           elif [ "$phpstan_result" == "failure" ]; then
@@ -809,10 +816,10 @@ jobs:
             type="newman_failed"
           elif [ "$outcome" == "other_failure" ]; then
             type="other_failure"
-          elif [ "$outcome" == "success" ]; then
-            type="success"
           elif [ "$trivy_result" == "failure" ]; then
             type="trivy_failed"
+          elif [ "$outcome" == "success" ]; then
+            type="success"
           fi
 
           echo "type=$type" >> $GITHUB_OUTPUT

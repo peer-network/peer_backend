@@ -16,6 +16,7 @@ return static function (string $appEnv) {
 
     $settings =  [
         'media_server_url' => $_ENV['MEDIA_SERVER_URL'] ?? '',
+        'web_app_url' => $_ENV['WEB_APP_URL'] ?? '',
         'di_compilation_path' => __DIR__ . '/../../' . $_ENV['CONTAINER_PATH'],
         'display_error_details' => false,
         'log_errors' => true,
