@@ -4,6 +4,10 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
+const BASIC = 50;
+const PINNED = 200;
+
+use Fawaz\App\LogWinService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -60,6 +64,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
+        protected LogWinService $logWinService,
         protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -209,6 +214,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
     }
 
@@ -1573,6 +1579,14 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
+            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
+            // 'logWinMigration02' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration02(),
+            // 'logWinMigration03' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration03(),
+            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
+            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
+            'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
+            'logWinMigrationWalletUpdate' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletUpdate(),
+            'logWinMigrationWalletNegativeToZero' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletNegativeToZero(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
         ];
