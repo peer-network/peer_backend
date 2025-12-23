@@ -333,7 +333,7 @@ class AdvertisementService
         return true;
     }
 
-    private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
+    private function formatStartAndEndTimestamps(DateTimeImmutable $startDate, string $durationKey): array
     {
         $dateFilters = [
             'ONE_DAY' => '+1 days',
@@ -410,7 +410,7 @@ class AdvertisementService
 
             if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) {
                 if ($startday) {
-                    $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
+                    $startDate = DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
 
                     $timestart = $timestamps['timestart']; // Set timestart

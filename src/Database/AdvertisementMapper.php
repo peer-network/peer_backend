@@ -341,7 +341,7 @@ class AdvertisementMapper
             //     }
             // }
             $statsStmt->execute($paramsStats);
-            $stats = $statsStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+            $stats = $statsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
             $this->logger->info('fetchAllWithStats.statsStmt', ['statsStmt' => $stats]);
 
             // Data
@@ -353,10 +353,10 @@ class AdvertisementMapper
             //         $dataStmt->bindValue($k, $v);
             //     }
             // }
-            // $dataStmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            // $dataStmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            // $dataStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            // $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $dataStmt->execute($paramsData);
-            $rows = $dataStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
             $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
             $ads = array_values(array_filter(array_map(self::mapRowToAdvertisementt(...), $rows)));
@@ -486,11 +486,11 @@ class AdvertisementMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result && isset($result['duration_minutes'])) {
                 $durationMinutes = (float)$result['duration_minutes'];
@@ -538,11 +538,11 @@ class AdvertisementMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $this->logger->info("Advertisement timing check result", $result);
 
@@ -568,11 +568,11 @@ class AdvertisementMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
+            $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+            $stmt->bindValue(':status', $status, PDO::PARAM_STR);
             $stmt->execute();
 
-            $results = array_map(fn ($row) => new Advertisements($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Advertisements($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched advertisementId successfully" : "No advertisements found for userid.",
@@ -593,7 +593,7 @@ class AdvertisementMapper
         $this->logger->debug("AdvertisementMapper.advertisementExistsById started");
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM advertisements WHERE advertisementId = :advertisementId");
-        $stmt->bindValue(':advertisementId', $advertisementId, \PDO::PARAM_STR);
+        $stmt->bindValue(':advertisementId', $advertisementId, PDO::PARAM_STR);
         $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
@@ -605,8 +605,8 @@ class AdvertisementMapper
 
         $sql = "SELECT 1 FROM advertisements WHERE postid = :postId AND status = :status LIMIT 1";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
-        $stmt->bindValue(':status', $status, \PDO::PARAM_STR);
+        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
         $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
@@ -721,7 +721,7 @@ class AdvertisementMapper
             }
 
             foreach (['advertisementid', 'postid', 'userid', 'status', 'timestart', 'timeend','createdat'] as $key) {
-                $stmt1->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt1->bindValue(':' . $key, $data[$key], PDO::PARAM_STR);
             }
 
             $stmt1->execute();
@@ -733,7 +733,7 @@ class AdvertisementMapper
             }
 
             foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost','createdat'] as $key) {
-                $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt2->bindValue(':' . $key, $data[$key], PDO::PARAM_STR);
             }
 
             $stmt2->execute();
@@ -745,7 +745,7 @@ class AdvertisementMapper
             }
 
             foreach (['advertisementid', 'postid', 'userid', 'updatedat', 'createdat'] as $key) {
-                $stmt3->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt3->bindValue(':' . $key, $data[$key], PDO::PARAM_STR);
             }
 
             $stmt3->execute();
@@ -776,17 +776,17 @@ class AdvertisementMapper
         try {
 
             $stmt1 = $this->db->prepare($query1);
-            $stmt1->bindValue(':timestart', $data['timestart'], \PDO::PARAM_STR);
-            $stmt1->bindValue(':timeend', $data['timeend'], \PDO::PARAM_STR);
-            $stmt1->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt1->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt1->bindValue(':status', $data['status'], \PDO::PARAM_STR);
+            $stmt1->bindValue(':timestart', $data['timestart'], PDO::PARAM_STR);
+            $stmt1->bindValue(':timeend', $data['timeend'], PDO::PARAM_STR);
+            $stmt1->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt1->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
+            $stmt1->bindValue(':status', $data['status'], PDO::PARAM_STR);
 
             $stmt1->execute();
 
             $stmt2 = $this->db->prepare($query2);
             foreach (['advertisementid', 'operationid', 'postid', 'userid', 'status', 'timestart', 'timeend', 'tokencost', 'eurocost', 'createdat'] as $key) {
-                $stmt2->bindValue(':' . $key, $data[$key], \PDO::PARAM_STR);
+                $stmt2->bindValue(':' . $key, $data[$key], PDO::PARAM_STR);
             }
             $stmt2->execute();
 
@@ -951,14 +951,14 @@ class AdvertisementMapper
                 $pinnedStmt->bindValue(":" . $key, $val);
             }
             $pinnedStmt->execute();
-            $pinned = $pinnedStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $pinned = $pinnedStmt->fetchAll(PDO::FETCH_ASSOC);
 
             $basicStmt = $this->db->prepare($sqlBasicAds);
             foreach ($params as $key => $val) {
                 $basicStmt->bindValue(":" . $key, $val);
             }
             $basicStmt->execute();
-            $basic = $basicStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $basic = $basicStmt->fetchAll(PDO::FETCH_ASSOC);
 
             $finalPosts = [];
             if (!empty($pinned)) {
