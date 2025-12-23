@@ -105,7 +105,7 @@ class LogWinMapper
                     WHERE lw.migrated = 0
                     AND lw.whereby = 18
                     GROUP BY created_at_second, lw.fromid
-                    HAVING COUNT(*) IN (6, 7)
+                    HAVING COUNT(*) IN (5, 6, 7)
                     ORDER BY created_at_second ASC, lw.fromid
                     LIMIT 100;
                 ";
@@ -115,7 +115,6 @@ class LogWinMapper
             $stmt->execute();
 
             $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
             if (empty($logwins)) {
                 $this->logger->info('No logwins to migrate');
                 return true;
@@ -137,10 +136,14 @@ class LogWinMapper
                 }
 
                 $hasInviter = false;
+                $withoutFeeDeduction = false;
                 if (count($tnxs) == 7) {
                     $hasInviter = true;
                 }
 
+                if (count($tnxs) == 5) {
+                    $withoutFeeDeduction = true;
+                }
                 try {
                     /*
                     * This action considere as Credit to Receipient
@@ -195,7 +198,14 @@ class LogWinMapper
                         $recipientId = $tnxs[4]['userid'];
                         $amount = $tnxs[4]['numbers'];
                         $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    } else {
+                    } elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[2]['fromid'];
+                        $recipientId = $tnxs[2]['userid'];
+                        $amount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
                         $senderId = $tnxs[3]['fromid'];
                         $recipientId = $tnxs[3]['userid'];
                         $amount = $tnxs[3]['numbers'];
@@ -221,7 +231,15 @@ class LogWinMapper
                         $recipientId = ($tnxs[5]['userid']); // Requested tokens
                         $amount = $tnxs[5]['numbers'];
                         $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    } else {
+                    } 
+                    elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[3]['fromid'];
+                        $recipientId = ($tnxs[3]['userid']); // Requested tokens
+                        $amount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = ($tnxs[4]['userid']); // Requested tokens
                         $amount = $tnxs[4]['numbers'];
@@ -245,7 +263,15 @@ class LogWinMapper
                         $recipientId = ($tnxs[6]['userid']); // Requested tokens
                         $amount = $tnxs[6]['numbers'];
                         $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    } else {
+                    } 
+                    elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = ($tnxs[4]['userid']); // Requested tokens
+                        $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
                         if (isset($tnxs[5]['fromid'])) {
                             $senderId = $tnxs[5]['fromid'];
                             $recipientId = ($tnxs[5]['userid']); // Requested tokens
