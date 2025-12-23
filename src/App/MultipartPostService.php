@@ -158,8 +158,8 @@ class MultipartPostService
                     WHERE token = :token
                 ";
             $updateStmt = $this->db->prepare($updateSql);
-            $updateStmt->bindValue(':status', 'FILE_UPLOADED', \PDO::PARAM_STR);
-            $updateStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+            $updateStmt->bindValue(':status', 'FILE_UPLOADED', PDO::PARAM_STR);
+            $updateStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
             $updateStmt->execute();
             $this->logger->info("Inserted new token into database", ['eligibilityToken' => $eligibilityToken]);
 
