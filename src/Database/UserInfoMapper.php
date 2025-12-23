@@ -12,6 +12,7 @@ use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class UserInfoMapper
 {
@@ -36,10 +37,10 @@ class UserInfoMapper
                  WHERE userid = :id'
             );
 
-            $stmt->bindValue(':id', $id, \PDO::PARAM_STR);
+            $stmt->bindValue(':id', $id, PDO::PARAM_STR);
             $stmt->execute();
 
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data) {
                 $this->logger->info('User info loaded successfully', ['id' => $id, 'data' => $data]);
@@ -48,7 +49,7 @@ class UserInfoMapper
                 $this->logger->warning("No user found with given ID", ['id' => $id]);
                 return false;
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Database error in loadInfoById", [
                 'id' => $id,
                 'error' => $e->getMessage()
@@ -90,20 +91,20 @@ class UserInfoMapper
 
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
-            $stmt->bindValue(':amountposts', $data['amountposts'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfollower', $data['amountfollower'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountfriends', $data['amountfriends'], \PDO::PARAM_INT);
-            $stmt->bindValue(':amountblocked', $data['amountblocked'], \PDO::PARAM_INT);
-            $stmt->bindValue(':isprivate', $data['isprivate'], \PDO::PARAM_INT);
-            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
-            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
-            $stmt->bindValue(':invited', $data['invited'], \PDO::PARAM_STR);
-            $stmt->bindValue(':phone', $data['phone'], \PDO::PARAM_STR);
-            $stmt->bindValue(':pkey', $data['pkey'], \PDO::PARAM_STR);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $data['liquidity'], PDO::PARAM_STR);
+            $stmt->bindValue(':amountposts', $data['amountposts'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollower', $data['amountfollower'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfollowed', $data['amountfollowed'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountfriends', $data['amountfriends'], PDO::PARAM_INT);
+            $stmt->bindValue(':amountblocked', $data['amountblocked'], PDO::PARAM_INT);
+            $stmt->bindValue(':isprivate', $data['isprivate'], PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], PDO::PARAM_INT);
+            $stmt->bindValue(':reports', $data['reports'], PDO::PARAM_INT);
+            $stmt->bindValue(':invited', $data['invited'], PDO::PARAM_STR);
+            $stmt->bindValue(':phone', $data['phone'], PDO::PARAM_STR);
+            $stmt->bindValue(':pkey', $data['pkey'], PDO::PARAM_STR);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -114,7 +115,7 @@ class UserInfoMapper
             }
 
             return new UserInfo($data);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Database error in update", [
                 'userid' => $userid,
                 'error' => $e->getMessage()
@@ -138,8 +139,8 @@ class UserInfoMapper
 
             $insertQuery = "INSERT INTO follows (followerid, followedid) VALUES (:followerid, :followeduserid) ON CONFLICT (followerid, followedid) DO NOTHING";
             $stmt = $this->db->prepare($insertQuery);
-            $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+            $stmt->bindValue(':followerid', $followerid, PDO::PARAM_STR);
+            $stmt->bindValue(':followeduserid', $followeduserid, PDO::PARAM_STR);
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
@@ -156,8 +157,8 @@ class UserInfoMapper
             } else {
                 $deleteQuery = "DELETE FROM follows WHERE followerid = :followerid AND followedid = :followeduserid";
                 $stmt = $this->db->prepare($deleteQuery);
-                $stmt->bindValue(':followerid', $followerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':followeduserid', $followeduserid, \PDO::PARAM_STR);
+                $stmt->bindValue(':followerid', $followerid, PDO::PARAM_STR);
+                $stmt->bindValue(':followeduserid', $followeduserid, PDO::PARAM_STR);
                 $stmt->execute();
 
                 if ($stmt->rowCount() > 0) {
@@ -204,8 +205,8 @@ class UserInfoMapper
 
         $query = "UPDATE users_info SET $column = GREATEST($column + :change, 0) WHERE userid = :userId";
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':change', $change, \PDO::PARAM_INT);
-        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+        $stmt->bindValue(':change', $change, PDO::PARAM_INT);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -224,7 +225,7 @@ class UserInfoMapper
         ";
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+        $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
         $stmt->execute();
     }
 
@@ -234,7 +235,7 @@ class UserInfoMapper
 
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :userId");
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
 
             $exists = $stmt->fetchColumn() > 0;
@@ -242,7 +243,7 @@ class UserInfoMapper
             $this->logger->info('Checked user existence', ['userId' => $userId, 'exists' => $exists]);
 
             return $exists;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error('Database error in isUserExistById', [
                 'userId' => $userId,
                 'error' => $e->getMessage()
@@ -268,21 +269,21 @@ class UserInfoMapper
 
             $query = "SELECT COUNT(*) FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-            $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+            $stmt->bindValue(':blockerid', $blockerid, PDO::PARAM_STR);
+            $stmt->bindValue(':blockedid', $blockedid, PDO::PARAM_STR);
             $stmt->execute();
 
             if ($stmt->fetchColumn() > 0) {
 
                 $query = "DELETE FROM user_block_user WHERE blockerid = :blockerid AND blockedid = :blockedid";
                 $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, PDO::PARAM_STR);
+                $stmt->bindValue(':blockedid', $blockedid, PDO::PARAM_STR);
                 $stmt->execute();
 
                 $queryUpdateBlocker = "UPDATE users_info SET amountblocked = GREATEST(amountblocked - 1, 0) WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, PDO::PARAM_STR);
                 $stmt->execute();
 
                 $action = false;
@@ -291,13 +292,13 @@ class UserInfoMapper
                 // Block the user
                 $query = "INSERT INTO user_block_user (blockerid, blockedid) VALUES (:blockerid, :blockedid)";
                 $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
-                $stmt->bindValue(':blockedid', $blockedid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, PDO::PARAM_STR);
+                $stmt->bindValue(':blockedid', $blockedid, PDO::PARAM_STR);
                 $stmt->execute();
 
                 $queryUpdateBlocker = "UPDATE users_info SET amountblocked = amountblocked + 1 WHERE userid = :blockerid";
                 $stmt = $this->db->prepare($queryUpdateBlocker);
-                $stmt->bindValue(':blockerid', $blockerid, \PDO::PARAM_STR);
+                $stmt->bindValue(':blockerid', $blockerid, PDO::PARAM_STR);
                 $stmt->execute();
 
                 $action = true;
@@ -306,7 +307,7 @@ class UserInfoMapper
 
             return ['status' => 'success', 'ResponseCode' => $response, 'isBlocked' => $action];
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error('Database error in toggleUserBlock', [
                 'error' => $e->getMessage()
             ]);
@@ -372,7 +373,7 @@ class UserInfoMapper
         ";
         $stmt = $this->db->prepare($sqlBlockedBy);
         $stmt->execute($blockedByParams);
-        $blockedByRows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $blockedByRows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         // Query for users I blocked
         $sqlIBlocked = "
@@ -395,7 +396,7 @@ class UserInfoMapper
         ";
         $stmt = $this->db->prepare($sqlIBlocked);
         $stmt->execute($iBlockedParams);
-        $iBlockedRows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $iBlockedRows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         $blockedBy = array_map(fn ($row) => new Profile($row), $blockedByRows);
 

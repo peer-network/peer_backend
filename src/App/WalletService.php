@@ -216,7 +216,7 @@ class WalletService
 
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 0.0;
         }
     }
@@ -236,7 +236,7 @@ class WalletService
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
@@ -255,7 +255,7 @@ class WalletService
             );
 
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this::respondWithError(41205);
         }
     }
@@ -343,7 +343,7 @@ class WalletService
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
