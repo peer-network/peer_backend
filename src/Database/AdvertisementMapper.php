@@ -890,7 +890,7 @@ class AdvertisementMapper
         }
 
         // FilterBy Content Types
-        if (!empty($filterBy) && \is_array($filterBy)) {
+        if (!empty($filterBy)) {
             $dbTypes = ContentFilterHelper::mapContentTypesForDb($filterBy);
 
             if (!empty($dbTypes)) {
