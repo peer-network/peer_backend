@@ -806,7 +806,7 @@ class PostMapper
 
         $uploadedFilesObj = [];
         try {
-            if (is_array($fileObjs) && !empty($fileObjs)) {
+            if (!empty($fileObjs)) {
                 $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
                 $uploadedFilesObj = $multipartPost->moveFileTmpToMedia();
             }
@@ -859,7 +859,7 @@ class PostMapper
     {
         $fileObjs = explode(',', $uploadedFiles);
         try {
-            if (is_array($fileObjs) && !empty($fileObjs)) {
+            if (!empty($fileObjs)) {
                 $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
                 $multipartPost->revertFileToTmp();
             }
