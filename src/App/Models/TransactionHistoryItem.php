@@ -11,8 +11,8 @@ use Fawaz\App\ReadModels\UserRef;
 use function DI\string;
 
 /**
- * Lightweight read model for a grouped transaction history item.
- * Represents one logical operation with aggregated fees.
+ * Presentation model for a grouped transaction history item.
+
  */
 class TransactionHistoryItem implements HasUserRefs
 {
@@ -54,6 +54,14 @@ class TransactionHistoryItem implements HasUserRefs
         // Optional pre-attached profiles if provided
         $this->sender = $data['sender'] ?? null;
         $this->recipient = $data['recipient'] ?? null;
+
+        $this->roundTokenAmount();
+    }
+
+    // we are rounding only two values and only for presentation(api). this values are not stored anywhere
+    private function roundTokenAmount() {
+        $this->netTokenAmount = (string)round((float)$this->netTokenAmount, 8);
+        $this->tokenamount = (string)round((float)$this->tokenamount, 8);
     }
 
     public function getArrayCopy(): array
