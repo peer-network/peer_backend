@@ -6,8 +6,8 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- Replace the wallet UUIDs below before running.
 DO $$
 DECLARE
-    burn_wallet UUID := '7e0b2d21-d2b0-4af5-8b73-5f8efc04b000';
-    company_wallet UUID := '85d5f836-b1f5-4c4e-9381-1b058e13df93';
+    burn_wallet UUID := '{{BURN_WALLET_UUID}}';
+    company_wallet UUID := '{{COMPANY_WALLET_UUID}}';
     total_burn NUMERIC(30,10);
 BEGIN
     CREATE TEMP TABLE migrated_tokens (operationid UUID) ON COMMIT DROP;
