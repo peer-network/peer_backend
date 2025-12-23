@@ -55,6 +55,7 @@ use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\Models\TransactionCategory;
+use PDOException;
 
 class GraphQLSchemaBuilder
 {
@@ -3127,7 +3128,7 @@ class GraphQLSchemaBuilder
 
         try {
             return $this->moderationService->getModerationStats();
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.moderationStats", ['exception' => $e->getMessage()]);
             return self::respondWithError(40302);
         } catch (\Exception $e) {

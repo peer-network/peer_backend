@@ -57,7 +57,7 @@ class ProfileRepositoryImpl implements ProfileRepository
         $params['currentUserId'] = $currentUserId;
 
         $stmt->execute($params);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
         if ($data === false) {
@@ -130,7 +130,7 @@ class ProfileRepositoryImpl implements ProfileRepository
             $params['currentUserId'] = $currentUserId;
             $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (!$rows) {
                 return [];
             }

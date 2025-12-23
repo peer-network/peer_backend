@@ -7,6 +7,7 @@ namespace Fawaz\App\Repositories;
 use Fawaz\App\Models\Transaction;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class TransactionRepository
 {
@@ -48,7 +49,7 @@ class TransactionRepository
             $this->logger->info("Inserted new transaction into database");
 
             return $transaction;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "TransactionRepository.saveTransaction: Exception occurred while inserting transaction",
                 [

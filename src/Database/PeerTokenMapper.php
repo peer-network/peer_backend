@@ -15,6 +15,7 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 use RuntimeException;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
@@ -49,9 +50,9 @@ class PeerTokenMapper
 
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':senderId', $senderId, \PDO::PARAM_STR);
-            $stmt->bindValue(':recipientId', $recipientId, \PDO::PARAM_STR);
-            $stmt->bindValue(':amount', $amount, \PDO::PARAM_STR);
+            $stmt->bindValue(':senderId', $senderId, PDO::PARAM_STR);
+            $stmt->bindValue(':recipientId', $recipientId, PDO::PARAM_STR);
+            $stmt->bindValue(':amount', $amount, PDO::PARAM_STR);
             $stmt->execute();
             return (bool) $stmt->fetchColumn();
         } catch (\Throwable $e) {
@@ -69,18 +70,18 @@ class PeerTokenMapper
     /**
      * Loads and validates the liquidity pool and FEE's wallets.
      *
-     * @throws \RuntimeException if accounts are missing or invalid
+     * @throws RuntimeException if accounts are missing or invalid
      */
     public function initializeLiquidityPool(): array
     {
         $accounts = $this->pool->returnAccounts();
         if (($accounts['status'] ?? '') === 'error') {
-            throw new \RuntimeException("Failed to load pool accounts");
+            throw new RuntimeException("Failed to load pool accounts");
         }
 
         $data = $accounts['response'] ?? [];
         if (!isset($data['pool'], $data['burn'], $data['peer'])) {
-            throw new \RuntimeException("Liquidity pool wallets incomplete");
+            throw new RuntimeException("Liquidity pool wallets incomplete");
         }
 
         $this->burnWallet = $data['burn'];
@@ -124,12 +125,12 @@ class PeerTokenMapper
         try {
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':userId', $poolWallet, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $poolWallet, PDO::PARAM_STR);
             $stmt->execute();
-            $walletInfo = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $walletInfo = $stmt->fetch(PDO::FETCH_ASSOC);
 
             return (string) $walletInfo['liquidity'];
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
                 [
@@ -137,7 +138,7 @@ class PeerTokenMapper
                     'trace' => $e->getTraceAsString(),
                 ]
             );
-            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+            throw new RuntimeException("Failed to get accounts: " . $e->getMessage());
         } catch (\Exception $e) {
             $this->logger->error(
                 "PeerTokenMapper.getLpToken: Exception occurred while getting loop accounts",
@@ -145,7 +146,7 @@ class PeerTokenMapper
                     'error' => $e->getMessage()
                 ]
             );
-            throw new \RuntimeException("Failed to get accounts: " . $e->getMessage());
+            throw new RuntimeException("Failed to get accounts: " . $e->getMessage());
         }
     }
 
@@ -427,16 +428,16 @@ class PeerTokenMapper
 
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
             $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
 
             return $balance;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
-            throw new \RuntimeException('Unable to fetch wallet balance');
+            throw new RuntimeException('Unable to fetch wallet balance');
         }
     }
 
@@ -531,7 +532,7 @@ class PeerTokenMapper
         try {
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {
-                $stmt->bindValue($key, $val, is_int($val) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+                $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
             }
             $stmt->execute();
 
@@ -547,7 +548,7 @@ class PeerTokenMapper
             $this->logger->error('Database error while fetching transactions - PeerTokenMapper.getTransactions', [
                 'error' => $th->getMessage(),
             ]);
-            throw new \RuntimeException('Database error while fetching transactions: ' . $th->getMessage());
+            throw new RuntimeException('Database error while fetching transactions: ' . $th->getMessage());
         }
     }
 
@@ -782,7 +783,7 @@ class PeerTokenMapper
 
         foreach ($walletsToLock as $walletId) {
             if (!self::isValidUUID($walletId)) {
-                throw new \RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
+                throw new RuntimeException('Invalid wallet UUID for locking: ' . $walletId);
             }
             $this->lockWalletBalance($walletId);
         }
@@ -795,10 +796,10 @@ class PeerTokenMapper
     {
         $query = "SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE";
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':userid', $walletId, \PDO::PARAM_STR);
+        $stmt->bindValue(':userid', $walletId, PDO::PARAM_STR);
         $stmt->execute();
         // Fetching the row to ensure the lock is acquired
-        $stmt->fetch(\PDO::FETCH_ASSOC);
+        $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
 }
