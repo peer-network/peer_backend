@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
@@ -21,6 +22,12 @@ class AdsTransferStrategy extends BaseTransferStrategy implements TransferStrate
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
     }
+
+    public function getTransactionCategory(): TransactionCategory
+    {
+        return TransactionCategory::AD_PINNED;
+    }
+
     public function getRecipientTransactionType(): string
     {
         return 'transferForAds';
