@@ -24,16 +24,6 @@ class DailyFreeService
         $this->currentUserId = $userId;
     }
 
-    
-    private function checkAuthentication(): bool
-    {
-        if ($this->currentUserId === null) {
-            $this->logger->warning("Unauthorized action attempted.");
-            return false;
-        }
-        return true;
-    }
-
     public function getUserDailyAvailability(string $userId): array
     {
         $this->logger->debug('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
