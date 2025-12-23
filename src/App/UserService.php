@@ -27,6 +27,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use PDOException;
 
 class UserService
@@ -43,7 +44,8 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
         protected Mailer $mailer,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -676,6 +678,23 @@ class UserService
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
+        }
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
         }
 
         if (empty($args['username'])) {
