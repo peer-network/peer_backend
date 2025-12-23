@@ -316,7 +316,7 @@ class CommentMapper
             // Check if the parent ID exists
             $parentCheckSql = "SELECT 1 FROM comments WHERE commentid = :parentId LIMIT 1";
             $parentStmt = $this->db->prepare($parentCheckSql);
-            $parentStmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
+            $parentStmt->bindParam(':parentId', $parentId, PDO::PARAM_STR);
             $parentStmt->execute();
             $parentExists = $parentStmt->fetchColumn();
 
@@ -377,10 +377,10 @@ class CommentMapper
 			";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
-            $stmt->bindParam(':currentUserId', $currentUserId, \PDO::PARAM_STR);
-            $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindParam(':parentId', $parentId, PDO::PARAM_STR);
+            $stmt->bindParam(':currentUserId', $currentUserId, PDO::PARAM_STR);
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
             $stmt->execute();
 
@@ -513,12 +513,12 @@ class CommentMapper
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':parentId', $parentId, \PDO::PARAM_STR);
-        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindParam(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->bindParam(':parentId', $parentId, PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return array_map(fn ($row) => new Comment($row), $rows);
     }
