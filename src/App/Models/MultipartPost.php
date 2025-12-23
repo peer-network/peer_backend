@@ -106,7 +106,7 @@ class MultipartPost
      */
     public function validateMediaContentTypes(): void
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -147,7 +147,7 @@ class MultipartPost
      */
     public function validateMediaAllow(): void
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -199,7 +199,7 @@ class MultipartPost
      */
     public function validateSameContentTypes(): string|bool
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             return false;
         }
 
@@ -380,7 +380,7 @@ class MultipartPost
             ];
         }
 
-        return isset($allMetadata) && is_array($allMetadata) ? $allMetadata : [];
+        return isset($allMetadata) ? $allMetadata : [];
     }
 
 
