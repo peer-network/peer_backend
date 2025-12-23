@@ -52,10 +52,10 @@ class PoolMapper
 
         $stmt = $this->db->prepare($sql);
         foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+            $stmt->bindValue(":$param", $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         $results = [
@@ -64,7 +64,7 @@ class PoolMapper
             'posts' => []
         ];
 
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = (float)($row['overall_total_numbers'] ?? 0);
@@ -113,7 +113,7 @@ class PoolMapper
             ";
 
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $entries = $stmt->fetch(PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
@@ -179,7 +179,7 @@ class PoolMapper
 
         try {
             $stmt = $this->db->query($sql);
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
@@ -246,6 +246,6 @@ class PoolMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetch(\PDO::FETCH_ASSOC) ?: null;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 }

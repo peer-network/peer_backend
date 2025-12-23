@@ -17,6 +17,7 @@ use Fawaz\App\User;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\App\ValidationException;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class PostMapper
 {
@@ -37,11 +38,11 @@ class PostMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
 
-            $results = array_map(fn ($row) => new Post($row), $stmt->fetchAll(\PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Post($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched posts successfully" : "No posts found",
@@ -49,7 +50,7 @@ class PostMapper
             );
 
             return $results;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Error fetching posts from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -79,7 +80,7 @@ class PostMapper
         $this->logger->debug("PostMapper.postExistsById started");
 
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM posts WHERE postid = :postId");
-        $stmt->bindValue(':postId', $postId, \PDO::PARAM_STR);
+        $stmt->bindValue(':postId', $postId, PDO::PARAM_STR);
         $stmt->execute();
 
         return (bool) $stmt->fetchColumn();
@@ -92,7 +93,7 @@ class PostMapper
         $sql = "SELECT * FROM posts WHERE title LIKE :title AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['title' => '%' . $title . '%']);
-        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (!empty($data)) {
             return array_map(fn ($row) => new Post($row, [], false), $data);
@@ -109,7 +110,7 @@ class PostMapper
         $sql = "SELECT * FROM posts WHERE postid = :postid AND feedid IS NULL";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $id]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Post($data, [], false);
@@ -162,7 +163,7 @@ class PostMapper
 
         $stmt->execute($params);
 
-        $unfidtered_result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $unfidtered_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $result = [];
 
         foreach ($unfidtered_result as $row) {
@@ -179,7 +180,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchLikes(string $postid): array
@@ -190,7 +191,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchDislikes(string $postid): array
@@ -201,7 +202,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchSaves(string $postid): array
@@ -212,7 +213,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchViews(string $postid): array
@@ -223,7 +224,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function fetchReports(string $postid): array
@@ -236,7 +237,7 @@ class PostMapper
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function countLikes(string $postid): int
@@ -347,7 +348,7 @@ class PostMapper
         $sql = "SELECT * FROM users WHERE uid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data === false) {
             $this->logger->warning("No user found with id: " . $id);
@@ -373,29 +374,29 @@ class PostMapper
             $stmt = $this->db->prepare($query);
 
             // Explicitly bind each value
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':feedid', $data['feedid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
-            $stmt->bindValue(':title', $data['title'], \PDO::PARAM_STR);
-            $stmt->bindValue(':mediadescription', $data['mediadescription'], \PDO::PARAM_STR);
-            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
-            //$stmt->bindValue(':cover', $data['cover'], \PDO::PARAM_STR);
-            $stmt->bindValue(':cover', $data['cover'] ?? null, $data['cover'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':visibility_status', $data['visibility_status'], \PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':feedid', $data['feedid'], PDO::PARAM_STR);
+            $stmt->bindValue(':contenttype', $data['contenttype'], PDO::PARAM_STR);
+            $stmt->bindValue(':title', $data['title'], PDO::PARAM_STR);
+            $stmt->bindValue(':mediadescription', $data['mediadescription'], PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], PDO::PARAM_STR);
+            //$stmt->bindValue(':cover', $data['cover'], PDO::PARAM_STR);
+            $stmt->bindValue(':cover', $data['cover'] ?? null, $data['cover'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':createdat', $data['createdat'], PDO::PARAM_STR);
+            $stmt->bindValue(':visibility_status', $data['visibility_status'], PDO::PARAM_STR);
 
             $stmt->execute();
 
             $queryUpdateProfile = "UPDATE users_info SET amountposts = amountposts + 1 WHERE userid = :userid";
             $stmt = $this->db->prepare($queryUpdateProfile);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
             $stmt->execute();
 
             $this->logger->info("Inserted new post into database");
 
             return new Post($data);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "PostMapper.insert: Exception occurred while inserting post",
                 [
@@ -435,17 +436,17 @@ class PostMapper
                 throw new \RuntimeException("SQL prepare() failed: " . implode(", ", $this->db->errorInfo()));
             }
 
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':contenttype', $data['contenttype'], \PDO::PARAM_STR);
-            $stmt->bindValue(':media', $data['media'], \PDO::PARAM_STR);
-            $stmt->bindValue(':options', $data['options'] ?? null, $data['options'] !== null ? \PDO::PARAM_STR : \PDO::PARAM_NULL);
+            $stmt->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
+            $stmt->bindValue(':contenttype', $data['contenttype'], PDO::PARAM_STR);
+            $stmt->bindValue(':media', $data['media'], PDO::PARAM_STR);
+            $stmt->bindValue(':options', $data['options'] ?? null, $data['options'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
             $stmt->execute();
 
             $this->logger->info("Inserted new PostMedia into database");
 
             return new PostMedia($data);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "PostMapper.insertmed: Exception occurred while inserting PostMedia",
                 [
@@ -488,7 +489,7 @@ class PostMapper
     //         foreach ($tables as $table) {
     //             $sql = "DELETE FROM $table WHERE postid = :postid";
     //             $stmt = $this->db->prepare($sql);
-    //             $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+    //             $stmt->bindValue(':postid', $postid, PDO::PARAM_STR);
     //             $stmt->execute();
     //         }
 
@@ -750,7 +751,7 @@ class PostMapper
             $params['limit'] = $limit;
             $params['offset'] = $offset;
             $stmt->execute($params);
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $results = array_map(function (array $row) {
                 $row['tags'] = json_decode($row['tags'], true) ?? [];
@@ -832,13 +833,13 @@ class PostMapper
                     WHERE userid = :userid AND status = 'FILE_UPLOADED'
                 ";
             $updateStmt = $this->db->prepare($updateSql);
-            $updateStmt->bindValue(':status', 'POST_CREATED', \PDO::PARAM_STR);
-            $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $updateStmt->bindValue(':status', 'POST_CREATED', PDO::PARAM_STR);
+            $updateStmt->bindValue(':userid', $userId, PDO::PARAM_STR);
             $updateStmt->execute();
 
             $this->logger->info("PostMapper.updateTokenStatus updated successfully with POST_CREATED status");
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("PostMapper.updateTokenStatus: Exception occurred while update token status", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -934,7 +935,7 @@ class PostMapper
 
             $stmt->execute($params);
 
-            $userResults =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $userResults =  $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $userResultObj = [];
             foreach ($userResults as $key => $prt) {
@@ -944,7 +945,7 @@ class PostMapper
             }
 
             return $userResultObj;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Error fetching posts from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -972,9 +973,9 @@ class PostMapper
                 'status' => $status,
             ]);
 
-            $now       = new \DateTime()->format('Y-m-d H:i:s.u');
-            $expiresAt = new \DateTime('+5 minutes')->format('Y-m-d H:i:s.u');
-            $oneHourAgo = new \DateTime('-1 hour')->format('Y-m-d H:i:s.u');
+            $now       = new DateTime()->format('Y-m-d H:i:s.u');
+            $expiresAt = new DateTime('+5 minutes')->format('Y-m-d H:i:s.u');
+            $oneHourAgo = new DateTime('-1 hour')->format('Y-m-d H:i:s.u');
 
             // Only enforce cap if status is one of the restricted ones
             $restrictedStatuses = ['NO_FILE', 'FILE_UPLOADED'];
@@ -987,8 +988,8 @@ class PostMapper
                     AND createdat >= :oneHourAgo
                 ";
                 $capStmt = $this->db->prepare($capSql);
-                $capStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $capStmt->bindValue(':oneHourAgo', $oneHourAgo, \PDO::PARAM_STR);
+                $capStmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+                $capStmt->bindValue(':oneHourAgo', $oneHourAgo, PDO::PARAM_STR);
                 $capStmt->execute();
                 $cnt = (int) $capStmt->fetchColumn();
 
@@ -1008,8 +1009,8 @@ class PostMapper
                 LIMIT 1
             ";
             $existsStmt = $this->db->prepare($existsSql);
-            $existsStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $existsStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+            $existsStmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $existsStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
             $existsStmt->execute();
             $exists = (bool) $existsStmt->fetchColumn();
 
@@ -1022,11 +1023,11 @@ class PostMapper
                     AND token  = :token
                 ";
                 $updateStmt = $this->db->prepare($updateSql);
-                $updateStmt->bindValue(':status', $status, \PDO::PARAM_STR);
-                $updateStmt->bindValue(':expiresat', $expiresAt, \PDO::PARAM_STR);
-                $updateStmt->bindValue(':now', $now, \PDO::PARAM_STR);
-                $updateStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $updateStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':status', $status, PDO::PARAM_STR);
+                $updateStmt->bindValue(':expiresat', $expiresAt, PDO::PARAM_STR);
+                $updateStmt->bindValue(':now', $now, PDO::PARAM_STR);
+                $updateStmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+                $updateStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
                 $updateStmt->execute();
             } else {
                 $insertSql = "
@@ -1036,11 +1037,11 @@ class PostMapper
                         (:userid, :token, :status, :expiresat, :now)
                 ";
                 $insertStmt = $this->db->prepare($insertSql);
-                $insertStmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $insertStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
-                $insertStmt->bindValue(':status', $status, \PDO::PARAM_STR);
-                $insertStmt->bindValue(':expiresat', $expiresAt, \PDO::PARAM_STR);
-                $insertStmt->bindValue(':now', $now, \PDO::PARAM_STR);
+                $insertStmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+                $insertStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
+                $insertStmt->bindValue(':status', $status, PDO::PARAM_STR);
+                $insertStmt->bindValue(':expiresat', $expiresAt, PDO::PARAM_STR);
+                $insertStmt->bindValue(':now', $now, PDO::PARAM_STR);
                 $insertStmt->execute();
             }
 

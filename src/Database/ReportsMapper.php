@@ -68,10 +68,10 @@ class ReportsMapper
                     AND hash_content_sha256 = :hash_content_sha256
             ";
             $stmtCheck = $this->db->prepare($sqlCheck);
-            $stmtCheck->bindValue(':reporter_userid', $reporter_userid, \PDO::PARAM_STR);
-            $stmtCheck->bindValue(':targetid', $targetid, \PDO::PARAM_STR);
-            $stmtCheck->bindValue(':targettype', $targetTypeString, \PDO::PARAM_STR);
-            $stmtCheck->bindValue(':hash_content_sha256', $hash_content_sha256, \PDO::PARAM_STR);
+            $stmtCheck->bindValue(':reporter_userid', $reporter_userid, PDO::PARAM_STR);
+            $stmtCheck->bindValue(':targetid', $targetid, PDO::PARAM_STR);
+            $stmtCheck->bindValue(':targettype', $targetTypeString, PDO::PARAM_STR);
+            $stmtCheck->bindValue(':hash_content_sha256', $hash_content_sha256, PDO::PARAM_STR);
             $stmtCheck->execute();
 
             $exists = $stmtCheck->fetchColumn() > 0;
@@ -107,14 +107,14 @@ class ReportsMapper
             )";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':reportid', $reportId, \PDO::PARAM_STR);
-            $stmt->bindValue(':reporter_userid', $reporter_userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':targetid', $targetid, \PDO::PARAM_STR);
-            $stmt->bindValue(':targettype', $targetTypeString, \PDO::PARAM_STR);
-            $stmt->bindValue(':moderationticketid', $moderationTicketId, \PDO::PARAM_STR);
-            $stmt->bindValue(':collected', 0, \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
-            $stmt->bindValue(':hash_content_sha256', $hash_content_sha256, \PDO::PARAM_STR);
+            $stmt->bindValue(':reportid', $reportId, PDO::PARAM_STR);
+            $stmt->bindValue(':reporter_userid', $reporter_userid, PDO::PARAM_STR);
+            $stmt->bindValue(':targetid', $targetid, PDO::PARAM_STR);
+            $stmt->bindValue(':targettype', $targetTypeString, PDO::PARAM_STR);
+            $stmt->bindValue(':moderationticketid', $moderationTicketId, PDO::PARAM_STR);
+            $stmt->bindValue(':collected', 0, PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_STR);
+            $stmt->bindValue(':hash_content_sha256', $hash_content_sha256, PDO::PARAM_STR);
 
             $success = $stmt->execute();
 
