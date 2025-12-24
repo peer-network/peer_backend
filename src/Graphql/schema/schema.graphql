@@ -38,7 +38,18 @@ type Query {
   listTodaysInteractions: ListTodaysInteractionsResponse!
   getActionPrices: GetActionPricesResponse!
   postEligibility: PostEligibilityResponse!
+  
   getTransactionHistory(type: TokenMovementFilterType, direction: DirectionFilterType, start_date: String, end_date: String, limit: Int, offset: Int, sort: SortFilterType): TransactionResponse!
+  
+  transactionHistory(
+    type: TokenMovementFilterType,
+    start_date: String,
+    end_date: String,
+    limit: Int,
+    offset: Int,
+    sort: SortFilterType
+  ): TransactionHistoryResponse!
+
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
