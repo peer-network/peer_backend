@@ -1,6 +1,7 @@
 BEGIN;
 
-DELETE FROM transactions
+UPDATE transactions
+SET message = NULL
 WHERE message IN (
     'Buy like',
     'Buy dislike',
