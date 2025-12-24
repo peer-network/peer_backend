@@ -57,7 +57,7 @@ class ProfileRepositoryImpl implements ProfileRepository
         $params['currentUserId'] = $currentUserId;
 
         $stmt->execute($params);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
         if ($data === false) {
@@ -92,10 +92,14 @@ class ProfileRepositoryImpl implements ProfileRepository
 
         // Build positional placeholders for the IN clause
         $params = $allSpecs->paramsToPrepare;
-        $userIdsForInStatement = array_map(fn ($id) => "'$id'", $userIds);
+        $inPlaceholders = [];
+        foreach ($userIds as $i => $id) {
+            $paramName = ":uid_$i";              // e.g. :uid_0, :uid_1, ...
+            $inPlaceholders[] = $paramName;
+            $params[$paramName] = $id;           // bind each userId
+        }
 
-        $userIdsString = implode(',', $userIdsForInStatement);
-        $whereClauses[] = "u.uid IN ($userIdsString)";
+        $whereClauses[] = 'u.uid IN (' . implode(',', $inPlaceholders) . ')';
         $whereClausesString = implode(' AND ', $whereClauses);
         $sql = sprintf(
             "
@@ -123,10 +127,10 @@ class ProfileRepositoryImpl implements ProfileRepository
             $whereClausesString
         );
         try {
-            $stmt = $this->db->prepare($sql);
             $params['currentUserId'] = $currentUserId;
+            $stmt = $this->db->prepare($sql);
             $stmt->execute($params);
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (!$rows) {
                 return [];
             }

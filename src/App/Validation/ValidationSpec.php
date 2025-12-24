@@ -10,6 +10,17 @@ namespace Fawaz\App\Validation;
  */
 class ValidationSpec
 {
+    public static function dateMonthYearString(string $field, bool $required = false, int $errorCode = 30258): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateDateMonthYearString', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
     public static function offsetAndLimit(string $field, bool $required = false, int $errorCode = 00000): array
     {
         return [
@@ -132,6 +143,9 @@ class ValidationSpec
             'commentLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'messageOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
+
+            'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
+            'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
         ];
 
         $spec = [];

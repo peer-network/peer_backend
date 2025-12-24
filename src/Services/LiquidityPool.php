@@ -19,12 +19,6 @@ class LiquidityPool
     {
         $response = $this->envi;
 
-        if (is_array($response)) {
-            // Return success status along with the data
-            return ['status' => 'success', 'response' => $response];
-        } else {
-            // Return error status with an empty array if not an array
-            return ['status' => 'error', 'response' => []];
-        }
+        return ['status' => 'success', 'response' => $response];
     }
 }

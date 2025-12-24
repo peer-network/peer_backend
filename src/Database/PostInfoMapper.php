@@ -7,6 +7,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\PostInfo;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class PostInfoMapper
 {
@@ -26,7 +27,7 @@ class PostInfoMapper
         $sql = "SELECT * FROM post_info WHERE postid = :postid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['postid' => $postid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new PostInfo($data);
@@ -61,16 +62,16 @@ class PostInfoMapper
             $stmt = $this->db->prepare($query);
 
             // Explicitly bind each value
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':likes', $data['likes'], \PDO::PARAM_INT);
-            $stmt->bindValue(':dislikes', $data['dislikes'], \PDO::PARAM_INT);
-            $stmt->bindValue(':reports', $data['reports'], \PDO::PARAM_INT);
-            $stmt->bindValue(':totalreports', $data['totalreports'], \PDO::PARAM_INT);
-            $stmt->bindValue(':views', $data['views'], \PDO::PARAM_INT);
-            $stmt->bindValue(':saves', $data['saves'], \PDO::PARAM_INT);
-            $stmt->bindValue(':shares', $data['shares'], \PDO::PARAM_INT);
-            $stmt->bindValue(':comments', $data['comments'], \PDO::PARAM_INT);
+            $stmt->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':likes', $data['likes'], PDO::PARAM_INT);
+            $stmt->bindValue(':dislikes', $data['dislikes'], PDO::PARAM_INT);
+            $stmt->bindValue(':reports', $data['reports'], PDO::PARAM_INT);
+            $stmt->bindValue(':totalreports', $data['totalreports'], PDO::PARAM_INT);
+            $stmt->bindValue(':views', $data['views'], PDO::PARAM_INT);
+            $stmt->bindValue(':saves', $data['saves'], PDO::PARAM_INT);
+            $stmt->bindValue(':shares', $data['shares'], PDO::PARAM_INT);
+            $stmt->bindValue(':comments', $data['comments'], PDO::PARAM_INT);
 
             if ($stmt->execute()) {
                 $this->logger->info("Inserted new post info into database", ['postid' => $data['postid']]);
@@ -79,7 +80,7 @@ class PostInfoMapper
                 $this->logger->error("Failed to insert new post info into database", ['postid' => $data['postid']]);
                 return false;
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error(
                 "PostInfoMapper.insert: Exception occurred while inserting post info",
                 [
@@ -112,9 +113,9 @@ class PostInfoMapper
                 WHERE postid = :postid
                 FOR UPDATE
             ");
-            $stmtSel->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmtSel->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
             $stmtSel->execute();
-            $old = $stmtSel->fetch(\PDO::FETCH_ASSOC) ?: [
+            $old = $stmtSel->fetch(PDO::FETCH_ASSOC) ?: [
                 'likes' => 0,'dislikes' => 0,'reports' => 0,'totalreports' => 0,'views' => 0,'saves' => 0,'shares' => 0,'comments' => 0
             ];
 
@@ -136,15 +137,15 @@ class PostInfoMapper
                 WHERE postid=:postid
             ");
             // Jeden Wert explizit binden
-            $stmtUpd->bindValue(':likes', (int)$data['likes'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':reports', (int)$data['reports'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':totalreports', (int)$data['totalreports'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':views', (int)$data['views'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':saves', (int)$data['saves'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':shares', (int)$data['shares'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':comments', (int)$data['comments'], \PDO::PARAM_INT);
-            $stmtUpd->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
+            $stmtUpd->bindValue(':likes', (int)$data['likes'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':dislikes', (int)$data['dislikes'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':reports', (int)$data['reports'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':totalreports', (int)$data['totalreports'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':views', (int)$data['views'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':saves', (int)$data['saves'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':shares', (int)$data['shares'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':comments', (int)$data['comments'], PDO::PARAM_INT);
+            $stmtUpd->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
 
             if (!$stmtUpd->execute()) {
                 throw new \RuntimeException("post_info update failed");
@@ -203,8 +204,8 @@ class PostInfoMapper
             // Check if the record already exists
             $sqlCheck = "SELECT COUNT(*) FROM $table WHERE userid = :userid AND postid = :postid";
             $stmtCheck = $this->db->prepare($sqlCheck);
-            $stmtCheck->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmtCheck->bindValue(':postid', $postid, \PDO::PARAM_STR);
+            $stmtCheck->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmtCheck->bindValue(':postid', $postid, PDO::PARAM_STR);
             $stmtCheck->execute();
             $exists = $stmtCheck->fetchColumn() > 0;
 
@@ -212,8 +213,8 @@ class PostInfoMapper
                 // Insert a new record
                 $sql = "INSERT INTO $table (userid, postid) VALUES (:userid, :postid)";
                 $stmt = $this->db->prepare($sql);
-                $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-                $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $stmt->bindValue(':postid', $postid, PDO::PARAM_STR);
                 $success = $stmt->execute();
 
                 if ($success) {
@@ -239,8 +240,8 @@ class PostInfoMapper
             // Check if the post is already saved by the user
             $query = "SELECT COUNT(*) FROM user_post_saves WHERE userid = :userid AND postid = :postid";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $postid, PDO::PARAM_STR);
             $stmt->execute();
 
             $isSaved = $stmt->fetchColumn() > 0;
@@ -254,7 +255,7 @@ class PostInfoMapper
                 // Decrement the save count in `post_info`
                 $updatePostInfoQuery = "UPDATE post_info SET saves = saves - 1 WHERE postid = :postid";
                 $updateStmt = $this->db->prepare($updatePostInfoQuery);
-                $updateStmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':postid', $postid, PDO::PARAM_STR);
                 $updateStmt->execute();
             } else {
                 // Insert a new save record
@@ -265,14 +266,14 @@ class PostInfoMapper
                 // Increment the save count in `post_info`
                 $updatePostInfoQuery = "UPDATE post_info SET saves = saves + 1 WHERE postid = :postid";
                 $updateStmt = $this->db->prepare($updatePostInfoQuery);
-                $updateStmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+                $updateStmt->bindValue(':postid', $postid, PDO::PARAM_STR);
                 $updateStmt->execute();
             }
 
             // Execute the toggle action (delete or insert)
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $postid, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $postid, PDO::PARAM_STR);
             $stmt->execute();
 
 
@@ -324,16 +325,16 @@ class PostInfoMapper
         $stmt = $this->db->prepare($sql);
         $updatedat = new \DateTime()->format('Y-m-d H:i:s.u');
         // Jeden Wert explizit binden
-        $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-        $stmt->bindValue(':dLikes', $dLikes, \PDO::PARAM_INT);
-        $stmt->bindValue(':dDislikes', $dDislikes, \PDO::PARAM_INT);
-        $stmt->bindValue(':dReports', $dReports, \PDO::PARAM_INT);
-        $stmt->bindValue(':dTotalReports', $dTotalReports, \PDO::PARAM_INT);
-        $stmt->bindValue(':dViews', $dViews, \PDO::PARAM_INT);
-        $stmt->bindValue(':dSaves', $dSaves, \PDO::PARAM_INT);
-        $stmt->bindValue(':dShares', $dShares, \PDO::PARAM_INT);
-        $stmt->bindValue(':dComments', $dComments, \PDO::PARAM_INT);
-        $stmt->bindValue(':updatedat', $updatedat, \PDO::PARAM_STR);
+        $stmt->bindValue(':postid', $postId, PDO::PARAM_STR);
+        $stmt->bindValue(':dLikes', $dLikes, PDO::PARAM_INT);
+        $stmt->bindValue(':dDislikes', $dDislikes, PDO::PARAM_INT);
+        $stmt->bindValue(':dReports', $dReports, PDO::PARAM_INT);
+        $stmt->bindValue(':dTotalReports', $dTotalReports, PDO::PARAM_INT);
+        $stmt->bindValue(':dViews', $dViews, PDO::PARAM_INT);
+        $stmt->bindValue(':dSaves', $dSaves, PDO::PARAM_INT);
+        $stmt->bindValue(':dShares', $dShares, PDO::PARAM_INT);
+        $stmt->bindValue(':dComments', $dComments, PDO::PARAM_INT);
+        $stmt->bindValue(':updatedat', $updatedat, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->rowCount();
     }

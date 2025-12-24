@@ -126,6 +126,17 @@ enum DayFilterType {
   Y0
 }
 
+enum TransactionCategory {
+  P2P_TRANSFER
+  AD_PINNED
+  POST_CREATE
+  LIKE
+  DISLIKE
+  COMMENT
+  TOKEN_MINT
+  SHOP_PURCHASE
+}
+
 enum OnboardingType {
   INTROONBOARDING
 }

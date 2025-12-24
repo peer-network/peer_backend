@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
 interface TransferStrategy
@@ -17,6 +18,7 @@ interface TransferStrategy
     public function getPoolFeeTransactionType(): string;
     public function getPeerFeeTransactionType(): string;
     public function getBurnFeeTransactionType(): string;
+    public function getTransactionCategory(): TransactionCategory;
 
     public function getTransactionId(): string;
     public function getOperationId(): string;

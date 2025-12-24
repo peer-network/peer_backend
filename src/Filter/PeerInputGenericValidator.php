@@ -493,4 +493,30 @@ class PeerInputGenericValidator
 
         return true;
     }
+    protected function validateDateMonthYearString(string $value, array $options = []): bool {
+        $fieldKey = $options['field'] ?? 'date';
+        $errorCode = (string)($options['errorCode'] ?? '30258');
+
+        // Treat empty value as valid (field is optional in schema)
+        if ($value === '' || $value === null) {
+            return true;
+        }
+
+        $val = trim((string)$value);
+
+        // Expect format YYYY-MM-DD as used in PeerTokenMapper filters
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $val)) {
+            $this->pushError($options, $fieldKey, $errorCode);
+            return false;
+        }
+
+        // Validate calendar correctness
+        [$year, $month, $day] = array_map('intval', explode('-', $val));
+        if (!checkdate($month, $day, $year)) {
+            $this->pushError($options, $fieldKey, $errorCode);
+            return false;
+        }
+
+        return true;
+    }
 }
