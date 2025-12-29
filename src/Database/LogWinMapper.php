@@ -145,6 +145,10 @@ class LogWinMapper
                     $withoutFeeDeduction = true;
                 }
                 try {
+                    $inviterAmount = null;
+                    $poolFeeAmount = null;
+                    $peerFeeAmount = null;
+                    $burnFeeAmount = null;
                     /*
                     * This action considere as Credit to Receipient
                     */
@@ -153,14 +157,13 @@ class LogWinMapper
                     if (isset($tnxs[1]['fromid'])) {
                         $senderId = $tnxs[1]['fromid'];
                         $recipientId = $tnxs[1]['userid'];
-                        $amount = $tnxs[1]['numbers'];
 
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToRecipient',
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
-                            'tokenamount' => $amount,
+                            'tokenamount' => $tnxs[1]['numbers'],
                             // 'message' => $message,
                             'transferaction' => 'CREDIT',
                             'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
@@ -175,14 +178,14 @@ class LogWinMapper
                     if ($hasInviter && isset($tnxs[2]['fromid'])) {
                         $senderId = $tnxs[2]['fromid'];
                         $recipientId = $tnxs[2]['userid'];
-                        $amount = $tnxs[2]['numbers'];
+                        $inviterAmount = $tnxs[2]['numbers'];
                         $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToInviter',
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
-                            'tokenamount' => $amount,
+                            'tokenamount' => $inviterAmount,
                             'transferaction' => 'INVITER_FEE',
                             'createdat' => $createdat
                         ]);
@@ -196,19 +199,19 @@ class LogWinMapper
                     if ($hasInviter && isset($tnxs[4]['fromid'])) {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = $tnxs[4]['userid'];
-                        $amount = $tnxs[4]['numbers'];
+                        $poolFeeAmount = $tnxs[4]['numbers'];
                         $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } elseif($withoutFeeDeduction){
                         // No fee deduction scenario
                         $senderId = $tnxs[2]['fromid'];
                         $recipientId = $tnxs[2]['userid'];
-                        $amount = $tnxs[2]['numbers'];
+                        $poolFeeAmount = $tnxs[2]['numbers'];
                         $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     else {
                         $senderId = $tnxs[3]['fromid'];
                         $recipientId = $tnxs[3]['userid'];
-                        $amount = $tnxs[3]['numbers'];
+                        $poolFeeAmount = $tnxs[3]['numbers'];
                         $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     $this->createAndSaveTransaction($transRepo, [
@@ -216,7 +219,7 @@ class LogWinMapper
                         'transactiontype' => 'transferSenderToPoolWallet',
                         'senderid' => $senderId,
                         'recipientid' => $recipientId,
-                        'tokenamount' => $amount,
+                        'tokenamount' => $poolFeeAmount,
                         'transferaction' => 'POOL_FEE',
                         'createdat' => $createdat
                     ]);
@@ -229,20 +232,20 @@ class LogWinMapper
                     if ($hasInviter && isset($tnxs[5]['fromid'])) {
                         $senderId = $tnxs[5]['fromid'];
                         $recipientId = ($tnxs[5]['userid']); // Requested tokens
-                        $amount = $tnxs[5]['numbers'];
+                        $peerFeeAmount = $tnxs[5]['numbers'];
                         $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } 
                     elseif($withoutFeeDeduction){
                         // No fee deduction scenario
                         $senderId = $tnxs[3]['fromid'];
                         $recipientId = ($tnxs[3]['userid']); // Requested tokens
-                        $amount = $tnxs[3]['numbers'];
+                        $peerFeeAmount = $tnxs[3]['numbers'];
                         $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     else {
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = ($tnxs[4]['userid']); // Requested tokens
-                        $amount = $tnxs[4]['numbers'];
+                        $peerFeeAmount = $tnxs[4]['numbers'];
                         $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     $this->createAndSaveTransaction($transRepo, [
@@ -250,7 +253,7 @@ class LogWinMapper
                         'transactiontype' => 'transferSenderToPeerWallet',
                         'senderid' => $senderId,
                         'recipientid' => $recipientId,
-                        'tokenamount' => $amount,
+                        'tokenamount' => $peerFeeAmount,
                         'transferaction' => 'PEER_FEE',
                         'createdat' => $createdat
                     ]);
@@ -261,21 +264,21 @@ class LogWinMapper
                     if ($hasInviter && isset($tnxs[6]['fromid'])) {
                         $senderId = $tnxs[6]['fromid'];
                         $recipientId = ($tnxs[6]['userid']); // Requested tokens
-                        $amount = $tnxs[6]['numbers'];
+                        $burnFeeAmount = $tnxs[6]['numbers'];
                         $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     } 
                     elseif($withoutFeeDeduction){
                         // No fee deduction scenario
                         $senderId = $tnxs[4]['fromid'];
                         $recipientId = ($tnxs[4]['userid']); // Requested tokens
-                        $amount = $tnxs[4]['numbers'];
+                        $burnFeeAmount = $tnxs[4]['numbers'];
                         $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                     }
                     else {
                         if (isset($tnxs[5]['fromid'])) {
                             $senderId = $tnxs[5]['fromid'];
                             $recipientId = ($tnxs[5]['userid']); // Requested tokens
-                            $amount = $tnxs[5]['numbers'];
+                            $burnFeeAmount = $tnxs[5]['numbers'];
                             $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
                         }
                     }
@@ -284,7 +287,7 @@ class LogWinMapper
                         'transactiontype' => 'transferSenderToBurnWallet',
                         'senderid' => $senderId,
                         'recipientid' => $recipientId, // burn accounts for 217+ records not found.
-                        'tokenamount' => $amount,
+                        'tokenamount' => $burnFeeAmount,
                         'transferaction' => 'BURN_FEE',
                         'createdat' => $createdat
                     ]);
@@ -400,14 +403,13 @@ class LogWinMapper
                     if (isset($tnxs[1]['fromid'])) {
                         $senderId = $tnxs[1]['fromid'];
                         $recipientId = $tnxs[1]['userid'];
-                        $amount = $tnxs[1]['numbers'];
 
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToRecipient',
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
-                            'tokenamount' => $amount,
+                            'tokenamount' => $tnxs[1]['numbers'],
                             // 'message' => $message,
                             'transferaction' => 'CREDIT',
                             'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
