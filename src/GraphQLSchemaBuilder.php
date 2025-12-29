@@ -34,6 +34,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseMessagesProvider;
+use Fawaz\App\Errors\ErrorMapper;
+use Fawaz\Utils\ArrayNormalizer;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
 use Fawaz\App\Status;
@@ -50,7 +52,9 @@ use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
+use Fawaz\App\Models\TransactionCategory;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -1342,6 +1346,65 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => fn(array $root): string => isset($root['ResponseCode']) ? (string) $root['ResponseCode'] : '',
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
             ],
+            'TransactionHistoryResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'affectedRows' => function (array $root): array {
+                    return $root['affectedRows'] ?? [];
+                },
+            ],
+            'TransactionHistoryItem' => [
+                'operationid' => function (array $root): string {
+                    return $root['operationid'] ?? '';
+                },
+                'transactiontype' => function (array $root): string {
+                    return $root['transactiontype'] ?? '';
+                },
+                'tokenamount' => function (array $root): string {
+                    return $root['tokenamount'] ?? '';
+                },
+                'netTokenAmount' => function (array $root): string {
+                    return $root['netTokenAmount'] ?? '';
+                },
+                'message' => function (array $root): string {
+                    return $root['message'] ?? '';
+                },
+                'createdat' => function (array $root): string {
+                    return $root['createdat'] ?? '';
+                },
+                'sender' => function (array $root): array {
+                    return $root['sender'] ?? [];
+                },
+                'recipient' => function (array $root): array {
+                    return $root['recipient'] ?? [];
+                },
+                'fees' => function (array $root): ?array {
+                    return $root['fees'] ?? null;
+                },
+                'transactionCategory' => function (array $root): ?string {
+                    return $root['transactioncategory'] ?? null;
+                },
+            ],
+            'TransactionFeeSummary' => [
+                'total' => function (array $root): ?string {
+                    return isset($root['total']) ? $root['total'] : null;
+                },
+                'burn' => function (array $root): ?string {
+                    return isset($root['burn']) ? $root['burn'] : null;
+                },
+                'peer' => function (array $root): ?string {
+                    return isset($root['peer']) ? $root['peer'] : null;
+                },
+                'inviter' => function (array $root): ?string {
+                    return isset($root['inviter']) ? $root['inviter'] : null;
+                },
+            ],
             'TransferTokenResponse' => [
                 'meta' => fn(array $root): array => [
                     'status' => $root['status'] ?? '',
@@ -1571,6 +1634,7 @@ class GraphQLSchemaBuilder
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
             'postEligibility' => fn (mixed $root, array $args) => $this->postService->postEligibility(),
             'getTransactionHistory' => fn (mixed $root, array $args) => $this->transactionsHistory($args),
+            'transactionHistory' => fn (mixed $root, array $args) => $this->transactionsHistoryItems($args),
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
@@ -2504,9 +2568,37 @@ class GraphQLSchemaBuilder
 
         try {
             return $this->peerTokenService->transactionsHistory($args);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistory", ['exception' => $e->getMessage()]);
-            return self::respondWithError(41226);  // Error occurred while retrieving transaction history
+            return ErrorMapper::toResponse($e);
+        }
+
+    }
+
+    public function transactionsHistoryItems(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validation = RequestValidator::validate($args);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        try {
+            // $validation['transactionCategory'] = TransactionCategory::tryFrom("hahss");
+            $entitiesArray = $this->peerTokenService->transactionsHistoryItems($validation);
+            $resultArray = array_map(fn (TransactionHistoryItem $item) => $item->getArrayCopy(),$entitiesArray);
+            return $this::createSuccessResponse(11215, $resultArray);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.transactionsHistoryItems", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
         }
 
     }
@@ -2612,47 +2704,6 @@ class GraphQLSchemaBuilder
             empty($data) ? 21501 : 11501,
             $data
         );
-    }
-
-    protected function mapPostWithAdvertisement(Advertisements $advertise): ?array
-    {
-        return $advertise->getArrayCopy();
-    }
-
-    protected function mapPostWithComments(PostAdvanced $post, int $commentOffset, int $commentLimit, ?string $contentFilterBy = null): array
-    {
-        $postArray = $post->getArrayCopy();
-        
-        $contentFilterCase = ContentFilteringCases::searchById;
-        
-        $deletedUserSpec = new DeletedUserSpec(
-            $contentFilterCase,
-            ContentType::comment
-        );
-        $systemUserSpec = new SystemUserSpec(
-            $contentFilterCase,
-            ContentType::comment
-        );
-        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
-            $contentFilterCase,
-            $contentFilterBy,
-            ContentType::comment,
-            $this->currentUserId
-        );
-
-        $specs = [
-            $deletedUserSpec,
-            $systemUserSpec,
-            $hiddenContentFilterSpec,
-        ];
-        
-        $comments = $this->commentService->fetchAllByPostIdetaild($post->getPostId(), $commentOffset, $commentLimit, $specs);
-
-        $postArray['comments'] = array_map(
-            $this->fetchCommentWithoutReplies(...),
-            $comments
-        );
-        return $postArray;
     }
 
     protected function fetchCommentWithoutReplies(CommentAdvanced $comment): ?array

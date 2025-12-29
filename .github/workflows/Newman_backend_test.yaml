@@ -16,6 +16,38 @@ permissions:
   pull-requests: write
 
 jobs:
+  auto_label:
+    name: Auto Label PR
+    uses: peer-network/.github/.github/workflows/auto-label.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      mode: soft
+      label_config: |
+        {
+          "src/.*": "backend",
+          "composer.*": "backend",
+          "phpstan.neon": "backend",
+          "rector.php": "backend",
+
+          "sql_files_for_import/.*": "database",
+          "db/.*": "database",
+
+          ".github/workflows/.*": "ci",
+          ".githooks/.*": "ci",
+          "Makefile": "ci",
+
+          ".security/.*": "security",
+
+          "Dockerfile.*": "docker",
+          "docker-compose.*": "docker",
+
+          "tests/.*": "tests",
+
+          "docs/.*": "documentation",
+          "README.*": "documentation"
+        }
+
   check_branch_sync:
     name: Check if PR Branch is Behind Base
     uses: peer-network/.github/.github/workflows/check-branch-sync.yml@main
