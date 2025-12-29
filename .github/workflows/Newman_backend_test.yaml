@@ -16,14 +16,37 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto_update_branch:
-    name: Auto-Update PR Branch
-    if: github.actor != 'dependabot[bot]'
-    uses: peer-network/.github/.github/workflows/auto-update-pr.yml@main
+  auto_label:
+    name: Auto Label PR
+    uses: peer-network/.github/.github/workflows/auto-label.yml@main
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     with:
-      pr_base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || '' }}
-      pr_head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || '' }}
-    secrets: inherit
+      mode: soft
+      label_config: |
+        {
+          "src/.*": "backend",
+          "composer.*": "backend",
+          "phpstan.neon": "backend",
+          "rector.php": "backend",
+
+          "sql_files_for_import/.*": "database",
+          "db/.*": "database",
+
+          ".github/workflows/.*": "ci",
+          ".githooks/.*": "ci",
+          "Makefile": "ci",
+
+          ".security/.*": "security",
+
+          "Dockerfile.*": "docker",
+          "docker-compose.*": "docker",
+
+          "tests/.*": "tests",
+
+          "docs/.*": "documentation",
+          "README.*": "documentation"
+        }
 
   check_branch_sync:
     name: Check if PR Branch is Behind Base
@@ -121,7 +144,6 @@ jobs:
     name: Build And Run Postman Tests
     runs-on: ubuntu-latest
     needs: [
-      # auto_update_branch,
       check_branch_sync,
       gitleaks_scan_staged,
       validate_sql_files, 
@@ -771,7 +793,6 @@ jobs:
     name: Unified Discord Notification
     runs-on: ubuntu-latest
     needs: [
-      # auto_update_branch,
       check_branch_sync,
       phpstan_analysis,
       validate_sql_files,
