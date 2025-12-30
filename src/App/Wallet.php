@@ -7,8 +7,9 @@ namespace Fawaz\App;
 use DateTime;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Capabilities\HasUserId;
 
-class Wallet
+class Wallet implements HasUserId
 {
     protected string $token;
     protected string $userid;

@@ -25,6 +25,10 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
@@ -36,10 +40,6 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
-use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 
 class PostService
 {
@@ -51,6 +51,7 @@ class PostService
         protected PeerLoggerInterface $logger,
         protected PostMapper $postMapper,
         protected CommentMapper $commentMapper,
+        protected CommentService $commentService,
         protected PostInfoMapper $postInfoMapper,
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
@@ -63,8 +64,7 @@ class PostService
         protected TransactionManager $transactionManager,
         protected ProfileRepository $profileRepository,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected PostInfoService $postInfoService,
-        protected CommentService $commentService,
+        protected PostInfoService $postInfoService
     ) {
     }
 
@@ -249,7 +249,6 @@ class PostService
         $actionMap = $args['art'] = $actionMaps[$action];
 
         $this->transactionManager->beginTransaction();
-        
         try {
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);

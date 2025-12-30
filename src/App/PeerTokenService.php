@@ -10,12 +10,13 @@ use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
-use Fawaz\Services\TokenTransfer\Strategies\DefaultTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\Interfaces\ProfileRepository;
@@ -155,9 +156,15 @@ class PeerTokenService
             }
 
             $receipientUserObj = $this->userMapper->loadById($recipientId);
+            $senderUserObj = $this->userMapper->loadById($this->currentUserId);
+
             if (empty($receipientUserObj)) {
                 $this->logger->warning('Unknown Id Exception.');
                 return self::respondWithError(31007);
+            }
+            if (empty($senderUserObj)) {
+                $this->logger->warning('Unknown Id Exception.');
+                return self::respondWithError(40301);
             }
 
             if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
@@ -187,14 +194,14 @@ class PeerTokenService
                 return self::respondWithError(51301);
             }
 
-            $transferStrategy = new DefaultTransferStrategy();
+            $transferStrategy = new UserToUserTransferStrategy();
 
             $response = $this->peerTokenMapper->transferToken(
-                $this->currentUserId,
-                $recipientId,
                 $numberOfTokens,
                 $transferStrategy,
-                $message
+                $senderUserObj,
+                $receipientUserObj,
+                $message,
             );
             if ($response['status'] === 'error') {
                 $this->transactionManager->rollback();
