@@ -2044,7 +2044,7 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-
+  
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {

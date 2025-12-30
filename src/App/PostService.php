@@ -371,7 +371,7 @@ class PostService
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     $this->transactionManager->rollback();
-                    return $this::respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
