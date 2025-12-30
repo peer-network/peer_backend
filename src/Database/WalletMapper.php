@@ -17,8 +17,6 @@ use Fawaz\Utils\PeerLoggerInterface;
 class WalletMapper implements WalletCreditable, WalletDebitable
 {
     use ResponseHelper;
-    private string $burnWallet;
-    private string $peerWallet;
     private const DEFAULT_LIMIT = 20;
     private const MAX_WHEREBY = 100;
     private const ALLOWED_FIELDS = ['userid', 'postid', 'fromid', 'whereby'];

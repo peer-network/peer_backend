@@ -16,8 +16,6 @@ use Fawaz\Database\UserMapper;
 class UserActionsRepositoryImpl implements UserActionsRepository
 {
     use ResponseHelper;
-    private string $burnWallet;
-    private string $peerWallet;
 
     public function __construct(
         protected PeerLoggerInterface $logger, 

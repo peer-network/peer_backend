@@ -226,7 +226,6 @@ class AdvertisementService
             if ($balance < $CostPlan) {
                 $this->transactionManager->rollback();
                 $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
-                $this->transactionManager->rollback();
                 return $this->respondWithError(51301);
             }
 
@@ -246,7 +245,6 @@ class AdvertisementService
                 }
 
                 if (!$deducted) {
-                    $this->transactionManager->rollback();
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     $this->transactionManager->rollback();
                     return $this->respondWithError(40301);

@@ -13,8 +13,6 @@ use Fawaz\App\Repositories\MintAccountRepository;
 class MintRepositoryImpl implements MintRepository
 {
     use ResponseHelper;
-    private string $burnWallet;
-    private string $peerWallet;
 
     public function __construct(
         protected PeerLoggerInterface $logger, 
