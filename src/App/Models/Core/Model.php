@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App\Models\Core;
 
 use PDO;
+use PDOException;
 
 abstract class Model
 {
@@ -82,8 +83,8 @@ abstract class Model
             $stmt->execute($params);
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return (int)($result['count'] ?? 0);
-        } catch (\PDOException $e) {
-            throw new \PDOException('Failed to count() . error:' . $e->getMessage(), 40302);
+        } catch (PDOException $e) {
+            throw new PDOException('Failed to count() . error:' . $e->getMessage(), 40302);
         }
 
     }
@@ -128,8 +129,8 @@ abstract class Model
             $stmt->execute($params);
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            throw new \PDOException('Failed to all() . error:' . $e->getMessage(), 40302);
+        } catch (PDOException $e) {
+            throw new PDOException('Failed to all() . error:' . $e->getMessage(), 40302);
         }
     }
 
@@ -200,8 +201,8 @@ abstract class Model
                 'current_page' => $currentPage,
                 'last_page' => $lastPage,
             ];
-        } catch (\PDOException $e) {
-            throw new \PDOException('Failed to paginate() . Error:' . $e->getMessage(), 40302);
+        } catch (PDOException $e) {
+            throw new PDOException('Failed to paginate() . Error:' . $e->getMessage(), 40302);
         }
     }
 
@@ -381,8 +382,8 @@ abstract class Model
             $stmt = $db->prepare($sql);
 
             return $stmt->execute($data);
-        } catch (\PDOException $e) {
-            throw new \PDOException('Failed to insert record. Error:' . $e->getMessage(), 40302);
+        } catch (PDOException $e) {
+            throw new PDOException('Failed to insert record. Error:' . $e->getMessage(), 40302);
         }
     }
 
@@ -409,8 +410,8 @@ abstract class Model
             $stmt = $db->prepare($sql);
 
             return $stmt->execute($params);
-        } catch (\PDOException $e) {
-            throw new \PDOException('Failed to update record. Error:' . $e->getMessage(), 40302);
+        } catch (PDOException $e) {
+            throw new PDOException('Failed to update record. Error:' . $e->getMessage(), 40302);
         }
     }
 

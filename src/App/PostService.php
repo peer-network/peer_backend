@@ -93,11 +93,6 @@ class PostService
         return json_encode($args);
     }
 
-    private function argsToString($args)
-    {
-        return serialize($args);
-    }
-
     private function validateCoverCount(array $args, string $contenttype): array
     {
         if (!is_array($args['cover'])) {
@@ -376,7 +371,7 @@ class PostService
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     $this->transactionManager->rollback();
-                    return $this::respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
@@ -534,10 +529,6 @@ class PostService
                     'trace' => $e->getTraceAsString(),
                 ]);
                 return $this::respondWithError(30263);
-                if (isset($args['uploadedFiles'])) {
-                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
-                }
-                return $this::respondWithError($e->getMessage());
             }
             $this->postMapper->insert(post: $post);
 
@@ -902,59 +893,6 @@ class PostService
             return false;
         }
     }
-
-    private function mapCommentsWithReplies(array $comments): array
-    {
-        return array_map(
-            function (Comment $comment) {
-                $commentArray = $comment->getArrayCopy();
-                $replies = $this->commentMapper->fetchAllByParentId($comment->getId());
-                $commentArray['replies'] = $this->mapCommentsWithReplies($replies);
-                return $commentArray;
-            },
-            $comments
-        );
-    }
-
-    // public function deletePost(string $id): array
-    // {
-    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-    //         return $this::respondWithError('Invalid feed ID');
-    //     }
-
-    //     if (!self::isValidUUID($id)) {
-    //         return $this::respondWithError(30209);
-    //     }
-
-    //     $this->logger->debug('PostService.deletePost started');
-
-    //     $posts = $this->postMapper->loadById($id);
-    //     if (!$posts) {
-    //         return $this::createSuccessResponse(21516);
-    //     }
-
-    //     $post = $posts->getArrayCopy();
-
-    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-    //         return $this::respondWithError('Unauthorized: You can only delete your own posts.');
-    //     }
-
-    //     try {
-    //         $postid = $this->postMapper->delete($id);
-
-    //         if ($postid) {
-    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-    //             return [
-    //                 'status' => 'success',
-    //                 'ResponseCode' => "11510",
-    //             ];
-    //         }
-    //     } catch (\Throwable $e) {
-    //         return $this::respondWithError(41510);
-    //     }
-
-    //     return $this::respondWithError(41510);
-    // }
 
 
     /**

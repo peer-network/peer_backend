@@ -27,6 +27,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use PDOException;
 
 class UserService
 {
@@ -856,7 +857,7 @@ class UserService
                     )
                 ]
             ];
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error('Database Error: Failed to fetch followers or following data', ['error' => $e->getMessage()]);
             return self::respondWithErrorObject(41104);
         } catch (\Throwable $e) {

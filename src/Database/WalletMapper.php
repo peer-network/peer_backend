@@ -14,6 +14,8 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use function hexdec;
+use function strlen;
 
 use function DI\string;
 
@@ -87,10 +89,10 @@ class WalletMapper
 
         $stmt = $this->db->prepare($sql);
         foreach ($queryParams as $param => $value) {
-            $stmt->bindValue(":$param", $value, is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR);
+            $stmt->bindValue(":$param", $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
         $results = [
@@ -99,7 +101,7 @@ class WalletMapper
             'posts' => []
         ];
 
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             try {
                 if ($results['overall_total_numbers'] === 0) {
                     $results['overall_total_numbers'] = ($row['overall_total_numbers'] ?? 0);
@@ -162,7 +164,7 @@ class WalletMapper
         $stmt->execute($queryParams);
 
         $results = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             try {
                 $results[] = new Wallet($row);
             } catch (\Throwable $e) {
@@ -239,7 +241,7 @@ class WalletMapper
             $stmt->execute($params);
 
             $results = [];
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $results[] = new Wallet($row);
             }
 
@@ -271,7 +273,7 @@ class WalletMapper
         $sql = "SELECT liquidity AS currentliquidity FROM wallett WHERE userid = :userid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['userid' => $userid]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             $this->logger->info('transaction found with', ['data' => $data]);
@@ -296,14 +298,14 @@ class WalletMapper
             $stmt = $this->db->prepare($query);
 
             // Explicitly bind each value
-            $stmt->bindValue(':token', $data['token'], \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $data['postid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $data['fromid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $data['numbers'], \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $data['numbersq'], \PDO::PARAM_INT);
-            $stmt->bindValue(':whereby', $data['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $data['token'], PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $data['postid'], PDO::PARAM_STR);
+            $stmt->bindValue(':fromid', $data['fromid'], PDO::PARAM_STR);
+            $stmt->bindValue(':numbers', $data['numbers'], PDO::PARAM_STR);
+            $stmt->bindValue(':numbersq', $data['numbersq'], PDO::PARAM_INT);
+            $stmt->bindValue(':whereby', $data['whereby'], PDO::PARAM_INT);
+            $stmt->bindValue(':createdat', $data['createdat'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -333,11 +335,11 @@ class WalletMapper
             $stmt = $this->db->prepare($query);
 
             // Explicitly bind each value
-            $stmt->bindValue(':userid', $data['userid'], \PDO::PARAM_STR);
-            $stmt->bindValue(':liquidity', $data['liquidity'], \PDO::PARAM_STR);
-            $stmt->bindValue(':liquiditq', $data['liquiditq'], \PDO::PARAM_INT);
-            $stmt->bindValue(':updatedat', $data['updatedat'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $data['userid'], PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $data['liquidity'], PDO::PARAM_STR);
+            $stmt->bindValue(':liquiditq', $data['liquiditq'], PDO::PARAM_INT);
+            $stmt->bindValue(':updatedat', $data['updatedat'], PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -366,7 +368,7 @@ class WalletMapper
         $bits = (int)$log + 1;
         $filter = (int)(1 << $bits) - 1;
         do {
-            $rnd = \hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
+            $rnd = hexdec(\bin2hex(\openssl_random_pseudo_bytes($bytes)));
             $rnd &= $filter;
         } while ($rnd >= $range);
         return $min + $rnd;
@@ -377,7 +379,7 @@ class WalletMapper
         $token = '';
         $codeAlphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         for ($i = 0; $i < $length; $i++) {
-            $token .= $codeAlphabet[$this->crypto_rand_secure(0, \strlen($codeAlphabet))];
+            $token .= $codeAlphabet[$this->crypto_rand_secure(0, strlen($codeAlphabet))];
         }
         return $token;
     }
@@ -389,7 +391,7 @@ class WalletMapper
         do {
             $stmt = $this->db->prepare('SELECT token FROM wallet WHERE token = ?');
             $stmt->execute([$token]);
-            $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
         } while ($res && $x++ < 100);
         return $token;
     }
@@ -449,11 +451,11 @@ class WalletMapper
             ";
 
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userid, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
-            $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
             $this->logger->info("WalletMapper.fetchWinsLog rows: ", ['rows' => $rows]);
             $result = !empty($rows) ? $rows : [];
 
@@ -507,16 +509,15 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $tokenId = $args['gemid'] ?? $id;
-            $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-            $stmt->bindValue(':gems', $gems, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), \PDO::PARAM_STR); // 29 char precision
-            $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $args['gemid'] ?? $id, PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $postId, PDO::PARAM_STR);
+            $stmt->bindValue(':fromid', $fromId, PDO::PARAM_STR);
+            $stmt->bindValue(':gems', $gems, PDO::PARAM_STR);
+            $stmt->bindValue(':numbers', $numBers, PDO::PARAM_STR);
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':whereby', $args['whereby'], PDO::PARAM_INT);
+            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -622,14 +623,14 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-            $stmt->bindValue(':postid', $postId, \PDO::PARAM_STR);
-            $stmt->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), \PDO::PARAM_STR); // 29 char precision
-            $stmt->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-            $stmt->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+            $stmt->bindValue(':token', $this->getPeerToken(), PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':postid', $postId, PDO::PARAM_STR);
+            $stmt->bindValue(':fromid', $fromId, PDO::PARAM_STR);
+            $stmt->bindValue(':numbers', $numBers, PDO::PARAM_STR);
+            $stmt->bindValue(':numbersq', $this->decimalToQ64_96((string)$numBers), PDO::PARAM_STR); // 29 char precision
+            $stmt->bindValue(':whereby', $args['whereby'], PDO::PARAM_INT);
+            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -708,7 +709,7 @@ class WalletMapper
                     INNER JOIN posts p ON s.postid = p.postid AND s.userid != p.userid 
                     WHERE s.collected = 0";
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
             return self::respondWithError(41208);
@@ -787,7 +788,7 @@ class WalletMapper
             ";
 
             $stmt = $this->db->query($sql);
-            $entries = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $entries = $stmt->fetch(PDO::FETCH_ASSOC);
             $this->logger->info('fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
             $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
@@ -857,7 +858,7 @@ class WalletMapper
 
         try {
             $stmt = $this->db->query($sql);
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
             //$this->logger->info('fetching data for ', ['data' => $data]);
         } catch (\Throwable $e) {
             $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
@@ -1051,7 +1052,7 @@ class WalletMapper
 
         try {
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
@@ -1071,8 +1072,8 @@ class WalletMapper
             $sqlUpdate = "UPDATE users_info SET liquidity = :liquidity, updatedat = CURRENT_TIMESTAMP WHERE userid = :userid";
             $stmt = $this->db->prepare($sqlUpdate);
 
-            $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':liquidity', $liquidity, PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
 
             $stmt->execute();
 
@@ -1090,9 +1091,9 @@ class WalletMapper
 
         try {
             $stmt = $this->db->prepare("SELECT liquidity FROM wallett WHERE userid = :userid FOR UPDATE");
-            $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
             $stmt->execute();
-            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$row) {
                 // User does not exist, insert new wallet entry
@@ -1103,10 +1104,10 @@ class WalletMapper
                     "INSERT INTO wallett (userid, liquidity, liquiditq, updatedat)
                     VALUES (:userid, :liquidity, :liquiditq, :updatedat)"
                 );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $liquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $liquidity, PDO::PARAM_STR);
+                $stmt->bindValue(':liquiditq', $liquiditq, PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
                 $stmt->execute();
             } else {
                 // User exists, safely calculate new liquidity
@@ -1130,10 +1131,10 @@ class WalletMapper
                     SET liquidity = :liquidity, liquiditq = :liquiditq, updatedat = :updatedat
                     WHERE userid = :userid"
                 );
-                $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquidity', $newLiquidity, \PDO::PARAM_STR);
-                $stmt->bindValue(':liquiditq', $liquiditq, \PDO::PARAM_STR);
-                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), \PDO::PARAM_STR);
+                $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+                $stmt->bindValue(':liquidity', $newLiquidity, PDO::PARAM_STR);
+                $stmt->bindValue(':liquiditq', $liquiditq, PDO::PARAM_STR);
+                $stmt->bindValue(':updatedat', new \DateTime()->format('Y-m-d H:i:s.u'), PDO::PARAM_STR);
 
                 $stmt->execute();
             }
@@ -1232,7 +1233,7 @@ class WalletMapper
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['userId' => $userId]);
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $interactionCount = (int)($result['interaction_count'] ?? 0);
 
@@ -1280,22 +1281,6 @@ class WalletMapper
 
         return $scaledValue;
     }
-
-    /*private function q64_96ToDecimal(string $qValue): string
-    {
-        $scaleFactor = \bcpow('2', '96');
-
-        $decimalValue = \bcdiv($qValue, $scaleFactor, 18);
-
-        return (string) round((float) $decimalValue, 2);
-    }*/
-
-    private function addQ64_96(string $qValue1, string $qValue2): string
-    {
-        return \bcadd($qValue1, $qValue2);
-    }
-
-
 
     /**
      * To Defend against Atomicity issues in concurrent debit operations
