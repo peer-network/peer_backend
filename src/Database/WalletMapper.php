@@ -509,7 +509,8 @@ class WalletMapper
         try {
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':token', $args['gemid'] ?? $id, PDO::PARAM_STR);
+            $tokenId = $args['gemid'] ?? $id;
+            $stmt->bindValue(':token', $tokenId, PDO::PARAM_STR);
             $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
             $stmt->bindValue(':postid', $postId, PDO::PARAM_STR);
             $stmt->bindValue(':fromid', $fromId, PDO::PARAM_STR);
