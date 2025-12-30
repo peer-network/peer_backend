@@ -592,7 +592,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = 3; // Each extra like will cost 3 Gems
+                    $numBers = '3'; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -622,7 +622,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
+                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -724,7 +724,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($recipientid, $numBers, 'CREDIT');
+                    $this->saveWalletEntry($recipientid, (string)$numBers, 'CREDIT');
 
                     $this->transactionManager->commit();
 
@@ -765,7 +765,7 @@ class LogWinMapper
                 $this->transactionManager->beginTransaction();
 
                 try {
-                    $numBers = 0;
+                    $numBers = '0';
                     $recipientid = $userId;
 
                     $operationid = self::generateUUID();
@@ -877,7 +877,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = 5; // Each extra dislike will cost 5 Gems
+                    $numBers = '5'; // Each extra dislike will cost 5 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -907,7 +907,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
+                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -986,7 +986,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = 20; // Each extra like will cost 3 Gems
+                    $numBers = '20'; // Each extra like will cost 3 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -1016,7 +1016,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
+                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -1095,7 +1095,7 @@ class LogWinMapper
 
                     $tokenId = self::generateUUID();
 
-                    $numBers = 0.5; // Each extra like will cost 0.5 Gems
+                    $numBers = '0.5'; // Each extra like will cost 0.5 Gems
 
                     $userId = $value['userid'];
                     $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
@@ -1125,7 +1125,7 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
+                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
                     $this->transactionManager->commit();
@@ -1345,7 +1345,7 @@ class LogWinMapper
                             ]);
 
                             if ($transferType === 'BURN') {
-                                $this->saveWalletEntry($this->burnWallet, $numBers, 'DEBIT');
+                                $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
                             }
 
                             $this->logger->info('Inserted into logwins successfully', [
@@ -1539,7 +1539,7 @@ class LogWinMapper
 
 
 
-    public function updateUserLiquidity(string $userId, float $liquidity): bool
+    public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
 
@@ -1559,12 +1559,12 @@ class LogWinMapper
     }
 
 
-    private function decimalToQ64_96(float $value): string
+    private function decimalToQ64_96(string $value): string
     {
         $scaleFactor = \bcpow('2', '96');
 
-        // Convert float to plain decimal string 
-        $decimalString = \number_format($value, 30, '.', ''); // 30 decimal places should be enough
+        // Convert float to plain decimal string
+        $decimalString = \number_format((float)$value, 30, '.', ''); // 30 decimal places should be enough
 
         $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
