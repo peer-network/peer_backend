@@ -49,21 +49,6 @@ class TagService
         return true;
     }
 
-    private function isValidTagName(?string $tagName): bool
-    {
-        if (empty($tagName)) {
-            return false;
-        }
-
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
-        $tagName = htmlspecialchars($tagName, ENT_QUOTES, 'UTF-8'); // Schutz vor XSS
-
-        $length = strlen($tagName);
-        return $length >= $tagNameConfig['MIN_LENGTH']
-            && $length <= $tagNameConfig['MAX_LENGTH']
-            && preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
-    }
-
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
@@ -71,7 +56,7 @@ class TagService
         }
 
         $this->logger->debug('TagService.createTag started');
-        $tagName = !empty($tagName) ? trim($tagName) : null;
+        $tagName = !empty($tagName) ? strtolower(trim($tagName)) : null;
 
         try {
             $this->transactionManager->beginTransaction();
@@ -132,6 +117,7 @@ class TagService
         try {
 
             if (isset($args['tagName']) && !empty($args['tagName'])) {
+                $args['tagName'] = strtolower(trim((string) $args['tagName']));
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {

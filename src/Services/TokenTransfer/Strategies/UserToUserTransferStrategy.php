@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 use Fawaz\Utils\ResponseHelper;
 
@@ -20,6 +21,11 @@ class UserToUserTransferStrategy extends BaseTransferStrategy implements Transfe
         $this::$mode = FeePolicyMode::ADDED;
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
+    }
+
+    public function getTransactionCategory(): TransactionCategory
+    {
+        return TransactionCategory::P2P_TRANSFER;
     }
 
     public function getRecipientTransactionType(): string

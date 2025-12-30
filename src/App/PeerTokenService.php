@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
+use Fawaz\App\Errors\PermissionDeniedException;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\UserToUserTransferStrategy;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
+use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\config\constants\ConstantsConfig;
 
 class PeerTokenService
@@ -29,8 +34,9 @@ class PeerTokenService
         protected TransactionManager $transactionManager,
         protected UserMapper $userMapper,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-    ) {
-    }
+        protected ProfileRepository $profileRepository,
+        protected ProfileEnrichmentAssembler $profileAssembler
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -56,7 +62,7 @@ class PeerTokenService
         $this->logger->debug('WalletService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
         $recipientid =  $args['recipient'];
@@ -228,17 +234,10 @@ class PeerTokenService
      */
     public function transactionsHistory(array $args): array
     {
-        $this->logger->info('WalletService.transactionsHistory started');
-
-        if (!$this->checkAuthentication()) {
-            return $this->respondWithError(60501);
-        }
-
         $this->logger->debug('PeerTokenService.transactionsHistory started');
 
         try {
             $results = $this->peerTokenMapper->getTransactions($this->currentUserId, $args);
-
             return $this::createSuccessResponse(
                 (int)$results['ResponseCode'],
                 $results['affectedRows'],
@@ -252,5 +251,51 @@ class PeerTokenService
 
     }
 
+    public function transactionsHistoryItems(array $args): array
+    {
+        $this->logger->info('WalletService.transactionsHistoryItems started');
 
+        if (!$this->checkAuthentication()) {
+            throw new PermissionDeniedException(60501, 'Unauthorized');
+        }
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+        $targetContent = ContentType::user;
+        
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            $targetContent
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            $targetContent
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            $targetContent
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec
+        ];
+
+        try {
+            $items = $this->peerTokenMapper->getTransactionHistoryItems(
+                $this->currentUserId,
+                $args,
+                $specs
+            );
+
+            $this->profileAssembler->enrichHasUserRefs($items, $specs, (string)$this->currentUserId);
+
+            return $items;
+
+        } catch (\Exception $e) {
+            $this->logger->error("Error in PeerTokenService.transactionsHistory", ['exception' => $e->getMessage()]);
+            throw new \RuntimeException("Database error while fetching transactions: " . $e->getMessage());
+        }
+    }
 }

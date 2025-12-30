@@ -1,21 +1,17 @@
 {
     "ios" : [
         {
-            "version" : "0.0.0",
-            "url" : "https://fourchan.fake/"
-        },
-        {
-            "version" : "1.9.0",
+            "version" : "1.11.0",
             "url" : "https://peernetwork.eu/graphql"
         },
         {
-            "version" : "1.10.0",
+            "version" : "1.12.0",
             "url" : "https://getpeer.eu/graphql"
         }
     ],
     "android" : [
         {
-            "version" : "1.9.0",
+            "version" : "1.10.0",
             "url" : "https://peernetwork.eu/graphql"
         },
         {
@@ -25,11 +21,11 @@
     ],
     "web" : [
         {
-            "version" : "1.9.0",
+            "version" : "1.11.0",
             "url" : "https://peernetwork.eu/graphql"
         },
         {
-            "version" : "1.10.0",
+            "version" : "1.12.0",
             "url" : "https://getpeer.eu/graphql"
         }
     ]

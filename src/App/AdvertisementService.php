@@ -23,7 +23,6 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Utils\ContentFilterHelper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -35,7 +34,6 @@ class AdvertisementService
     protected ?string $currentUserId = null;
     public const PLAN_BASIC = 'BASIC';
     public const PLAN_PINNED = 'PINNED';
-
     public const DURATION_ONE_DAY = 'ONE_DAY';
     public const DURATION_TWO_DAYS = 'TWO_DAYS';
     public const DURATION_THREE_DAYS = 'THREE_DAYS';
@@ -221,13 +219,14 @@ class AdvertisementService
             return $this->respondWithError(42005);
         }
 
-        $this->transactionManager->beginTransaction();
         try {
+            $this->transactionManager->beginTransaction();
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->transactionManager->rollback();
                 $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->transactionManager->rollback();
                 return $this->respondWithError(51301);
             }
 
@@ -249,7 +248,8 @@ class AdvertisementService
                 if (!$deducted) {
                     $this->transactionManager->rollback();
                     $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
-                    return $this->respondWithError($deducted['ResponseCode']);
+                    $this->transactionManager->rollback();
+                    return $this->respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
@@ -333,7 +333,7 @@ class AdvertisementService
         return true;
     }
 
-    private function formatStartAndEndTimestamps(\DateTimeImmutable $startDate, string $durationKey): array
+    private function formatStartAndEndTimestamps(DateTimeImmutable $startDate, string $durationKey): array
     {
         $dateFilters = [
             'ONE_DAY' => '+1 days',
@@ -410,7 +410,7 @@ class AdvertisementService
 
             if ($CostPlan !== null && $CostPlan === self::PLAN_BASIC) {
                 if ($startday) {
-                    $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $startday);
+                    $startDate = DateTimeImmutable::createFromFormat('Y-m-d', $startday);
                     $timestamps = $this->formatStartAndEndTimestamps($startDate, $date);
 
                     $timestart = $timestamps['timestart']; // Set timestart
@@ -528,6 +528,8 @@ class AdvertisementService
         $postId = $filter['postId'] ?? null;
         $userId = $filter['userId'] ?? null;
         $sortBy = $args['sort'] ?? [];
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
 
         if ($from !== null && !self::validateDate($from)) {
@@ -618,6 +620,18 @@ class AdvertisementService
 
         try {
             $result = $this->advertisementMapper->fetchAllWithStats($specs, $args);
+
+            $historyRows = $result['affectedRows']['advertisements'] ?? [];
+            if (!empty($historyRows)) {
+                $entries = $this->convertHistoryRowsToEntries($historyRows);
+                $entries = $this->enrichPostAndAdvertisementResults(
+                    $entries,
+                    $specs,
+                    $commentOffset,
+                    $commentLimit
+                );
+                $result['affectedRows']['advertisements'] = $this->flattenHistoryEntries($entries);
+            }
 
             return self::createSuccessResponse(12002, $result['affectedRows'], false);
         } catch (\Throwable $e) {
@@ -782,66 +796,135 @@ class AdvertisementService
             return $this->respondWithError(31510);
         }
 
-        // results is an array of ['post' => PostAdvanced, 'advertisement' => Advertisements]
-        // Extract only posts, enrich them, then merge back with their ads and return
         if (!empty($results)) {
-            $posts = [];
-            foreach ($results as $item) {
-                if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
-                    $posts[] = $item['post'];
-                }
-            }
-
-            if (!empty($posts)) {
-                $enrichedPosts = $this->enrichWithProfileAndComment(
-                    $posts,
-                    $specs,
-                    $this->currentUserId,
-                    $commentOffset,
-                    $commentLimit
-                );
-                foreach ($enrichedPosts as $post) {
-                    ContentReplacer::placeholderPost($post, $specs);
-                }
-                // Merge enriched posts back to the original structure preserving order
-                $idx = 0;
-                foreach ($results as $key => $item) {
-                    if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
-                        $results[$key]['post'] = $enrichedPosts[$idx] ?? $item['post'];
-                        $idx++;
-                    }
-                }
-            }
-
-            // Enrich Advertisements with user profiles
-            $adUserIds = [];
-            $adUserIds = [];
-            foreach ($results as $item) {
-                if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
-                    $uid = $item['advertisement']->getUserId();
-                    if (!empty($uid)) {
-                        $adUserIds[$uid] = $uid;
-                    }
-                }
-            }
-
-            if (!empty($adUserIds)) {
-                $adProfiles = $this->profileRepository->fetchByIds(array_values($adUserIds), $this->currentUserId, $specs);
-
-                foreach ($results as $key => $item) {
-                    if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
-                        $ad = $item['advertisement'];
-                        $adData = $ad->getArrayCopy();
-                        $profile = $adProfiles[$ad->getUserId()] ?? null;
-                        $adEnriched = $this->enrichAndPlaceholderWithProfile($adData, $profile, $specs);
-                        $results[$key]['advertisement'] = new Advertisements($adEnriched, [], false);
-                    }
-                }
-            }
-
+            $results = $this->enrichPostAndAdvertisementResults(
+                $results,
+                $specs,
+                $commentOffset,
+                $commentLimit
+            );
         }
 
         return $results;
+    }
+
+    private function enrichPostAndAdvertisementResults(
+        array $results,
+        array $specs,
+        int $commentOffset,
+        int $commentLimit
+    ): array {
+        if (empty($results)) {
+            return $results;
+        }
+
+        $posts = [];
+        foreach ($results as $item) {
+            if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
+                $posts[] = $item['post'];
+            }
+        }
+
+        if (!empty($posts)) {
+            $enrichedPosts = $this->enrichWithProfileAndComment(
+                $posts,
+                $specs,
+                $this->currentUserId,
+                $commentOffset,
+                $commentLimit
+            );
+            foreach ($enrichedPosts as $post) {
+                ContentReplacer::placeholderPost($post, $specs);
+            }
+
+            $idx = 0;
+            foreach ($results as $key => $item) {
+                if (isset($item['post']) && $item['post'] instanceof PostAdvanced) {
+                    $results[$key]['post'] = $enrichedPosts[$idx] ?? $item['post'];
+                    $idx++;
+                }
+            }
+        }
+
+        $adUserIds = [];
+        foreach ($results as $item) {
+            if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                $uid = $item['advertisement']->getUserId();
+                if (!empty($uid)) {
+                    $adUserIds[$uid] = $uid;
+                }
+            }
+        }
+
+        if (!empty($adUserIds)) {
+            $adProfiles = $this->profileRepository->fetchByIds(array_values($adUserIds), $this->currentUserId, $specs);
+            foreach ($results as $key => $item) {
+                if (isset($item['advertisement']) && $item['advertisement'] instanceof Advertisements) {
+                    $ad = $item['advertisement'];
+                    $adData = $ad->getArrayCopy();
+                    $profile = $adProfiles[$ad->getUserId()] ?? null;
+                    $adEnriched = $this->enrichAndPlaceholderWithProfile($adData, $profile, $specs);
+                    $results[$key]['advertisement'] = new Advertisements($adEnriched, [], false);
+                }
+            }
+        }
+
+        return $results;
+    }
+
+    private function convertHistoryRowsToEntries(array $historyRows): array
+    {
+        $entries = [];
+        foreach ($historyRows as $row) {
+            $post = $this->createPostFromArray($row['post'] ?? []);
+            $advertisement = $this->createAdvertisementFromArray($row);
+
+            if (!$post instanceof PostAdvanced || !$advertisement instanceof Advertisements) {
+                continue;
+            }
+
+            $entries[] = [
+                'post' => $post,
+                'advertisement' => $advertisement,
+            ];
+        }
+
+        return $entries;
+    }
+
+    private function flattenHistoryEntries(array $entries): array
+    {
+        $flattened = [];
+        foreach ($entries as $entry) {
+            $post = $entry['post'] instanceof PostAdvanced ? $entry['post']->getArrayCopy() : (array)$entry['post'];
+            $advertisement = $entry['advertisement'] instanceof Advertisements ? $entry['advertisement']->getArrayCopy() : (array)$entry['advertisement'];
+            $advertisement['post'] = $post;
+            $flattened[] = $advertisement;
+        }
+
+        return $flattened;
+    }
+
+    private function createPostFromArray(array $postData): ?PostAdvanced
+    {
+        if (empty($postData['postid'])) {
+            return null;
+        }
+
+        if (empty($postData['userid']) && isset($postData['user']['uid'])) {
+            $postData['userid'] = (string)$postData['user']['uid'];
+        }
+
+        return new PostAdvanced($postData, [], false);
+    }
+
+    private function createAdvertisementFromArray(array $adData): ?Advertisements
+    {
+        if (empty($adData['advertisementid'] ?? null)) {
+            return null;
+        }
+
+        return new Advertisements($adData, [], false);
     }
 
     private function enrichWithProfileAndComment(

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\TokenTransfer\Strategies;
 
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
@@ -19,6 +20,11 @@ class PaidDislikeTransferStrategy extends BaseTransferStrategy implements Transf
         $this::$mode = FeePolicyMode::INCLUDED;
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
+    }
+
+    public function getTransactionCategory(): TransactionCategory
+    {
+        return TransactionCategory::DISLIKE;
     }
 
     public function getRecipientTransactionType(): string

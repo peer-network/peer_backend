@@ -141,16 +141,11 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false) {
-                $success = [
-                    'status' => 'success',
-                    'ResponseCode' => "11204",
-                    'currentliquidity' => $results,
-                ];
-                return $success;
-            }
-
-            return $this::createSuccessResponse(21203);
+            return [
+                'status' => 'success',
+                'ResponseCode' => "11204",
+                'currentliquidity' => $results,
+            ];
         } catch (\Exception $e) {
             return $this::respondWithError(41204);
         }
@@ -162,8 +157,47 @@ class WalletService
 
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 0.0;
+        }
+    }
+
+    public function deductFromWallet(string $userId, ?array $args = []): ?array
+    {
+        $this->logger->debug('WalletService.deductFromWallet started');
+
+        try {
+            $this->transactionManager->beginTransaction();
+            $response = $this->walletMapper->deductFromWallets($userId, $args);
+            if ($response['status'] === 'success') {
+                $this->transactionManager->commit();
+                return $response;
+            } else {
+                $this->transactionManager->rollBack();
+                return $response;
+            }
+
+        } catch (Exception $e) {
+            $this->transactionManager->rollBack();
+            return $this::respondWithError(40301);
+        }
+    }
+
+    public function callUserMove(): ?array
+    {
+        $this->logger->debug('WalletService.callUserMove started');
+
+        try {
+            $response = $this->walletMapper->callUserMove($this->currentUserId);
+            return $this::createSuccessResponse(
+                $response['ResponseCode'],
+                $response['affectedRows'],
+                false // no counter needed for existing data
+            );
+
+
+        } catch (Exception $e) {
+            return $this::respondWithError(41205);
         }
     }
 
@@ -176,25 +210,22 @@ class WalletService
         $this->logger->debug('WalletService.performPayment started');
 
         try {
-            // $this->transactionManager->beginTransaction();
-
             $postId = $args['postid'] ?? null;
             $art = $args['art'] ?? null;
             $prices = ConstantsConfig::tokenomics()['ACTION_TOKEN_PRICES'];
             $actions = ConstantsConfig::wallet()['ACTIONS'];
 
             $mapping = [
-                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => 'Buy like'],
-                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => 'Buy dislike'],
-                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => 'Buy comment'],
-                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => 'Buy post'],
-                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => 'Buy advertise basic'],
-                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => 'Buy advertise pinned'],
+                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => ''],
+                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => ''],
+                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => ''],
+                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => ''],
+                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => ''],
+                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => ''],
             ];
 
             if (!isset($mapping[$art])) {
                 $this->logger->warning('Invalid art type provided.', ['art' => $art]);
-                // $this->transactionManager->rollback();
                 return self::respondWithError(30105);
             }
 
@@ -214,7 +245,6 @@ class WalletService
                     'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
-                // $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
@@ -244,7 +274,6 @@ class WalletService
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
-                // $this->transactionManager->rollBack();
                 $this->logger->error("Error occurred in performPayment.insertWinToLog", [
                     'userId' => $userId,
                     'args' => $args,
@@ -252,11 +281,14 @@ class WalletService
                 return self::respondWithError(41205);
             }
 
-            return $response;
+            if ($response['status'] === 'success') {
+                return $response;
+            } else {
+                return $response;
+            }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
-            // $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
     }

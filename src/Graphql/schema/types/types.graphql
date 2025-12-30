@@ -1,3 +1,23 @@
+type TransactionHistoryItem {
+  operationid: String!
+  transactionCategory: TransactionCategory
+  transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
+  tokenamount: String! #sum with all fees transactions
+  netTokenAmount: String! #value of CREDIT transaction
+  message: String
+  createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
+  fees: TransactionFeeSummary
+}
+
+type TransactionFeeSummary {
+  total: Decimal # sum of all fees transactions
+  burn: Decimal 
+  peer: Decimal
+  inviter: Decimal # can be null
+}
+
 type AdvertisementPost {
   post: Post!
   advertisement: AdvCreator!
@@ -171,8 +191,10 @@ type Transaction {
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: Decimal @deprecated(reason: "Use tokenSendFormatted")
+  tokensSubstractedFromWallet: Decimal @deprecated(reason: "Use tokensSubstractedFromWalletFormatted")
+  tokenSendFormatted: String!
+  tokensSubstractedFromWalletFormatted: String!
   createdat: String
 }
 
@@ -527,6 +549,7 @@ type ModerationItem {
   createdat: String!
   targetcontent: TargetContent!
   reporters: [BasicUserInfo!]!
+  moderatedBy: BasicUserInfo
 }
 
 type TargetContent {

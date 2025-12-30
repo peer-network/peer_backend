@@ -224,7 +224,6 @@ class PostInfoService
                 return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
-
             $exists = $this->reportMapper->addReport(
                 $this->currentUserId,
                 ReportTargetType::POST,
@@ -351,7 +350,7 @@ class PostInfoService
         $response = $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
 
         if (isset($response['status']) && $response['status'] === 'error') {
-           $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
+            $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
             return $response;
         }
 

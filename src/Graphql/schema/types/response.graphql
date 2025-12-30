@@ -5,6 +5,11 @@ type DefaultResponse {
   ResponseMessage: String
 }
 
+type TransactionHistoryResponse {
+  meta: DefaultResponse
+  affectedRows: [TransactionHistoryItem!]
+}
+
 type ListAdvertisementPostsResponse {
   meta: DefaultResponse!
   status: String! @deprecated(reason: "use meta.status . this field will be removed after 15 October`.")

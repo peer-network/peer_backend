@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "eafd0ed3-37ee-4d48-8b5f-a4e35d2f17fb",
+		"_postman_id": "eb624dfe-d088-4a18-83e1-10533f03f88e",
 		"name": "002_posts_wallet_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "32542010",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-eafd0ed3-37ee-4d48-8b5f-a4e35d2f17fb?action=share&source=collection_link&creator=32542010"
+		"_exporter_id": "43606001",
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-eb624dfe-d088-4a18-83e1-10533f03f88e?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -156,6 +156,125 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login tester 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"10801\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"if (!pm.response.text().includes(\"error\")) {",
+							"    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+							"} else {",
+							"    console.log(\"Error detected in response, environment variable not set.\");",
+							"}",
+							"let token = pm.environment.get(\"accessToken\");",
+							"pm.test(\"Access token exists\", function () {",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t3}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Check current liquidity",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11204\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"let response = pm.response.json();",
+							"let liquidity = response.data.balance.currentliquidity;",
+							"pm.environment.set(\"liquidity1\", liquidity);",
+							"console.log(\"Saved liquidity:\", liquidity);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -393,7 +512,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -403,7 +523,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -423,7 +544,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\", \"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] \n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -650,6 +866,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post photo with cover",
 			"event": [
 				{
@@ -688,7 +1095,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -698,7 +1106,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -718,7 +1127,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            cover: \"{{new_profile_pic}}\"\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{new_profile_pic}}\",\"{{base64_photo1}}\",\"{{base64_photo2}}\"]\n            mediadescription: \"{{invalid_email}}\"\n            contenttype: image\n            cover: \"{{new_profile_pic}}\"\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] \n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n         \n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -867,6 +1371,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post text",
 			"event": [
 				{
@@ -905,7 +1600,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -915,7 +1611,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -935,7 +1632,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\", tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"]  },) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1090,6 +1882,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post audio",
 			"event": [
 				{
@@ -1128,7 +2111,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1138,7 +2122,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1158,7 +2143,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\" }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"audio\", contenttype: audio, media: [\"{{base64_audio}}\"], cover: \"{{base64_photo1}}\",tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"] }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1307,6 +2387,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post video",
 			"event": [
 				{
@@ -1373,7 +2644,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -1383,7 +2655,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1403,7 +2676,102 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{base64_video}}\"]\n            contenttype: video\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n    }\n}\n\n",
+						"query": "mutation CreatePost {\n    createPost(\n        input: {\n            title: \"meowwwww\"\n            media: [\"{{base64_video}}\"]\n            contenttype: video\n            tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"]\n        }\n        action: POST  \n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n        }\n    }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listposts (confirm tags)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11501\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"All tags for created post are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listPosts = body?.data?.listPosts;",
+							"    const posts = listPosts?.affectedRows;",
+							"",
+							"    pm.expect(posts, \"listPosts.affectedRows should exist\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    const postId = pm.environment.get(\"postid\");",
+							"    pm.expect(postId, \"Environment variable 'postid' must be set\").to.exist;",
+							"",
+							"    const targetPost = posts.find(p => String(p.id) === String(postId));",
+							"    pm.expect(targetPost, `Post with id ${postId} should be present in response`).to.exist;",
+							"",
+							"    const tags = targetPost.tags;",
+							"    pm.expect(tags, \"tags should be an array\").to.be.an(\"array\").that.is.not.empty;",
+							"",
+							"    tags.forEach(tag => {",
+							"        pm.expect(tag, `Tag \"${tag}\" should be lowercase`).to.equal(tag.toLowerCase());",
+							"    });",
+							"",
+							"    console.log(\"Tags for post\", postId, \":\", tags);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListPosts {\n    listPosts(postid: \"{{postid}}\") {\n        status\n        counter\n        ResponseCode\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1566,6 +2934,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create post with tags",
 			"event": [
 				{
@@ -1672,12 +3231,54 @@
 							"pm.test(\"ResponseCode is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"11701\");",
 							"});",
+							"",
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
-							"});"
+							"});",
+							"",
+							"pm.test(\"listTags.affectedRows is array of Tag objects\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const listTags = body?.data?.listTags;",
+							"    pm.expect(listTags, \"data.listTags should exist\").to.exist;",
+							"",
+							"    const rows = listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach((t, i) => {",
+							"        pm.expect(t, `Tag at index ${i} should be an object`).to.be.an(\"object\");",
+							"        pm.expect(t, `Tag at index ${i} should have name`).to.have.property(\"name\");",
+							"        pm.expect(t.name, `Tag.name at index ${i} should be string`).to.be.a(\"string\");",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"All tag names are lowercase\", function () {",
+							"    let body;",
+							"",
+							"    try {",
+							"        body = pm.response.json();",
+							"    } catch (e) {",
+							"        throw new Error(\"Response is not valid JSON\");",
+							"    }",
+							"",
+							"    const rows = body?.data?.listTags?.affectedRows;",
+							"    pm.expect(rows, \"listTags.affectedRows should exist\").to.be.an(\"array\");",
+							"",
+							"    rows.forEach(t => {",
+							"        pm.expect(t.name, `Tag \\\"${t.name}\\\" should be lowercase`).to.equal(t.name.toLowerCase());",
+							"    });",
+							"});",
+							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -1697,7 +3298,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query ListTags {\n    listTags(offset: 20, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            name\n        }\n    }\n}\n",
+						"query": "query ListTags {\n    listTags(offset: 0, limit: 20) {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            name\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -1902,6 +3503,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Posting with special characters",
 			"event": [
 				{
@@ -2025,6 +3817,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2391,6 +4374,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -2789,6 +4963,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -3112,6 +5477,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get eligibility token",
 			"event": [
 				{
@@ -3419,6 +5975,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -6142,7 +8889,20 @@
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
-							""
+							"",
+							"const json = pm.response.json();",
+							"",
+							"const tokenAmount =",
+							"    json?.data?.resolveTransferV2?.affectedRows?.tokensSubstractedFromWallet;",
+							"",
+							"pm.test(\"tokensSubstractedFromWallet exists\", () => {",
+							"    pm.expect(tokenAmount).to.not.be.undefined;",
+							"    pm.expect(tokenAmount).to.not.be.null;",
+							"});",
+							"",
+							"pm.environment.set(\"tokenamount\", Number(tokenAmount));",
+							"",
+							"console.log(\"tokenamount set to:\", tokenAmount);"
 						],
 						"type": "text/javascript",
 						"packages": {},
@@ -6260,6 +9020,197 @@
 			"response": []
 		},
 		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get transaction history",
 			"event": [
 				{
@@ -6350,7 +9301,20 @@
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
-							""
+							"",
+							"const json = pm.response.json();",
+							"",
+							"const tokenAmount =",
+							"    json?.data?.resolveTransferV2?.affectedRows?.tokensSubstractedFromWallet;",
+							"",
+							"pm.test(\"tokensSubstractedFromWallet exists\", () => {",
+							"    pm.expect(tokenAmount).to.not.be.undefined;",
+							"    pm.expect(tokenAmount).to.not.be.null;",
+							"});",
+							"",
+							"pm.environment.set(\"tokenamount\", Number(tokenAmount));",
+							"",
+							"console.log(\"tokenamount set to:\", tokenAmount);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -6450,6 +9414,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -7811,10 +10966,24 @@
 							"pm.test(\"Status is correct\", function () {",
 							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
 							"});",
-							""
+							"",
+							"const json = pm.response.json();",
+							"",
+							"const tokenAmount =",
+							"    json?.data?.resolveTransferV2?.affectedRows?.tokensSubstractedFromWallet;",
+							"",
+							"pm.test(\"tokensSubstractedFromWallet exists\", () => {",
+							"    pm.expect(tokenAmount).to.not.be.undefined;",
+							"    pm.expect(tokenAmount).to.not.be.null;",
+							"});",
+							"",
+							"pm.environment.set(\"tokenamount\", Number(tokenAmount));",
+							"",
+							"console.log(\"tokenamount set to:\", tokenAmount);"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -7824,7 +10993,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -7911,6 +11081,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -8144,6 +11505,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// pm.test(\"ResponseCode is correct\", function () {",
+							"//     pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"// });",
+							"",
+							"// pm.test(\"Status is correct\", function () {",
+							"//     pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"// });",
+							"",
+							"// const json = pm.response.json();",
+							"// const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"// const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"// let prevOpIds = pm.environment.get(\"operationid\");",
+							"// prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"// const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"// pm.test(\"No duplicate operationid from previous request\", () => {",
+							"//     pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"// });",
+							"",
+							"// const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"// pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"// pm.test(\"affectedRows is non-empty array\", () => {",
+							"//     pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"// });",
+							"",
+							"// const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"// const TOLERANCE = 0.0001;",
+							"",
+							"// function num(v) {",
+							"//     return Number(v);",
+							"// }",
+							"",
+							"// function expectNotNull(value, path) {",
+							"//     pm.expect(",
+							"//         value !== null && value !== undefined && value !== \"\",",
+							"//         `${path} is null/empty`",
+							"//     ).to.be.true;",
+							"// }",
+							"",
+							"// function expectPercent(actual, base, percent, path) {",
+							"//     const expected = +(base * percent / 100).toFixed(6);",
+							"//     pm.expect(",
+							"//         actual,",
+							"//         `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"//     ).to.be.closeTo(expected, TOLERANCE);",
+							"// }",
+							"",
+							"// rows.forEach((tx, i) => {",
+							"//     const p = `affectedRows[${i}]`;",
+							"",
+							"//     pm.test(`${p} mandatory fields not null`, () => {",
+							"//         [",
+							"//             \"operationid\",",
+							"//             \"transactionCategory\",",
+							"//             \"transactiontype\",",
+							"//             \"tokenamount\",",
+							"//             \"netTokenAmount\",",
+							"//             \"createdat\"",
+							"//         ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"//         [\"sender\", \"recipient\"].forEach(role => {",
+							"//             Object.entries(tx[role]).forEach(([k, v]) => {",
+							"//                 if (k !== \"updatedat\") {",
+							"//                     expectNotNull(v, `${p}.${role}.${k}`);",
+							"//                 }",
+							"//             });",
+							"//         });",
+							"",
+							"//         [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"//             expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"//         );",
+							"//     });",
+							"",
+							"//     pm.test(`${p} fees calculation`, () => {",
+							"//         const base = Math.abs(num(tx.netTokenAmount));",
+							"//         const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"//         expectPercent(",
+							"//             num(tx.fees.total),",
+							"//             base,",
+							"//             hasInviter ? 4 : 3,",
+							"//             `${p}.fees.total`",
+							"//         );",
+							"",
+							"//         expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"//         expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"//         if (hasInviter) {",
+							"//             expectPercent(",
+							"//                 num(tx.fees.inviter),",
+							"//                 base,",
+							"//                 1,",
+							"//                 `${p}.fees.inviter`",
+							"//             );",
+							"//         }",
+							"//     });",
+							"",
+							"//     pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"//         const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"//         switch (tx.transactionCategory) {",
+							"//             case \"LIKE\":",
+							"//             case \"DISLIKE\":",
+							"//                 pm.expect(token).to.equal(3);",
+							"//                 break;",
+							"",
+							"//             case \"COMMENT\":",
+							"//                 pm.expect(token).to.equal(1);",
+							"//                 break;",
+							"",
+							"//             case \"AD_PINNED\":",
+							"//                 pm.expect(",
+							"//                     token === 160 || token % 50 === 0,",
+							"//                     `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"//                 ).to.be.true;",
+							"//                 break;",
+							"",
+							"//             case \"POST_CREATE\":",
+							"//                 pm.expect(token).to.equal(20);",
+							"//                 break;",
+							"",
+							"//             case \"P2P_TRANSFER\":",
+							"//                 pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"//                 break;",
+							"",
+							"//             default:",
+							"//                 console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"//         }",
+							"//     });",
+							"// });"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
@@ -9898,6 +13450,197 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transaction history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+							"",
+							"const currentOpIds = rows.map(tx => tx.operationid);",
+							"",
+							"let prevOpIds = pm.environment.get(\"operationid\");",
+							"prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+							"",
+							"const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+							"",
+							"pm.test(\"No duplicate operationid from previous request\", () => {",
+							"    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+							"});",
+							"",
+							"const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+							"pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+							"",
+							"pm.test(\"affectedRows is non-empty array\", () => {",
+							"    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+							"});",
+							"",
+							"const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+							"const TOLERANCE = 0.0001;",
+							"",
+							"function num(v) {",
+							"    return Number(v);",
+							"}",
+							"",
+							"function expectNotNull(value, path) {",
+							"    pm.expect(",
+							"        value !== null && value !== undefined && value !== \"\",",
+							"        `${path} is null/empty`",
+							"    ).to.be.true;",
+							"}",
+							"",
+							"function expectPercent(actual, base, percent, path) {",
+							"    const expected = +(base * percent / 100).toFixed(6);",
+							"    pm.expect(",
+							"        actual,",
+							"        `${path} expected ${percent}% (${expected}), got ${actual}`",
+							"    ).to.be.closeTo(expected, TOLERANCE);",
+							"}",
+							"",
+							"rows.forEach((tx, i) => {",
+							"    const p = `affectedRows[${i}]`;",
+							"",
+							"    pm.test(`${p} mandatory fields not null`, () => {",
+							"        [",
+							"            \"operationid\",",
+							"            \"transactionCategory\",",
+							"            \"transactiontype\",",
+							"            \"tokenamount\",",
+							"            \"netTokenAmount\",",
+							"            \"createdat\"",
+							"        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+							"",
+							"        [\"sender\", \"recipient\"].forEach(role => {",
+							"            Object.entries(tx[role]).forEach(([k, v]) => {",
+							"                if (k !== \"updatedat\") {",
+							"                    expectNotNull(v, `${p}.${role}.${k}`);",
+							"                }",
+							"            });",
+							"        });",
+							"",
+							"        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+							"            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+							"        );",
+							"    });",
+							"",
+							"    pm.test(`${p} fees calculation`, () => {",
+							"        const base = Math.abs(num(tx.netTokenAmount));",
+							"        const hasInviter = tx.fees.inviter !== null;",
+							"",
+							"        expectPercent(",
+							"            num(tx.fees.total),",
+							"            base,",
+							"            hasInviter ? 4 : 3,",
+							"            `${p}.fees.total`",
+							"        );",
+							"",
+							"        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+							"        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+							"",
+							"        if (hasInviter) {",
+							"            expectPercent(",
+							"                num(tx.fees.inviter),",
+							"                base,",
+							"                1,",
+							"                `${p}.fees.inviter`",
+							"            );",
+							"        }",
+							"    });",
+							"",
+							"    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+							"        const token = Math.abs(num(tx.tokenamount));",
+							"",
+							"        switch (tx.transactionCategory) {",
+							"            case \"LIKE\":",
+							"            case \"DISLIKE\":",
+							"                pm.expect(token).to.equal(3);",
+							"                break;",
+							"",
+							"            case \"COMMENT\":",
+							"                pm.expect(token).to.equal(1);",
+							"                break;",
+							"",
+							"            case \"AD_PINNED\":",
+							"                pm.expect(",
+							"                    token === 160 || token % 50 === 0,",
+							"                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+							"                ).to.be.true;",
+							"                break;",
+							"",
+							"            case \"POST_CREATE\":",
+							"                pm.expect(token).to.equal(20);",
+							"                break;",
+							"",
+							"            case \"P2P_TRANSFER\":",
+							"                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+							"                break;",
+							"",
+							"            default:",
+							"                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+							"        }",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},
