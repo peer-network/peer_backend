@@ -200,16 +200,11 @@ class WalletService
         try {
             $results = $this->walletMapper->loadLiquidityById($userId);
 
-            if ($results !== false) {
-                $success = [
-                    'status' => 'success',
-                    'ResponseCode' => "11204",
-                    'currentliquidity' => $results,
-                ];
-                return $success;
-            }
-
-            return $this::createSuccessResponse(21203);
+            return [
+                'status' => 'success',
+                'ResponseCode' => "11204",
+                'currentliquidity' => $results,
+            ];
         } catch (\Exception $e) {
             return $this::respondWithError(41204);
         }
@@ -221,7 +216,7 @@ class WalletService
 
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return 0.0;
         }
     }
@@ -241,7 +236,7 @@ class WalletService
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->transactionManager->rollBack();
             return $this::respondWithError(40301);
         }
@@ -260,7 +255,7 @@ class WalletService
             );
 
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this::respondWithError(41205);
         }
     }
@@ -280,12 +275,12 @@ class WalletService
             $actions = ConstantsConfig::wallet()['ACTIONS'];
 
             $mapping = [
-                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => 'Buy like'],
-                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => 'Buy dislike'],
-                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => 'Buy comment'],
-                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => 'Buy post'],
-                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => 'Buy advertise basic'],
-                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => 'Buy advertise pinned'],
+                2 => ['price' => $prices['like'], 'whereby' => $actions['LIKE'], 'text' => ''],
+                3 => ['price' => $prices['dislike'], 'whereby' => $actions['DISLIKE'], 'text' => ''],
+                4 => ['price' => $prices['comment'], 'whereby' => $actions['COMMENT'], 'text' => ''],
+                5 => ['price' => $prices['post'], 'whereby' => $actions['POST'], 'text' => ''],
+                6 => ['price' => $prices['advertisementBasic'], 'whereby' => $actions['POSTINVESTBASIC'], 'text' => ''],
+                7 => ['price' => $prices['advertisementPinned'], 'whereby' => $actions['POSTINVESTPREMIUM'], 'text' => ''],
             ];
 
             if (!isset($mapping[$art])) {
@@ -348,7 +343,7 @@ class WalletService
                 return $response;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }

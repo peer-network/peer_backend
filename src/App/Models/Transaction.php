@@ -26,6 +26,7 @@ class Transaction
     protected string $senderid;
     protected string $recipientid;
     protected string $transactiontype;
+    protected TransactionCategory $transactioncategory;
     protected string  $tokenamount;
     protected string $transferaction;
     protected ?string $message;
@@ -41,6 +42,7 @@ class Transaction
         $this->senderid = $data['senderid'] ?? null;
         $this->recipientid = $data['recipientid'] ?? null;
         $this->transactiontype = $data['transactiontype'] ?? null;
+        $this->transactioncategory = TransactionCategory::tryFrom($data['transactioncategory']);
         $this->tokenamount = (string) ($data['tokenamount'] ?? 0);
         $this->transferaction = $data['transferaction'] ?? 'DEDUCT';
         $this->message = $data['message'] ?? null;
@@ -64,6 +66,7 @@ class Transaction
             'recipientid' => $this->recipientid,
             'tokenamount' => $this->tokenamount,
             'transferaction' => $this->transferaction,
+            'transactioncategory' => $this->transactioncategory->value,
             'message' => $this->message,
             'createdat' => $this->createdat,
         ];
@@ -227,6 +230,12 @@ class Transaction
         return $this->tokenamount;
     }
 
+
+
+    public function getTransactionCategory(): TransactionCategory
+    {
+        return $this->transactioncategory;
+    }
 
 
     /**
