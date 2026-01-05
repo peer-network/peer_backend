@@ -577,9 +577,9 @@ class LogWinMapper
 
             
             $sql = "INSERT INTO logwins 
-                    (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                    (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
                     VALUES 
-                    (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+                    (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
 
 
             $tokenIds = [];
@@ -604,6 +604,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 2, \PDO::PARAM_INT);
+                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
                     $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
@@ -630,15 +631,11 @@ class LogWinMapper
 
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    // Guard: $tokenId may not be set if failure happened before generation
-                    if (isset($tokenId) && $tokenId !== '') {
-                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
-                    }
+                    
                     continue;
                 }
             }
 
-            $this->updateLogwinStatusInBunch($tokenIds, 1);
 
             return false;
         } catch (\Throwable $e) {
@@ -868,9 +865,9 @@ class LogWinMapper
                 $this->transactionManager->beginTransaction();
 
                 $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
                 VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
 
                 try {
                     $stmt = $this->db->prepare($sql);
@@ -889,6 +886,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 3, \PDO::PARAM_INT);
+                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
                     $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
@@ -914,14 +912,11 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    if (isset($tokenId) && $tokenId !== '') {
-                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
-                    }
+                    
                     continue;
                 }
             }
 
-            $this->updateLogwinStatusInBunch($tokenIds, 1);
 
             return false;
         } catch (\Throwable $e) {
@@ -977,9 +972,9 @@ class LogWinMapper
                 $this->transactionManager->beginTransaction();
 
                 $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
                 VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
 
                 try {
                     $stmt = $this->db->prepare($sql);
@@ -998,6 +993,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 5, \PDO::PARAM_INT);
+                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
                     $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
@@ -1023,14 +1019,9 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    if (isset($tokenId) && $tokenId !== '') {
-                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
-                    }
                     continue;
                 }
             }
-
-            $this->updateLogwinStatusInBunch($tokenIds, 1);
 
             return false;
         } catch (\Throwable $e) {
@@ -1086,9 +1077,9 @@ class LogWinMapper
                 $this->transactionManager->beginTransaction();
 
                 $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
                 VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
 
                 try {
                     $stmt = $this->db->prepare($sql);
@@ -1107,6 +1098,7 @@ class LogWinMapper
                     $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
                     $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
                     $stmt->bindValue(':whereby', 4, \PDO::PARAM_INT);
+                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
                     $stmt->bindValue(':createdat', $createdat);
 
                     $stmt->execute();
@@ -1132,14 +1124,11 @@ class LogWinMapper
                     $tokenIds[] = $tokenId;
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
-                    if (isset($tokenId) && $tokenId !== '') {
-                        $this->updateLogwinStatus($tokenId, 2); // Unmigrated due to some errors
-                    }
+                   
                     continue;
                 }
             }
 
-            $this->updateLogwinStatusInBunch($tokenIds, 1);
 
             return false;
         } catch (\Throwable $e) {
