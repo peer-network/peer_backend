@@ -4,6 +4,7 @@ namespace Fawaz\Database;
 
 use DateTime;
 use Fawaz\App\Models\Transaction;
+use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\Repositories\TransactionRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
 use PDO;
@@ -161,6 +162,7 @@ class LogWinMapper
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
                             'tokenamount' => $tnxs[1]['numbers'],
@@ -187,7 +189,8 @@ class LogWinMapper
                             'recipientid' => $recipientId,
                             'tokenamount' => $inviterAmount,
                             'transferaction' => 'INVITER_FEE',
-                            'createdat' => $createdat
+                            'createdat' => $createdat,
+                            'transactioncategory' => TransactionCategory::FEE->value
                         ]);
                     }
 
@@ -221,6 +224,7 @@ class LogWinMapper
                         'recipientid' => $recipientId,
                         'tokenamount' => $poolFeeAmount,
                         'transferaction' => 'POOL_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -255,6 +259,7 @@ class LogWinMapper
                         'recipientid' => $recipientId,
                         'tokenamount' => $peerFeeAmount,
                         'transferaction' => 'PEER_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -289,6 +294,7 @@ class LogWinMapper
                         'recipientid' => $recipientId, // burn accounts for 217+ records not found.
                         'tokenamount' => $burnFeeAmount,
                         'transferaction' => 'BURN_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -407,6 +413,7 @@ class LogWinMapper
                         $this->createAndSaveTransaction($transRepo, [
                             'operationid' => $transUniqueId,
                             'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
                             'senderid' => $senderId,
                             'recipientid' => $recipientId,
                             'tokenamount' => $tnxs[1]['numbers'],
@@ -433,6 +440,7 @@ class LogWinMapper
                             'recipientid' => $recipientId,
                             'tokenamount' => $amount,
                             'transferaction' => 'INVITER_FEE',
+                            'transactioncategory' => TransactionCategory::FEE->value,
                             'createdat' => $createdat
                         ]);
                     }
@@ -460,6 +468,7 @@ class LogWinMapper
                         'recipientid' => $recipientId,
                         'tokenamount' => $amount,
                         'transferaction' => 'POOL_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -486,6 +495,7 @@ class LogWinMapper
                         'recipientid' => $recipientId,
                         'tokenamount' => $amount,
                         'transferaction' => 'PEER_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -512,6 +522,7 @@ class LogWinMapper
                         'recipientid' => $recipientId, // burn accounts for 217+ records not found.
                         'tokenamount' => $amount,
                         'transferaction' => 'BURN_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
                         'createdat' => $createdat
                     ]);
 
@@ -616,6 +627,7 @@ class LogWinMapper
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
+                        'transactioncategory' => TransactionCategory::LIKE->value,
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
@@ -631,6 +643,7 @@ class LogWinMapper
 
                 } catch (\Throwable $e) {
                     $this->transactionManager->rollback();
+                    $this->logger->info('Error generating logwins for Like action: ' . $e->getMessage());
                     
                     continue;
                 }
@@ -898,6 +911,7 @@ class LogWinMapper
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
+                        'transactioncategory' => TransactionCategory::DISLIKE->value,
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
@@ -1005,6 +1019,7 @@ class LogWinMapper
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
+                        'transactioncategory' => TransactionCategory::POST_CREATE->value,
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
@@ -1110,6 +1125,7 @@ class LogWinMapper
                     $this->createAndSaveTransaction($transRepo, [
                         'operationid' => $tokenId,
                         'transactiontype' => $transactionType,
+                        'transactioncategory' => TransactionCategory::COMMENT->value,
                         'senderid' => $userId,
                         'recipientid' => $this->burnWallet,
                         'tokenamount' => $numBers,
@@ -1187,17 +1203,12 @@ class LogWinMapper
         
         // Prepare insert queries only once
         $sqlLogWins = "INSERT INTO logwins 
-            (token, userid, postid, fromid, gems, numbers, numbersq, whereby, createdat) 
+            (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
             VALUES 
-            (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :createdat)";
+            (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
 
-        $sqlWallet = "INSERT INTO wallet 
-            (token, userid, postid, fromid, numbers, numbersq, whereby, createdat) 
-            VALUES 
-            (:token, :userid, :postid, :fromid, :numbers, :numbersq, :whereby, :createdat)";
 
         $stmtLogWins = $this->db->prepare($sqlLogWins);
-        $stmtWallet = $this->db->prepare($sqlWallet);
 
 
         foreach ($gemDays as $key => $day) {
@@ -1298,66 +1309,62 @@ class LogWinMapper
                             $stmtLogWins->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
                             $stmtLogWins->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
                             $stmtLogWins->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
+                            $stmtLogWins->bindValue(':migrated', 0, \PDO::PARAM_INT);
                             $stmtLogWins->execute();
                             $stmtLogWins->closeCursor();
 
                             // Create transaction entry
-                            $transactionType = match ($args['whereby']) {
-                                1 => 'postViewed',
-                                2 => 'postLiked',
-                                3 => 'postDisLiked',
-                                4 => 'postComment',
-                                5 => 'postCreated',
-                                default => '',
-                            };
+                            // $transactionType = match ($args['whereby']) {
+                            //     1 => 'postViewed',
+                            //     2 => 'postLiked',
+                            //     3 => 'postDisLiked',
+                            //     4 => 'postComment',
+                            //     5 => 'postCreated',
+                            //     default => '',
+                            // };
 
-                            $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
+                            // $transactionCategory = match ($args['whereby']) {
+                            //     1 => TransactionCategory::TOKEN_MINT,
+                            //     2 => TransactionCategory::LIKE,
+                            //     3 => TransactionCategory::DISLIKE,
+                            //     4 => TransactionCategory::COMMENT,
+                            //     5 => TransactionCategory::POST_CREATE,
+                            //     default => '',
+                            // };
 
-                            $senderid = $userId;
-                            if ($numBers < 0) {
-                                $transferType = 'BURN';
-                                $recipientid = $this->burnWallet;
-                            } else {
-                                $transferType = 'MINT';
-                                $recipientid = $userId;
-                                $senderid = $this->companyWallet;
-                            }
+                            // $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
 
-                            $this->createAndSaveTransaction($transRepo, [
-                                'operationid' => $tokenId,
-                                'transactiontype' => $transactionType,
-                                'senderid' => $senderid,
-                                'recipientid' => $recipientid,
-                                'tokenamount' => $numBers,
-                                'transferaction' => $transferType,
-                                'createdat' => $createdat
-                            ]);
+                            // $senderid = $userId;
+                            // if ($numBers < 0) {
+                            //     $transferType = 'BURN';
+                            //     $recipientid = $this->burnWallet;
+                            // } else {
+                            //     $transferType = 'MINT';
+                            //     $recipientid = $userId;
+                            //     $senderid = $this->companyWallet;
+                            // }
 
-                            if ($transferType === 'BURN') {
-                                $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-                            }
+                            // $this->createAndSaveTransaction($transRepo, [
+                            //     'operationid' => $tokenId,
+                            //     'transactiontype' => $transactionType,
+                            //     'transactioncategory' => $transactionCategory,
+                            //     'senderid' => $senderid,
+                            //     'recipientid' => $recipientid,
+                            //     'tokenamount' => $numBers,
+                            //     'transferaction' => $transferType,
+                            //     'createdat' => $createdat
+                            // ]);
+
+                            // if ($transferType === 'BURN') {
+                            //     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
+                            // }
 
                             $this->logger->info('Inserted into logwins successfully', [
                                 'userId' => $userId,
                                 'postid' => $postId
                             ]);
 
-                            // Insert into wallet
-                            $stmtWallet->bindValue(':token', $this->getPeerToken(), \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
-                            $stmtWallet->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                            $stmtWallet->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
-                            $stmtWallet->execute();
-                            $stmtWallet->closeCursor();
 
-                            $this->logger->info('Inserted into wallet successfully', [
-                                'userId' => $userId,
-                                'postid' => $postId
-                            ]);
                         } catch (\Throwable $e) {
                             $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
                         }
