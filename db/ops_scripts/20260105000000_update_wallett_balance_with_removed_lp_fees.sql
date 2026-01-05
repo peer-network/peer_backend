@@ -21,4 +21,10 @@ BEGIN
     SET liquidity = liquidity + fee
     WHERE userid = r.recipientid;
   END LOOP;
+
+UPDATE public.users_info ui
+SET liquidity = w.liquidity
+FROM public.wallett w
+WHERE ui.userid = w.userid;
+
 END $$;
