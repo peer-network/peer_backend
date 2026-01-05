@@ -670,29 +670,107 @@ class LogWinMapper
 
         try {
 
-            $sql = "SELECT u.uid, u.username, w.liquidity, 
-                        (SELECT sum(numbers) FROM logwins l WHERE l.userid = u.uid) AS logwin_total, 
+            $sql = "SELECT
+                        u.uid,
+                        u.username,
+                        w.liquidity,
                         (
-                        SELECT		    
-                            COALESCE(SUM(CASE WHEN t.recipientid = u.uid THEN t.tokenamount END), 0)
-                        - COALESCE(SUM(CASE WHEN t.senderid = u.uid THEN ABS(t.tokenamount) END), 0) AS net_balance
-                        FROM transactions t
+                            SELECT
+                                sum(numbers)
+                            FROM
+                                logwins l
+                            WHERE
+                                l.userid = u.uid
+                        ) AS logwin_total,
+                        (
+                            SELECT
+                                COALESCE(
+                                    SUM(
+                                        CASE
+                                            WHEN t.recipientid = u.uid THEN t.tokenamount
+                                        END
+                                    ),
+                                    0
+                                ) - COALESCE(
+                                    SUM(
+                                        CASE
+                                            WHEN t.senderid = u.uid THEN ABS(t.tokenamount)
+                                        END
+                                    ),
+                                    0
+                                ) AS net_balance
+                            FROM
+                                transactions t
                         ) AS transaction_total,
                         (
-                        (SELECT sum(numbers) FROM logwins l WHERE l.userid = u.uid)
-                        - (
-                        SELECT		    
-                            COALESCE(SUM(CASE WHEN t.recipientid = u.uid THEN t.tokenamount END), 0)
-                        - COALESCE(SUM(CASE WHEN t.senderid = u.uid THEN ABS(t.tokenamount) END), 0) AS net_balance
-                        FROM transactions t
-                        )) AS logwind_tnx_diff,
+                            (
+                                SELECT
+                                    sum(numbers)
+                                FROM
+                                    logwins l
+                                WHERE
+                                    l.userid = u.uid
+                            ) - (
+                                SELECT
+                                    COALESCE(
+                                        SUM(
+                                            CASE
+                                                WHEN t.recipientid = u.uid THEN t.tokenamount
+                                            END
+                                        ),
+                                        0
+                                    ) - COALESCE(
+                                        SUM(
+                                            CASE
+                                                WHEN t.senderid = u.uid THEN ABS(t.tokenamount)
+                                            END
+                                        ),
+                                        0
+                                    ) AS net_balance
+                                FROM
+                                    transactions t
+                            )
+                        ) AS logwind_tnx_diff,
                         (
-                            (SELECT (SUM(numbers)) FROM logwins l WHERE l.userid = u.uid) - w.liquidity
+                            (
+                                SELECT
+                                    (sum(numbers))
+                                FROM
+                                    logwins l
+                                WHERE
+                                    l.userid = u.uid
+                            ) - w.liquidity
                         ) AS logwins_balance_diff,
-                        u.createdat 
-                    FROM users u 
-                        LEFT JOIN wallett w ON u.uid = w.userid 
-                    ORDER BY u.createdat ASC LIMIT 500;
+                        (
+                            (
+                                SELECT
+                                    COALESCE(
+                                        SUM(
+                                            CASE
+                                                WHEN t.recipientid = u.uid THEN t.tokenamount
+                                            END
+                                        ),
+                                        0
+                                    ) - COALESCE(
+                                        SUM(
+                                            CASE
+                                                WHEN t.senderid = u.uid THEN ABS(t.tokenamount)
+                                            END
+                                        ),
+                                        0
+                                    ) AS net_balance
+                                FROM
+                                    transactions t
+                            ) - w.liquidity
+                        ) AS transaction_balance_diff,
+                        u.createdat
+                    FROM
+                        users u
+                        LEFT JOIN wallett w ON u.uid = w.userid
+                        where w.liquidity != 0
+                    ORDER BY
+                        u.createdat ASC limit 1000;
+;
                     ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
@@ -700,6 +778,7 @@ class LogWinMapper
             $balances = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
 
+            // ***** NEEDS TO REVIEW *****
             
             $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
@@ -713,7 +792,7 @@ class LogWinMapper
                 $this->transactionManager->beginTransaction();
 
                 try {
-                    $numBers = $balance['logwins_balance_diff'];
+                    $numBers = $balance['transaction_total'];
                     $recipientid = $balance['uid'];
 
                     $operationid = self::generateUUID();
@@ -730,11 +809,11 @@ class LogWinMapper
                         'recipientid' => $recipientid,
                         'tokenamount' => 0,
                         'transferaction' => $transferaction,
-                        'message' => 'Wallet adjustment as records mismatch - ' . $balance['logwins_balance_diff'],
+                        'message' => 'Wallet adjustment as records mismatch - ' . $balance['transaction_total'],
                         'createdat' => $createdat
                     ]);
 
-                    $this->saveWalletEntry($recipientid, (string)$numBers, 'CREDIT');
+                    $this->saveWalletEntry($recipientid, (string) $numBers, 'CREDIT');
 
                     $this->transactionManager->commit();
 
