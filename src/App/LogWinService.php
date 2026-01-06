@@ -158,6 +158,21 @@ class LogWinService
                 // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
 
             }
+
+            $response = $this->logWinMapper->checkForUnmigratedRecords();
+            
+            if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration05();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
+            }
             
             $message = 'Token transfer migration batch processed.';
 

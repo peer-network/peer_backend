@@ -545,6 +545,44 @@ class LogWinMapper
 
 
     /**
+     * 
+     */
+    public function checkForUnmigratedRecords(): bool
+    {
+
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
+
+        try {
+
+            // Group by fromid to avoid duplicates
+            $sql = "select * from logwins where migrated in (0, 2) and whereby = 18 order by createdat;";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+            $updateSql = "UPDATE logwins SET migrated = 0 WHERE migrated in (0, 2) and whereby = 18";
+
+            $updateStmt = $this->db->prepare($updateSql);
+            $updateStmt->execute();
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
+        }
+
+    }
+
+    /**
      * Generate logwins entries for Like actions between 05th March 2025 to 02nd April 2025
      *
      * Used for Actions records:
