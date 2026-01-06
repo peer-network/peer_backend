@@ -41,6 +41,8 @@ use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 
+use function grapheme_strlen;
+
 class PostService
 {
     use ResponseHelper;
@@ -785,7 +787,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 

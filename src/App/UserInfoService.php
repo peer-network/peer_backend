@@ -27,6 +27,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ResponseHelper;
 
+use function grapheme_strlen;
+
 class UserInfoService
 {
     use ResponseHelper;
@@ -356,7 +358,7 @@ class UserInfoService
 
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
-        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
+        if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this::respondWithError(30228);
         }
 
