@@ -4,9 +4,21 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
+use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\GemsInTokenResult;
+use Fawaz\App\DTO\GemsRow;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
+use Fawaz\App\MintServiceImpl;
+use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\Database\GemsRepository;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\MintRepository;
+use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Database\UserActionsRepository;
+use Fawaz\Database\UserMapper;
+use Fawaz\Database\WalletMapper;
+use Fawaz\Utils\PeerLoggerInterface;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\UncollectedGemsFactory;
 
@@ -20,13 +32,82 @@ use Tests\Support\UncollectedGemsFactory;
 final class MintServiceImplTest extends TestCase
 {
     private const DELTA = 0.00000001;
+    private MintServiceImpl $service;
     private \ReflectionMethod $calculateGemsInToken;
+    private \ReflectionMethod $buildUncollectedGemsResult;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $ref = new \ReflectionClass(\Fawaz\App\MintServiceImpl::class);
+        $ref = new \ReflectionClass(MintServiceImpl::class);
         $this->calculateGemsInToken = $ref->getMethod('calculateGemsInToken');
+        $this->calculateGemsInToken->setAccessible(true);
+        $this->buildUncollectedGemsResult = $ref->getMethod('buildUncollectedGemsResult');
+        $this->buildUncollectedGemsResult->setAccessible(true);
+
+        $this->service = new MintServiceImpl(
+            $this->createMock(PeerLoggerInterface::class),
+            $this->createMock(MintAccountRepository::class),
+            $this->createMock(MintRepository::class),
+            $this->createMock(UserMapper::class),
+            $this->createMock(PeerTokenMapper::class),
+            $this->createMock(UserActionsRepository::class),
+            $this->createMock(GemsRepository::class),
+            $this->createMock(TransactionManager::class),
+            $this->createMock(WalletMapper::class),
+            new \PDO('sqlite::memory:')
+        );
+    }
+
+    public function testBuildUncollectedGemsResult_singlePositiveUser(): void
+    {
+        $gems = $this->makeGems([
+            'u1' => [0.25],
+        ]);
+
+        /** @var UncollectedGemsResult $result */
+        $result = $this->buildUncollectedGemsResult->invoke($this->service, $gems);
+
+        $this->assertSame('0.25', $result->overallTotal);
+        $this->assertCount(1, $result->rows);
+        $row = $result->rows[0];
+        $this->assertSame('u1', $row->userid);
+        $this->assertSame('0.25', $row->totalNumbers);
+        $this->assertSame('100', $row->percentage);
+        $this->assertSame('0.25', $row->overallTotal);
+    }
+
+    public function testBuildUncollectedGemsResult_filtersNegativeUsers(): void
+    {
+        $gems = $this->makeGems([
+            'u1' => [0.25, 2.0, 5.0],
+            'u2' => [-3.0, 0.25],
+        ]);
+
+        /** @var UncollectedGemsResult $result */
+        $result = $this->buildUncollectedGemsResult->invoke($this->service, $gems);
+
+        $this->assertSame('7.25', $result->overallTotal);
+        $this->assertCount(3, $result->rows);
+        foreach ($result->rows as $row) {
+            $this->assertSame('u1', $row->userid);
+            $this->assertSame('7.25', $row->totalNumbers);
+            $this->assertSame('100', $row->percentage);
+        }
+    }
+
+    public function testBuildUncollectedGemsResult_allNegativeTotalsReturnsEmpty(): void
+    {
+        $gems = $this->makeGems([
+            'u1' => [-3.0],
+            'u2' => [-2.0, 1.5, -0.5],
+        ]);
+
+        /** @var UncollectedGemsResult $result */
+        $result = $this->buildUncollectedGemsResult->invoke($this->service, $gems);
+
+        $this->assertSame('0', $result->overallTotal);
+        $this->assertCount(0, $result->rows);
     }
 
     public function testCalculateGemsInToken_singleUser_quarterGem(): void
@@ -100,22 +181,6 @@ final class MintServiceImplTest extends TestCase
         $this->assertEqualsWithDelta(5000.0, (float)$result->confirmation, self::DELTA);
     }
 
-    public function testCalculateGemsInToken_oneUser_dislikeAndView(): void
-    {
-        $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
-            'u1' => [-3, 0.25],
-        ]);
-
-        // Assert:
-        // totalGems = 0.0, negative amount of gems per user > 0
-        // DAILY_NUMBER_TOKEN = 5000; gemsInToken = 5000 / 0.5 = 10000
-        // confirmation = totalGems * gemsInToken = 0.5 * 10000 = 5000
-        /** @var GemsInTokenResult $result */
-        $result = $this->calculateGemsInToken->invoke(null, $uncollected);
-
-        $this->assertSame('0', $result->totalGems);
-    }
-
     public function testCalculateGemsInToken_oneUser_like_dislike_comment_view(): void
     {
         $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
@@ -132,7 +197,7 @@ final class MintServiceImplTest extends TestCase
     public function testCalculateGemsInToken_twoUsers_one_with_negative_gems_amount(): void
     {
 
-        $uncollected = UncollectedGemsFactory::makeFiveUsersSample([
+        $uncollected = $this->makeSanitizedUncollected([
             'u1' => [-3, 2, 5, 0.25],
             'u2' => [-3, 0.25],
         ]);
@@ -161,4 +226,43 @@ final class MintServiceImplTest extends TestCase
         $this->assertSame('4.25', $result->totalGems);
     }
 
+    /**
+     * Build sanitized UncollectedGemsResult using the service conversion logic.
+     *
+     * @param array<string, list<float|int>> $usersWithGems
+     */
+    private function makeSanitizedUncollected(array $usersWithGems): UncollectedGemsResult
+    {
+        $gems = $this->makeGems($usersWithGems);
+
+        /** @var UncollectedGemsResult $result */
+        $result = $this->buildUncollectedGemsResult->invoke($this->service, $gems);
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, list<float|int>> $usersWithGems
+     */
+    private function makeGems(array $usersWithGems): Gems
+    {
+        $rows = [];
+        $i = 1;
+        foreach ($usersWithGems as $uid => $entries) {
+            foreach ($entries as $value) {
+                $rows[] = new GemsRow(
+                    userid: (string)$uid,
+                    gemid: 'g'.$i,
+                    postid: 'p'.$i,
+                    fromid: 'f'.$i,
+                    gems: rtrim(rtrim(sprintf('%.10F', (float)$value), '0'), '.'),
+                    whereby: 0,
+                    createdat: '2025-01-01 00:00:00'
+                );
+                $i++;
+            }
+        }
+
+        return new Gems($rows);
+    }
 }

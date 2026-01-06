@@ -237,7 +237,6 @@ class GemsRepositoryImpl implements GemsRepository
                 createdat: (string)$r['createdat']
             );
         }
-        var_dump($mapped);
         return new Gems($mapped);
     }
 

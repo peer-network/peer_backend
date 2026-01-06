@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
+use Fawaz\App\DTO\UncollectedGemsRow;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\GemsRepository;
@@ -95,6 +97,82 @@ class MintServiceImpl implements MintService
         return new GemsInTokenResult($totalGems, $gemsintoken, $bestatigungInitial);
     }
 
+    /**
+     * Convert raw gem rows into the structure required for token distribution.
+     */
+    private function buildUncollectedGemsResult(Gems $gems): UncollectedGemsResult
+    {
+        $userTotals = [];
+        $rowsByUser = [];
+
+        foreach ($gems->rows as $row) {
+            $uid = (string)$row->userid;
+            $userTotals[$uid] = $userTotals[$uid] ?? '0';
+            $userTotals[$uid] = TokenHelper::addRc($userTotals[$uid], (string)$row->gems);
+            $rowsByUser[$uid][] = $row;
+        }
+
+        $filteredTotals = [];
+        foreach ($userTotals as $uid => $total) {
+            if ((float)$total < 0) {
+                continue;
+            }
+            $filteredTotals[$uid] = $total;
+        }
+
+        if (empty($filteredTotals)) {
+            return new UncollectedGemsResult([], '0');
+        }
+
+        $overallTotal = '0';
+        foreach ($filteredTotals as $total) {
+            $overallTotal = TokenHelper::addRc($overallTotal, $total);
+        }
+
+        $overallTotal = $this->normalizeDecimalString($overallTotal);
+
+        $rows = [];
+        foreach ($filteredTotals as $uid => $totalNumbers) {
+            $totalNumbers = $this->normalizeDecimalString($totalNumbers);
+            $percentage = '0';
+            if ((float)$overallTotal !== 0.0) {
+                $percentage = TokenHelper::mulRc(
+                    TokenHelper::divRc($totalNumbers, $overallTotal),
+                    '100'
+                );
+            }
+            $percentage = $this->normalizeDecimalString($percentage);
+
+            foreach ($rowsByUser[$uid] as $row) {
+                $rows[] = new UncollectedGemsRow(
+                    userid: (string)$row->userid,
+                    gemid: (string)$row->gemid,
+                    postid: (string)$row->postid,
+                    fromid: (string)$row->fromid,
+                    gems: (string)$row->gems,
+                    whereby: (int)$row->whereby,
+                    createdat: (string)$row->createdat,
+                    totalNumbers: $totalNumbers,
+                    overallTotal: $overallTotal,
+                    percentage: $percentage
+                );
+            }
+        }
+
+        return new UncollectedGemsResult($rows, $overallTotal);
+    }
+
+    private function normalizeDecimalString(string $value): string
+    {
+        if (str_contains($value, '.')) {
+            $value = rtrim(rtrim($value, '0'), '.');
+        }
+
+        return $value === '' || $value === '-'
+            ? '0'
+            : $value;
+    }
+
 
     private function tokensPerUser(
         UncollectedGemsResult $uncollectedGems,
@@ -105,18 +183,8 @@ class MintServiceImpl implements MintService
 
         foreach ($uncollectedGems->rows as $row) {
             $userId = (string)$row->userid;
-            if (!isset($args[$userId])) {
-                $totalTokenNumber = TokenHelper::mulRc((string) $row->totalNumbers, $gemsInToken->gemsInToken);
-                $args[$userId] = [
-                    'userid' => $userId,
-                    'gems' => (float)$row->totalNumbers,
-                    'tokens' => $totalTokenNumber,
-                    'percentage' => (float)$row->percentage,
-                    'details' => []
-                ];
-
-                // Track total tokens per user in a compact internal array
-                $tokenTotals[$userId] = $totalTokenNumber;
+            if (!isset($tokenTotals[$userId])) {
+                $tokenTotals[$userId] = TokenHelper::mulRc((string) $row->totalNumbers, $gemsInToken->gemsInToken);
             }
         }
 
@@ -149,15 +217,19 @@ class MintServiceImpl implements MintService
             $mintid = $this->generateUUID();
 
             // ALL uncollected gems
-            $uncollectedGems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
+            $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
 
-            if (empty($uncollectedGems)) {
+            if ($gems === null || empty($gems->rows)) {
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
 
-            // here filter users/gems whose sum of gems is less than 0
+            $uncollectedGems = $this->buildUncollectedGemsResult($gems);
 
+            if (empty($uncollectedGems->rows) || (float)$uncollectedGems->overallTotal <= 0) {
+                $this->transactionManager->rollback();
+                return self::createSuccessResponse(21206);
+            }
 
             $gemsInTokenResult = $this::calculateGemsInToken(
                 $uncollectedGems
