@@ -22,6 +22,8 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\config\constants\ConstantsConfig;
 
+use function grapheme_strlen;
+
 class PeerTokenService
 {
     use ResponseHelper;
@@ -109,7 +111,7 @@ class PeerTokenService
                 $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
                 $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/iu';
 
-                if (strlen($message) > $maxLength) {
+                if (grapheme_strlen($message) > $maxLength) {
                     $this->logger->warning('Transfer message length is too high', [
                         'maxLength' => $maxLength,
                     ]);

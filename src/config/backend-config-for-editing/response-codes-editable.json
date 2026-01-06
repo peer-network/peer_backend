@@ -867,6 +867,10 @@
         "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
         "userFriendlyComment": "Please provide either a user ID or a username, not both."
     },
+    "31013": {
+        "comment": "Profile updates blocked due to moderation",
+        "userFriendlyComment": "Profile updates blocked due to moderation."
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."

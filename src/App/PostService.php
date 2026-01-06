@@ -41,6 +41,8 @@ use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
 
+use function grapheme_strlen;
+
 class PostService
 {
     use ResponseHelper;
@@ -784,7 +786,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
