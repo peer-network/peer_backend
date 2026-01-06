@@ -229,10 +229,6 @@ class GemsRepositoryImpl implements GemsRepository
     }
     
     /**
-     * Immutable DTO variant of fetchUncollectedGemsForMint result.
-     * Does not alter existing callers that expect an array.
-     */
-    /**
      * Immutable DTO result for uncollected gems over a time window.
      *
      * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
@@ -261,7 +257,8 @@ class GemsRepositoryImpl implements GemsRepository
                 percentage: (string)$r['percentage'],
             );
         }
-
+        var_dump($mapped);
+        exit;
         return new UncollectedGemsResult($mapped, $overall);
     }
 

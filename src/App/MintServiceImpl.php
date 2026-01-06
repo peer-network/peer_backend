@@ -154,6 +154,9 @@ class MintServiceImpl implements MintService
                 return self::createSuccessResponse(21206);
             }
 
+            // here filter users/gems whose sum of gems is less than 0
+
+
             $gemsInTokenResult = $this::calculateGemsInToken(
                 $uncollectedGems
             );
