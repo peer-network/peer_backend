@@ -27,6 +27,8 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ResponseHelper;
 
+use function grapheme_strlen;
+
 class UserInfoService
 {
     use ResponseHelper;
@@ -337,9 +339,26 @@ class UserInfoService
             return $this::respondWithError(60501);
         }
 
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
+        }
+
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
-        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
+        if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this::respondWithError(30228);
         }
 
@@ -393,6 +412,23 @@ class UserInfoService
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
+        }
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
         }
 
         if (trim($mediaFile) === '') {
