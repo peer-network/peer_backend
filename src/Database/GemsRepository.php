@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\UncollectedGemsResult;
 
 interface GemsRepository
@@ -29,9 +30,9 @@ interface GemsRepository
      * Immutable DTO result for uncollected gems over a time window.
      *
      * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
-     * @return UncollectedGemsResult DTO containing rows and overall total
+     * @return ?Gems DTO containing rows
      */
-    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): UncollectedGemsResult;
+    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): ?Gems;
     
     /**
      * Apply mint metadata and mark corresponding gems as collected.

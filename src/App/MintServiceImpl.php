@@ -70,7 +70,7 @@ class MintServiceImpl implements MintService
     
     public function listTodaysInteractions(): ?array
     {
-        $this->logger->debug('WalletService.listTodaysInteractions started');
+        $this->logger->debug('MintService.listTodaysInteractions started');
 
         try {
             $response = $this->userActionsRepository->listTodaysInteractions($this->currentUserId);
@@ -100,6 +100,7 @@ class MintServiceImpl implements MintService
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInToken
     ): array {
+        $this->logger->debug('MintService.tokensPerUser started');
         $tokenTotals = [];
 
         foreach ($uncollectedGems->rows as $row) {
@@ -124,6 +125,7 @@ class MintServiceImpl implements MintService
 
     public function distributeTokensFromGems(string $day = 'D0'): array
     {
+        $this->logger->debug('MintService.distributeTokensFromGems started', ['day' => $day]);
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
@@ -209,6 +211,9 @@ class MintServiceImpl implements MintService
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInTokenResult
     ): array {
+        $this->logger->debug('MintService.transferMintTokens started', [
+            'recipients' => count($tokensPerUser),
+        ]);
         $mintAccount = $this->mintAccountRepository->getDefaultAccount();
 
         if ($mintAccount === null) {

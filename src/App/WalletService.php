@@ -162,27 +162,6 @@ class WalletService
         }
     }
 
-    public function deductFromWallet(string $userId, ?array $args = []): ?array
-    {
-        $this->logger->debug('WalletService.deductFromWallet started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->walletMapper->deductFromWallets($userId, $args);
-            if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
-                return $response;
-            } else {
-                $this->transactionManager->rollBack();
-                return $response;
-            }
-
-        } catch (Exception $e) {
-            $this->transactionManager->rollBack();
-            return $this::respondWithError(40301);
-        }
-    }
-
     /**
      * Transfer Tokens from User Wallet for Advertisement Actions
      * Add logwins entry

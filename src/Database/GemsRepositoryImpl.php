@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 namespace Fawaz\Database;
-use Fawaz\App\DTO\MintLogItem;
+
+use Fawaz\App\DTO\Gems;
+use Fawaz\App\DTO\GemsRow;
 use Fawaz\App\DTO\UncollectedGemsResult;
-use Fawaz\App\DTO\UncollectedGemsRow;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -30,6 +31,7 @@ class GemsRepositoryImpl implements GemsRepository
      */
     public function fetchUncollectedGemsStats(): array
     {
+        $this->logger->debug('GemsRepositoryImpl.fetchUncollectedGemsStats started');
         try {
             $sql = "
                 SELECT 
@@ -182,10 +184,7 @@ class GemsRepositoryImpl implements GemsRepository
             'D4' => "createdat::date = CURRENT_DATE - INTERVAL '4 day'",
             'D5' => "createdat::date = CURRENT_DATE - INTERVAL '5 day'",
             'D6' => "createdat::date = CURRENT_DATE - INTERVAL '6 day'",
-            'D7' => "createdat::date = CURRENT_DATE - INTERVAL '7 day'",
-            'W0' => "DATE_PART('week', createdat) = DATE_PART('week', CURRENT_DATE) AND EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)",
-            'M0' => "TO_CHAR(createdat, 'YYYY-MM') = TO_CHAR(CURRENT_DATE, 'YYYY-MM')",
-            'Y0' => "EXTRACT(YEAR FROM createdat) = EXTRACT(YEAR FROM CURRENT_DATE)",
+            'D7' => "createdat::date = CURRENT_DATE - INTERVAL '7 day'"
         ];
 
         if (!array_key_exists($day, $dayOptionsRaw)) {
@@ -196,17 +195,6 @@ class GemsRepositoryImpl implements GemsRepository
         $whereConditionAliased = preg_replace('/\b(createdat)\b/', 'g.$1', $whereConditionRaw);
 
         $sql = "
-            WITH user_sums AS (
-                SELECT 
-                    userid,
-                    GREATEST(SUM(gems), 0) AS total_numbers
-                FROM gems
-                WHERE {$whereConditionRaw} AND collected = 0
-                GROUP BY userid
-            ),
-            total_sum AS (
-                SELECT SUM(total_numbers) AS overall_total FROM user_sums
-            )
             SELECT 
                 g.userid,
                 g.gemid,
@@ -214,14 +202,9 @@ class GemsRepositoryImpl implements GemsRepository
                 g.fromid,
                 g.gems,
                 g.whereby,
-                g.createdat,
-                us.total_numbers,
-                (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
-                (us.total_numbers * 100.0 / ts.overall_total) AS percentage
+                g.createdat
             FROM gems g
-            JOIN user_sums us ON g.userid = us.userid
-            CROSS JOIN total_sum ts
-            WHERE us.total_numbers > 0 AND g.collected = 0 AND {$whereConditionAliased};
+            WHERE g.collected = 0 AND {$whereConditionAliased};
         ";
 
         $stmt = $this->db->query($sql);
@@ -232,34 +215,30 @@ class GemsRepositoryImpl implements GemsRepository
      * Immutable DTO result for uncollected gems over a time window.
      *
      * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
-     * @return UncollectedGemsResult DTO containing rows and overall total
+     * @return Gems DTO containing rows
      */
-    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): UncollectedGemsResult
+    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): ?Gems
     {
+        $this->logger->debug('GemsRepositoryImpl.fetchUncollectedGemsForMintResult started', ['day' => $day]);
         $rows = $this->fetchUncollectedGemsForMint($day);
         if (empty($rows)) {
-            return new UncollectedGemsResult([], '0');
+            return null;
         }
 
-        $overall = isset($rows[0]['overall_total']) ? (string)$rows[0]['overall_total'] : '0';
         $mapped = [];
         foreach ($rows as $r) {
-            $mapped[] = new UncollectedGemsRow(
+            $mapped[] = new GemsRow(
                 userid: (string)$r['userid'],
                 gemid: (string)$r['gemid'],
                 postid: isset($r['postid']) ? (string)$r['postid'] : null,
                 fromid: isset($r['fromid']) ? (string)$r['fromid'] : null,
                 gems: (string)$r['gems'],
                 whereby: (int)$r['whereby'],
-                createdat: (string)$r['createdat'],
-                totalNumbers: (string)$r['total_numbers'],
-                overallTotal: (string)($r['overall_total'] ?? $overall),
-                percentage: (string)$r['percentage'],
+                createdat: (string)$r['createdat']
             );
         }
         var_dump($mapped);
-        exit;
-        return new UncollectedGemsResult($mapped, $overall);
+        return new Gems($mapped);
     }
 
     /**
@@ -274,7 +253,10 @@ class GemsRepositoryImpl implements GemsRepository
     {
         \ignore_user_abort(true);
 
-        $this->logger->debug('WalletMapper.setGlobalWins started');
+        $this->logger->debug('GemsRepositoryImpl.setGlobalWins started', [
+            'tableName' => $tableName,
+            'winType' => $winType,
+        ]);
 
         try {
             $sql = "SELECT s.userid, s.postid, s.createdat, p.userid as poster 
