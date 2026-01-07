@@ -209,7 +209,7 @@ class MintServiceImpl implements MintService
             // Prevent duplicate minting for the selected period
             if ($this->mintRepository->getMintForDay($day)) {
                 $this->logger->error('Mint already performed for selected period', ['day' => $day]);
-                return $this::respondWithError(40301);
+                return $this::respondWithError(31204);
             }
 
             $this->transactionManager->beginTransaction();
@@ -258,15 +258,12 @@ class MintServiceImpl implements MintService
             );
 
             $this->transactionManager->commit();
-
-            $graphQlArgs = $this->formatMintResponseUserStatus($args);
-
             return $this->createSuccessResponse(
                 11208,
                 [
                     'winStatus' => $gemsInTokenResult->toWinStatusArray(),
-                    'userStatus' =>  $graphQlArgs,
-                    'counter' => count($graphQlArgs)
+                    'userStatus' =>  $args,
+                    'counter' => count($args)
                 ],
                 true,
                 'counter'    
@@ -338,15 +335,11 @@ class MintServiceImpl implements MintService
         foreach ($uncollectedGems->rows as $row) {
             $userId = (string)$row->userid;
 
-            if (!isset($args[$userId])) {
-                $args[$userId] = [
-                    'userid' => $userId,
-                    'gems' => (float)$row->totalGems,
-                    'tokens' => $tokensPerUser[$userId],
-                    'percentage' => (float)$row->percentage,
-                    'details' => []
-                ];
-            }
+            $args[$userId]['userid'] = $userId;
+            $args[$userId]['gems'] = (float)$row->totalGems;
+            $args[$userId]['tokens'] = $tokensPerUser[$userId];
+            $args[$userId]['percentage'] = (float)$row->percentage;
+            $args[$userId]['details'] = $args[$userId]['details'] ?? [];
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row->gemid,
@@ -367,25 +360,6 @@ class MintServiceImpl implements MintService
             );
         }
         return $args;
-    }
-
-    /**
-     * Convert Mint transfer args to the structure expected by GraphQLSchemaBuilder.
-     */
-    private function formatMintResponseUserStatus(array $args): array
-    {
-        $res = array_values(array_map(function (array $item): array {
-            return [
-                'userid' => isset($item['userid']) ? (string)$item['userid'] : '',
-                'gems' => isset($item['gems']) ? (float)$item['gems'] : 0.0,
-                'tokens' => isset($item['logItem']) ? (float)$item['logItem']->tokenamount : 0.0,
-                'percentage' => isset($item['percentage']) ? (float)$item['percentage'] : 0.0,
-                'details' => isset($item['details']) ? $item['details'] : []
-            ];
-        }, $args));
-        var_dump($res);
-        exit;  
-        return $res;
     }
     
     /**
