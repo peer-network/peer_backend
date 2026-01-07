@@ -8,12 +8,6 @@ parameters:
     reportUnmatchedIgnoredErrors: false
 
     ignoreErrors:
-        - '#Method .+::.+\(\) is unused#'
         - '#(Comparison operation .+ is always false|Strict comparison using .+ will always evaluate to .+|Negated boolean expression is always false|Result of .+ is always (true|false)|Dead catch .+ is never thrown|Strict comparison using .+ will always evaluate to true)#'
         - '#Offset .+ in (isset|empty)\(\) always exists and is not (nullable|falsy)#'
         - '#Variable .+ in (isset|empty)\(\) (always exists and is not (nullable|falsy)|is never defined)#'
-        - '#Parameter .+ of function array_map expects .+, .+ given#'
-        - '#Offset .+ does not exist on array\{\}#'
-        - '#Call to static method .+ on an unknown class .+#'
-        - '#Invoking callable on an unknown class .+#'
-        - '#If condition is always false#'
