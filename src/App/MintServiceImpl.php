@@ -244,6 +244,7 @@ class MintServiceImpl implements MintService
                 $gemsForDistribution,
                 $gemsInTokenResult
             );
+            
             $this->mintRepository->insertMint(
                 $mintid,
                 new DateTime()->format('Y-m-d'),
@@ -257,18 +258,20 @@ class MintServiceImpl implements MintService
             );
 
             $this->transactionManager->commit();
+
+            $graphQlArgs = $this->formatMintResponseUserStatus($args);
+
             return $this->createSuccessResponse(
                 11208,
                 [
                     'winStatus' => $gemsInTokenResult->toWinStatusArray(),
-                    'userStatus' =>  array_values($args),
-                    'counter' => count($args) - 1
+                    'userStatus' =>  $graphQlArgs,
+                    'counter' => count($graphQlArgs)
                 ],
                 true,
                 'counter'    
             );
         } catch(\Throwable $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
@@ -366,6 +369,25 @@ class MintServiceImpl implements MintService
         return $args;
     }
 
+    /**
+     * Convert Mint transfer args to the structure expected by GraphQLSchemaBuilder.
+     */
+    private function formatMintResponseUserStatus(array $args): array
+    {
+        $res = array_values(array_map(function (array $item): array {
+            return [
+                'userid' => isset($item['userid']) ? (string)$item['userid'] : '',
+                'gems' => isset($item['gems']) ? (float)$item['gems'] : 0.0,
+                'tokens' => isset($item['logItem']) ? (float)$item['logItem']->tokenamount : 0.0,
+                'percentage' => isset($item['percentage']) ? (float)$item['percentage'] : 0.0,
+                'details' => isset($item['details']) ? $item['details'] : []
+            ];
+        }, $args));
+        var_dump($res);
+        exit;  
+        return $res;
+    }
+    
     /**
      * Get the single Mint Account row.
      */
