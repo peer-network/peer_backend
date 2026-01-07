@@ -207,8 +207,8 @@ class PeerTokenService
                 return $this::createSuccessResponse(
                     11211,
                     [
-                        'tokenSend'                  => $response['tokenSend'],
-                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
+                        'tokenSend'                  => sprintf('%.10F', $response['tokenSend']),
+                        'tokensSubstractedFromWallet' => sprintf('%.10F', $response['tokensSubstractedFromWallet']),
                         'createdat'                  => $response['createdat'] ?? '',
                     ],
                     false // no counter needed for associative array
