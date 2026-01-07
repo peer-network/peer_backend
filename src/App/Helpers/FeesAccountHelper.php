@@ -13,6 +13,7 @@ class FeesAccountHelper
             'BURN_ACCOUNT' => $_ENV['BURN_ACCOUNT'],
             'LIQUIDITY_POOL' => $_ENV['LIQUIDITY_POOL'],
             'BTC_POOL' => $_ENV['BTC_POOL'],
+            'PEER_SHOP' => $_ENV['PEER_SHOP'],
         ];
     }
 }

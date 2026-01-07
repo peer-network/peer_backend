@@ -56,6 +56,7 @@ use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\Models\TransactionCategory;
+use Fawaz\App\PeerShopService;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -82,6 +83,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
+        protected PeerShopService $peerShopService,
         protected AdvertisementService $advertisementService,
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
@@ -214,6 +216,7 @@ class GraphQLSchemaBuilder
         $this->dailyFreeService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
+        $this->peerShopService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
     }
@@ -1679,6 +1682,7 @@ class GraphQLSchemaBuilder
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'performShopPurchase' => fn(mixed $root, array $args) => $this->peerShopService->performShopPurchase($args),
         ];
     }
 
