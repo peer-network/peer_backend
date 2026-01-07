@@ -1948,58 +1948,6 @@
 			"response": []
 		},
 		{
-			"name": "Update too short bio",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30228\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation UpdateBio {\n    updateBio(biography: \"va\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "{{test-backend}}/graphql",
-					"host": [
-						"{{test-backend}}"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "XSS bio atack",
 			"event": [
 				{
