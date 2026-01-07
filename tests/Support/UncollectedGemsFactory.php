@@ -48,7 +48,7 @@ final class UncollectedGemsFactory
         $rows = [];
         $i = 1;
         foreach ($users as $uid => $entries) {
-            $totalNumbersStr = rtrim(rtrim(sprintf('%.10F', $totals[$uid]), '0'), '.');
+            $totalGemsStr = rtrim(rtrim(sprintf('%.10F', $totals[$uid]), '0'), '.');
             $percentage = $overall != 0.0 ? ($totals[$uid] / $overall) * 100.0 : 0.0;
             $percentageStr = rtrim(rtrim(sprintf('%.10F', $percentage), '0'), '.');
             foreach ($entries as $g) {
@@ -60,7 +60,7 @@ final class UncollectedGemsFactory
                     gems: rtrim(rtrim(sprintf('%.10F', $g), '0'), '.'),
                     whereby: 0,
                     createdat: '2025-01-01 00:00:00',
-                    totalNumbers: $totalNumbersStr,
+                    totalGems: $totalGemsStr,
                     overallTotal: $overallStr,
                     percentage: $percentageStr
                 );

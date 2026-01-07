@@ -38,11 +38,11 @@ interface GemsRepository
      * Apply mint metadata and mark corresponding gems as collected.
      *
      * @param string                 $mintId           The mint operation identifier
-     * @param UncollectedGemsResult  $uncollectedGems  The result set to apply
+     * @param Gems  $uncollectedGems  The result set to apply
      * @param array<string,array<string, mixed>>    $mintLogItems     Map of userId => log item (contains transactionId)
      * @return void
      */
-    public function applyMintInfo(string $mintId, UncollectedGemsResult $uncollectedGems, array $mintLogItems);
+    public function applyMintInfo(string $mintId, Gems $uncollectedGems, array $mintLogItems);
 
     /**
      * Insert global win entries into gems and mark source rows as collected.

@@ -19,7 +19,7 @@ final class UncollectedGemsRow
         public readonly string $gems,
         public readonly int $whereby,
         public readonly string $createdat,
-        public readonly string $totalNumbers,
+        public readonly string $totalGems,
         public readonly string $overallTotal,
         public readonly string $percentage,
     ) {}

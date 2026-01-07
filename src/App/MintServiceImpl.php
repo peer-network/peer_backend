@@ -132,12 +132,12 @@ class MintServiceImpl implements MintService
         $overallTotal = $this->normalizeDecimalString($overallTotal);
 
         $rows = [];
-        foreach ($filteredTotals as $uid => $totalNumbers) {
-            $totalNumbers = $this->normalizeDecimalString($totalNumbers);
+        foreach ($filteredTotals as $uid => $totalGems) {
+            $totalGems = $this->normalizeDecimalString($totalGems);
             $percentage = '0';
             if ((float)$overallTotal !== 0.0) {
                 $percentage = TokenHelper::mulRc(
-                    TokenHelper::divRc($totalNumbers, $overallTotal),
+                    TokenHelper::divRc($totalGems, $overallTotal),
                     '100'
                 );
             }
@@ -152,7 +152,7 @@ class MintServiceImpl implements MintService
                     gems: (string)$row->gems,
                     whereby: (int)$row->whereby,
                     createdat: (string)$row->createdat,
-                    totalNumbers: $totalNumbers,
+                    totalGems: $totalGems,
                     overallTotal: $overallTotal,
                     percentage: $percentage
                 );
@@ -184,7 +184,7 @@ class MintServiceImpl implements MintService
         foreach ($uncollectedGems->rows as $row) {
             $userId = (string)$row->userid;
             if (!isset($tokenTotals[$userId])) {
-                $tokenTotals[$userId] = TokenHelper::mulRc((string) $row->totalNumbers, $gemsInToken->gemsInToken);
+                $tokenTotals[$userId] = TokenHelper::mulRc((string) $row->totalGems, $gemsInToken->gemsInToken);
             }
         }
 
@@ -224,28 +224,26 @@ class MintServiceImpl implements MintService
                 return self::createSuccessResponse(21206);
             }
 
-            $uncollectedGems = $this->buildUncollectedGemsResult($gems);
+            $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
 
-            if (empty($uncollectedGems->rows) || (float)$uncollectedGems->overallTotal <= 0) {
+            if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
-
             $gemsInTokenResult = $this::calculateGemsInToken(
-                $uncollectedGems
+                $gemsForDistribution
             );
-            
+
             $tokensPerUser = $this->tokensPerUser(
-                $uncollectedGems,
+                $gemsForDistribution,
                 $gemsInTokenResult
             );
-
+            
             $args = $this->transferMintTokens(
                 $tokensPerUser,
-                $uncollectedGems,
+                $gemsForDistribution,
                 $gemsInTokenResult
             );
-            
             $this->mintRepository->insertMint(
                 $mintid,
                 new DateTime()->format('Y-m-d'),
@@ -254,7 +252,7 @@ class MintServiceImpl implements MintService
 
             $this->gemsRepository->applyMintInfo(
                 $mintid,
-                $uncollectedGems,
+                $gems,
                 $args
             );
 
@@ -294,7 +292,6 @@ class MintServiceImpl implements MintService
         }
         
         $args = [];
-
         foreach ($tokensPerUser as $recipientUserId => $amountToTransfer) {
             // Skip zero or negative amounts
             if ((float)$amountToTransfer <= 0) {
@@ -339,25 +336,22 @@ class MintServiceImpl implements MintService
             $userId = (string)$row->userid;
 
             if (!isset($args[$userId])) {
-                $totalTokenNumber = TokenHelper::mulRc((string) $row->totalNumbers, $gemsInTokenResult->gemsInToken);
                 $args[$userId] = [
                     'userid' => $userId,
-                    'gems' => (float)$row->totalNumbers,
-                    'tokens' => $totalTokenNumber,
+                    'gems' => (float)$row->totalGems,
+                    'tokens' => $tokensPerUser[$userId],
                     'percentage' => (float)$row->percentage,
                     'details' => []
                 ];
             }
-
-            $rowgems2token = TokenHelper::mulRc((string) $row->gems, $gemsInTokenResult->gemsInToken);
 
             $args[$userId]['details'][] = [
                 'gemid' => (string)$row->gemid,
                 'userid' => (string)$row->userid,
                 'postid' => (string)$row->postid,
                 'fromid' => (string)$row->fromid,
-                'gems' => (float)$row->gemid,
-                'numbers' => (float)$rowgems2token,
+                'gems' => (float)$row->gems,
+                'numbers' => $tokensPerUser[$userId],
                 'whereby' => (int)$row->whereby,
                 'createdat' => $row->createdat
             ];
@@ -366,10 +360,9 @@ class MintServiceImpl implements MintService
                 $row->gemid,
                 $args[$row->userid]['transactionId'],
                 $args[$row->userid]['operationId'],
-                $rowgems2token
+                $tokensPerUser[$userId]
             );
         }
-
         return $args;
     }
 

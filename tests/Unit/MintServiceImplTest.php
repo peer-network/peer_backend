@@ -72,7 +72,7 @@ final class MintServiceImplTest extends TestCase
         $this->assertCount(1, $result->rows);
         $row = $result->rows[0];
         $this->assertSame('u1', $row->userid);
-        $this->assertSame('0.25', $row->totalNumbers);
+        $this->assertSame('0.25', $row->totalGems);
         $this->assertSame('100', $row->percentage);
         $this->assertSame('0.25', $row->overallTotal);
     }
@@ -91,7 +91,7 @@ final class MintServiceImplTest extends TestCase
         $this->assertCount(3, $result->rows);
         foreach ($result->rows as $row) {
             $this->assertSame('u1', $row->userid);
-            $this->assertSame('7.25', $row->totalNumbers);
+            $this->assertSame('7.25', $row->totalGems);
             $this->assertSame('100', $row->percentage);
         }
     }

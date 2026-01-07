@@ -325,13 +325,13 @@ class GemsRepositoryImpl implements GemsRepository
      * Apply mint metadata and mark corresponding gems as collected.
      *
      * @param string                $mintId          The mint operation identifier
-     * @param UncollectedGemsResult $uncollectedGems The result set to apply
+     * @param Gems $uncollectedGems The result set to apply
      * @param array<string,array<string, mixed>>    $mintLogItems     Map of userId => log item (contains transactionId)
      * @return void
      */
     public function applyMintInfo(
         string $mintId, 
-        UncollectedGemsResult $uncollectedGems, 
+        Gems $uncollectedGems, 
         array $mintLogItems
     ): void {
 
