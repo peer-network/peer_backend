@@ -41,6 +41,8 @@ use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 
+use function grapheme_strlen;
+
 class PostService
 {
     use ResponseHelper;
@@ -371,7 +373,7 @@ class PostService
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     $this->transactionManager->rollback();
-                    return $this::respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
@@ -785,7 +787,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 

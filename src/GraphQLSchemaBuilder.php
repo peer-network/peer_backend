@@ -38,6 +38,7 @@ use Fawaz\App\Errors\ErrorMapper;
 use Fawaz\Utils\ArrayNormalizer;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
+use function grapheme_strlen;
 use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
@@ -2044,7 +2045,7 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-
+  
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
@@ -2879,7 +2880,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30202);
         }
 
-        if (strlen($message) < 3 || strlen($message) > 500) {
+        if (grapheme_strlen($message) < 3 || grapheme_strlen($message) > 500) {
             return $this::respondWithError(30103);
         }
 

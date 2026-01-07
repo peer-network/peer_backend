@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "2dc1bbff-3480-41df-b05e-83c59ef13947",
+		"_postman_id": "2f713afa-7263-4438-95ce-40f95f98fcf5",
 		"name": "001_user_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-2dc1bbff-3480-41df-b05e-83c59ef13947?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-2f713afa-7263-4438-95ce-40f95f98fcf5?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -1948,58 +1948,6 @@
 			"response": []
 		},
 		{
-			"name": "Update too short bio",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"ResponseCode is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include(\"30228\");",
-							"});",
-							"pm.test(\"Status is correct\", function () {",
-							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{accessToken}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "graphql",
-					"graphql": {
-						"query": "mutation UpdateBio {\n    updateBio(biography: \"va\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
-						"variables": ""
-					}
-				},
-				"url": {
-					"raw": "{{test-backend}}/graphql",
-					"host": [
-						"{{test-backend}}"
-					],
-					"path": [
-						"graphql"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "XSS bio atack",
 			"event": [
 				{
@@ -2196,7 +2144,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				},
 				{
@@ -2206,7 +2155,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -2226,7 +2176,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}\n\n\n\n\n\n\n\n\n\n\n",
+						"query": "query SearchUser {\n    searchUser(userid: \"{{userid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            createdat\n            updatedat\n        }\n    }\n}",
 						"variables": ""
 					}
 				},
