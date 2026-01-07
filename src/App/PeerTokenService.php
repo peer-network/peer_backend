@@ -135,7 +135,7 @@ class PeerTokenService
                 return self::respondWithError(30264);
             }
 
-            if ((float) $numberOfTokens < $minAmount) {
+            if ((float) $numberOfTokens <= $minAmount) {
                 $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
                     'minAmount'      => $minAmount,
