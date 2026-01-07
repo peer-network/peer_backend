@@ -304,7 +304,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MAX_LENGTH' => 200,
         ],
         'TYPE' => [
-            'MIN_LENGTH' => 2,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 63,
         ],
     ];
@@ -312,11 +312,11 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     private const POST = [
         'TITLE' => [
-            'MIN_LENGTH' => 2,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 63,
         ],
         'MEDIADESCRIPTION' => [
-            'MIN_LENGTH' => 3,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 500,
         ],
         'COVER' => [
@@ -488,7 +488,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'PATTERN' => '^[a-zA-Z0-9_-]+$',
         ],
         'BIOGRAPHY' => [
-            'MIN_LENGTH' => 3,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 5000,
         ],
         'PHONENUMBER' => [
