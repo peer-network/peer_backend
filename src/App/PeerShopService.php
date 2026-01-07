@@ -119,6 +119,11 @@ class PeerShopService
             if (!$isStrictDecimal) {
                 return self::respondWithError(30264);
             }
+            
+
+            // **********************************  Add Validation to check for PeerShop account existence
+
+
             $this->transactionManager->beginTransaction();
 
             $peerShop = $this->peerShopMapper->initializeWalletAccounts();
