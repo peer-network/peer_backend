@@ -693,7 +693,7 @@ class UserService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->warning('Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
@@ -940,7 +940,7 @@ class UserService
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {

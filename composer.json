@@ -30,6 +30,8 @@
         "rector/rector": "^2.1"
     },
     "scripts": {
-        "phpstan": "vendor/bin/phpstan analyse"
+        "phpstan": "vendor/bin/phpstan analyse",
+        "linter": "vendor/bin/php-cs-fixer fix",
+        "linter-dry": "vendor/bin/php-cs-fixer fix --dry-run"
     }
 }

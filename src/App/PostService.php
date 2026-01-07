@@ -251,7 +251,7 @@ class PostService
         $actionMap = $args['art'] = $actionMaps[$action];
 
         $this->transactionManager->beginTransaction();
-        
+
         try {
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
@@ -279,7 +279,7 @@ class PostService
                             $this->transactionManager->rollback();
                             return $response;
                         }
-                        
+
                         $response['ResponseCode'] = "11514";
                     } else {
                         $this->transactionManager->rollback();
@@ -315,7 +315,7 @@ class PostService
                 return $this::respondWithError(51301);
             }
 
-            
+
             if ($action === 'comment') {
                 $response = $this->commentService->createComment($args);
                 if (isset($response['status']) && $response['status'] === 'error') {
@@ -356,7 +356,7 @@ class PostService
 
             if (isset($response['status']) && $response['status'] === 'success') {
                 assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
-            
+
                 $transferStrategy = match($action) {
                     'post' => new PaidPostTransferStrategy(),
                     'like' => new PaidLikeTransferStrategy(),

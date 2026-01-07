@@ -321,7 +321,7 @@ abstract class Model
         }
 
         // Support multiple orders, including CASE expressions
-        $clauses = array_map(fn($order) => str_starts_with(trim($order), 'CASE') ? $order : $order, $this->orderBys);
+        $clauses = array_map(fn ($order) => str_starts_with(trim($order), 'CASE') ? $order : $order, $this->orderBys);
 
         return 'ORDER BY ' . implode(', ', $clauses);
     }

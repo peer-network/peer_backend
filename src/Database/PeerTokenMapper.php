@@ -255,10 +255,10 @@ class PeerTokenMapper
             }
             $mode = $strategy->getFeePolicyMode();
             [
-                $requiredAmount, 
-                $netRecipientAmount, 
-                $peerFeeAmount, 
-                $burnFeeAmount, 
+                $requiredAmount,
+                $netRecipientAmount,
+                $peerFeeAmount,
+                $burnFeeAmount,
                 $inviteFeeAmount
             ] = $this->calculateAmountsForMode($senderId, $numberOfTokens, $mode);
 
@@ -671,7 +671,7 @@ class PeerTokenMapper
                     'inviter' => (string)$row['inviter_fee'] ?: null,
                 ],
             ];
-            $items[] = new TransactionHistoryItem($tiData,$userId);
+            $items[] = new TransactionHistoryItem($tiData, $userId);
         }
 
         return $items;

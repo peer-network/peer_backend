@@ -37,7 +37,8 @@ class PeerTokenService
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ProfileRepository $profileRepository,
         protected ProfileEnrichmentAssembler $profileAssembler
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {
@@ -256,7 +257,7 @@ class PeerTokenService
 
         $contentFilterCase = ContentFilteringCases::searchById;
         $targetContent = ContentType::user;
-        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             $targetContent

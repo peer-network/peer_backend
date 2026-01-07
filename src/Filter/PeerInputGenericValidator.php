@@ -180,7 +180,7 @@ class PeerInputGenericValidator
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn ($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
             $formatted = trim($formatted);
@@ -493,7 +493,8 @@ class PeerInputGenericValidator
 
         return true;
     }
-    protected function validateDateMonthYearString(string $value, array $options = []): bool {
+    protected function validateDateMonthYearString(string $value, array $options = []): bool
+    {
         $fieldKey = $options['field'] ?? 'date';
         $errorCode = (string)($options['errorCode'] ?? '30258');
 

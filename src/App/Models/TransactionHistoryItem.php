@@ -36,10 +36,10 @@ class TransactionHistoryItem implements HasUserRefs
     {
         $tokenamount = (string)$data['tokenamount'];
         $netTokenAmount = (string)$data['netTokenAmount'];
-        if( $currentUserId === (string)$data['senderid']) {
+        if ($currentUserId === (string)$data['senderid']) {
             $tokenamount = '-' . $tokenamount;
             $netTokenAmount = '-' . $netTokenAmount;
-        } 
+        }
 
         $this->operationid = (string)($data['operationid'] ?? '');
         $this->transactiontype = (string)($data['transactiontype'] ?? '');
@@ -59,7 +59,8 @@ class TransactionHistoryItem implements HasUserRefs
     }
 
     // we are rounding only two values and only for presentation(api). this values are not stored anywhere
-    private function roundTokenAmount() {
+    private function roundTokenAmount()
+    {
         $this->netTokenAmount = (string)round((float)$this->netTokenAmount, 8);
         $this->tokenamount = (string)round((float)$this->tokenamount, 8);
     }

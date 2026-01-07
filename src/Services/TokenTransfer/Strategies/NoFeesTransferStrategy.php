@@ -8,7 +8,7 @@ use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
 
