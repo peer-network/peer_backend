@@ -247,7 +247,7 @@ class MintServiceImpl implements MintService
             
             $this->mintRepository->insertMint(
                 $mintid,
-                new DateTime()->format('Y-m-d'),
+                $this->resolveMintDate($day),
                 $gemsInTokenResult->gemsInToken
             );
 
@@ -387,5 +387,17 @@ class MintServiceImpl implements MintService
             ]);
             return self::respondWithError(40301);
         }
+    }
+
+    private function resolveMintDate(string $day): string
+    {
+        // $day comes as Dx where x is the offset from today
+        $offset = (int)substr($day, 1);
+        $date = new DateTime();
+        if ($offset > 0) {
+            $date->modify(sprintf('-%d day', $offset));
+        }
+
+        return $date->format('Y-m-d');
     }
 }
