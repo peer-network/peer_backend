@@ -60,8 +60,8 @@ class TransactionHistoryItem implements HasUserRefs
 
     // we are rounding only two values and only for presentation(api). this values are not stored anywhere
     private function roundTokenAmount() {
-        $this->netTokenAmount = (string)round((float)$this->netTokenAmount, 8);
-        $this->tokenamount = (string)round((float)$this->tokenamount, 8);
+        $this->netTokenAmount = (string)round((float)$this->netTokenAmount, 10);
+        $this->tokenamount = (string)round((float)$this->tokenamount, 10);
     }
 
     public function getArrayCopy(): array
