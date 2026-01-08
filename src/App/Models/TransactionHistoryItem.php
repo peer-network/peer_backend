@@ -37,8 +37,8 @@ class TransactionHistoryItem implements HasUserRefs
         $tokenamount = (string)$data['tokenamount'];
         $netTokenAmount = (string)$data['netTokenAmount'];
         if( $currentUserId === (string)$data['senderid']) {
-            $tokenamount = '-' . $tokenamount;
-            $netTokenAmount = '-' . $netTokenAmount;
+            $tokenamount = '-' . sprintf('%.10F', $tokenamount);
+            $netTokenAmount = '-' . sprintf('%.10F', $netTokenAmount);
         } 
 
         $this->operationid = (string)($data['operationid'] ?? '');
@@ -70,8 +70,8 @@ class TransactionHistoryItem implements HasUserRefs
             'operationid' => $this->operationid,
             'transactiontype' => $this->transactiontype,
             'transactioncategory' => $this->transactioncategory->value,
-            'tokenamount' => $this->tokenamount,
-            'netTokenAmount' => $this->netTokenAmount,
+            'tokenamount' => sprintf('%.10F', $this->tokenamount),
+            'netTokenAmount' => sprintf('%.10F', $this->netTokenAmount),
             'message' => $this->message,
             'createdat' => $this->createdat,
             'senderid' => $this->senderid,

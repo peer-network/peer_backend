@@ -517,7 +517,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             'PATTERN_URL' => '(:\/\/|www\.)',
         ],
         'TRANSACTION' => [
-            'MIN_AMOUNT' => 0.00000001,
+            'MIN_AMOUNT' => 0.000001,
             'MAX_DECIMALS' => 8, 
         ],
     ];
