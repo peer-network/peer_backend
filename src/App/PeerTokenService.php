@@ -135,7 +135,7 @@ class PeerTokenService
                 return self::respondWithError(30264);
             }
 
-            if ((float) $numberOfTokens <= $minAmount) {
+            if ((float) $numberOfTokens < $minAmount) {
                 $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
                     'numberOfTokens' => $numberOfTokens,
                     'minAmount'      => $minAmount,
@@ -149,9 +149,9 @@ class PeerTokenService
             }
 
             // Strict numeric validation for decimals (e.g., "1", "1.0", "0.25")
-            $numRaw = (string)($args['numberoftokens'] ?? '');
+            $numberOfTokens = sprintf('%.10F', $numberOfTokens);
             // Accepts unsigned decimal numbers with optional fractional part
-            $isStrictDecimal = $numRaw !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw) === 1;
+            $isStrictDecimal = $numberOfTokens !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numberOfTokens) === 1;
             if (!$isStrictDecimal) {
                 return self::respondWithError(30264);
             }
