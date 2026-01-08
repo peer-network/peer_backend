@@ -25,7 +25,7 @@ class MintTransferStrategy extends BaseTransferStrategy implements TransferStrat
 
     public function getTransactionCategory(): TransactionCategory
     {
-        return TransactionCategory::P2P_TRANSFER;
+        return TransactionCategory::TOKEN_MINT;
     }
     public function getRecipientTransactionType(): string
     {

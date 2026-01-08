@@ -318,8 +318,7 @@ class MintServiceImpl implements MintService
                 (string)$amountToTransfer,
                 $transactionStrategy,
                 $mintAccount,
-                $recipient,
-                "Mint"
+                $recipient
             );
 
             if (!is_array($response) || ($response['status'] ?? 'error') === 'error') {
