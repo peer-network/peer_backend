@@ -8,10 +8,6 @@ extend type Query {
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
   logWinsPaidActionForMarchApril: DefaultResponse
   logWinMigration: DefaultResponse
-  logWinMigration04: DefaultResponse
-  logWinMigration05: DefaultResponse
-  logWinMigrationWalletUpdate: DefaultResponse
-  logWinMigrationWalletNegativeToZero: DefaultResponse
 }
 
 extend type Mutation {

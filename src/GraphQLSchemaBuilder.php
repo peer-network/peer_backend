@@ -1646,11 +1646,7 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
-            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
-            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
             'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
-            'logWinMigrationWalletUpdate' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletUpdate(),
-            'logWinMigrationWalletNegativeToZero' => fn(mixed $root, array $args) => $this->logWinService->logWinMigrationWalletNegativeToZero(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
         ];
