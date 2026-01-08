@@ -20,7 +20,6 @@ class LogWinMapper
     use ResponseHelper;
 
     private string $burnWallet;
-    private string $companyWallet;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
 
@@ -42,7 +41,6 @@ class LogWinMapper
         }
 
         $this->burnWallet = $data['burn'];
-        $this->companyWallet = $data['peer'];
     }
 
     /**
