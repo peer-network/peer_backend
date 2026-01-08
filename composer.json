@@ -28,5 +28,8 @@
         "phpstan/phpstan": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.88",
         "rector/rector": "^2.1"
+    },
+    "scripts": {
+        "unit": "php vendor/bin/phpunit tests/Unit"
     }
 }

@@ -911,6 +911,10 @@
         "comment": "Unauthorized to initiate transfers to Pool accounts.",
         "userFriendlyComment": "You are not authorized to transfer to pool accounts."
     },
+    "31204": {
+        "comment": "Minting for the given day has already been performed.",
+        "userFriendlyComment": "Minting for this day has already been completed."
+   },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
         "userFriendlyComment": "You've already liked this post."

@@ -335,6 +335,13 @@ type MintingData {
   tokensMintedYesterday: Float!
 }
 
+type MintAccount {
+  accountid: ID!
+  initialBalance: Decimal!
+  currentBalance: Decimal!
+  updatedat: String!
+}
+
 type CurrentLiquidity {
   status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")

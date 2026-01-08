@@ -790,7 +790,6 @@ class AdvertisementMapper
             }
             $stmt2->execute();
 
-
             $this->logger->info("Updated Post Advertisement & inserted into Log");
             return new Advertisements($data);
 
