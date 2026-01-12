@@ -5,7 +5,9 @@ extend type Query {
   gemster: GemsterResponse!
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
-  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+  logWinsPaidActionForMarchApril: DefaultResponse
+  logWinMigration: DefaultResponse
 }
 
 extend type Mutation {
