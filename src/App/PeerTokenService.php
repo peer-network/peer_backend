@@ -149,9 +149,9 @@ class PeerTokenService
             }
 
             // Strict numeric validation for decimals (e.g., "1", "1.0", "0.25")
-            $numRaw = (string)($args['numberoftokens'] ?? '');
+            $numberOfTokens = sprintf('%.10F', $numberOfTokens);
             // Accepts unsigned decimal numbers with optional fractional part
-            $isStrictDecimal = $numRaw !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw) === 1;
+            $isStrictDecimal = $numberOfTokens !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numberOfTokens) === 1;
             if (!$isStrictDecimal) {
                 return self::respondWithError(30264);
             }
@@ -207,8 +207,8 @@ class PeerTokenService
                 return $this::createSuccessResponse(
                     11211,
                     [
-                        'tokenSend'                  => $response['tokenSend'],
-                        'tokensSubstractedFromWallet' => $response['tokensSubstractedFromWallet'],
+                        'tokenSend'                  => sprintf('%.10F', $response['tokenSend']),
+                        'tokensSubstractedFromWallet' => sprintf('%.10F', $response['tokensSubstractedFromWallet']),
                         'createdat'                  => $response['createdat'] ?? '',
                     ],
                     false // no counter needed for associative array
