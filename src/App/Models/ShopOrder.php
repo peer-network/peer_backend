@@ -116,7 +116,7 @@ class ShopOrder extends Model
                 'validators' => [['name' => 'Uuid']],
             ],
             'transactionoperationid' => [
-                'required' => true,
+                'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],
             'shopitemid' => [

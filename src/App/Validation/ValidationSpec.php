@@ -92,6 +92,19 @@ class ValidationSpec
         ];
     }
 
+    public static function tokenAmount(string $field = 'tokenAmount', bool $required = true, int $errorCode = 30264): array
+    {
+
+        return [
+            $field => [
+                'required' => $required,
+            ],
+        ];
+    }
+
+
+
+    
     /**
      * Merge multiple partial specs into one spec array.
      */
@@ -146,6 +159,9 @@ class ValidationSpec
 
             'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
+
+            'tokenAmount' => fn (string $f, bool $r) => self::tokenAmount($f, $r),
+            // 'name' => fn (string $f, bool $r) => self::validateName($f, $r),
         ];
 
         $spec = [];

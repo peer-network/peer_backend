@@ -1690,7 +1690,7 @@ class GraphQLSchemaBuilder
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
-            'performShopOrder' => fn(mixed $root, array $args) => $this->peerShopService->performShopOrder($args),
+            'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
         ];
     }
 
@@ -3186,5 +3186,43 @@ class GraphQLSchemaBuilder
             $this->logger->error("Error performing moderation action: " . $e->getMessage());
             return self::respondWithError(40301);
         }
+    }
+
+    
+    protected function performShopOrder(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.performShopOrder started');
+
+        $validation = RequestValidator::validate($args, ['tokenAmount']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $validation = RequestValidator::validate($args['orderDetails'], ['name']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+        var_dump('validation'); exit;
+
+
+        $results = $this->peerShopService->performShopOrder($args, []);
+
+
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        }
+
+        $this->logger->info('Query.performShopOrder successful');
+        return $results;
     }
 }
