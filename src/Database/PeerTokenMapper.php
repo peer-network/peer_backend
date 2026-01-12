@@ -26,7 +26,7 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class PeerTokenMapper
+class PeerTokenMapper implements PeerTokenMapperInterface
 {
     use ResponseHelper;
     private string $burnWallet;

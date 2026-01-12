@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fawaz\Database;
 
 use Fawaz\App\DTO\Gems;
-use Fawaz\App\DTO\UncollectedGemsResult;
 
 interface GemsRepository
 {

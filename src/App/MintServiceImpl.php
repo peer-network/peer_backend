@@ -9,20 +9,18 @@ use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
-use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Repositories\MintAccountRepositoryInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\GemsRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\MintRepository;
-use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Database\PeerTokenMapperInterface;
 use Fawaz\Database\UserActionsRepository;
-use Fawaz\Database\UserMapper;
-use Fawaz\Database\WalletMapper;
+use Fawaz\Database\UserMapperInterface;
 use Fawaz\Services\TokenTransfer\Strategies\MintTransferStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
-use PDO;
 use Fawaz\App\DTO\GemsInTokenResult;
 
 class MintServiceImpl implements MintService
@@ -33,15 +31,13 @@ class MintServiceImpl implements MintService
 
     public function __construct(
         protected PeerLoggerInterface $logger,
-        protected MintAccountRepository $mintAccountRepository,
+        protected MintAccountRepositoryInterface $mintAccountRepository,
         protected MintRepository $mintRepository,
-        protected UserMapper $userMapper,
-        protected PeerTokenMapper $peerTokenMapper,
+        protected UserMapperInterface $userMapper,
+        protected PeerTokenMapperInterface $peerTokenMapper,
         protected UserActionsRepository $userActionsRepository,
         protected GemsRepository $gemsRepository,
         protected TransactionManager $transactionManager,
-        protected WalletMapper $walletMapper,
-        protected PDO $db
     ) {
     }
 

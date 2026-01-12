@@ -19,7 +19,7 @@ use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
 use PDOException;
 
-class UserMapper
+class UserMapper implements UserMapperInterface
 {
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
