@@ -4,6 +4,10 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
+const BASIC = 50;
+const PINNED = 200;
+
+use Fawaz\App\LogWinService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -70,6 +74,7 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
+        protected LogWinService $logWinService,
         protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -223,6 +228,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
+        $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
         $this->mintService->setCurrentUserId($userid);
     }
