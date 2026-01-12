@@ -70,7 +70,7 @@ class PeerShopService
 
             $userConfig  = ConstantsConfig::user();
             $inputConfig = ConstantsConfig::input();
-            $message = isset($args['message']) ? (string) $args['message'] : null;
+            $message = isset($args['transferMessage']) ? (string) $args['transferMessage'] : null;
             if ($message !== null) {
                 $messageConfig = $userConfig['TRANSFER_MESSAGE'];
 
@@ -120,10 +120,6 @@ class PeerShopService
                 return self::respondWithError(30264);
             }
             
-
-            // **********************************  Add Validation to check for PeerShop account existence
-
-
             $this->transactionManager->beginTransaction();
 
             $peerShop = $this->peerShopMapper->initializeWalletAccounts();
