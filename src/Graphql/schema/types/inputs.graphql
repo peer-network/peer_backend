@@ -37,3 +37,18 @@ input UserPreferencesInput {
   contentFilteringSeverityLevel: ContentFilterType
   shownOnboardings: [OnboardingType!]
 }
+
+input ShopOrderDetailsInput {
+  name: String!
+  email: String!
+  addressline1: String!
+  addressline2: String
+  city: String!
+  zipcode: String!
+  country: ShopSupportedDeliveryCountry!
+  shopItemSpecs: ShopItemSpecsInput
+}
+
+input ShopItemSpecsInput {
+  size: String!
+}

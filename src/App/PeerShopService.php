@@ -52,9 +52,9 @@ class PeerShopService
      *
      */
 
-    public function performShopPurchase(array $args): array
+    public function performShopOrder(array $args): array
     {
-        $this->logger->debug('PeerShopService.performShopPurchase started');
+        $this->logger->debug('PeerShopService.performShopOrder started');
 
         if (!$this->checkAuthentication()) {
             throw new PermissionDeniedException(60501, 'Unauthorized');
@@ -168,7 +168,7 @@ class PeerShopService
                 $this->transactionManager->rollback();
                 return $response;
             } else {
-                $this->logger->info('PeerShopService.performShopPurchase completed successfully', ['response' => $response]);
+                $this->logger->info('PeerShopService.performShopOrder completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
                 
                 return self::createSuccessResponse(00000, [], true); // Product purchased successfully
@@ -176,7 +176,7 @@ class PeerShopService
             }
 
         } catch (\Exception $e) {
-            $this->logger->error("Error in PeerShopService.performShopPurchase", ['exception' => $e->getMessage()]);
+            $this->logger->error("Error in PeerShopService.performShopOrder", ['exception' => $e->getMessage()]);
             $this->transactionManager->rollback();
             return $this::respondWithError(41229); // Failed to transfer token
         }

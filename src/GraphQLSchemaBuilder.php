@@ -1690,7 +1690,7 @@ class GraphQLSchemaBuilder
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
-            'performShopPurchase' => fn(mixed $root, array $args) => $this->peerShopService->performShopPurchase($args),
+            'performShopOrder' => fn(mixed $root, array $args) => $this->peerShopService->performShopOrder($args),
         ];
     }
 

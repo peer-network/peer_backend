@@ -53,6 +53,7 @@ type Query {
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
+  shopOrderDetails(transactionOperationId: String): ShopOrderDetailsResponse
 }
 
 type Mutation {
@@ -75,5 +76,5 @@ type Mutation {
   resolveTransferV2(recipient: ID!, numberoftokens: Decimal!, message: String): TransferTokenResponse!
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
   advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): ListAdvertisementData!
-  performShopPurchase(tokenAmount: Decimal!, productId: ID, transferMessage: String ): DefaultResponse!
+  performShopOrder(tokenAmount: Decimal!, shopItemId: String!, orderDetails: ShopOrderDetailsInput): DefaultResponse!
 }

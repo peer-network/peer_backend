@@ -550,3 +550,32 @@ type TargetContent {
   comment: Comment
   user: BasicUserInfo
 }
+
+type ShopItemSpecs {
+  size: String!
+}
+
+type ShopOrderDetailsResponse {
+  meta: DefaultResponse!
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  orderDeliveryDetails: ShopOrderDetails!
+}
+
+type ShopOrderDetails {
+  shopOrderId: String!
+  shopItemId: String!
+  shopItemSpecs: ShopItemSpecs
+  deliveryDetails: ShopOrderDeliveryDetails!
+  createdat: Date!
+}
+
+type ShopOrderDeliveryDetails {
+  name: String!
+  email: String!
+  addressline1: String!
+  addressline2: String
+  city: String!
+  zipcode: String!
+  country: ShopSupportedDeliveryCountry!
+}
