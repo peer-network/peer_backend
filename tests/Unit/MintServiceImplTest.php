@@ -53,9 +53,7 @@ final class MintServiceImplTest extends TestCase
             $this->createMock(PeerTokenMapperInterface::class),
             $this->createMock(UserActionsRepository::class),
             $this->createMock(GemsRepository::class),
-            $this->createMock(TransactionManager::class),
-            $this->createMock(WalletMapper::class),
-            new \PDO('sqlite::memory:')
+            $this->createMock(TransactionManager::class)
         );
     }
 
