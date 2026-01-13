@@ -176,8 +176,7 @@ class PeerShopService
 
             $isAllowed = $this->shopOrderPermissionsMapper->canAccessShopOrder(
                 $this->currentUserId,
-                $orderOwnerId,
-                [$peerShopAccount]
+                [$orderOwnerId, $peerShopAccount]
             );
 
             if (!$isAllowed) {

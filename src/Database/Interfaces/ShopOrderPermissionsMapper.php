@@ -7,7 +7,7 @@ namespace Fawaz\Database\Interfaces;
 interface ShopOrderPermissionsMapper
 {
     /**
-     * @param array<string> $allowedAccounts additional accounts (e.g., peer shop, admins)
+     * @param array<string> $allowedAccounts Shop Order Owner and additional accounts (e.g., peer shop)
      */
-    public function canAccessShopOrder(string $currentUserId, string $orderUserId, array $allowedAccounts = []): bool;
+    public function canAccessShopOrder(string $currentUserId, array $allowedAccounts = []): bool;
 }

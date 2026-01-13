@@ -12,16 +12,15 @@ class ShopOrderPermissionsMapperImpl implements ShopOrderPermissionsMapper
     {
     }
 
-    public function canAccessShopOrder(string $currentUserId, string $orderUserId, array $allowedAccounts = []): bool
+    public function canAccessShopOrder(string $currentUserId, array $allowedAccounts = []): bool
     {
-        if ($currentUserId === '' || $orderUserId === '') {
+        if ($currentUserId === '') {
             return false;
         }
 
-        $isOwner = $currentUserId === $orderUserId;
         $isAllowedAccount = in_array($currentUserId, $allowedAccounts, true);
 
-        if ($isOwner || $isAllowedAccount) {
+        if ($isAllowedAccount) {
             return true;
         }
 
