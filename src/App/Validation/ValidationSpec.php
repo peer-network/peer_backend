@@ -94,14 +94,75 @@ class ValidationSpec
 
     public static function tokenAmount(string $field = 'tokenAmount', bool $required = true, int $errorCode = 30264): array
     {
-
         return [
             $field => [
                 'required' => $required,
+                'validators' => [
+                    ['name' => 'validateTokenAmount', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
             ],
         ];
     }
 
+    public static function addressLine1(string $field = 'addressLine1', bool $required = false, int $errorCode = 30103): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateAddressLine1', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
+    public static function city(string $field = 'city', bool $required = false, int $errorCode = 30103): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateCity', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
+    public static function zipCode(string $field = 'zipCode', bool $required = false, int $errorCode = 30103): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateZipCode', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
+    public static function country(string $field = 'country', bool $required = false, int $errorCode = 30103): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateCountry', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
+    public static function name(string $field = 'name', bool $required = false, int $errorCode = 30103): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateName', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
 
 
     
@@ -161,7 +222,12 @@ class ValidationSpec
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
 
             'tokenAmount' => fn (string $f, bool $r) => self::tokenAmount($f, $r),
-            // 'name' => fn (string $f, bool $r) => self::validateName($f, $r),
+            'name' => fn (string $f, bool $r) => self::name($f, $r),
+            'addressLine1' => fn (string $f, bool $r) => self::addressLine1($f, $r),
+            'city' => fn (string $f, bool $r) => self::city($f, $r),
+            'zipcode' => fn (string $f, bool $r) => self::zipCode($f, $r),
+            'country' => fn (string $f, bool $r) => self::country($f, $r),
+            'shopItemId' => fn (string $f, bool $r) => self::uuid($f, $r),
         ];
 
         $spec = [];

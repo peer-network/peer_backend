@@ -123,7 +123,8 @@ class ConstantsConfig implements ConstantsConfigInterface
      *     LIQUIDITY: array{MIN_LENGTH: int, MAX_LENGTH: int},
      *     AVATAR: array{MAX_SIZE_MB: int},
      *     TRANSFER_MESSAGE: array{MIN_LENGTH: int, MAX_LENGTH: int, PATTERN_URL: string},
-     *     TRANSACTION: array{MIN_AMOUNT: float, MAX_DECIMALS: int}
+     *     TRANSACTION: array{MIN_AMOUNT: float, MAX_DECIMALS: int},
+     *     COUNTRIES: string[]
      * }
      */
     public static function user()
@@ -515,6 +516,9 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MIN_LENGTH' => 0,
             'MAX_LENGTH' => 500,
             'PATTERN_URL' => '(:\/\/|www\.)',
+        ],
+        'COUNTRIES' => [
+            'Germany',
         ],
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.000001,

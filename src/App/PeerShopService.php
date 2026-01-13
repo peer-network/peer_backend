@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Errors\PermissionDeniedException;
+use Fawaz\App\Models\ShopOrder;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
@@ -13,6 +14,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\PeerShopMapper;
 use Fawaz\Services\TokenTransfer\Strategies\ShopTransferStrategy;
+use Fawaz\Utils\ErrorResponse;
 
 use function grapheme_strlen;
 
@@ -52,7 +54,7 @@ class PeerShopService
      *
      */
 
-    public function performShopOrder(array $args): array
+    public function performShopOrder(array $args): array | ErrorResponse
     {
         $this->logger->debug('PeerShopService.performShopOrder started');
 
@@ -62,63 +64,7 @@ class PeerShopService
 
         try {
             $tokenAmount = (string) $args['tokenAmount'];
-
-            if(!isset($args['tokenAmount']) || empty($tokenAmount) || !is_numeric($tokenAmount) || (float)$tokenAmount <= 0) {
-                $this->logger->warning('Amount Missing or Invalid Amount.');
-                return self::respondWithError(30264);
-            }
-
-            $userConfig  = ConstantsConfig::user();
-            $inputConfig = ConstantsConfig::input();
             $message = isset($args['transferMessage']) ? (string) $args['transferMessage'] : null;
-            if ($message !== null) {
-                $messageConfig = $userConfig['TRANSFER_MESSAGE'];
-
-                $maxLength      = (int) $messageConfig['MAX_LENGTH'];
-                $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
-                $urlPattern     = '/'.$messageConfig['PATTERN_URL'].'/iu';
-
-                if (grapheme_strlen($message) > $maxLength) {
-                    $this->logger->warning('Transfer message length is too high', [
-                        'maxLength' => $maxLength,
-                    ]);
-                    return self::respondWithError(30270);
-                }
-                if (preg_match($controlPattern, $message) === 1) {
-                    $this->logger->warning('Transfer message contains control characters');
-                    return self::respondWithError(30271);
-                }
-                if (preg_match($urlPattern, $message) === 1) {
-                    $this->logger->warning('Transfer message contains URL/link');
-                    return self::respondWithError(30271);
-                }
-            }
-
-            $transferConfig = $userConfig['TRANSACTION'];
-            $minAmount = (float) $transferConfig['MIN_AMOUNT'];
-            $maxDecimals = (int) $transferConfig['MAX_DECIMALS'];
-
-            $parts = explode('.', (string) $tokenAmount);
-
-            if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
-                return self::respondWithError(30264);
-            }
-
-            if ((float) $tokenAmount < $minAmount) {
-                $this->logger->warning('Incorrect Amount Exception: less than minimum transfer amount', [
-                    'tokenAmount' => $tokenAmount,
-                    'minAmount'      => $minAmount,
-                ]);
-                return self::respondWithError(30264);
-            }
-
-            // Strict numeric validation for decimals (e.g., "1", "1.0", "0.25")
-            $numRaw = (string)($args['tokenAmount']);
-            // Accepts unsigned decimal numbers with optional fractional part
-            $isStrictDecimal = $numRaw !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numRaw) === 1;
-            if (!$isStrictDecimal) {
-                return self::respondWithError(30264);
-            }
             
             $this->transactionManager->beginTransaction();
 
@@ -155,7 +101,19 @@ class PeerShopService
                 return self::respondWithError(51301);
             }
 
+            // Create ShopOrder in shop order table
             $transferStrategy = new ShopTransferStrategy();
+
+            $args['transactionoperationid'] = $transferStrategy->getOperationId();
+            $args['userid'] = $this->currentUserId;
+            $shopOrder = new ShopOrder($args, [], false);
+
+            $isShopOrder = $this->peerShopMapper->createShopOrder($shopOrder);
+            if (!$isShopOrder) {
+                $this->transactionManager->rollback();
+                $this->logger->error('PeerShopService.performShopOrder failed to create shop order');
+                return self::respondWithError(00000); // Failed to create shop order
+            }
 
             $response = $this->peerTokenMapper->transferToken(
                 $this->currentUserId,
@@ -164,7 +122,7 @@ class PeerShopService
                 $transferStrategy,
                 $message
             );
-            if ($response['status'] === 'error') {
+            if ($response['status'] === 'error' || !$isShopOrder) {
                 $this->transactionManager->rollback();
                 return $response;
             } else {
@@ -172,7 +130,6 @@ class PeerShopService
                 $this->transactionManager->commit();
                 
                 return self::createSuccessResponse(00000, [], true); // Product purchased successfully
-                
             }
 
         } catch (\Exception $e) {

@@ -35,6 +35,7 @@ class ShopOrder extends Model
     protected ?string $addressline2;
     protected string $city;
     protected string $zipcode;
+    protected string $size;
     protected string $country;
     protected ?string $createdat;
 
@@ -52,15 +53,16 @@ class ShopOrder extends Model
         $this->shoporderid = $data['shoporderid'] ?? self::generateUUID();
         $this->userid = $data['userid'] ?? '';
         $this->transactionoperationid = $data['transactionoperationid'] ?? '';
-        $this->shopitemid = $data['shopitemid'] ?? '';
-        $this->name = $data['name'] ?? '';
-        $this->email = $data['email'] ?? '';
-        $this->addressline1 = $data['addressline1'] ?? '';
-        $this->addressline2 = $data['addressline2'] ?? null;
-        $this->city = $data['city'] ?? '';
-        $this->zipcode = $data['zipcode'] ?? '';
-        $this->country = $data['country'] ?? '';
-        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');;
+        $this->shopitemid = $data['shopItemId'] ?? '';
+        $this->name = $data['orderDetails']['name'] ?? '';
+        $this->email = $data['orderDetails']['email'] ?? '';
+        $this->addressline1 = $data['orderDetails']['addressline1'] ?? '';
+        $this->addressline2 = $data['orderDetails']['addressline2'] ?? null;
+        $this->city = $data['orderDetails']['city'] ?? '';
+        $this->zipcode = $data['orderDetails']['zipcode'] ?? '';
+        $this->country = $data['orderDetails']['country'] ?? '';
+        $this->size = $data['orderDetails']['shopItemSpecs']['size'] ?? '';
+        $this->createdat = $data['orderDetails']['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');;
     }
 
     public function getArrayCopy(): array
@@ -70,14 +72,20 @@ class ShopOrder extends Model
             'userid' => $this->userid,
             'transactionoperationid' => $this->transactionoperationid,
             'shopitemid' => $this->shopitemid,
-            'name' => $this->name,
-            'email' => $this->email,
-            'addressline1' => $this->addressline1,
-            'addressline2' => $this->addressline2,
-            'city' => $this->city,
-            'zipcode' => $this->zipcode,
-            'country' => $this->country,
-            'createdat' => $this->createdat,
+            'orderDetails' => [
+                'name' => $this->name,
+                'email' => $this->email,
+                'addressline1' => $this->addressline1,
+                'addressline2' => $this->addressline2,
+                'city' => $this->city,
+                'zipcode' => $this->zipcode,
+                'country' => $this->country,
+                'createdat' => $this->createdat,
+                'shopItemSpecs' => [
+                    'size' => $this->size,
+                ],
+            ],
+            
         ];
     }
 
@@ -158,6 +166,11 @@ class ShopOrder extends Model
             ],
             'country' => [
                 'required' => true,
+                'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
+                'validators' => [['name' => 'isString']],
+            ],
+            'size' => [
+                'required' => false,
                 'filters' => [['name' => 'StringTrim'], ['name' => 'StripTags']],
                 'validators' => [['name' => 'isString']],
             ],

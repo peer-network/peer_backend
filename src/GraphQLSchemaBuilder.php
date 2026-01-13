@@ -3197,7 +3197,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.performShopOrder started');
 
-        $validation = RequestValidator::validate($args, ['tokenAmount']);
+        $validation = RequestValidator::validate($args, ['tokenAmount', 'shopItemId']);
 
         if ($validation instanceof ValidatorErrors) {
             return $this::respondWithError(
@@ -3205,17 +3205,15 @@ class GraphQLSchemaBuilder
             );
         }
 
-        $validation = RequestValidator::validate($args['orderDetails'], ['name']);
+        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country' ]);
 
-        if ($validation instanceof ValidatorErrors) {
+        if ($orderValidation instanceof ValidatorErrors) {
             return $this::respondWithError(
-                $validation->errors[0]
+                $orderValidation->errors[0]
             );
         }
-        var_dump('validation'); exit;
 
-
-        $results = $this->peerShopService->performShopOrder($args, []);
+        $results = $this->peerShopService->performShopOrder($args);
 
 
         if ($results instanceof ErrorResponse) {
