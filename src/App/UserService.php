@@ -291,7 +291,7 @@ class UserService
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            $this->logger->error('Error handling referral info.', ['exception' => $e]);
             return self::respondWithError(41013);
         }
 
