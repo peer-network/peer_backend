@@ -1648,8 +1648,6 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
-            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
-            'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
         ];
