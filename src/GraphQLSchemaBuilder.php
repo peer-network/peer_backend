@@ -150,7 +150,7 @@ class GraphQLSchemaBuilder
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }
 
@@ -161,7 +161,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver($this->fieldResolver(...));
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
+            $this->logger->error('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
