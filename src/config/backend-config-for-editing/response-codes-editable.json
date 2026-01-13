@@ -155,6 +155,10 @@
         "comment": "Success: Successfully retrieved transaction history.",
         "userFriendlyComment": "Transaction history loaded successfully."
     },
+    "11216": {
+        "comment": "Success: Purchase completed successfully.",
+        "userFriendlyComment": "Your purchase was successful!"
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"

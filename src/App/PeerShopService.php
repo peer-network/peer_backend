@@ -171,7 +171,7 @@ class PeerShopService
                 $this->logger->info('PeerShopService.performShopOrder completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
                 
-                return self::createSuccessResponse(00000, [], true); // Product purchased successfully
+                return self::createSuccessResponse(11216, [], true); // Product purchased successfully
                 
             }
 
