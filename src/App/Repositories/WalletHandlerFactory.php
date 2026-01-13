@@ -13,13 +13,13 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
  * Factory for resolving the appropriate WalletRepository implementation
  * from a HasUserId domain object.
  *
- * - If the object is a MintAccount, returns MintAccountRepository
+ * - If the object is a MintAccount, returns MintAccountRepositoryImpl
  * - Otherwise, returns WalletMapper
  */
 class WalletHandlerFactory {
     public function __construct(
         private WalletMapper $walletMapper,
-        private MintAccountRepository $mintAccountRepository,
+        private MintAccountRepositoryImpl $mintAccountRepository,
     ) {
     }
 

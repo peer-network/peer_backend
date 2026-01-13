@@ -8,7 +8,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
-use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Repositories\MintAccountRepositoryImpl;
 
 class MintRepositoryImpl implements MintRepository
 {
@@ -17,7 +17,7 @@ class MintRepositoryImpl implements MintRepository
     public function __construct(
         protected PeerLoggerInterface $logger, 
         protected PDO $db, 
-        protected MintAccountRepository $mintAccountRepository,
+        protected MintAccountRepositoryImpl $mintAccountRepository,
     ){}
 
     /**

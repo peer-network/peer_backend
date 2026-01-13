@@ -16,7 +16,7 @@ use Tests\Mocks\Database\MockMintRepository;
 use Tests\Mocks\Database\MockPeerTokenMapper;
 use Tests\Mocks\Database\MockUserActionsRepository;
 use Tests\Mocks\Database\MockUserMapper;
-use Tests\Mocks\Repositories\MockMintAccountRepository;
+use Tests\Mocks\Repositories\MockMintAccountRepositoryImpl;
 
 final class MintServiceDistributeTokensIntegrationTest extends TestCase
 {
@@ -144,7 +144,7 @@ final class MintServiceDistributeTokensIntegrationTest extends TestCase
         $gemsRepository = new MockGemsRepository($seedFactory);
         $peerTokenMapper = new MockPeerTokenMapper();
         $peerTokenMapper->seedWalletBalance('mock-account-id', 10000.0);
-        $mintAccountRepository = new MockMintAccountRepository();
+        $mintAccountRepository = new MockMintAccountRepositoryImpl();
         $mintRepository = new MockMintRepository();
         $userMapper = new MockUserMapper();
         $userActionsRepository = new MockUserActionsRepository();

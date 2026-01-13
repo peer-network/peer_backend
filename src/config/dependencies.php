@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Fawaz\App\MintService;
 use Fawaz\App\MintServiceImpl;
-use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Repositories\MintAccountRepositoryImpl;
 use Fawaz\App\Repositories\WalletHandlerFactory;
 use Fawaz\BaseURL;
 use Fawaz\Database\MintRepository;
@@ -34,6 +34,11 @@ use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
+use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Database\PeerTokenMapperInterface;
+use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserMapperInterface;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -107,12 +112,15 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         WalletHandlerFactory::class => function (ContainerInterface $c) {
             return new WalletHandlerFactory(
                 $c->get(WalletMapper::class),
-                $c->get(MintAccountRepository::class)
+                $c->get(MintAccountRepositoryImpl::class)
             );
         },
         MintRepository::class => \DI\autowire(MintRepositoryImpl::class),
         MintService::class => \DI\autowire(MintServiceImpl::class),
         GemsRepository::class => \DI\autowire(GemsRepositoryImpl::class),
         UserActionsRepository::class => \DI\autowire(UserActionsRepositoryImpl::class),
+        MintAccountRepository::class => \DI\autowire(MintAccountRepositoryImpl::class),
+        UserMapperInterface::class => \DI\autowire(UserMapper::class),
+        PeerTokenMapperInterface::class => \DI\autowire(PeerTokenMapper::class),
     ]);
 };

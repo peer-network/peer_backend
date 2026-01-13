@@ -10,7 +10,7 @@ use Fawaz\App\DTO\GemsRow;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
 use Fawaz\App\MintServiceImpl;
-use Fawaz\App\Repositories\MintAccountRepositoryInterface;
+use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\Database\GemsRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\MintRepository;
@@ -47,7 +47,7 @@ final class MintServiceImplTest extends TestCase
 
         $this->service = new MintServiceImpl(
             $this->createMock(PeerLoggerInterface::class),
-            $this->createMock(MintAccountRepositoryInterface::class),
+            $this->createMock(MintAccountRepository::class),
             $this->createMock(MintRepository::class),
             $this->createMock(UserMapperInterface::class),
             $this->createMock(PeerTokenMapperInterface::class),

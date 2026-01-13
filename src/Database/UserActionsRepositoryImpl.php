@@ -10,7 +10,7 @@ use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
-use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\Repositories\MintAccountRepositoryImpl;
 use Fawaz\Database\UserMapper;
 
 class UserActionsRepositoryImpl implements UserActionsRepository
@@ -23,7 +23,7 @@ class UserActionsRepositoryImpl implements UserActionsRepository
         protected LiquidityPool $pool,
         protected WalletMapper $walletMapper,
         protected PeerTokenMapper $peerTokenMapper,
-        protected MintAccountRepository $mintAccountRepository,
+        protected MintAccountRepositoryImpl $mintAccountRepository,
         protected UserMapper $userMapper,
     ){}
 

@@ -9,7 +9,7 @@ use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
-use Fawaz\App\Repositories\MintAccountRepositoryInterface;
+use Fawaz\App\Repositories\MintAccountRepositorysitory;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\GemsRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -22,6 +22,7 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\App\DTO\GemsInTokenResult;
+use Fawaz\App\Repositories\MintAccountRepository;
 
 class MintServiceImpl implements MintService
 {
@@ -31,7 +32,7 @@ class MintServiceImpl implements MintService
 
     public function __construct(
         protected PeerLoggerInterface $logger,
-        protected MintAccountRepositoryInterface $mintAccountRepository,
+        protected MintAccountRepository $mintAccountRepository,
         protected MintRepository $mintRepository,
         protected UserMapperInterface $userMapper,
         protected PeerTokenMapperInterface $peerTokenMapper,

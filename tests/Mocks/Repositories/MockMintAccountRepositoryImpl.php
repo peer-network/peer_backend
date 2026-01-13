@@ -6,10 +6,10 @@ namespace Tests\Mocks\Repositories;
 
 use DateTimeImmutable;
 use Fawaz\App\Models\MintAccount;
-use Fawaz\App\Repositories\MintAccountRepositoryInterface;
+use Fawaz\App\Repositories\MintAccountRepository;
 use RuntimeException;
 
-final class MockMintAccountRepository implements MintAccountRepositoryInterface
+final class MockMintAccountRepositoryImpl implements MintAccountRepository
 {
     private ?array $accountData;
 
