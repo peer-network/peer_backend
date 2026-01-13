@@ -44,6 +44,13 @@
       FROM prepared_users
       ON CONFLICT (uid) DO NOTHING
       RETURNING uid
+  ),
+  inserted_wallets AS (
+      INSERT INTO wallett (userid)
+      SELECT uid
+      FROM prepared_users
+      ON CONFLICT (userid) DO NOTHING
+      RETURNING userid
   )
   INSERT INTO users_info (userid)
   SELECT uid
