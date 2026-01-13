@@ -559,7 +559,7 @@ type ShopOrderDetailsResponse {
   meta: DefaultResponse!
   status: String!
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
-  orderDeliveryDetails: ShopOrderDetails!
+  affectedRows: ShopOrderDetails!
 }
 
 type ShopOrderDetails {
@@ -577,5 +577,5 @@ type ShopOrderDeliveryDetails {
   addressline2: String
   city: String!
   zipcode: String!
-  country: ShopSupportedDeliveryCountry!
+  country: ShopSupportedDeliveryCountry
 }

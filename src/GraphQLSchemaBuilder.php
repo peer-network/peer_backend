@@ -1600,6 +1600,43 @@ class GraphQLSchemaBuilder
                 'comment' => fn(array|null $root): ?array => $root['comment'] ?? null,
                 'user' => fn(array|null $root): ?array => $root['user'] ?? null,
             ],
+            'ShopOrderDetailsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ShopOrderDetailsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
+                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+                'meta' => fn(array $root): array => [
+                    'status' => $root['status'] ?? '',
+                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                    'RequestId' => $this->logger->getRequestUid(),
+                ],
+            ],
+            'ShopOrderDetails' => [
+                'shopOrderId' => fn(array $root): string => $root['shopOrderId'] ?? '',
+                'shopItemId' => fn(array $root): string => $root['shopItemId'] ?? '',
+                'shopItemSpecs' => fn(array $root): array => $root['shopItemSpecs'] ?? [],
+                'deliveryDetails' => fn(array $root): array => $root['deliveryDetails'] ?? [],
+                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+            ],
+            'ShopItemSpecs' =>[
+                'size' => fn(array $root): string => $root['size'] ?? '',
+            ],
+            'ShopOrderDeliveryDetails' => [
+                'name' => fn(array $root): string => $root['name'] ?? '',
+                'email' => fn(array $root): string => $root['email'] ?? '',
+                'addressline1' => fn(array $root): string => $root['addressline1'] ?? '',
+                'addressline2' => fn(array $root): string => $root['addressline2'] ?? '',
+                'city' => fn(array $root): string => $root['city'] ?? '',
+                'zipcode' => fn(array $root): string => $root['zipcode'] ?? '',
+                'country' => fn(array $root): ?string => $root['country'] ?? null,
+            ],
+            'ShopSupportedDeliveryCountry' => [
+                'country' => fn(array $root): ?string => $root['country'] ?? null,
+            ],
+
         ];
     }
 
@@ -1651,7 +1688,8 @@ class GraphQLSchemaBuilder
             'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
             'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
         ];
     }
 
@@ -3223,4 +3261,31 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.performShopOrder successful');
         return $results;
     }
+
+
+    public function shopOrderDetails(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.shopOrderDetails started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validation = RequestValidator::validate($args);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        try {
+            return $this->peerShopService->shopOrderDetails($validation);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.shopOrderDetails", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
+        }
+
+    }
+
 }

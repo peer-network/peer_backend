@@ -77,4 +77,16 @@ class PeerShopMapper
     }
 
 
+    public function getShopOrderDetails(string $transactionOperationId): array
+    {
+        $this->logger->debug('PeerShopMapper.getShopOrderDetails started', [
+            'transactionOperationId' => $transactionOperationId,
+        ]);
+
+        $order = ShopOrder::query()
+            ->where('transactionoperationid', $transactionOperationId)
+            ->first();
+
+        return is_array($order) ? $order : [];
+    }
 }
