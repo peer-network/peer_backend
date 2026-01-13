@@ -28,6 +28,9 @@
 -- add to gems
 ---- by date and userid: add mintid and transactionid
 
+-- logwins
+---- set migrated = 1
+
 BEGIN;
 
   CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -126,6 +129,11 @@ BEGIN;
           g.mintid IS DISTINCT FROM im.mintid
           OR g.transactionid IS DISTINCT FROM it.transactionid
         );
+
+  UPDATE logwins lw
+  SET migrated = 1
+  FROM tmp_logwins_scope tls
+  WHERE lw.token = tls.token;
 
 
   COMMIT;
