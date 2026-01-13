@@ -165,6 +165,29 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
+                    
+                    $this->appendLogWinMigrationRecord([
+                        "logwins" => [
+                            'token' => $tokenId,
+                            'userid' => $userId,
+                            'postid' => $value['postid'],
+                            'fromid' => $userId,
+                            'gems' => 0,
+                            'numbers' => $numBers,
+                            'whereby' => 2,
+                            'createdat' => $createdat,
+                        ],
+                        "transactions" => [
+                            'operationid' => $tokenId,
+                            'transactiontype' => $transactionType,
+                            'transactioncategory' => TransactionCategory::LIKE->value,
+                            'senderid' => $userId,
+                            'recipientid' => $this->burnWallet,
+                            'tokenamount' => $numBers,
+                            'transferaction' => $transferType,
+                            'createdat' => $createdat
+                        ]
+                        ], 'PaidAction_To_logwins_&_Transactions');
                     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
@@ -259,7 +282,6 @@ class LogWinMapper
 
                     $stmt->execute();
 
-
                     $transactionType = 'postDisliked';
                     $transferType = 'BURN';
 
@@ -273,6 +295,31 @@ class LogWinMapper
                         'transferaction' => $transferType,
                         'createdat' => $createdat
                     ]);
+
+
+                    $this->appendLogWinMigrationRecord([
+                        "logwins" => [
+                            'token' => $tokenId,
+                            'userid' => $userId,
+                            'postid' => $value['postid'],
+                            'fromid' => $userId,
+                            'gems' => 0,
+                            'numbers' => $numBers,
+                            'whereby' => 3,
+                            'createdat' => $createdat,
+                        ],
+                        "transactions" => [
+                           'operationid' => $tokenId,
+                            'transactiontype' => $transactionType,
+                            'transactioncategory' => TransactionCategory::DISLIKE->value,
+                            'senderid' => $userId,
+                            'recipientid' => $this->burnWallet,
+                            'tokenamount' => $numBers,
+                            'transferaction' => $transferType,
+                            'createdat' => $createdat
+                        ]
+                        ], 'PaidAction_To_logwins_&_Transactions');
+
 
                     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
@@ -382,6 +429,30 @@ class LogWinMapper
                         'createdat' => $createdat
                     ]);
 
+                    $this->appendLogWinMigrationRecord([
+                        "logwins" => [
+                            'token' => $tokenId,
+                            'userid' => $userId,
+                            'postid' => $value['postid'],
+                            'fromid' => $userId,
+                            'gems' => 0,
+                            'numbers' => $numBers,
+                            'whereby' => 5,
+                            'createdat' => $createdat,
+                        ],
+                        "transactions" => [
+                            'operationid' => $tokenId,
+                            'transactiontype' => $transactionType,
+                            'transactioncategory' => TransactionCategory::POST_CREATE->value,
+                            'senderid' => $userId,
+                            'recipientid' => $this->burnWallet,
+                            'tokenamount' => $numBers,
+                            'transferaction' => $transferType,
+                            'createdat' => $createdat
+                        ]
+                        ], 'PaidAction_To_logwins_&_Transactions');
+
+
                     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
 
@@ -473,7 +544,6 @@ class LogWinMapper
 
                     $stmt->execute();
 
-
                     $transactionType = 'postComment';
                     $transferType = 'BURN';
 
@@ -487,6 +557,29 @@ class LogWinMapper
                         'transferaction' => $transferType,
                         'createdat' => $createdat
                     ]);
+
+                    $this->appendLogWinMigrationRecord([
+                        "logwins" => [
+                            'token' => $tokenId,
+                            'userid' => $userId,
+                            'postid' => $value['commentid'],
+                            'fromid' => $userId,
+                            'gems' => 0,
+                            'numbers' => $numBers,
+                            'whereby' => 4,
+                            'createdat' => $createdat,
+                        ],
+                        "transactions" => [
+                            'operationid' => $tokenId,
+                            'transactiontype' => $transactionType,
+                            'transactioncategory' => TransactionCategory::COMMENT->value,
+                            'senderid' => $userId,
+                            'recipientid' => $this->burnWallet,
+                            'tokenamount' => $numBers,
+                            'transferaction' => $transferType,
+                            'createdat' => $createdat
+                        ]
+                    ], 'PaidAction_To_logwins_&_Transactions');
 
                     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
 
@@ -667,6 +760,16 @@ class LogWinMapper
                             $stmtLogWins->bindValue(':migrated', 0, \PDO::PARAM_INT);
                             $stmtLogWins->execute();
                             $stmtLogWins->closeCursor();
+                            $this->appendLogWinMigrationRecord([
+                                'token' => $tokenId,
+                                'userid' => $userId,
+                                'postid' => $postId,
+                                'fromid' => $fromId,
+                                'gems' => $gems,
+                                'numbers' => $numBers,
+                                'whereby' => $args['whereby'],
+                                'createdat' => $createdat,
+                            ], 'Mint_For_MARCH_gems_to_logwins');
 
                             // Create transaction entry
                             // $transactionType = match ($args['whereby']) {
@@ -784,6 +887,21 @@ class LogWinMapper
     {
         $transaction = new Transaction($transObj, ['operationid', 'senderid', 'tokenamount'], false);
         $transRepo->saveTransaction($transaction);
+    }
+
+    private function appendLogWinMigrationRecord(array $payload, string $name): void
+    {
+        $logDir = __DIR__ . '/../../runtime-data/logs';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0775, true);
+        }
+
+        $logFile = $logDir . '/logwins_migration_' . $name . '.txt';
+        file_put_contents(
+            $logFile,
+            json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
     }
 
 
