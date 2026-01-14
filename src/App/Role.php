@@ -12,7 +12,7 @@ final class Role
     public const BURN_ACCOUNT = 4;
     public const WEB3_BRIDGE_USER = 8;
     public const ADMIN = 16;
-    public const CONTRIBUTOR = 32;
+    public const PEER_SHOP = 32;
     public const COORDINATOR = 64;
     public const CREATOR = 128;
     public const MODERATOR = 256;
