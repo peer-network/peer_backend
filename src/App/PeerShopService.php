@@ -29,7 +29,6 @@ class PeerShopService
     use ResponseHelper;
 
     protected ?string $currentUserId = null;
-    protected ShopOrderPermissionsMapper $shopOrderPermissionsMapper;
 
     public function __construct(
         protected PeerLoggerInterface $logger,
@@ -38,9 +37,8 @@ class PeerShopService
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected UserMapper $userMapper,
-        ?ShopOrderPermissionsMapper $shopOrderPermissionsMapper = null
+        protected ShopOrderPermissionsMapper $shopOrderPermissionsMapper
     ) {
-        $this->shopOrderPermissionsMapper = $shopOrderPermissionsMapper ?? new ShopOrderPermissionsMapperImpl();
     }
 
     public function setCurrentUserId(string $userId): void

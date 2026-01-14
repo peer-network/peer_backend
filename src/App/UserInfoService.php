@@ -504,6 +504,11 @@ class UserInfoService
                 return $this->respondWithError(31007);
             }
 
+            if ($user->getRolesmask() == Role::PEER_SHOP) {
+                $this->logger->warning('UserInfoService.reportUser: Shop Account can not be reported');
+                return $this->respondWithError(32201);
+            }
+
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
                 $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
                 return $this->respondWithError(32104);

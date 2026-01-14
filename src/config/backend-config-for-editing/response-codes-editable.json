@@ -1220,6 +1220,10 @@
         "comment": "Error: Content already reviewed and restored",
         "userFriendlyComment": "This content was already decided and restored."
     },
+    "32201": {
+        "comment": "Forbidden: You are not allowed to perform this action.",
+        "userFriendlyComment": "You don’t have permission to perform this action."
+    },
     "42101": {
         "comment": "Error: Failed while performing moderation action",
         "userFriendlyComment": "Error: Failed while performing moderation action"

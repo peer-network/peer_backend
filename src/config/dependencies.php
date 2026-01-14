@@ -21,6 +21,8 @@ use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
+use Fawaz\Database\Interfaces\ShopOrderPermissionsMapper;
+use Fawaz\Database\ShopOrderPermissionsMapperImpl;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -90,5 +92,6 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return new ResponseMessagesProviderImpl($path);
         },
         InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
+        ShopOrderPermissionsMapper::class => \DI\autowire(ShopOrderPermissionsMapperImpl::class),
     ]);
 };

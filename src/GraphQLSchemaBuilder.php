@@ -126,6 +126,8 @@ class GraphQLSchemaBuilder
                 $schema = $adminSchema;
             } elseif ($this->userRoles === Role::MODERATOR) { // Role::MODERATOR
                 $schema = $moderatorSchema;
+            }if ($this->userRoles === Role::PEER_SHOP) {
+                $schema = $userSchema;
             }
         }
 
