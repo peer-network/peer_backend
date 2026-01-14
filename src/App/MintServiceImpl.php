@@ -39,7 +39,7 @@ class MintServiceImpl implements MintService
         protected MintAccountRepository $mintAccountRepository,
         protected MintRepository $mintRepository,
         protected UserMapperInterface $userMapper,
-        protected UserService $userService,
+        protected UserServiceInterface $userService,
         protected PeerTokenMapperInterface $peerTokenMapper,
         protected UserActionsRepository $userActionsRepository,
         protected GemsRepository $gemsRepository,

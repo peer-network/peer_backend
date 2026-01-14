@@ -30,7 +30,7 @@ use Fawaz\App\UserPreferences;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use PDOException;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
