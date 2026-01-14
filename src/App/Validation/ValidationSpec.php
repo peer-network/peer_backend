@@ -104,7 +104,7 @@ class ValidationSpec
         ];
     }
 
-    public static function addressLine1(string $field = 'addressLine1', bool $required = false, int $errorCode = 30103): array
+    public static function addressLine1(string $field = 'addressline1', bool $required = false, int $errorCode = 30273): array
     {
         return [
             $field => [
@@ -116,7 +116,7 @@ class ValidationSpec
         ];
     }
 
-    public static function city(string $field = 'city', bool $required = false, int $errorCode = 30103): array
+    public static function city(string $field = 'city', bool $required = false, int $errorCode = 30274): array
     {
         return [
             $field => [
@@ -128,7 +128,7 @@ class ValidationSpec
         ];
     }
 
-    public static function zipCode(string $field = 'zipCode', bool $required = false, int $errorCode = 30103): array
+    public static function zipCode(string $field = 'zipCode', bool $required = false, int $errorCode = 30275): array
     {
         return [
             $field => [
@@ -140,7 +140,7 @@ class ValidationSpec
         ];
     }
 
-    public static function country(string $field = 'country', bool $required = false, int $errorCode = 30103): array
+    public static function country(string $field = 'country', bool $required = false, int $errorCode = 30276): array
     {
         return [
             $field => [
@@ -152,13 +152,25 @@ class ValidationSpec
         ];
     }
 
-    public static function name(string $field = 'name', bool $required = false, int $errorCode = 30103): array
+    public static function name(string $field = 'name', bool $required = false, int $errorCode = 30277): array
     {
         return [
             $field => [
                 'required' => $required,
                 'validators' => [
                     ['name' => 'validateName', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
+    public static function genericUuid(string $field, bool $required = false, int $errorCode = 30272): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateGenericUuid', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
             ],
         ];
@@ -223,12 +235,12 @@ class ValidationSpec
 
             'tokenAmount' => fn (string $f, bool $r) => self::tokenAmount($f, $r),
             'name' => fn (string $f, bool $r) => self::name($f, $r),
-            'addressLine1' => fn (string $f, bool $r) => self::addressLine1($f, $r),
+            'addressline1' => fn (string $f, bool $r) => self::addressLine1($f, $r),
             'city' => fn (string $f, bool $r) => self::city($f, $r),
             'zipcode' => fn (string $f, bool $r) => self::zipCode($f, $r),
             'country' => fn (string $f, bool $r) => self::country($f, $r),
-            'shopItemId' => fn (string $f, bool $r) => self::uuid($f, $r),
-            'transactionOperationId' => fn (string $f, bool $r) => self::uuid($f, $r),
+            'shopItemId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
+            'transactionOperationId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
         ];
 
         $spec = [];

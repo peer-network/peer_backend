@@ -247,6 +247,11 @@ class ConstantsConfig implements ConstantsConfigInterface
         return ConstantsConfig::INPUT;
     }
 
+    public static function shop(): array
+    {
+        return ConstantsConfig::PEER_SHOP;
+    }
+
     private const ONBOARDING = [
         'AVAILABLE_ONBOARDINGS' => [
             'INTROONBOARDING',
@@ -524,5 +529,21 @@ class ConstantsConfig implements ConstantsConfigInterface
             'MIN_AMOUNT' => 0.000001,
             'MAX_DECIMALS' => 8, 
         ],
+    ];
+
+
+    private const PEER_SHOP = [
+        'ADDRESS' => [
+            'MIN_LENGTH' => 6
+        ],
+        'CITY' => [
+            'MIN_LENGTH' => 2
+        ],
+        'ZIPCODE' => [
+            'LENGTH' => 5
+        ],
+        'NAME' => [
+            'MIN_LENGTH' => 2
+        ]
     ];
 }

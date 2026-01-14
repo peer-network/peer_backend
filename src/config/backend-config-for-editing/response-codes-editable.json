@@ -779,6 +779,30 @@
         "comment": "The 'transfer message' field must not contain control symbols and links.",
         "userFriendlyComment": "Message must not contain control symbols and links."
     },
+    "30272": {
+        "comment": "UUID must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX).",
+        "userFriendlyComment": "That ID doesn’t look right. Please check it and try again."
+    },
+    "30273": {
+        "comment": "addressLine1 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
+    },
+    "30274": {
+        "comment": "city must be a valid city name.",
+        "userFriendlyComment": "Please enter a valid city."
+    },
+    "30275": {
+        "comment": "zipCode must be a valid postal/ZIP code.",
+        "userFriendlyComment": "Please enter a valid ZIP/postal code."
+    },
+    "30276": {
+        "comment": "country must be a valid country value.",
+        "userFriendlyComment": "Please select a valid country."
+    },
+    "30277": {
+        "comment": "name must be a valid name.",
+        "userFriendlyComment": "Please enter a valid name."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."

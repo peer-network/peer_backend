@@ -12,10 +12,14 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\PeerShopMapper;
 use Fawaz\Services\TokenTransfer\Strategies\ShopTransferStrategy;
 use Fawaz\Database\Interfaces\ShopOrderPermissionsMapper;
 use Fawaz\Database\ShopOrderPermissionsMapperImpl;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ErrorResponse;
 
 use function grapheme_strlen;
@@ -32,6 +36,7 @@ class PeerShopService
         protected PeerTokenMapper $peerTokenMapper,
         protected PeerShopMapper $peerShopMapper,
         protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected UserMapper $userMapper,
         ?ShopOrderPermissionsMapper $shopOrderPermissionsMapper = null
     ) {
@@ -72,19 +77,36 @@ class PeerShopService
             $tokenAmount = (string) $args['tokenAmount'];
             $message = isset($args['transferMessage']) ? (string) $args['transferMessage'] : null;
             
-            $this->transactionManager->beginTransaction();
-
             $peerShop = $this->peerShopMapper->initializeWalletAccounts();
-        
-            if ((string) $peerShop === $this->currentUserId) {
-                $this->logger->warning('Send and Receive Same Wallet Error.');
-                return self::respondWithError(31202);
-            }
 
             $receipientUserObj = $this->userMapper->loadById($peerShop);
             if (empty($receipientUserObj)) {
                 $this->logger->warning('Unknown Id Exception.');
                 return self::respondWithError(31007);
+            }
+
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::user
+            );
+
+            $specs = [
+                $systemUserSpec
+            ];
+
+            $recipientid = $receipientUserObj->getUserId();
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
+                return $this::respondWithError(31203, ['recipientid' => $recipientid]);
+            }
+            $this->transactionManager->beginTransaction();
+
+        
+            if ((string) $peerShop === $this->currentUserId) {
+                $this->logger->warning('Send and Receive Same Wallet Error.');
+                return self::respondWithError(31202);
             }
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
