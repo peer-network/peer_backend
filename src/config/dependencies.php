@@ -35,6 +35,8 @@ use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
 use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\UserService;
+use Fawaz\App\UserServiceInterface;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\PeerTokenMapperInterface;
 use Fawaz\Database\UserMapper;
@@ -122,5 +124,6 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         MintAccountRepository::class => \DI\autowire(MintAccountRepositoryImpl::class),
         UserMapperInterface::class => \DI\autowire(UserMapper::class),
         PeerTokenMapperInterface::class => \DI\autowire(PeerTokenMapper::class),
+        UserServiceInterface::class => \DI\autowire(UserService::class)
     ]);
 };
