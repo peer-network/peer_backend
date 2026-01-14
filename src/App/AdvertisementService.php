@@ -246,7 +246,7 @@ class AdvertisementService
                 }
 
                 if (!$deducted) {
-                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     $this->transactionManager->rollback();
                     return $this->respondWithError(40301);
                 }
