@@ -53,7 +53,7 @@ type Query {
   postInteractions(getOnly: GetOnly!, contentFilterBy: ContentFilterType, postOrCommentId: ID!, offset: Int, limit: Int): PostInteractionResponse
   getTokenomics: TokenomicsResponse!
   advertisementHistory(filter: AdvertisementHistoryFilter, sort: AdvertisementSort, offset: Int, limit: Int): ListedAdvertisementData!
-  shopOrderDetails(transactionOperationId: String!): ShopOrderDetailsResponse!
+  shopOrderDetails(transactionId: String!): ShopOrderDetailsResponse!
 }
 
 type Mutation {

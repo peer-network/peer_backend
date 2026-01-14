@@ -240,7 +240,7 @@ class ValidationSpec
             'zipcode' => fn (string $f, bool $r) => self::zipCode($f, $r),
             'country' => fn (string $f, bool $r) => self::country($f, $r),
             'shopItemId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
-            'transactionOperationId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
+            'transactionId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
         ];
 
         $spec = [];

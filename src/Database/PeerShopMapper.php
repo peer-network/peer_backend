@@ -55,7 +55,7 @@ class PeerShopMapper
             ShopOrder::insert([
                 'shoporderid' => $shopOrder['shoporderid'],
                 'userid' => $shopOrder['userid'],
-                'transactionoperationid' => $shopOrder['transactionoperationid'],
+                'transactionid' => $shopOrder['transactionid'],
                 'shopitemid' => $shopOrder['shopitemid'],
                 'name' => $shopOrder['orderDetails']['name'],
                 'email' => $shopOrder['orderDetails']['email'],
@@ -77,14 +77,14 @@ class PeerShopMapper
     }
 
 
-    public function getShopOrderDetails(string $transactionOperationId): array
+    public function getShopOrderDetails(string $transactionId): array
     {
         $this->logger->debug('PeerShopMapper.getShopOrderDetails started', [
-            'transactionOperationId' => $transactionOperationId,
+            'transactionId' => $transactionId,
         ]);
 
         $order = ShopOrder::query()
-            ->where('transactionoperationid', $transactionOperationId)
+            ->where('transactionid', $transactionId)
             ->first();
 
         return is_array($order) ? $order : [];

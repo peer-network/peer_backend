@@ -3269,7 +3269,7 @@ class GraphQLSchemaBuilder
             return self::respondWithError(60501);
         }
 
-        $validation = RequestValidator::validate($args);
+        $validation = RequestValidator::validate($args, ['transactionId']);
 
         if ($validation instanceof ValidatorErrors) {
             return $this::respondWithError(

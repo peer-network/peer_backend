@@ -132,16 +132,7 @@ class PeerShopService
             // Create ShopOrder in shop order table
             $transferStrategy = new ShopTransferStrategy();
 
-            $args['transactionoperationid'] = $transferStrategy->getOperationId();
-            $args['userid'] = $this->currentUserId;
-            $shopOrder = new ShopOrder($args, [], false);
-
-            $isShopOrder = $this->peerShopMapper->createShopOrder($shopOrder);
-            if (!$isShopOrder) {
-                $this->transactionManager->rollback();
-                $this->logger->error('PeerShopService.performShopOrder failed to create shop order');
-                return self::respondWithError(41223); // Failed to create shop order
-            }
+            
 
             // ********************************* Needs to update SenderId and RecipientId after new Mint features merged
             $response = $this->peerTokenMapper->transferToken(
@@ -151,6 +142,18 @@ class PeerShopService
                 $transferStrategy,
                 $message
             );
+
+            $args['transactionid'] = $transferStrategy->getTransactionId();
+            $args['userid'] = $this->currentUserId;
+            $shopOrder = new ShopOrder($args, [], false);
+
+            $isShopOrder = $this->peerShopMapper->createShopOrder($shopOrder);
+            if (!$isShopOrder) {
+                $this->transactionManager->rollback();
+                $this->logger->error('PeerShopService.performShopOrder failed to create shop order');
+                return self::respondWithError(41223); // Failed to create shop order
+            }
+            
             if ($response['status'] === 'error' || !$isShopOrder) {
                 $this->transactionManager->rollback();
                 return $response;
@@ -181,13 +184,13 @@ class PeerShopService
         }
 
         try {
-            $transactionOperationId = (string)($args['transactionOperationId'] ?? $args['transactionoperationid'] ?? '');
+            $transactionId = (string)($args['transactionId'] ?? $args['transactionId'] ?? '');
 
-            if ($transactionOperationId === '') {
+            if ($transactionId === '') {
                 return self::respondWithError(30101);
             }
 
-            $order = $this->peerShopMapper->getShopOrderDetails($transactionOperationId);
+            $order = $this->peerShopMapper->getShopOrderDetails($transactionId);
 
             if (empty($order)) {
                 return self::respondWithError(22101); // Shop Order not found

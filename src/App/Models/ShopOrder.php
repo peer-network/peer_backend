@@ -17,8 +17,7 @@ use DateTime;
  *
  * Foreign Keys:
  *  1. userid -> users(uid)
- *  2. transactionoperationid -> transactions(operationid)
- *  3. shopitemid -> shop_items(uid)
+ *  2. transactionid -> transactions(transactionid)
  */
 
 
@@ -27,7 +26,7 @@ class ShopOrder extends Model
     use ResponseHelper;
     protected string $shoporderid;
     protected string $userid;
-    protected string $transactionoperationid;
+    protected string $transactionid;
     protected string $shopitemid;
     protected string $name;
     protected string $email;
@@ -52,7 +51,7 @@ class ShopOrder extends Model
 
         $this->shoporderid = $data['shoporderid'] ?? self::generateUUID();
         $this->userid = $data['userid'] ?? '';
-        $this->transactionoperationid = $data['transactionoperationid'] ?? '';
+        $this->transactionid = $data['transactionid'] ?? '';
         $this->shopitemid = $data['shopItemId'] ?? '';
         $this->name = $data['orderDetails']['name'] ?? '';
         $this->email = $data['orderDetails']['email'] ?? '';
@@ -70,7 +69,7 @@ class ShopOrder extends Model
         return [
             'shoporderid' => $this->shoporderid,
             'userid' => $this->userid,
-            'transactionoperationid' => $this->transactionoperationid,
+            'transactionid' => $this->transactionid,
             'shopitemid' => $this->shopitemid,
             'orderDetails' => [
                 'name' => $this->name,
@@ -123,7 +122,7 @@ class ShopOrder extends Model
                 'required' => true,
                 'validators' => [['name' => 'Uuid']],
             ],
-            'transactionoperationid' => [
+            'transactionid' => [
                 'required' => false,
                 'validators' => [['name' => 'Uuid']],
             ],

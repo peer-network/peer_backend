@@ -4,7 +4,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS shop_orders (
     shoporderid UUID PRIMARY KEY,
     userid UUID NOT NULL,
-    transactionoperationid UUID NOT NULL,
+    transactionid UUID NOT NULL,
     shopitemid VARCHAR(255) DEFAULT NULL,
     size VARCHAR(255) DEFAULT NULL,
     name VARCHAR(255) DEFAULT NULL,
@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS shop_orders (
     zipcode VARCHAR(100) DEFAULT NULL,
     country VARCHAR(100) DEFAULT NULL,
     createdat TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_shop_order_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE
+    CONSTRAINT fk_shop_order_userid FOREIGN KEY (userid) REFERENCES users(uid) ON DELETE CASCADE,
+    CONSTRAINT fk_shop_order_transactionid FOREIGN KEY (transactionid) REFERENCES transactions(transactionid) ON DELETE CASCADE
 );
 
 
