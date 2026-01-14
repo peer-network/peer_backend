@@ -94,10 +94,8 @@ class PeerShopService
                 $systemUserSpec
             ];
 
-            $recipientid = $receipientUserObj->getUserId();
-
-            if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
-                return $this::respondWithError(31205, ['recipientid' => $recipientid]);
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $this->currentUserId) === false) {
+                return $this::respondWithError(31205, ['Current User Id' => $this->currentUserId]);
             }
             $this->transactionManager->beginTransaction();
 
@@ -132,12 +130,13 @@ class PeerShopService
 
             
 
-            // ********************************* Needs to update SenderId and RecipientId after new Mint features merged
+            $senderUserObj = $this->userMapper->loadById($this->currentUserId);
+
             $response = $this->peerTokenMapper->transferToken(
-                $this->currentUserId,
-                $peerShop,
                 $tokenAmount,
                 $transferStrategy,
+                $senderUserObj,
+                $receipientUserObj,
                 $message
             );
 
