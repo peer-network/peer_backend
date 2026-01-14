@@ -545,12 +545,11 @@ class UserMapper implements UserMapperInterface
         try {
             $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
                     FROM users 
-                    WHERE uid = :id AND status != :status";
+                    WHERE uid = :id";
 
             $stmt = $this->db->prepare($sql);
 
             $stmt->bindValue(':id', $id, PDO::PARAM_STR);
-            $stmt->bindValue(':status', Status::DELETED, PDO::PARAM_INT);
 
             $stmt->execute();
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
