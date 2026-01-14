@@ -21,6 +21,7 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\UserMapperInterface;
 
 use function grapheme_strlen;
 
@@ -34,7 +35,8 @@ class PeerTokenService
         protected PeerLoggerInterface $logger,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager,
-        protected UserMapper $userMapper,
+        protected UserMapperInterface $userMapper,
+        protected UserService $userService,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ProfileRepository $profileRepository,
         protected ProfileEnrichmentAssembler $profileAssembler
@@ -69,7 +71,7 @@ class PeerTokenService
 
         $recipientid =  $args['recipient'];
 
-        if (!$this->userMapper->isUserExistById($recipientid)) {
+        if (!$this->userService->isVisibleUserExistById($recipientid)) {
             return $this::respondWithError(31007);
         }
 

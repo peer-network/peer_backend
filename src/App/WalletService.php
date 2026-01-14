@@ -24,6 +24,7 @@ class WalletService
         protected PeerLoggerInterface $logger,
         protected WalletMapper $walletMapper,
         protected UserMapper $userMapper,
+        protected UserService $userService,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
     ) {}
@@ -212,8 +213,8 @@ class WalletService
             [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
             $recipientId = $args['fromid'] ?? $peerWallet;
 
-            $senderUserObj = $this->userMapper->loadById($userId);
-            $receipientUserObj = $this->userMapper->loadById($recipientId);
+            $senderUserObj = $this->userService->loadAllUsersById($userId);
+            $receipientUserObj = $this->userService->loadAllUsersById($recipientId);
 
             $args = [
                 'postid' => $postId,

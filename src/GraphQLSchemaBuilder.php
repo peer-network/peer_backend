@@ -2961,7 +2961,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.verifyAccount started');
 
         try {
-            $user = $this->userMapper->loadById($userid);
+            $user = $this->userService->loadAllUsersById($userid);
             if (!$user) {
                 return $this::respondWithError(31007);
             }
@@ -3087,7 +3087,7 @@ class GraphQLSchemaBuilder
             //     return $this::respondWithError(30901);
             // }
 
-            $users = $this->userMapper->loadById($decodedToken->uid);
+            $users = $this->userService->loadVisibleUsersById($decodedToken->uid);
             if ($users === false) {
                 return $this::respondWithError(30901);
             }

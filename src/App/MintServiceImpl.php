@@ -23,6 +23,10 @@ use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\App\DTO\GemsInTokenResult;
 use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 
 class MintServiceImpl implements MintService
 {
@@ -35,6 +39,7 @@ class MintServiceImpl implements MintService
         protected MintAccountRepository $mintAccountRepository,
         protected MintRepository $mintRepository,
         protected UserMapperInterface $userMapper,
+        protected UserService $userService,
         protected PeerTokenMapperInterface $peerTokenMapper,
         protected UserActionsRepository $userActionsRepository,
         protected GemsRepository $gemsRepository,
@@ -54,7 +59,8 @@ class MintServiceImpl implements MintService
             return false;
         }
         // Admin-only: allow ADMIN and SUPER_ADMIN
-        $user = $this->userMapper->loadById($this->currentUserId);
+        
+        $user = $this->userService->loadAllUsersById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found for admin check', ['uid' => $this->currentUserId]);
             return false;
@@ -297,7 +303,8 @@ class MintServiceImpl implements MintService
                 ]);
                 throw new ValidationException('amount to transfer is 0', [40301]);
             }
-            $recipient = $this->userMapper->loadById($recipientUserId); // user loadByIds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            $recipient = $this->userService->loadAllUsersById($recipientUserId); // user loadByIds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             if ($recipient === false) {
                 $this->logger->error('Recipient user not found for token transfer', [
                     'userId' => $recipientUserId,

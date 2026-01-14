@@ -75,7 +75,7 @@ final class MockUserMapper implements UserMapperInterface
         return $this->loadById($id);
     }
 
-    public function loadById(string $id): User|false
+    public function loadById(string $id, array $specifications = []): User|false
     {
         if (!isset($this->users[$id])) {
             return false;
