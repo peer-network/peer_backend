@@ -161,6 +161,25 @@ class PeerInputGenericValidator
         return false;
     }
 
+    protected function validateGenericUuid(mixed $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'uuid';
+        if ($value !== null && $value === '') {
+            return false;
+        }
+
+        if (!is_string($value)) {
+            $this->pushError($options, $fieldKey, '30272');
+            return false;
+        }
+
+        if (preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $value) === 1) {
+            return true;
+        }
+        $this->pushError($options, $fieldKey, '30272');
+        return false;
+    }
+
     protected function Date(string $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'Date';
@@ -327,17 +346,19 @@ class PeerInputGenericValidator
 
     protected function validateAddressLine1(mixed $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'addressLine1';
-        $options['errorCode'] = $options['errorCode'] ?? '30103';
+        $fieldKey = $options['field'] ?? 'addressline1';
+        $options['errorCode'] = $options['errorCode'] ?? '30273';
 
         if (!is_string($value) && !is_int($value) && !is_float($value)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30273');
             return false;
         }
 
+        $peerShopConfig = ConstantsConfig::shop()['ADDRESS'];
+
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < 6) {
-            $this->pushError($options, $fieldKey, '30103');
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30273');
             return false;
         }
 
@@ -347,16 +368,18 @@ class PeerInputGenericValidator
     protected function validateCity(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'city';
-        $options['errorCode'] = $options['errorCode'] ?? '30103';
+        $options['errorCode'] = $options['errorCode'] ?? '30274';
 
         if (!is_string($value) && !is_int($value) && !is_float($value)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30274');
             return false;
         }
 
+        $peerShopConfig = ConstantsConfig::shop()['CITY'];
+
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < 2) {
-            $this->pushError($options, $fieldKey, '30103');
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30274');
             return false;
         }
 
@@ -366,16 +389,19 @@ class PeerInputGenericValidator
     protected function validateZipCode(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'zipCode';
-        $options['errorCode'] = $options['errorCode'] ?? '30103';
+        $options['errorCode'] = $options['errorCode'] ?? '30275';
 
         if (!is_string($value) && !is_int($value) && !is_float($value)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30275');
             return false;
         }
 
+        $peerShopConfig = ConstantsConfig::shop()['ZIPCODE'];
+        $zipCodeLength = $peerShopConfig['LENGTH'];
+
         $val = trim((string)$value);
-        if (preg_match('/^\d{5}$/', $val) !== 1) {
-            $this->pushError($options, $fieldKey, '30103');
+        if (preg_match('/^\d{' . $zipCodeLength . '}$/', $val) !== 1) {
+            $this->pushError($options, $fieldKey, '30275');
             return false;
         }
 
@@ -385,16 +411,16 @@ class PeerInputGenericValidator
     protected function validateCountry(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'country';
-        $options['errorCode'] = $options['errorCode'] ?? '30103';
+        $options['errorCode'] = $options['errorCode'] ?? '30276';
 
         if (!is_string($value) && !is_int($value) && !is_float($value)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30276');
             return false;
         }
 
         $val = trim((string)$value);
         if ($val === '') {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30276');
             return false;
         }
 
@@ -402,7 +428,7 @@ class PeerInputGenericValidator
         $normalizedAllowed = array_map('strtolower', $allowedCountries);
 
         if (!in_array(strtolower($val), $normalizedAllowed, true)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30276');
             return false;
         }
 
@@ -412,16 +438,17 @@ class PeerInputGenericValidator
     protected function validateName(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'name';
-        $options['errorCode'] = $options['errorCode'] ?? '30103';
+        $options['errorCode'] = $options['errorCode'] ?? '30277';
 
         if (!is_string($value) && !is_int($value) && !is_float($value)) {
-            $this->pushError($options, $fieldKey, '30103');
+            $this->pushError($options, $fieldKey, '30277');
             return false;
         }
+        $peerShopConfig = ConstantsConfig::shop()['ZIPCODE'];
 
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < 2) {
-            $this->pushError($options, $fieldKey, '30103');
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30277');
             return false;
         }
 

@@ -12,10 +12,14 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\PeerShopMapper;
 use Fawaz\Services\TokenTransfer\Strategies\ShopTransferStrategy;
 use Fawaz\Database\Interfaces\ShopOrderPermissionsMapper;
 use Fawaz\Database\ShopOrderPermissionsMapperImpl;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ErrorResponse;
 
 use function grapheme_strlen;
@@ -32,6 +36,7 @@ class PeerShopService
         protected PeerTokenMapper $peerTokenMapper,
         protected PeerShopMapper $peerShopMapper,
         protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected UserMapper $userMapper,
         ?ShopOrderPermissionsMapper $shopOrderPermissionsMapper = null
     ) {
@@ -72,19 +77,36 @@ class PeerShopService
             $tokenAmount = (string) $args['tokenAmount'];
             $message = isset($args['transferMessage']) ? (string) $args['transferMessage'] : null;
             
+            $peerShop = $this->peerShopMapper->initializeWalletAccounts();
+
+            $receipientUserObj = $this->userMapper->loadById($peerShop);
+            if (empty($receipientUserObj)) {
+                $this->logger->warning('Peer Shop Account not found.');
+                return self::respondWithError(41223);
+            }
+
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::user
+            );
+
+            $specs = [
+                $systemUserSpec
+            ];
+
+            $recipientid = $receipientUserObj->getUserId();
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
+                return $this::respondWithError(31204, ['recipientid' => $recipientid]);
+            }
             $this->transactionManager->beginTransaction();
 
-            $peerShop = $this->peerShopMapper->initializeWalletAccounts();
         
             if ((string) $peerShop === $this->currentUserId) {
                 $this->logger->warning('Send and Receive Same Wallet Error.');
                 return self::respondWithError(31202);
-            }
-
-            $receipientUserObj = $this->userMapper->loadById($peerShop);
-            if (empty($receipientUserObj)) {
-                $this->logger->warning('Unknown Id Exception.');
-                return self::respondWithError(31007);
             }
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
@@ -118,7 +140,7 @@ class PeerShopService
             if (!$isShopOrder) {
                 $this->transactionManager->rollback();
                 $this->logger->error('PeerShopService.performShopOrder failed to create shop order');
-                return self::respondWithError(00000); // Failed to create shop order
+                return self::respondWithError(41223); // Failed to create shop order
             }
 
             // ********************************* Needs to update SenderId and RecipientId after new Mint features merged
@@ -136,13 +158,13 @@ class PeerShopService
                 $this->logger->info('PeerShopService.performShopOrder completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
                 
-                return self::createSuccessResponse(11216, [], true); // Product purchased successfully
+                return self::createSuccessResponse(12201, [], true); // Product purchased successfully
             }
 
         } catch (\Exception $e) {
             $this->logger->error("Error in PeerShopService.performShopOrder", ['exception' => $e->getMessage()]);
             $this->transactionManager->rollback();
-            return $this::respondWithError(41229); // Failed to transfer token
+            return $this::respondWithError(41223); // Failed to transfer token
         }
     }
 
@@ -168,7 +190,7 @@ class PeerShopService
             $order = $this->peerShopMapper->getShopOrderDetails($transactionOperationId);
 
             if (empty($order)) {
-                return self::respondWithError(00000); // Shop Order not found
+                return self::respondWithError(22101); // Shop Order not found
             }
 
             $orderOwnerId = (string)($order['userid'] ?? '');
@@ -206,7 +228,7 @@ class PeerShopService
             ];
 
             // Shop Order details fetched successfully
-            return self::createSuccessResponse(00000, $orderDetails); 
+            return self::createSuccessResponse(12202, $orderDetails); 
 
         } catch (\Exception $e) {
             $this->logger->error("Error in PeerShopService.shopOrderDetails", ['exception' => $e->getMessage()]);

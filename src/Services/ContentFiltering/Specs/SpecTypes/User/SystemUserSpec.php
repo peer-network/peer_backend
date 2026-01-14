@@ -45,7 +45,7 @@ final class SystemUserSpec implements Specification
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = u.uid AND
-                        SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
+                        SystemUserSpec_users.roles_mask IN (0,2,16,256,32) AND
                         SystemUserSpec_users.verified = 1
                     )" ],
                     []
@@ -56,7 +56,7 @@ final class SystemUserSpec implements Specification
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = p.userid AND
-                        SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
+                        SystemUserSpec_users.roles_mask IN (0,2,16,256,32) AND
                         SystemUserSpec_users.verified = 1
                     )" ],
                     []
@@ -67,7 +67,7 @@ final class SystemUserSpec implements Specification
                         SELECT 1
                         FROM users SystemUserSpec_users
                         WHERE SystemUserSpec_users.uid = c.userid AND
-                        SystemUserSpec_users.roles_mask IN (0,2,16,256) AND
+                        SystemUserSpec_users.roles_mask IN (0,2,16,256,32) AND
                         SystemUserSpec_users.verified = 1
                     )" ],
                     []
