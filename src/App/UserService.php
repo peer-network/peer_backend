@@ -123,6 +123,70 @@ class UserService
         return null;
     }
 
+    public function loadVisibleUsersById(string $userId): User|false
+    {
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);
+
+        $contentFilterCase = ContentFilteringCases::hideAll;
+
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
+        ];
+
+        try {
+            return $this->userMapper->loadById($userId, $defaultSpecs);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function isVisibleUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isVisibleUserExistById started', ['userId' => $userId]);
+
+        $contentFilterCase = ContentFilteringCases::hideAll;
+
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
+        ];
+
+        try {
+            return $this->userMapper->isUserExistById($userId, $defaultSpecs);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check visible user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function loadAllUsersById(string $userId): User|false
+    {
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);        
+
+        try {
+            return $this->userMapper->loadById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function isAnyUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isUserExistById started', ['userId' => $userId]);
+
+        try {
+            return $this->userMapper->isUserExistById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function createUser(array $args): array
     {
         $this->logger->debug('UserService.createUser started');
@@ -152,7 +216,7 @@ class UserService
                 return self::respondWithError(31007);
             }
 
-            $inviter = $this->userMapper->loadById($referralUuid);
+            $inviter = $this->loadVisibleUsersById($referralUuid);
 
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
