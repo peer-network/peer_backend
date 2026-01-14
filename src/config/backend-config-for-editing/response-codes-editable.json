@@ -949,7 +949,11 @@
         "userFriendlyComment": "You are not authorized to transfer to pool accounts."
     },
     "31204": {
-         "comment": "Unauthorized to place shop order.",
+        "comment": "Minting for the given day has already been performed.",
+        "userFriendlyComment": "Minting for this day has already been completed."
+    },
+    "31205": {
+        "comment": "Unauthorized to place shop order.",
         "userFriendlyComment": "You are not authorized to place a shop order."
     },
     "31501": {

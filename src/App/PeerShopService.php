@@ -97,7 +97,7 @@ class PeerShopService
             $recipientid = $receipientUserObj->getUserId();
 
             if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
-                return $this::respondWithError(31204, ['recipientid' => $recipientid]);
+                return $this::respondWithError(31205, ['recipientid' => $recipientid]);
             }
             $this->transactionManager->beginTransaction();
 

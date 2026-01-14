@@ -94,7 +94,7 @@ class PoolMapper
         return $results;
     }
 
-    public function getTimeSorted()
+    public function fetchGemsStats()
     {
         try {
 
@@ -124,7 +124,7 @@ class PoolMapper
 
     }
 
-    public function getTimeSortedMatch(string $day = 'D0'): array
+    public function fetchAllGemsForDay(string $day = 'D0'): array
     {
         \ignore_user_abort(true);
 

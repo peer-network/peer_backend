@@ -2,10 +2,19 @@
 
 declare(strict_types=1);
 
+use Fawaz\App\MintService;
+use Fawaz\App\MintServiceImpl;
+use Fawaz\App\Repositories\MintAccountRepositoryImpl;
+use Fawaz\App\Repositories\WalletHandlerFactory;
 use Fawaz\BaseURL;
+use Fawaz\Database\MintRepository;
+use Fawaz\Database\MintRepositoryImpl;
 use Fawaz\Database\InteractionsPermissionsMapperImpl;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\UserActionsRepository;
+use Fawaz\Database\UserActionsRepositoryImpl;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\ResponseMessagesProvider;
 use Fawaz\Services\JWTService;
 use Fawaz\Services\Mailer;
@@ -13,16 +22,27 @@ use Fawaz\Services\LiquidityPool;
 use DI\ContainerBuilder;
 use Fawaz\App\ProfileServiceImpl;
 use Fawaz\App\Interfaces\ProfileService;
+use Fawaz\App\Interfaces\GemsService;
+use Fawaz\App\GemsServiceImpl;
 use Fawaz\App\Models\Core\Model;
 use Fawaz\Utils\PeerLogger;
 use Fawaz\Utils\ResponseMessagesProviderImpl;
 use Fawaz\Database\ProfileRepositoryImpl;
+use Fawaz\Database\GemsRepository;
+use Fawaz\Database\GemsRepositoryImpl;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
 use Fawaz\Database\Interfaces\ShopOrderPermissionsMapper;
 use Fawaz\Database\ShopOrderPermissionsMapperImpl;
+use Fawaz\App\Repositories\MintAccountRepository;
+use Fawaz\App\UserService;
+use Fawaz\App\UserServiceInterface;
+use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Database\PeerTokenMapperInterface;
+use Fawaz\Database\UserMapper;
+use Fawaz\Database\UserMapperInterface;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -85,6 +105,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         },
 
         ProfileService::class => \DI\autowire(ProfileServiceImpl::class),
+        GemsService::class => \DI\autowire(GemsServiceImpl::class),
         ProfileRepository::class => \DI\autowire(ProfileRepositoryImpl::class),
         ProfileEnrichmentAssembler::class => \DI\autowire(ProfileEnrichmentAssembler::class),
         ResponseMessagesProvider::class => function (ContainerInterface $c) {
@@ -93,5 +114,19 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         },
         InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
         ShopOrderPermissionsMapper::class => \DI\autowire(ShopOrderPermissionsMapperImpl::class),
+        WalletHandlerFactory::class => function (ContainerInterface $c) {
+            return new WalletHandlerFactory(
+                $c->get(WalletMapper::class),
+                $c->get(MintAccountRepositoryImpl::class)
+            );
+        },
+        MintRepository::class => \DI\autowire(MintRepositoryImpl::class),
+        MintService::class => \DI\autowire(MintServiceImpl::class),
+        GemsRepository::class => \DI\autowire(GemsRepositoryImpl::class),
+        UserActionsRepository::class => \DI\autowire(UserActionsRepositoryImpl::class),
+        MintAccountRepository::class => \DI\autowire(MintAccountRepositoryImpl::class),
+        UserMapperInterface::class => \DI\autowire(UserMapper::class),
+        PeerTokenMapperInterface::class => \DI\autowire(PeerTokenMapper::class),
+        UserServiceInterface::class => \DI\autowire(UserService::class)
     ]);
 };
