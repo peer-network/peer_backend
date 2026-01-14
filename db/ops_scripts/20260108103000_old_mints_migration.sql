@@ -39,6 +39,7 @@ BEGIN;
   SELECT
       token,
       userid,
+      createdat,
       createdat::date AS day,
       gems::NUMERIC(30,10)     AS gems,
       numbers::NUMERIC(30,10)  AS numbers
@@ -68,6 +69,7 @@ BEGIN;
       SELECT
           userid,
           day,
+          MIN(createdat) AS createdat,
           SUM(numbers)::NUMERIC(30,10) AS token_amount
       FROM tmp_logwins_scope
       GROUP BY userid, day
@@ -82,7 +84,7 @@ BEGIN;
           dut.userid AS recipientid,
           dut.token_amount,
           'CREDIT'::VARCHAR AS transferaction,
-          dut.day,
+          dut.createdat,
           im.mintid
       FROM daily_user_tokens dut
       JOIN inserted_mints im USING (day)
@@ -110,7 +112,7 @@ BEGIN;
           tp.transferaction,
           'TOKEN_MINT',
           NULL,
-          tp.day::TIMESTAMP
+          tp.createdat
       FROM transactions_payload tp
       RETURNING
           transactionid,
