@@ -25,7 +25,7 @@ interface UserMapperInterface
 
     public function loadByIdMAin(string $id, int $roles_mask = 0): User|false;
 
-    public function loadById(string $id): User|false;
+    public function loadById(string $id, array $specifications = []): User|false;
 
     public function loadByEmail(string $email): User|false;
 

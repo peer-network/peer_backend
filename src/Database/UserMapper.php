@@ -538,20 +538,42 @@ class UserMapper implements UserMapperInterface
         }
     }
 
-    public function loadById(string $id): User|false
+    public function loadById(string $id, array $specifications = []): User|false
     {
         $this->logger->debug("UserMapper.loadById started");
 
         try {
-            $sql = "SELECT uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, createdat, updatedat, visibility_status
-                    FROM users 
-                    WHERE uid = :id";
+            $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+            $allSpecs = SpecificationSQLData::merge($specsSQL);
+            $whereClauses = $allSpecs->whereClauses;
+            $params = $allSpecs->paramsToPrepare;
+
+            $whereClauses[] = 'u.uid = :id';
+            $params['id'] = $id;
+
+            $whereClausesString = implode(' AND ', $whereClauses);
+
+            $sql = "SELECT 
+                        u.uid, 
+                        u.email, 
+                        u.username, 
+                        u.password, 
+                        u.status, 
+                        u.verified, 
+                        u.slug, 
+                        u.roles_mask, 
+                        u.ip, 
+                        u.img, 
+                        u.biography, 
+                        u.createdat, 
+                        u.updatedat, 
+                        u.visibility_status
+                    FROM users u
+                    WHERE $whereClausesString";
 
             $stmt = $this->db->prepare($sql);
 
-            $stmt->bindValue(':id', $id, PDO::PARAM_STR);
-
-            $stmt->execute();
+            $stmt->execute($params);
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
@@ -617,14 +639,22 @@ class UserMapper implements UserMapperInterface
         }
     }
 
-    public function isUserExistById(string $id): bool
+    public function isUserExistById(string $id, array $specifications = []): bool
     {
         $this->logger->debug("UserMapper.isUserExistById started", ['id' => $id]);
 
         try {
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE uid = :id");
-            $stmt->bindParam(':id', $id);
-            $stmt->execute();
+            $specsSQL = array_map(fn (Specification $spec) => $spec->toSql(ContentType::user), $specifications);
+            $allSpecs = SpecificationSQLData::merge($specsSQL);
+            $whereClauses = $allSpecs->whereClauses;
+            $params = $allSpecs->paramsToPrepare;
+
+            $whereClauses[] = 'u.uid = :id';
+            $params['id'] = $id;
+            $whereClausesString = implode(' AND ', $whereClauses);
+
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM users u WHERE $whereClausesString");
+            $stmt->execute($params);
             $exists = $stmt->fetchColumn() > 0;
 
             $this->logger->info("User existence check", ['id' => $id, 'exists' => $exists]);
