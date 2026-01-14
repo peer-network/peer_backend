@@ -109,7 +109,7 @@ class TokenHelper
         $result = $runtIns->multiply_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+            throw new \RuntimeException("Error in multiply operation, result is not numeric.");
         }
         return $result;
 
@@ -129,7 +129,7 @@ class TokenHelper
         $result = $runtIns->divide_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+            throw new \RuntimeException("Error in divide operation, result is not numeric.");
         }
         return $result;
     }
@@ -148,7 +148,7 @@ class TokenHelper
         $result = $runtIns->subtract_decimal($value1, $value2);
 
         if (is_numeric($result) === false) {
-            throw new \RuntimeException("Error in addition operation, result is not numeric.");
+            throw new \RuntimeException("Error in subtract   operation, result is not numeric.");
         }
         return $result;
     }

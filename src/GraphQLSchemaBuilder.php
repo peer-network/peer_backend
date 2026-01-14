@@ -18,6 +18,7 @@ use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\PoolService;
+use Fawaz\App\Interfaces\GemsService;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
 use Fawaz\App\PostService;
@@ -25,6 +26,7 @@ use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
+use Fawaz\App\MintService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
@@ -59,6 +61,8 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
 use PDOException;
 
@@ -81,6 +85,7 @@ class GraphQLSchemaBuilder
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
+        protected GemsService $gemsService,
         protected PostInfoService $postInfoService,
         protected PostService $postService,
         protected CommentService $commentService,
@@ -88,11 +93,13 @@ class GraphQLSchemaBuilder
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
         protected AdvertisementService $advertisementService,
+        protected MintService $mintService,
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected TransactionManager $transactionManager
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -143,7 +150,7 @@ class GraphQLSchemaBuilder
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }
 
@@ -154,7 +161,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver($this->fieldResolver(...));
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
+            $this->logger->error('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
@@ -212,6 +219,7 @@ class GraphQLSchemaBuilder
         $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
+        $this->gemsService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
         $this->postInfoService->setCurrentUserId($userid);
         $this->commentService->setCurrentUserId($userid);
@@ -222,6 +230,7 @@ class GraphQLSchemaBuilder
         $this->tagService->setCurrentUserId($userid);
         $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
+        $this->mintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -333,6 +342,19 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+            ],
+            'MintAccountResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'mintAccount' => function (array $root): array {
+                    return $root['affectedRows'];
+                },
             ],
             'ReferralInfo' => [
                 'uid' => function (array $root): string {
@@ -893,6 +915,21 @@ class GraphQLSchemaBuilder
                 'currentliquidity' => function (array $root): float {
                     $this->logger->debug('Query.currentliquidity Resolvers');
                     return $root['currentliquidity'] ?? 0.0;
+                },
+            ],
+            'MintAccount' => [
+                'accountid' => function (array $root): string {
+                    $this->logger->debug('Query.MintAccount Resolvers');
+                    return $root['accountid'] ?? '';
+                },
+                'initialBalance' => function (array $root): string {
+                    return (string)$root['initial_balance'];
+                },
+                'currentBalance' => function (array $root): string {
+                    return (string)$root['current_balance'];
+                },
+                'updatedat' => function (array $root): string {
+                    return $root['updatedat'] ?? '';
                 },
             ],
             'UserInfo' => [
@@ -1625,17 +1662,17 @@ class GraphQLSchemaBuilder
             'listTags' => fn (mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn (mixed $root, array $args) => $this->resolveTagsearch($args),
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'gemster' => fn (mixed $root, array $args) => $this->walletService->callGemster(),
+            'gemster' => fn (mixed $root, array $args) => $this->gemsService->gemsStats(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn (mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
-            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
+            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->mintService->listTodaysInteractions(),
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
-            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),
-            'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->gemsStats(),
+            'dailygemsresults' => fn (mixed $root, array $args) => $this->gemsService->allGemsForDay($args['day']),
             'getReferralInfo' => fn (mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
@@ -1645,10 +1682,9 @@ class GraphQLSchemaBuilder
             'postInteractions' => fn (mixed $root, array $args) => $this->postInteractions($args),
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
-            'logWinMigration' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration(),
-            'logWinsPaidActionForMarchApril' => fn(mixed $root, array $args) => $this->logWinService->logwinsPaidActionForMarchApril(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
         ];
     }
 
@@ -1681,8 +1717,8 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
-            'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
-            'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
+            'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
+            'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
@@ -2053,7 +2089,6 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-  
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
@@ -2926,7 +2961,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.verifyAccount started');
 
         try {
-            $user = $this->userMapper->loadById($userid);
+            $user = $this->userService->loadAllUsersById($userid);
             if (!$user) {
                 return $this::respondWithError(31007);
             }
@@ -3052,7 +3087,7 @@ class GraphQLSchemaBuilder
             //     return $this::respondWithError(30901);
             // }
 
-            $users = $this->userMapper->loadById($decodedToken->uid);
+            $users = $this->userService->loadVisibleUsersById($decodedToken->uid);
             if ($users === false) {
                 return $this::respondWithError(30901);
             }
