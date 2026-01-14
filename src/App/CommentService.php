@@ -140,7 +140,6 @@ class CommentService
 
             if (!$result) {
                 $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
-
                 return $this::respondWithError(41602);
             }
 
