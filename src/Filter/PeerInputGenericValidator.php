@@ -424,7 +424,7 @@ class PeerInputGenericValidator
             return false;
         }
 
-        $allowedCountries = ConstantsConfig::user()['COUNTRIES'];
+        $allowedCountries = ConstantsConfig::shop()['COUNTRIES'];
         $normalizedAllowed = array_map('strtolower', $allowedCountries);
 
         if (!in_array(strtolower($val), $normalizedAllowed, true)) {
