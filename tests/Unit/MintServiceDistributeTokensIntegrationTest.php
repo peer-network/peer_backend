@@ -17,6 +17,7 @@ use Tests\Mocks\Database\MockPeerTokenMapper;
 use Tests\Mocks\Database\MockUserActionsRepository;
 use Tests\Mocks\Database\MockUserMapper;
 use Tests\Mocks\Repositories\MockMintAccountRepositoryImpl;
+use Tests\Mocks\Services\MockUserService;
 
 final class MintServiceDistributeTokensIntegrationTest extends TestCase
 {
@@ -147,6 +148,7 @@ final class MintServiceDistributeTokensIntegrationTest extends TestCase
         $mintAccountRepository = new MockMintAccountRepositoryImpl();
         $mintRepository = new MockMintRepository();
         $userMapper = new MockUserMapper();
+        $userService = new MockUserService();
         $userActionsRepository = new MockUserActionsRepository();
         $transactionManager = new TransactionManager(new PDO('sqlite::memory:'));
 
@@ -163,6 +165,7 @@ final class MintServiceDistributeTokensIntegrationTest extends TestCase
             $mintAccountRepository,
             $mintRepository,
             $userMapper,
+            $userService,
             $peerTokenMapper,
             $userActionsRepository,
             $gemsRepository,
