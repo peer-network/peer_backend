@@ -5,7 +5,6 @@ namespace Fawaz\Services\ContentFiltering\Specs\SpecTypes\User;
 use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
 use Fawaz\Services\ContentFiltering\Specs\Specification;
 use Fawaz\Services\ContentFiltering\Specs\SpecificationSQLData;
-use Fawaz\App\Status;
 use Fawaz\config\ContentReplacementPattern;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\ContentFiltering\Replaceables\PostReplaceable;
@@ -82,26 +81,6 @@ final class PeerShopSpec implements Specification
     public function toReplacer(
         ProfileReplaceable|PostReplaceable|CommentReplaceable $subject
     ): ?ContentReplacementPattern {
-        if ($subject instanceof ProfileReplaceable) {
-            $showingContent = ContentType::user;
-        } elseif ($subject instanceof CommentReplaceable) {
-            $showingContent = ContentType::comment;
-        } else {
-            $showingContent = ContentType::post;
-        }
-
-
-        if ($this->contentFilterService->getContentFilterAction(
-            $showingContent,
-            $this->contentFilterStrategy
-        )  === ContentFilteringAction::replaceWithPlaceholder) {
-            if ($subject instanceof ProfileReplaceable) {
-                if ($subject->getStatus() !== Status::NORMAL) {
-                    return ContentReplacementPattern::deleted;
-                }
-            }
-            // posts, comments of Deleted User are not changed
-        }
         return null;
     }
 
