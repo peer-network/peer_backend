@@ -177,6 +177,18 @@ class ValidationSpec
     }
 
 
+
+    public static function size(string $field, bool $required = false, int $errorCode = 30278): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateSize', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
     
     /**
      * Merge multiple partial specs into one spec array.
@@ -241,6 +253,7 @@ class ValidationSpec
             'country' => fn (string $f, bool $r) => self::country($f, $r),
             'shopItemId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
             'transactionId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
+            'size' => fn (string $f, bool $r) => self::size($f, $r),
         ];
 
         $spec = [];

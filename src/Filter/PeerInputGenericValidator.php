@@ -357,7 +357,7 @@ class PeerInputGenericValidator
         $peerShopConfig = ConstantsConfig::shop()['ADDRESS'];
 
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH'] || strlen($val) > $peerShopConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30273');
             return false;
         }
@@ -378,7 +378,7 @@ class PeerInputGenericValidator
         $peerShopConfig = ConstantsConfig::shop()['CITY'];
 
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH'] || strlen($val) > $peerShopConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30274');
             return false;
         }
@@ -444,16 +444,38 @@ class PeerInputGenericValidator
             $this->pushError($options, $fieldKey, '30277');
             return false;
         }
-        $peerShopConfig = ConstantsConfig::shop()['ZIPCODE'];
+        $peerShopConfig = ConstantsConfig::shop()['NAME'];
 
         $val = trim((string)$value);
-        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH']) {
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH'] || strlen($val) > $peerShopConfig['MAX_LENGTH']) {
             $this->pushError($options, $fieldKey, '30277');
             return false;
         }
 
         return true;
     }
+
+    protected function validateSize(mixed $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'size';
+        $options['errorCode'] = $options['errorCode'] ?? '30278';
+
+        if (!is_string($value) && !is_int($value) && !is_float($value)) {
+            $this->pushError($options, $fieldKey, '30278');
+            return false;
+        }
+
+        $peerShopConfig = ConstantsConfig::shop()['SIZE'];
+
+        $val = trim((string)$value);
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH'] || strlen($val) > $peerShopConfig['MAX_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30278');
+            return false;
+        }
+
+        return true;
+    }
+    
 
     // Validate a single offset/limit-like field based on options['field']
     protected function validateOffsetAndLimit(int $value, array $options = []): bool

@@ -530,19 +530,26 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     private const PEER_SHOP = [
         'ADDRESS' => [
-            'MIN_LENGTH' => 6
+            'MIN_LENGTH' => 6,
+            'MAX_LENGTH' => 100,
         ],
         'CITY' => [
-            'MIN_LENGTH' => 2
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 100,
         ],
         'ZIPCODE' => [
             'LENGTH' => 5
         ],
         'NAME' => [
-            'MIN_LENGTH' => 2
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 100,
         ],
         'COUNTRIES' => [
             'Germany',
+        ],
+        'SIZE' => [
+            'MIN_LENGTH' => 1,
+            'MAX_LENGTH' => 100,
         ],
     ];
 }

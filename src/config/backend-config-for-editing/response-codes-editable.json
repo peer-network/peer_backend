@@ -816,6 +816,10 @@
         "comment": "name must be a valid name.",
         "userFriendlyComment": "Please enter a valid name."
     },
+    "30278": {
+        "comment": "size must be not more than {PEER_SHOP.SIZE.MAX_LENGTH}.",
+        "userFriendlyComment": "Please enter a valid size {PEER_SHOP.SIZE.MAX_LENGTH}."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."

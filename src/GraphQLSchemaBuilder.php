@@ -3285,7 +3285,7 @@ class GraphQLSchemaBuilder
             );
         }
 
-        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country' ]);
+        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'size']);
 
         if ($orderValidation instanceof ValidatorErrors) {
             return $this::respondWithError(
