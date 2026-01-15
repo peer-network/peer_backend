@@ -45,5 +45,117 @@ class LogWinService
     }
 
 
+    /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration04(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration04 started');
+
+        set_time_limit(0);
+        try {
+
+
+            $response = $this->logWinMapper->migrateTokenTransfer();
+
+            if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration04();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
+            }
+            
+            $message = 'Token transfer migration batch processed.';
+
+            return [
+                'status' => $message,
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration04: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
+
+    /**
+     * This will be Recurring function to migrate logwin data
+     * It will keep migrating data until all logwin records are processed
+     * 
+     */
+    public function logWinMigration05(): ?array
+    {
+        $this->logger->info('LogWinService.logWinMigration04 started');
+
+        set_time_limit(0);
+        try {
+
+
+            $response = $this->logWinMapper->migrateTokenTransfer01();
+
+            if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration05();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
+            }
+
+            $response = $this->logWinMapper->checkForUnmigratedRecords();
+            
+            if(!$response){
+                // Free memory between batches
+                gc_collect_cycles();
+
+                // Small delay helps avoid TLS exhaustion on some PHP builds
+                usleep(200); // 200 ms
+
+                $this->logWinMigration05();
+
+                // $message = 'Token transfer migration batch has more records to process. Wait for 20 seconds and call again.';
+
+            }
+            
+            $message = 'Token transfer migration batch processed.';
+
+            return [
+                'status' => $message,
+                'ResponseCode' => 200
+            ];
+
+        }catch (\RuntimeException $e) {
+            $this->logger->error('RuntimeException in LogWinService.logWinMigration04: ' . $e->getMessage());
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => $e->getCode()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'status' => 'error - ' . $e->getMessage(),
+                'ResponseCode' => 41205
+            ];
+        }
+    }
 
 }
