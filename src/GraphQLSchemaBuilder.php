@@ -1731,6 +1731,8 @@ class GraphQLSchemaBuilder
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
             'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
+            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
+            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
         ];
     }
 

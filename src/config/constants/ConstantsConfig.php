@@ -298,7 +298,7 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     private const COMMENT = [
         'CONTENT' => [
-            'MIN_LENGTH' => 2,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 200,
         ],
     ];
