@@ -19,31 +19,8 @@ class LogWinMapper
 {
     use ResponseHelper;
 
-    private string $burnWallet;
-    private string $companyWallet;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
-
-    /**
-     * Initialize and validates the liquidity pool wallets.
-     *
-     * @throws \RuntimeException if accounts are missing or invalid
-     */
-    private function initializeLiquidityPool(): void
-    {
-        $accounts = $this->pool->returnAccounts();
-        if (($accounts['status'] ?? '') === 'error') {
-            throw new \RuntimeException("Failed to load pool accounts");
-        }
-
-        $data = $accounts['response'] ?? [];
-        if (!isset($data['pool'], $data['burn'], $data['peer'])) {
-            throw new \RuntimeException("Liquidity pool wallets incomplete");
-        }
-
-        $this->burnWallet = $data['burn'];
-        $this->companyWallet = $data['peer'];
-    }
 
     /**
      * Migrate logwins records to transactions table.
@@ -121,7 +98,6 @@ class LogWinMapper
                 return true;
             }
 
-            $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
 
@@ -312,7 +288,7 @@ class LogWinMapper
 
                     $this->updateLogwinStatusInBunch($txnIds, 1);
 
-                    if($saveForLogs){
+                    if(isset($saveForLogs)){
                         $this->appendLogWinMigrationRecord($saveForLogs, 'P2P_transfer_logwins_to_transaction');
                     }
                     
@@ -396,7 +372,6 @@ class LogWinMapper
                 return true;
             }
 
-            $this->initializeLiquidityPool();
             $transRepo = new TransactionRepository($this->logger, $this->db);
 
 
@@ -556,7 +531,7 @@ class LogWinMapper
 
                     $this->updateLogwinStatusInBunch($txnIds, 1);
 
-                    if($saveForLogs){
+                    if(isset($saveForLogs)){
                         $this->appendLogWinMigrationRecord($saveForLogs, 'P2P_transfer_logwins_to_transaction');
                     }
 
