@@ -584,5 +584,5 @@ type ShopOrderDeliveryDetails {
   addressline2: String
   city: String!
   zipcode: String!
-  country: ShopSupportedDeliveryCountry
+  country: ShopSupportedDeliveryCountry!
 }
