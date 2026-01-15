@@ -25,6 +25,7 @@ use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
 use Fawaz\Utils\ResponseHelper;
 
 use function grapheme_strlen;
@@ -188,9 +189,15 @@ class UserInfoService
             $contentFilterCase,
             ContentType::user
         );
+        $peerShopUserSpec = new PeerShopSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
+            $peerShopUserSpec
         ];
 
         if ($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -504,9 +511,22 @@ class UserInfoService
                 return $this->respondWithError(31007);
             }
 
-            if ($user->getRolesmask() == Role::PEER_SHOP) {
-                $this->logger->warning('UserInfoService.reportUser: Shop Account can not be reported');
-                return $this->respondWithError(32201);
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $peerShopUserSpec = new PeerShopSpec(
+                $contentFilterCase,
+                ContentType::user
+            );
+
+            $specs = [
+                $peerShopUserSpec
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $reported_userid
+            ) === false) {
+                return $this::respondWithError(32201, ['userid' => $reported_userid]);
             }
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {

@@ -97,7 +97,7 @@ final class SystemUserSpec implements Specification
                     SELECT 1
                     FROM users SystemUserSpec_users
                     WHERE SystemUserSpec_users.uid = :SystemUserSpec_userid
-                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
+                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256,32)
                     AND SystemUserSpec_users.verified = 1
                 )"
             ], [
@@ -109,7 +109,7 @@ final class SystemUserSpec implements Specification
                     FROM posts SystemUserSpec_posts
                     LEFT JOIN users SystemUserSpec_users ON SystemUserSpec_users.uid = SystemUserSpec_posts.userid
                     WHERE SystemUserSpec_posts.postid = :SystemUserSpec_postid
-                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
+                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256,32)
                     AND SystemUserSpec_users.verified = 1
                 )"
             ], [
@@ -121,7 +121,7 @@ final class SystemUserSpec implements Specification
                     FROM comments SystemUserSpec_comments
                     LEFT JOIN users SystemUserSpec_users ON SystemUserSpec_users.uid = SystemUserSpec_comments.userid
                     WHERE SystemUserSpec_comments.commentid = :SystemUserSpec_commentid
-                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256)
+                    AND SystemUserSpec_users.roles_mask IN (0,2,16,256,32)
                     AND SystemUserSpec_users.verified = 1
                 )"
             ], [
