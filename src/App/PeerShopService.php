@@ -128,8 +128,6 @@ class PeerShopService
             // Create ShopOrder in shop order table
             $transferStrategy = new ShopTransferStrategy();
 
-            
-
             $senderUserObj = $this->userMapper->loadById($this->currentUserId);
 
             $response = $this->peerTokenMapper->transferToken(
