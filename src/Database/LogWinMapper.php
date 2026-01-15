@@ -20,6 +20,7 @@ class LogWinMapper
     use ResponseHelper;
 
     private string $burnWallet;
+    private string $companyWallet;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected LiquidityPool $pool, protected TransactionManager $transactionManager) {}
 
@@ -41,6 +42,7 @@ class LogWinMapper
         }
 
         $this->burnWallet = $data['burn'];
+        $this->companyWallet = $data['peer'];
     }
 
     /**
@@ -74,783 +76,544 @@ class LogWinMapper
      * Table `Transactions` has Foreign key on `operationsid`, which refers to `logWins`'s `token` PK. 
      */
 
-    /**
-     * Generate logwins entries for Like actions between 05th March 2025 to 02nd April 2025
-     *
-     * Used for Actions records:
-     *  whereby = 2  -> Post Like
-     */
-    public function generateLikePaidActionToLogWins(): bool
-    {
-        \ignore_user_abort(true);
-
-        ini_set('max_execution_time', '0');
-
-        try {
-
-            $sql = "WITH ranked AS (
-                        SELECT 
-                            upl.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY userid, DATE(createdat) 
-                                ORDER BY createdat
-                            ) AS rn
-                        FROM user_post_likes upl
-                        WHERE  createdat < '2025-04-02 08:31'
-                    )
-                    SELECT *
-                    FROM ranked
-                    WHERE rn > 3
-                    ORDER BY createdat;
-                ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-
-            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            if(empty($logwins)) {
-                $this->logger->info('No logwins to migrate');
-                return true;
-            }
-
-            $this->initializeLiquidityPool();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-
-            
-            $sql = "INSERT INTO logwins 
-                    (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
-                    VALUES 
-                    (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
-
-
-            $tokenIds = [];
-            foreach ($logwins as $key => $value) {
-                $this->transactionManager->beginTransaction();
-
-
-                try {
-                    $stmt = $this->db->prepare($sql);
-
-                    $tokenId = self::generateUUID();
-
-                    $numBers = '3'; // Each extra like will cost 3 Gems
-
-                    $userId = $value['userid'];
-                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', 2, \PDO::PARAM_INT);
-                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat);
-
-                    $stmt->execute();
-
-
-                    $transactionType = 'postLiked';
-                    $transferType = 'BURN';
-
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'transactioncategory' => TransactionCategory::LIKE->value,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType,
-                        'createdat' => $createdat
-                    ]);
-
-                    
-                    $this->appendLogWinMigrationRecord([
-                        "logwins" => [
-                            'token' => $tokenId,
-                            'userid' => $userId,
-                            'postid' => $value['postid'],
-                            'fromid' => $userId,
-                            'gems' => 0,
-                            'numbers' => $numBers,
-                            'whereby' => 2,
-                            'createdat' => $createdat,
-                        ],
-                        "transactions" => [
-                            'operationid' => $tokenId,
-                            'transactiontype' => $transactionType,
-                            'transactioncategory' => TransactionCategory::LIKE->value,
-                            'senderid' => $userId,
-                            'recipientid' => $this->burnWallet,
-                            'tokenamount' => $numBers,
-                            'transferaction' => $transferType,
-                            'createdat' => $createdat
-                        ]
-                        ], 'PaidAction_To_logwins_&_Transactions');
-                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-
-
-                    $this->transactionManager->commit();
-                    $tokenIds[] = $tokenId;
-
-                } catch (\Throwable $e) {
-                    $this->transactionManager->rollback();
-                    $this->logger->info('Error generating logwins for Like action: ' . $e->getMessage());
-                    
-                    continue;
-                }
-            }
-
-
-            return false;
-        } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID'. $e->getMessage(), 41401);
-        }
-    }
-
 
     /**
-     * Generate logwins entries for Dislike actions between 05th March 2025 to 02nd April 2025
-     *
-     * Used for Actions records:
-     *  whereby = 3  -> Post Dislike
-     */
-    public function generateDislikePaidActionToLogWins(): bool
-    {
-        \ignore_user_abort(true);
-
-        ini_set('max_execution_time', '0');
-
-        try {
-
-            $sql = "WITH ranked AS (
-                        SELECT 
-                            upl.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY userid, DATE(createdat) 
-                                ORDER BY createdat
-                            ) AS rn
-                        FROM user_post_dislikes upl
-                        WHERE  createdat < '2025-04-02 08:31'
-                    )
-                    SELECT *
-                    FROM ranked
-                    WHERE rn > 0
-                    ORDER BY createdat;
-                ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-
-            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            if(empty($logwins)) {
-                $this->logger->info('No logwins to migrate');
-                return true;
-            }
-            $this->initializeLiquidityPool();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-
-            $tokenIds = [];
-            foreach ($logwins as $key => $value) {
-                $this->transactionManager->beginTransaction();
-
-                $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
-                VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
-
-                try {
-                    $stmt = $this->db->prepare($sql);
-
-                    $tokenId = self::generateUUID();
-
-                    $numBers = '5'; // Each extra dislike will cost 5 Gems
-
-                    $userId = $value['userid'];
-                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', 3, \PDO::PARAM_INT);
-                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat);
-
-                    $stmt->execute();
-
-                    $transactionType = 'postDisliked';
-                    $transferType = 'BURN';
-
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'transactioncategory' => TransactionCategory::DISLIKE->value,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType,
-                        'createdat' => $createdat
-                    ]);
-
-
-                    $this->appendLogWinMigrationRecord([
-                        "logwins" => [
-                            'token' => $tokenId,
-                            'userid' => $userId,
-                            'postid' => $value['postid'],
-                            'fromid' => $userId,
-                            'gems' => 0,
-                            'numbers' => $numBers,
-                            'whereby' => 3,
-                            'createdat' => $createdat,
-                        ],
-                        "transactions" => [
-                           'operationid' => $tokenId,
-                            'transactiontype' => $transactionType,
-                            'transactioncategory' => TransactionCategory::DISLIKE->value,
-                            'senderid' => $userId,
-                            'recipientid' => $this->burnWallet,
-                            'tokenamount' => $numBers,
-                            'transferaction' => $transferType,
-                            'createdat' => $createdat
-                        ]
-                        ], 'PaidAction_To_logwins_&_Transactions');
-
-
-                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-
-
-                    $this->transactionManager->commit();
-                    $tokenIds[] = $tokenId;
-                } catch (\Throwable $e) {
-                    $this->transactionManager->rollback();
-                    
-                    continue;
-                }
-            }
-
-
-            return false;
-        } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID', 41401);
-        }
-    }
-
-
-    /**
-     * Generate logwins entries for Post creation actions between 05th March 2025 to 02nd April 2025
-     *
-     * Used for Actions records:
-     *  whereby = 5  -> Post Creation
-     */
-    public function generatePostPaidActionToLogWins(): bool
-    {
-        \ignore_user_abort(true);
-
-        ini_set('max_execution_time', '0');
-
-        try {
-
-            $sql = "WITH ranked AS (
-                        SELECT 
-                            upl.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY userid, DATE(createdat) 
-                                ORDER BY createdat
-                            ) AS rn
-                        FROM posts upl
-                        WHERE  createdat < '2025-04-02 08:31'
-                    )
-                    SELECT *
-                    FROM ranked
-                    WHERE rn > 1
-                    ORDER BY createdat;
-                ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-
-            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            if(empty($logwins)) {
-                $this->logger->info('No logwins to migrate');
-                return true;
-            }
-
-            $this->initializeLiquidityPool();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-
-            $tokenIds = [];
-            foreach ($logwins as $key => $value) {
-                $this->transactionManager->beginTransaction();
-
-                $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
-                VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
-
-                try {
-                    $stmt = $this->db->prepare($sql);
-
-                    $tokenId = self::generateUUID();
-
-                    $numBers = '20'; // Each extra like will cost 3 Gems
-
-                    $userId = $value['userid'];
-                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $value['postid'], \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', 5, \PDO::PARAM_INT);
-                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat);
-
-                    $stmt->execute();
-
-
-                    $transactionType = 'postCreated';
-                    $transferType = 'BURN';
-
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'transactioncategory' => TransactionCategory::POST_CREATE->value,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType,
-                        'createdat' => $createdat
-                    ]);
-
-                    $this->appendLogWinMigrationRecord([
-                        "logwins" => [
-                            'token' => $tokenId,
-                            'userid' => $userId,
-                            'postid' => $value['postid'],
-                            'fromid' => $userId,
-                            'gems' => 0,
-                            'numbers' => $numBers,
-                            'whereby' => 5,
-                            'createdat' => $createdat,
-                        ],
-                        "transactions" => [
-                            'operationid' => $tokenId,
-                            'transactiontype' => $transactionType,
-                            'transactioncategory' => TransactionCategory::POST_CREATE->value,
-                            'senderid' => $userId,
-                            'recipientid' => $this->burnWallet,
-                            'tokenamount' => $numBers,
-                            'transferaction' => $transferType,
-                            'createdat' => $createdat
-                        ]
-                        ], 'PaidAction_To_logwins_&_Transactions');
-
-
-                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-
-
-                    $this->transactionManager->commit();
-                    $tokenIds[] = $tokenId;
-                } catch (\Throwable $e) {
-                    $this->transactionManager->rollback();
-                    continue;
-                }
-            }
-
-            return false;
-        } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID', 41401);
-        }
-    }
-
-
-    /**
-     * Generate logwins entries for Post creation actions between 05th March 2025 to 02nd April 2025
-     *
-     * Used for Actions records:
-     *  whereby = 4  -> Post Comment
-     */
-    public function generateCommentPaidActionToLogWins(): bool
-    {
-        \ignore_user_abort(true);
-
-        ini_set('max_execution_time', '0');
-
-        try {
-
-            $sql = "WITH ranked AS (
-                        SELECT 
-                            upl.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY userid, DATE(createdat) 
-                                ORDER BY createdat
-                            ) AS rn
-                        FROM user_post_comments upl
-                        WHERE  createdat < '2025-04-02 08:31'
-                    )
-                    SELECT *
-                    FROM ranked
-                    WHERE rn > 4
-                    ORDER BY createdat;
-                ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-
-            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-            if(empty($logwins)) {
-                $this->logger->info('No logwins to migrate');
-                return true;
-            }
-
-            $this->initializeLiquidityPool();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-
-            $tokenIds = [];
-            foreach ($logwins as $key => $value) {
-                $this->transactionManager->beginTransaction();
-
-                $sql = "INSERT INTO logwins 
-                (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
-                VALUES 
-                (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
-
-                try {
-                    $stmt = $this->db->prepare($sql);
-
-                    $tokenId = self::generateUUID();
-
-                    $numBers = '0.5'; // Each extra like will cost 0.5 Gems
-
-                    $userId = $value['userid'];
-                    $createdat = $value['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-                    $stmt->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':postid', $value['commentid'], \PDO::PARAM_STR);
-                    $stmt->bindValue(':fromid', $userId, \PDO::PARAM_STR);
-                    $stmt->bindValue(':gems', 0, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                    $stmt->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR); // 29 char precision
-                    $stmt->bindValue(':whereby', 4, \PDO::PARAM_INT);
-                    $stmt->bindValue(':migrated', 1, \PDO::PARAM_INT);
-                    $stmt->bindValue(':createdat', $createdat);
-
-                    $stmt->execute();
-
-                    $transactionType = 'postComment';
-                    $transferType = 'BURN';
-
-                    $this->createAndSaveTransaction($transRepo, [
-                        'operationid' => $tokenId,
-                        'transactiontype' => $transactionType,
-                        'transactioncategory' => TransactionCategory::COMMENT->value,
-                        'senderid' => $userId,
-                        'recipientid' => $this->burnWallet,
-                        'tokenamount' => $numBers,
-                        'transferaction' => $transferType,
-                        'createdat' => $createdat
-                    ]);
-
-                    $this->appendLogWinMigrationRecord([
-                        "logwins" => [
-                            'token' => $tokenId,
-                            'userid' => $userId,
-                            'postid' => $value['commentid'],
-                            'fromid' => $userId,
-                            'gems' => 0,
-                            'numbers' => $numBers,
-                            'whereby' => 4,
-                            'createdat' => $createdat,
-                        ],
-                        "transactions" => [
-                            'operationid' => $tokenId,
-                            'transactiontype' => $transactionType,
-                            'transactioncategory' => TransactionCategory::COMMENT->value,
-                            'senderid' => $userId,
-                            'recipientid' => $this->burnWallet,
-                            'tokenamount' => $numBers,
-                            'transferaction' => $transferType,
-                            'createdat' => $createdat
-                        ]
-                    ], 'PaidAction_To_logwins_&_Transactions');
-
-                    $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-
-
-                    $this->transactionManager->commit();
-                    $tokenIds[] = $tokenId;
-                } catch (\Throwable $e) {
-                    $this->transactionManager->rollback();
-                   
-                    continue;
-                }
-            }
-
-
-            return false;
-        } catch (\Throwable $e) {
-            throw new \RuntimeException('Failed to generate logwins ID', 41401);
-        }
-    }
-
-    /**
-     * Generate logwins entries from gems table between 05th March 2025 to 02nd April 2025
+     * Records migration for Token Transfers
      * 
-     * Gems table: Records are pending to be added on logwins: Around Total: 1666
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).
      * 
-     * Date From: 
-     * "2025-03-05 15:48:24.08886"										
-     * Date To:
-     * "2025-04-02 02:13:11.124195"	
+     * Used for Actions records:
+     * whereby = 18 -> Token transfer @deprecated
+     * 
      */
-    public function migrateGemsToLogWins(): bool
+    public function migrateTokenTransfer(): bool
     {
         \ignore_user_abort(true);
+
         ini_set('max_execution_time', '0');
 
         $this->logger->info('LogWinMapper.migrateTokenTransfer started');
 
-        $sql = "
-            SELECT 
-                DATE(g.createdat) AS created_date,
-                COUNT(*) AS total_gems
-            FROM gems g
-            WHERE g.createdat <= '2025-04-02'
-            AND NOT EXISTS (
-                SELECT 1
-                FROM logwins l
-                WHERE g.postid = l.postid
-                    AND g.fromid = l.fromid
-                    AND g.whereby = l.whereby
-                    AND g.userid = l.userid
-            )
-            GROUP BY DATE(g.createdat)
-            ORDER BY created_date ASC;
-        ";
-        $this->logger->info('LogWinMapper.migrateGemsToLogWins SQL', ['sql' => $sql]);
+        try {
 
-        $stmt = $this->db->query($sql);
-        $gemDays = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        if (empty($gemDays)) {
-            $this->logger->info('No gems to migrate to logwins');
-            return true;
-        }
-
-        // Initialize heavy dependencies only once
-        $this->initializeLiquidityPool();
-        $transRepo = new TransactionRepository($this->logger, $this->db);
-        
-        
-        // Prepare insert queries only once
-        $sqlLogWins = "INSERT INTO logwins 
-            (token, userid, postid, fromid, gems, numbers, numbersq, whereby, migrated, createdat) 
-            VALUES 
-            (:token, :userid, :postid, :fromid, :gems, :numbers, :numbersq, :whereby, :migrated, :createdat)";
+            // Group by fromid to avoid duplicates
+            $sql = "SELECT 
+                        date_trunc('second', lw.createdat) AS created_at_second,
+                        lw.fromid,
+                        json_agg(lw ORDER BY lw.createdat) AS logwin_entries,
+                        COUNT(*) AS logwin_count
+                    FROM logwins lw
+                    WHERE lw.migrated = 0
+                    AND lw.whereby = 18
+                    GROUP BY created_at_second, lw.fromid
+                    HAVING COUNT(*) IN (5, 6, 7)
+                    ORDER BY created_at_second ASC, lw.fromid
+                    LIMIT 100;
+                ";
 
 
-        $stmtLogWins = $this->db->prepare($sqlLogWins);
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if (empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
 
 
-        foreach ($gemDays as $key => $day) {
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
 
-            $data = json_decode($day['gem_entries'], true);
+                $tnxs = json_decode($value['logwin_entries'], true);
 
-            $sql = "
-                WITH user_sums AS (
-                    SELECT 
-                        userid,
-                        GREATEST(SUM(gems), 0) AS total_numbers
-                    FROM gems
-                    WHERE gems > 0 AND  createdat::date = '{$day['created_date']}' AND collected = 0
-                    GROUP BY userid
-                ),
-                total_sum AS (
-                    SELECT SUM(total_numbers) AS overall_total FROM user_sums
-                )
-                SELECT 
-                    g.userid,
-                    g.gemid,
-                    g.postid,
-                    g.fromid,
-                    g.gems,
-                    g.whereby,
-                    g.createdat,
-                    us.total_numbers,
-                    (SELECT SUM(total_numbers) FROM user_sums) AS overall_total,
-                    (us.total_numbers * 100.0 / ts.overall_total) AS percentage
-                FROM gems g
-                JOIN user_sums us ON g.userid = us.userid
-                CROSS JOIN total_sum ts
-                WHERE us.total_numbers > 0 AND collected = 0 AND createdat::date = '{$day['created_date']}';
-            ";
+                $txnIds = array_column($tnxs, 'token');
 
-            try {
-                $stmt = $this->db->query($sql);
-                $gemAllDays = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-                
-                $totalGems = isset($gemAllDays[0]['overall_total']) ? (string)$gemAllDays[0]['overall_total'] : '0';
-                $dailyToken =  (string) (\Fawaz\config\constants\ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
-
-                $gemsintoken = TokenHelper::divRc($dailyToken, $totalGems);
-                $bestatigungInitial = TokenHelper::mulRc($totalGems, $gemsintoken);
-
-                $args = [
-                    'winstatus' => [
-                        'totalGems' => $totalGems,
-                        'gemsintoken' => $gemsintoken,
-                        'bestatigung' => $bestatigungInitial
-                    ]
-                ];
-
-                if(empty($gemAllDays)) {
-                    $this->logger->info('No gems to migrate for date', ['date' => $day['created_date']]);
+                if (empty($tnxs)) {
                     continue;
                 }
+
+                $hasInviter = false;
+                $withoutFeeDeduction = false;
+                if (count($tnxs) == 7) {
+                    $hasInviter = true;
+                }
+
+                if (count($tnxs) == 5) {
+                    $withoutFeeDeduction = true;
+                }
                 try {
-                    $this->db->beginTransaction();
+                    $inviterAmount = null;
+                    $poolFeeAmount = null;
+                    $peerFeeAmount = null;
+                    $burnFeeAmount = null;
+                    /*
+                    * This action considere as Credit to Receipient
+                    */
+                    // 2. RECIPIENT: Credit To Account ----- Index 1
+                    $transUniqueId = self::generateUUID();
+                    if (isset($tnxs[1]['fromid'])) {
+                        $senderId = $tnxs[1]['fromid'];
+                        $recipientId = $tnxs[1]['userid'];
 
-                    foreach ($gemAllDays as $row) {
-                        $userId = (string)$row['userid'];
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $tnxs[1]['numbers'],
+                            // 'message' => $message,
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
+                        ]);
 
-
-                        if($row['gems'] <= 0) {
-                            continue;
-                        }
-
-                        $rowgems2token = TokenHelper::mulRc((string) $row['gems'],  $gemsintoken);
-
-                        $args = [
-                            'gemid' => $row['gemid'],
-                            'userid' => $row['userid'],
-                            'postid' => $row['postid'],
-                            'fromid' => $row['fromid'],
-                            'gems' => $row['gems'],
-                            'numbers' => $rowgems2token,
-                            'whereby' => $row['whereby'],
-                            'createdat' => $row['createdat']
+                        $saveForLogs = [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $tnxs[1]['numbers'],
+                            // 'message' => $message,
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
                         ];
-
-                        $postId = $args['postid'] ?? null;
-                        $fromId = $args['fromid'] ?? null;
-                        $gems = $args['gems'];
-                        $numBers = $rowgems2token;
-                        $createdat =  $args['createdat'] ?? (new \DateTime())->format('Y-m-d H:i:s.u');
-
-                        try {
-                            // Insert into logwins
-                            $tokenId = self::generateUUID();
-                            $stmtLogWins->bindValue(':token', $tokenId, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':userid', $userId, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':postid', $postId, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':fromid', $fromId, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':gems', $gems, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':numbers', $numBers, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':numbersq', $this->decimalToQ64_96($numBers), \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':whereby', $args['whereby'], \PDO::PARAM_INT);
-                            $stmtLogWins->bindValue(':createdat', $createdat, \PDO::PARAM_STR);
-                            $stmtLogWins->bindValue(':migrated', 0, \PDO::PARAM_INT);
-                            $stmtLogWins->execute();
-                            $stmtLogWins->closeCursor();
-                            $this->appendLogWinMigrationRecord([
-                                'token' => $tokenId,
-                                'userid' => $userId,
-                                'postid' => $postId,
-                                'fromid' => $fromId,
-                                'gems' => $gems,
-                                'numbers' => $numBers,
-                                'whereby' => $args['whereby'],
-                                'createdat' => $createdat,
-                            ], 'Mint_For_MARCH_gems_to_logwins');
-
-                            // Create transaction entry
-                            // $transactionType = match ($args['whereby']) {
-                            //     1 => 'postViewed',
-                            //     2 => 'postLiked',
-                            //     3 => 'postDisLiked',
-                            //     4 => 'postComment',
-                            //     5 => 'postCreated',
-                            //     default => '',
-                            // };
-
-                            // $transactionCategory = match ($args['whereby']) {
-                            //     1 => TransactionCategory::TOKEN_MINT,
-                            //     2 => TransactionCategory::LIKE,
-                            //     3 => TransactionCategory::DISLIKE,
-                            //     4 => TransactionCategory::COMMENT,
-                            //     5 => TransactionCategory::POST_CREATE,
-                            //     default => '',
-                            // };
-
-                            // $transferType = ($numBers < 0) ? 'BURN' : 'MINT';
-
-                            // $senderid = $userId;
-                            // if ($numBers < 0) {
-                            //     $transferType = 'BURN';
-                            //     $recipientid = $this->burnWallet;
-                            // } else {
-                            //     $transferType = 'MINT';
-                            //     $recipientid = $userId;
-                            //     $senderid = $this->companyWallet;
-                            // }
-
-                            // $this->createAndSaveTransaction($transRepo, [
-                            //     'operationid' => $tokenId,
-                            //     'transactiontype' => $transactionType,
-                            //     'transactioncategory' => $transactionCategory,
-                            //     'senderid' => $senderid,
-                            //     'recipientid' => $recipientid,
-                            //     'tokenamount' => $numBers,
-                            //     'transferaction' => $transferType,
-                            //     'createdat' => $createdat
-                            // ]);
-
-                            // if ($transferType === 'BURN') {
-                            //     $this->saveWalletEntry($this->burnWallet, (string)$numBers, 'DEBIT');
-                            // }
-
-                            $this->logger->info('Inserted into logwins successfully', [
-                                'userId' => $userId,
-                                'postid' => $postId
-                            ]);
-
-
-                        } catch (\Throwable $e) {
-                            $this->logger->error('Error updating gems or liquidity', ['exception' => $e->getMessage()]);
-                        }
                     }
 
-                    $this->db->commit();
-                } catch (\Throwable $e) {
-                    $this->db->rollBack();
-                    $this->logger->error('Transaction failed', ['exception' => $e->getMessage()]);
-                }
+                    /**
+                     * If current user was Invited by any Inviter than Current User has to pay 1% fee to Inviter
+                     * 
+                     * Consider this actions as a Transactions and Credit fees to Inviter'account
+                     */
+                    if ($hasInviter && isset($tnxs[2]['fromid'])) {
+                        $senderId = $tnxs[2]['fromid'];
+                        $recipientId = $tnxs[2]['userid'];
+                        $inviterAmount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToInviter',
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $inviterAmount,
+                            'transferaction' => 'INVITER_FEE',
+                            'createdat' => $createdat,
+                            'transactioncategory' => TransactionCategory::FEE->value
+                        ]);
+                    }
 
-                // Update gems as collected
-                try {
-                    $gemIds = array_column($gemAllDays, 'gemid');
-                    $quotedGemIds = array_map(fn($gemId) => $this->db->quote($gemId), $gemIds);
-                    $this->db->query('UPDATE gems SET collected = 1 WHERE gemid IN (' . \implode(',', $quotedGemIds) . ')');
+                    /**
+                     * 1% Pool Fees will be charged when a Token Transfer happen
+                     * 
+                     * Credits 1% fees to Pool's Account
+                     */
+                    if ($hasInviter && isset($tnxs[4]['fromid'])) {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = $tnxs[4]['userid'];
+                        $poolFeeAmount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[2]['fromid'];
+                        $recipientId = $tnxs[2]['userid'];
+                        $poolFeeAmount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
+                        $senderId = $tnxs[3]['fromid'];
+                        $recipientId = $tnxs[3]['userid'];
+                        $poolFeeAmount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPoolWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $poolFeeAmount,
+                        'transferaction' => 'POOL_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 2% of requested tokens Peer Fees will be charged 
+                     * 
+                     * Credits 2% fees to Peer's Account
+                     */
+                    if ($hasInviter && isset($tnxs[5]['fromid'])) {
+                        $senderId = $tnxs[5]['fromid'];
+                        $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                        $peerFeeAmount = $tnxs[5]['numbers'];
+                        $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } 
+                    elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[3]['fromid'];
+                        $recipientId = ($tnxs[3]['userid']); // Requested tokens
+                        $peerFeeAmount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = ($tnxs[4]['userid']); // Requested tokens
+                        $peerFeeAmount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPeerWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $peerFeeAmount,
+                        'transferaction' => 'PEER_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 1% of requested tokens will be transferred to Burn' account
+                     */
+                    if ($hasInviter && isset($tnxs[6]['fromid'])) {
+                        $senderId = $tnxs[6]['fromid'];
+                        $recipientId = ($tnxs[6]['userid']); // Requested tokens
+                        $burnFeeAmount = $tnxs[6]['numbers'];
+                        $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } 
+                    elseif($withoutFeeDeduction){
+                        // No fee deduction scenario
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = ($tnxs[4]['userid']); // Requested tokens
+                        $burnFeeAmount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    else {
+                        if (isset($tnxs[5]['fromid'])) {
+                            $senderId = $tnxs[5]['fromid'];
+                            $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                            $burnFeeAmount = $tnxs[5]['numbers'];
+                            $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        }
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToBurnWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId, // burn accounts for 217+ records not found.
+                        'tokenamount' => $burnFeeAmount,
+                        'transferaction' => 'BURN_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    $this->updateLogwinStatusInBunch($txnIds, 1);
+
+                    if($saveForLogs){
+                        $this->appendLogWinMigrationRecord($saveForLogs, 'P2P_transfer_logwins_to_transaction');
+                    }
+                    
+                    $this->transactionManager->commit();
                 } catch (\Throwable $e) {
-                    $this->logger->error('Error updating gems collected flag', ['exception' => $e->getMessage()]);
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatusInBunch($txnIds, 2);
+
+                    continue; // Skip to the next record
                 }
-            } catch (\Throwable $e) {
-                $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
+                // Update migrated status to 1
             }
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
         }
-
-        return true;
     }
 
 
+    /**
+     * Records migration for Token Transfers
+     * 
+     * It will process remaining records which were not processed in first run of migrateTokenTransfer()
+     * Used for Peer Token transfer to Receipient (Peer-to-Peer transfer).
+     * 
+     * 
+     * Used for Actions records:
+     * whereby = 18 -> Token transfer @deprecated
+     * 
+     */
+    public function migrateTokenTransfer01(): bool
+    {
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
+
+        try {
+
+            // Group by fromid to avoid duplicates
+            $sql = "WITH ordered AS (
+                        SELECT
+                            lw.*,
+                            CASE
+                            WHEN lag(lw.createdat) OVER (PARTITION BY lw.fromid ORDER BY lw.createdat) IS NULL THEN 1
+                            WHEN lw.createdat - lag(lw.createdat) OVER (PARTITION BY lw.fromid ORDER BY lw.createdat) > INTERVAL '1 second' THEN 1
+                            ELSE 0
+                            END AS is_new_group
+                        FROM logwins lw
+                        WHERE lw.migrated = 0
+                            AND lw.whereby = 18
+                        ),
+                        grp AS (
+                        SELECT
+                            *,
+                            sum(is_new_group) OVER (PARTITION BY fromid ORDER BY createdat
+                                                    ROWS UNBOUNDED PRECEDING) AS grp_no
+                        FROM ordered
+                        )
+                        SELECT
+                        fromid,
+                        date_trunc('second', min(createdat)) AS created_at_group,  -- representative timestamp
+                        json_agg(row_to_json(grp) ORDER BY createdat)     AS logwin_entries,
+                        count(*)                                         AS logwin_count
+                        FROM grp
+                        GROUP BY fromid, grp_no
+                        HAVING count(*) IN (6, 7)
+                        ORDER BY created_at_group ASC, fromid
+                        LIMIT 50;
+                ";
+
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+
+            $this->initializeLiquidityPool();
+            $transRepo = new TransactionRepository($this->logger, $this->db);
+
+
+            foreach ($logwins as $key => $value) {
+                $this->transactionManager->beginTransaction();
+
+                $tnxs = json_decode($value['logwin_entries'], true);
+
+                $txnIds = array_column($tnxs, 'token');
+
+                if (empty($tnxs)) {
+                    continue;
+                }
+
+                $hasInviter = false;
+                if (count($tnxs) == 7) {
+                    $hasInviter = true;
+                }
+
+                try {
+                    /*
+                    * This action considere as Credit to Receipient
+                    */
+                    // 2. RECIPIENT: Credit To Account ----- Index 1
+                    $transUniqueId = self::generateUUID();
+                    if (isset($tnxs[1]['fromid'])) {
+                        $senderId = $tnxs[1]['fromid'];
+                        $recipientId = $tnxs[1]['userid'];
+
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $tnxs[1]['numbers'],
+                            // 'message' => $message,
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
+                        ]);
+
+                        $saveForLogs = [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToRecipient',
+                            'transactioncategory' => TransactionCategory::P2P_TRANSFER->value,
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $tnxs[1]['numbers'],
+                            // 'message' => $message,
+                            'transferaction' => 'CREDIT',
+                            'createdat' => $tnxs[1]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u')
+                        ];
+                    }
+
+                    /**
+                     * If current user was Invited by any Inviter than Current User has to pay 1% fee to Inviter
+                     * 
+                     * Consider this actions as a Transactions and Credit fees to Inviter'account
+                     */
+                    if ($hasInviter && isset($tnxs[2]['fromid'])) {
+                        $senderId = $tnxs[2]['fromid'];
+                        $recipientId = $tnxs[2]['userid'];
+                        $amount = $tnxs[2]['numbers'];
+                        $createdat = $tnxs[2]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        $this->createAndSaveTransaction($transRepo, [
+                            'operationid' => $transUniqueId,
+                            'transactiontype' => 'transferSenderToInviter',
+                            'senderid' => $senderId,
+                            'recipientid' => $recipientId,
+                            'tokenamount' => $amount,
+                            'transferaction' => 'INVITER_FEE',
+                            'transactioncategory' => TransactionCategory::FEE->value,
+                            'createdat' => $createdat
+                        ]);
+                    }
+
+                    /**
+                     * 1% Pool Fees will be charged when a Token Transfer happen
+                     * 
+                     * Credits 1% fees to Pool's Account
+                     */
+                    if ($hasInviter && isset($tnxs[4]['fromid'])) {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = $tnxs[4]['userid'];
+                        $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        $senderId = $tnxs[3]['fromid'];
+                        $recipientId = $tnxs[3]['userid'];
+                        $amount = $tnxs[3]['numbers'];
+                        $createdat = $tnxs[3]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPoolWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $amount,
+                        'transferaction' => 'POOL_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 2% of requested tokens Peer Fees will be charged 
+                     * 
+                     * Credits 2% fees to Peer's Account
+                     */
+                    if ($hasInviter && isset($tnxs[5]['fromid'])) {
+                        $senderId = $tnxs[5]['fromid'];
+                        $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                        $amount = $tnxs[5]['numbers'];
+                        $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        $senderId = $tnxs[4]['fromid'];
+                        $recipientId = ($tnxs[4]['userid']); // Requested tokens
+                        $amount = $tnxs[4]['numbers'];
+                        $createdat = $tnxs[4]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToPeerWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId,
+                        'tokenamount' => $amount,
+                        'transferaction' => 'PEER_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    /**
+                     * 1% of requested tokens will be transferred to Burn' account
+                     */
+                    if ($hasInviter && isset($tnxs[6]['fromid'])) {
+                        $senderId = $tnxs[6]['fromid'];
+                        $recipientId = ($tnxs[6]['userid']); // Requested tokens
+                        $amount = $tnxs[6]['numbers'];
+                        $createdat = $tnxs[6]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                    } else {
+                        if (isset($tnxs[5]['fromid'])) {
+                            $senderId = $tnxs[5]['fromid'];
+                            $recipientId = ($tnxs[5]['userid']); // Requested tokens
+                            $amount = $tnxs[5]['numbers'];
+                            $createdat = $tnxs[5]['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+                        }
+                    }
+                    $this->createAndSaveTransaction($transRepo, [
+                        'operationid' => $transUniqueId,
+                        'transactiontype' => 'transferSenderToBurnWallet',
+                        'senderid' => $senderId,
+                        'recipientid' => $recipientId, // burn accounts for 217+ records not found.
+                        'tokenamount' => $amount,
+                        'transferaction' => 'BURN_FEE',
+                        'transactioncategory' => TransactionCategory::FEE->value,
+                        'createdat' => $createdat
+                    ]);
+
+                    $this->updateLogwinStatusInBunch($txnIds, 1);
+
+                    if($saveForLogs){
+                        $this->appendLogWinMigrationRecord($saveForLogs, 'P2P_transfer_logwins_to_transaction');
+                    }
+
+
+                    $this->transactionManager->commit();
+                } catch (\Throwable $e) {
+                    $this->transactionManager->rollback();
+                    $this->updateLogwinStatusInBunch($txnIds, 2);
+
+                    continue; // Skip to the next record
+                }
+                // Update migrated status to 1
+            }
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
+        }
+    }
+
+
+    /**
+     * 
+     */
+    public function checkForUnmigratedRecords(): bool
+    {
+
+        \ignore_user_abort(true);
+
+        ini_set('max_execution_time', '0');
+
+        $this->logger->info('LogWinMapper.migrateTokenTransfer started');
+
+        try {
+
+            // Group by fromid to avoid duplicates
+            $sql = "select * from logwins where migrated in (0, 2) and whereby = 18 order by createdat;";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+
+            $logwins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (empty($logwins)) {
+                $this->logger->info('No logwins to migrate');
+                return true;
+            }
+            $updateSql = "UPDATE logwins SET migrated = 0 WHERE migrated in (0, 2) and whereby = 18";
+
+            $updateStmt = $this->db->prepare($updateSql);
+            $updateStmt->execute();
+
+            return false;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Failed to generate logwins ID ' . $e->getMessage(), 41401);
+        }
+
+    }
 
     public function getToken(int $length = 32): string
     {
@@ -879,6 +642,19 @@ class LogWinMapper
         return $min + $rnd;
     }
 
+    /**
+     * Marked as Status migrated in bunch
+     */
+    private function updateLogwinStatusInBunch(array $tokens, int $status): void
+    {
+        $tokensList = implode("', '", $tokens);
+
+        $sql = "UPDATE logwins SET migrated = :migrated WHERE token IN ('$tokensList')";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':migrated', $status, \PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
 
     /**
      * Helper to create and save a transaction
@@ -889,23 +665,8 @@ class LogWinMapper
         $transRepo->saveTransaction($transaction);
     }
 
-    private function appendLogWinMigrationRecord(array $payload, string $name): void
-    {
-        $logDir = __DIR__ . '/../../runtime-data/logs';
-        if (!is_dir($logDir)) {
-            mkdir($logDir, 0775, true);
-        }
 
-        $logFile = $logDir . '/logwins_migration_' . $name . '.txt';
-        file_put_contents(
-            $logFile,
-            json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL,
-            FILE_APPEND | LOCK_EX
-        );
-    }
-
-
-    public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): float
+        public function saveWalletEntry(string $userId, string $liquidity, string $type = 'CREDIT'): float
     {
         \ignore_user_abort(true);
         $this->logger->debug('WalletMapper.saveWalletEntry started');
@@ -1002,6 +763,45 @@ class LogWinMapper
         $scaledValue = \bcmul($decimalString, $scaleFactor, 0);
 
         return $scaledValue;
+    }
+
+
+    public function getUserWalletBalance(string $userId): float
+    {
+        $this->logger->info('WalletMapper.getUserWalletBalance started');
+
+        $query = "SELECT COALESCE(liquidity, 0) AS balance 
+                  FROM wallett 
+                  WHERE userid = :userId";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userId', $userId, \PDO::PARAM_STR);
+            $stmt->execute();
+            $balance = $stmt->fetchColumn();
+
+            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
+
+            return (float) $balance;
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in getUserWalletBalance: ' . $e->getMessage());
+            throw new \RuntimeException('Unable to fetch wallet balance');
+        }
+    }
+
+    private function appendLogWinMigrationRecord(array $payload, string $name): void
+    {
+        $logDir = __DIR__ . '/../../runtime-data/logs';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0775, true);
+        }
+
+        $logFile = $logDir . '/logwins_migration_' . $name . '.txt';
+        file_put_contents(
+            $logFile,
+            json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
     }
 
 }
