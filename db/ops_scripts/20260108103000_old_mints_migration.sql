@@ -110,7 +110,7 @@ BEGIN;
           tp.transferaction,
           'TOKEN_MINT',
           NULL,
-          tp.day::TIMESTAMP
+          (tp.day::TIMESTAMP + INTERVAL '10 hours')::TIMESTAMP(3)
       FROM transactions_payload tp
       RETURNING
           transactionid,
