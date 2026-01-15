@@ -1412,6 +1412,9 @@ class GraphQLSchemaBuilder
                 'operationid' => function (array $root): string {
                     return $root['operationid'] ?? '';
                 },
+                'transactionId' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
                 },
@@ -1670,10 +1673,10 @@ class GraphQLSchemaBuilder
                 'addressline2' => fn(array $root): string => $root['addressline2'] ?? '',
                 'city' => fn(array $root): string => $root['city'] ?? '',
                 'zipcode' => fn(array $root): string => $root['zipcode'] ?? '',
-                'country' => fn(array $root): ?string => $root['country'] ?? null,
+                'country' => fn(array $root): string => $root['country'] ?? '',
             ],
             'ShopSupportedDeliveryCountry' => [
-                'country' => fn(array $root): ?string => $root['country'] ?? null,
+                'country' => fn(array $root): string => $root['country'] ?? '',
             ],
 
         ];

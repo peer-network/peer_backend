@@ -1,5 +1,6 @@
 type TransactionHistoryItem {
   operationid: String!
+  transactionId: String!
   transactionCategory: TransactionCategory
   transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
   tokenamount: String! #sum with all fees transactions
