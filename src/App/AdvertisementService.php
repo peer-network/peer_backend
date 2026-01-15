@@ -34,7 +34,6 @@ class AdvertisementService
     protected ?string $currentUserId = null;
     public const PLAN_BASIC = 'BASIC';
     public const PLAN_PINNED = 'PINNED';
-
     public const DURATION_ONE_DAY = 'ONE_DAY';
     public const DURATION_TWO_DAYS = 'TWO_DAYS';
     public const DURATION_THREE_DAYS = 'THREE_DAYS';
@@ -225,8 +224,8 @@ class AdvertisementService
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
-                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 $this->transactionManager->rollback();
+                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
 
@@ -246,14 +245,13 @@ class AdvertisementService
                 }
 
                 if (!$deducted) {
-                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     $this->transactionManager->rollback();
                     return $this->respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
             }
-
             $this->transactionManager->rollback();
             return $response;
 

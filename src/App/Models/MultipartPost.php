@@ -10,7 +10,6 @@ use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\ResponseHelper;
 use getID3;
-use FFMpeg\FFProbe;
 
 class MultipartPost
 {
