@@ -40,6 +40,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             "TOKENOMICS" => self::tokenomics(),
             "MINTING" => self::minting(),
             "INPUT" => self::input(),
+            "PEER_SHOP" => self::shop(),
         ];
     }
     /**
