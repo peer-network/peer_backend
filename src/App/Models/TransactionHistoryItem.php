@@ -16,6 +16,7 @@ use function DI\string;
  */
 class TransactionHistoryItem implements HasUserRefs
 {
+    private string $transactionid;
     private string $operationid;
     private string $transactiontype;
     protected ?TransactionCategory $transactioncategory;
@@ -42,6 +43,7 @@ class TransactionHistoryItem implements HasUserRefs
         } 
 
         $this->operationid = (string)($data['operationid'] ?? '');
+        $this->transactionid = (string)($data['transactionid'] ?? '');
         $this->transactiontype = (string)($data['transactiontype'] ?? '');
         $this->transactioncategory = TransactionCategory::tryFrom($data['transactioncategory']) ?? null;
         $this->tokenamount = $tokenamount;
@@ -68,6 +70,7 @@ class TransactionHistoryItem implements HasUserRefs
     {
         return [
             'operationid' => $this->operationid,
+            'transactionid' => $this->transactionid,
             'transactiontype' => $this->transactiontype,
             'transactioncategory' => $this->transactioncategory->value,
             'tokenamount' => sprintf('%.10F', $this->tokenamount),

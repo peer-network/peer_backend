@@ -7,11 +7,16 @@ namespace Fawaz\App;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\ModerationMapper;
+use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -24,8 +29,10 @@ class PostInfoService
         protected PostInfoMapper $postInfoMapper,
         protected CommentMapper $commentMapper,
         protected ReportsMapper $reportMapper,
+        protected UserMapper $userMapper,
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ModerationMapper $moderationMapper
     ) {
     }
@@ -189,6 +196,23 @@ class PostInfoService
             if (!$post) {
                 $this->logger->warning('PostInfoService: reportPost: Post not found');
                 return $this->respondWithError(31510);
+            }
+
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $peerShopUserSpec = new PeerShopSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $specs = [
+                $peerShopUserSpec
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31107, ['postId' => $postId]);
             }
 
             if ($this->moderationMapper->wasContentRestored($postId, 'post')) {

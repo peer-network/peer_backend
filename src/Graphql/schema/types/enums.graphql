@@ -159,3 +159,7 @@ enum ContentVisibilityStatus {
   HIDDEN
   ILLEGAL
 }
+
+enum ShopSupportedDeliveryCountry {
+  GERMANY
+}

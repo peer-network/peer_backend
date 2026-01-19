@@ -83,6 +83,7 @@ final class SettingsConfig
             'pool' => $_ENV['LIQUIDITY_POOL'] ?? '',
             'burn' => $_ENV['BURN_ACCOUNT'] ?? '',
             'btcpool' => $_ENV['BTC_POOL'] ?? '',
+            'peerShop' => $_ENV['PEER_SHOP'] ?? '',
         ];
         $settings->privateKeyPath = __DIR__ . '/../../' . ($_ENV['PRIVATE_KEY_PATH'] ?? '');
         $settings->publicKeyPath = __DIR__ . '/../../' . ($_ENV['PUBLIC_KEY_PATH'] ?? '');
