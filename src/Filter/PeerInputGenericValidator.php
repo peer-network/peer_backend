@@ -365,6 +365,29 @@ class PeerInputGenericValidator
         return true;
     }
 
+    
+    protected function validateAddressLine2(mixed $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'addressline2';
+        $options['errorCode'] = $options['errorCode'] ?? '30279';
+
+        if (!is_string($value) && !is_int($value) && !is_float($value)) {
+            $this->pushError($options, $fieldKey, '30279');
+            return false;
+        }
+
+        $peerShopConfig = ConstantsConfig::shop()['ADDRESS'];
+
+        $val = trim((string)$value);
+        if ($val === '' || strlen($val) < $peerShopConfig['MIN_LENGTH'] || strlen($val) > $peerShopConfig['MAX_LENGTH']) {
+            $this->pushError($options, $fieldKey, '30279');
+            return false;
+        }
+
+        return true;
+    }
+    
+
     protected function validateCity(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'city';

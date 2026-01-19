@@ -820,6 +820,10 @@
         "comment": "size must be not more than {PEER_SHOP.SIZE.MAX_LENGTH}.",
         "userFriendlyComment": "Please enter a valid size {PEER_SHOP.SIZE.MAX_LENGTH}."
     },
+    "30279": {
+        "comment": "addressLine2 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."

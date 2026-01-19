@@ -116,6 +116,19 @@ class ValidationSpec
         ];
     }
 
+    
+    public static function addressLine2(string $field = 'addressline2', bool $required = false, int $errorCode = 30279): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateAddressLine2', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
     public static function city(string $field = 'city', bool $required = false, int $errorCode = 30274): array
     {
         return [
@@ -253,7 +266,8 @@ class ValidationSpec
             'country' => fn (string $f, bool $r) => self::country($f, $r),
             'shopItemId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
             'transactionId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
-            'size' => fn (string $f, bool $r) => self::size($f, $r),
+            'size' => fn (string $f, bool $r) => self::size($f, false),
+            'addressline2' => fn (string $f, bool $r) => self::addressLine2($f, false),
         ];
 
         $spec = [];

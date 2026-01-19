@@ -3285,12 +3285,21 @@ class GraphQLSchemaBuilder
             );
         }
 
-        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'size']);
+        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'addressline2']);
 
         if ($orderValidation instanceof ValidatorErrors) {
             return $this::respondWithError(
                 $orderValidation->errors[0]
             );
+        }
+
+        if($args['orderDetails']['shopItemSpecs'] && !empty($args['orderDetails']['shopItemSpecs'])){
+            $orderValidation = RequestValidator::validate($args['orderDetails']['shopItemSpecs'], ['size']);
+            if ($orderValidation instanceof ValidatorErrors) {
+                return $this::respondWithError(
+                    $orderValidation->errors[0]
+                );
+            }
         }
 
         $results = $this->peerShopService->performShopOrder($args);
