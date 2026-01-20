@@ -4,23 +4,33 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\WalletMapper;
-use Fawaz\Mail\UserWelcomeMail;
 use Fawaz\Services\Base64FileHandler;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
-use Fawaz\Services\ContentFiltering\Strategies\ListPostsContentFilteringStrategy;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\Mailer;
+use Fawaz\Utils\ErrorResponse;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use PDOException;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
@@ -34,7 +44,8 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
         protected Mailer $mailer,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -112,39 +123,69 @@ class UserService
         return null;
     }
 
-/*  ------ Un-used function?--------
-    private function createPayload(string $email, string $username, string $verificationCode): array
+    public function loadVisibleUsersById(string $userId): User|false
     {
-        $email = trim($email);
-        $username = trim($username);
-        $verificationCode = trim($verificationCode);
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);
 
-        if (empty($email) || empty($username) || empty($verificationCode)) {
-            return self::respondWithError(40701);
-        }
+        $contentFilterCase = ContentFilteringCases::hideAll;
 
-        $payload = [
-            "to" => [
-                [
-                    "email" => $email,
-                    "name" => $username
-                ]
-            ],
-            "templateId" => 1,
-            "params" => [
-                "verification_code" => $verificationCode
-            ]
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
         ];
 
         try {
-            return $payload;
+            return $this->userMapper->loadById($userId, $defaultSpecs);
         } catch (\Throwable $e) {
-            $this->logger->error('Error create payload.', ['exception' => $e]);
-            return self::respondWithError(00000);//'Error create payload.'
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
         }
     }
 
-*/
+    public function isVisibleUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isVisibleUserExistById started', ['userId' => $userId]);
+
+        $contentFilterCase = ContentFilteringCases::hideAll;
+
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
+        ];
+
+        try {
+            return $this->userMapper->isUserExistById($userId, $defaultSpecs);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check visible user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function loadAllUsersById(string $userId): User|false
+    {
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);        
+
+        try {
+            return $this->userMapper->loadById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function isAnyUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isUserExistById started', ['userId' => $userId]);
+
+        try {
+            return $this->userMapper->isUserExistById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
 
     public function createUser(array $args): array
     {
@@ -175,7 +216,7 @@ class UserService
                 return self::respondWithError(31007);
             }
 
-            $inviter = $this->userMapper->loadById($referralUuid);
+            $inviter = $this->loadVisibleUsersById($referralUuid);
 
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
@@ -192,7 +233,7 @@ class UserService
 
         $username = trim($args['username']);
         $slug = $this->generateUniqueSlug($username);
-        $createdat = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $createdat = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if ($mediaFile !== '') {
             $args['img'] = $this->uploadMedia($mediaFile, $id, 'profile');
@@ -203,10 +244,17 @@ class UserService
             'userid' => $id,
             'attempt' => 1,
             'expiresat' => $expiresat,
-            'updatedat' => (new \DateTime())->format('Y-m-d H:i:s.u')
+            'updatedat' => new \DateTime()->format('Y-m-d H:i:s.u')
         ];
 
-        $this->logger->debug('UserService.createUser.verificationData started', ['verificationData' => $verificationData]);
+        // Mask token for logging (show first 6 chars, hide the rest)
+        $maskedToken = substr($verificationData['token'], 0, 6) . str_repeat('*', strlen($verificationData['token']) - 6);
+
+        $this->logger->debug('UserService.createUser.verificationData started', [
+            'userid' => $verificationData['userid'],
+            'token' => $maskedToken,
+            'expiresat' => $verificationData['expiresat']
+        ]);
 
         $userData = [
             'uid' => $id,
@@ -221,7 +269,8 @@ class UserService
             'img' => $args['img'] ?? '/profile/' . $id . '.jpg',
             'biography' => $biography,
             'createdat' => $createdat,
-            'updatedat' => $createdat
+            'updatedat' => $createdat,
+            'visibility_status' => 'normal',
         ];
 
         $infoData = [
@@ -306,7 +355,7 @@ class UserService
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            $this->logger->error('Error handling referral info.', ['exception' => $e]);
             return self::respondWithError(41013);
         }
 
@@ -331,16 +380,19 @@ class UserService
         }
 
         $this->userMapper->logLoginDaten($id);
-        $this->logger->info('User registered successfully.', ['username' => $username, 'email' => $email]);
+        $this->logger->info('User registered successfully.', ['userid' => $id]);
 
+        // Welcome email switch off
+        /*
         try {
             $data = [
                 'username' => $username
             ];
-            (new UserWelcomeMail($data))->send($email);
+            new UserWelcomeMail($data)->send($email);
         } catch (\Throwable $e) {
             $this->logger->error('Error occurred while sending welcome email: ' . $e->getMessage());
         }
+        */
         $this->transactionManager->commit();
         return [
             'status' => 'success',
@@ -351,28 +403,30 @@ class UserService
 
     public function verifyReferral(string $referralString): array
     {
-        if (empty($referralString)) {
-            return self::respondWithError(31010); // Invalid referral string
-        }
-
-        if (!self::isValidUUID($referralString)) {
-            return self::respondWithError(31010);
-        }
         try {
-            $users = $this->userMapper->getValidReferralInfoByLink($referralString);
+            $specs = [
+                new DeletedUserSpec(
+                    ContentFilteringCases::hideAll,
+                    ContentType::user
+                ),
+                new SystemUserSpec(
+                    ContentFilteringCases::hideAll,
+                    ContentType::user
+                ),
+            ];
+
+            $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
 
             if (!$users) {
                 return self::respondWithError(31007); // No valid referral information found
             }
-            $userObj = (new User($users, [], false))->getArrayCopy();
+            $userObj = new User($users, [], false)->getArrayCopy();
 
             return $this::createSuccessResponse(
                 11011,
                 $userObj,
                 false // no counter needed for object/associative array
             );
-
-
         } catch (\Throwable $e) {
             $this->logger->error('Error verifying referral info.', ['exception' => $e]);
             return self::respondWithError(41013); // Error while retriving Referral Info
@@ -381,7 +435,7 @@ class UserService
 
     public function referralList(string $userId, int $offset = 0, int $limit = 20): array
     {
-        $data = $this->userMapper->getReferralRelations($userId, $offset, $limit);
+        $data = $this->userMapper->getReferralRelations($userId, [], $offset, $limit);
 
         return [
             'status' => 'success',
@@ -473,7 +527,6 @@ class UserService
         }
     }
 
-
     public function updateUserPreferences(?array $args = []): array
     {
 
@@ -484,8 +537,6 @@ class UserService
         if (empty($args)) {
             return self::respondWithError(30101);
         }
-        $contentFilterService = new ContentFilterServiceImpl();
-
         $this->logger->debug('UserService.updateUserPreferences started');
 
         $newUserPreferences = $args['userPreferences'];
@@ -502,7 +553,7 @@ class UserService
             }
 
             if ($contentFiltering && !empty($contentFiltering)) {
-                $contentFilteringSeverityLevel = $contentFilterService->getContentFilteringSeverityLevel($contentFiltering);
+                $contentFilteringSeverityLevel = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
                 $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
                 $userPreferences->setUpdatedAt();
             }
@@ -514,7 +565,9 @@ class UserService
 
             $resultPreferences = ($this->userPreferencesMapper->update($userPreferences))->getArrayCopy();
 
-            $contentFilteringSeverityLevelString = $contentFilterService->getContentFilteringStringFromSeverityLevel($resultPreferences['contentFilteringSeverityLevel']);
+            $contentFilteringSeverityLevelString = HiddenContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel(
+                $resultPreferences['contentFilteringSeverityLevel']
+            );
 
             $resultPreferences['contentFilteringSeverityLevel'] = $contentFilteringSeverityLevelString;
 
@@ -641,7 +694,7 @@ class UserService
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30224);
         }
 
@@ -651,7 +704,7 @@ class UserService
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->warning('Email already in use', ['email' => $email]);
+            $this->logger->warning('Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -675,7 +728,7 @@ class UserService
             $data = $this->userMapper->updateProfil($user);
             $affectedRows = $data->getArrayCopy();
 
-            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId, 'email' => $email]);
+            $this->logger->info('User email updated successfully', ['userId' => $this->currentUserId]);
             $this->transactionManager->commit();
             return $this::createSuccessResponse(11006, $affectedRows, false);
         } catch (\Throwable $e) {
@@ -689,6 +742,23 @@ class UserService
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
+        }
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
         }
 
         if (empty($args['username'])) {
@@ -780,73 +850,78 @@ class UserService
         }
     }
 
-    public function Profile(?array $args = []): array
-    {
-        if (!$this->checkAuthentication()) {
-            return self::respondWithError(60501);
-        }
-
-        $userId = $args['userid'] ?? $this->currentUserId;
-        $postLimit = min(max((int)($args['postLimit'] ?? 4), 1), 10);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-
-        $this->logger->debug('UserService.Profile started');
-
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID for profile', ['userId' => $userId]);
-            return self::respondWithError(30102);
-        }
-        if (!$this->userMapper->isUserExistById($userId)) {
-            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-            return self::respondWithError(31007);
-        }
-
-        try {
-            $profileData = $this->userMapper->fetchProfileData($userId, $this->currentUserId, $contentFilterBy)->getArrayCopy();
-            $this->logger->info("Fetched profile data", ['profileData' => $profileData]);
-
-            $posts = $this->postMapper->fetchPostsByType($this->currentUserId, $userId, $postLimit, $contentFilterBy);
-
-            $contentTypes = ['image', 'video', 'audio', 'text'];
-            foreach ($contentTypes as $type) {
-                $profileData["{$type}posts"] = array_filter($posts, fn ($post) => $post['contenttype'] === $type);
-            }
-
-            $this->logger->info('Profile data prepared successfully', ['userId' => $userId]);
-            return $this::createSuccessResponse(11008, $profileData, false);
-        } catch (\Throwable $e) {
-            $this->logger->error('Failed to fetch profile data', [
-                'userId' => $userId,
-                'exception' => $e->getMessage(),
-            ]);
-            return $this::createSuccessResponse(21001, []);
-        }
-    }
-
-    public function Follows(?array $args = []): array
+    public function Follows(?array $args = []): array | ErrorResponse
     {
         $this->logger->debug('UserService.Follows started');
 
         $userId = $args['userid'] ?? $this->currentUserId;
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
 
-        if (!self::isValidUUID($userId)) {
-            $this->logger->warning('Invalid UUID provided for Follows', ['userId' => $userId]);
-            return self::respondWithError(30201);
-        }
         if (!$this->userMapper->isUserExistById($userId)) {
             $this->logger->warning('User not found for Follows', ['userId' => $userId]);
-            return self::respondWithError(31007);
+            return self::respondWithErrorObject(31007);
         }
+
+        $deletedUserSpec = new DeletedUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringCases::searchById,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentFilterSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $usersHiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
         try {
-            $followers = $this->userMapper->fetchFollowers($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
-            $following = $this->userMapper->fetchFollowing($userId, $this->currentUserId, $offset, $limit, $contentFilterBy);
+            $followers = $this->userMapper->fetchFollowers(
+                $userId,
+                $this->currentUserId,
+                $specs,
+                $offset,
+                $limit
+            );
+            $following = $this->userMapper->fetchFollowing(
+                $userId,
+                $this->currentUserId,
+                $specs,
+                $offset,
+                $limit
+            );
+
+            foreach ($followers as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
+
+            foreach ($following as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
 
             $counter = count($followers) + count($following);
 
@@ -856,18 +931,21 @@ class UserService
                 'ResponseCode' => "11101",
                 'affectedRows' => [
                     'followers' => array_map(
-                        fn (ProfilUser $follower) => $follower->getArrayCopy(),
+                        fn (Profile $follower) => $follower->getArrayCopy(),
                         $followers
                     ),
                     'following' => array_map(
-                        fn (ProfilUser $followed) => $followed->getArrayCopy(),
+                        fn (Profile $followed) => $followed->getArrayCopy(),
                         $following
                     )
                 ]
             ];
+        } catch (PDOException $e) {
+            $this->logger->error('Database Error: Failed to fetch followers or following data', ['error' => $e->getMessage()]);
+            return self::respondWithErrorObject(41104);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch followers or following data', ['error' => $e->getMessage()]);
-            return self::respondWithError(41104);
+            return self::respondWithErrorObject(41104);
         }
     }
 
@@ -877,26 +955,75 @@ class UserService
             return self::respondWithError(60501);
         }
 
+        $userId = $args['userid'] ?? $this->currentUserId;
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
-        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-        $this->logger->info('Fetching friends list', ['currentUserId' => $this->currentUserId, 'offset' => $offset, 'limit' => $limit]);
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
+        if (!$this->userMapper->isUserExistById($userId)) {
+            $this->logger->warning('User not found for Follows', ['userId' => $userId]);
+            return self::respondWithError(31007);
+        }
+
+        $this->logger->info('Fetching friends list', [
+            'currentUserId' => $this->currentUserId,
+            'targetUserId'  => $userId
+        ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($this->currentUserId, $offset, $limit, $contentFilterBy);
+            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
 
             if (!empty($users)) {
-                $this->logger->info('Friends list retrieved successfully', ['userCount' => count($users)]);
+                foreach ($users as $profile) {
+                    if ($profile instanceof ProfileReplaceable) {
+                        ContentReplacer::placeholderProfile($profile, $specs);
+                    }
+                    $usersArray[] = $profile->getArrayCopy();
+                }
+
+                $this->logger->info('Friends list retrieved successfully', ['userCount' => count($usersArray)]);
                 return [
                     'status' => 'success',
-                    'counter' => count($users),
+                    'counter' => count($usersArray),
                     'ResponseCode' => "11102",
-                    'affectedRows' => $users,
+                    'affectedRows' => $usersArray,
                 ];
             }
 
-            $this->logger->info('No friends found for the user', ['currentUserId' => $this->currentUserId]);
+            $this->logger->info('No friends found for the user', ['targetUserId' => $userId]);
             return self::createSuccessResponse(21101);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to fetch friends', ['exception' => $e->getMessage()]);
@@ -942,13 +1069,11 @@ class UserService
         $this->logger->debug('UserService.fetchAllAdvance started');
 
         $contentFilterBy = $args['contentFilterBy'] ?? null;
-        $contentFilterService = new ContentFilterServiceImpl(new ListPostsContentFilteringStrategy());
-        if ($contentFilterService->validateContentFilter($contentFilterBy) == false) {
-            return $this::respondWithError(30103);
-        }
+
+        $specs = [];
 
         try {
-            $users = $this->userMapper->fetchAllAdvance($args, $this->currentUserId, $contentFilterBy);
+            $users = $this->userMapper->fetchAllAdvance($args, $specs, $this->currentUserId);
             $fetchAll = array_map(fn (UserAdvanced $user) => $user->getArrayCopy(), $users);
 
             if ($fetchAll) {
@@ -971,16 +1096,54 @@ class UserService
 
         $this->logger->debug('UserService.fetchAll started');
 
-        try {
-            $users = $this->userMapper->fetchAll($this->currentUserId, $args);
-            $fetchAll = array_map(fn (User $user) => $user->getArrayCopy(), $users);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
 
-            if ($fetchAll) {
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentFilterSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
+        try {
+            $users = $this->userMapper->fetchAll($this->currentUserId, $args, $specs);
+            $usersArray = [];
+            foreach ($users as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+                $usersArray[] = $profile->getArrayCopy();
+            }
+
+            if ($usersArray) {
                 return [
                     'status' => 'success',
-                    'counter' => count($fetchAll),
+                    'counter' => count($usersArray),
                     'ResponseCode' => "11009",
-                    'affectedRows' => $fetchAll,
+                    'affectedRows' => $usersArray,
                 ];
             }
 
@@ -1007,7 +1170,7 @@ class UserService
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format', ['email' => $email]);
+            $this->logger->warning('Invalid email format');
             return self::respondWithError(30104);
         }
 
@@ -1017,7 +1180,7 @@ class UserService
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->warning('Invalid user', ['email' => $email]);
+                $this->logger->warning('Invalid user');
                 return $this->genericPasswordResetSuccessResponse();
             }
 
@@ -1097,7 +1260,7 @@ class UserService
         $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token)) {
-            $this->logger->warning('Invalid reset token', ['token' => $token]);
+            $this->logger->warning('Invalid reset token');
             return self::respondWithError(31904);
         }
 
@@ -1105,15 +1268,15 @@ class UserService
             $isValidToken = $this->userMapper->getPasswordResetRequest($token);
 
             if (!$isValidToken) {
-                $this->logger->warning('Invalid or expired reset token. ', ['token' => $token]);
+                $this->logger->warning('Invalid or expired reset token');
                 return self::respondWithError(31904);
             }
 
-            $this->logger->info('Token verified successfully', ['token' => $token]);
+            $this->logger->info('Token verified successfully');
 
             return self::createSuccessResponse(11902);
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage(), 'token' => $token]);
+            $this->logger->error('Unexpected error during token verification', ['error' => $e->getMessage()]);
             return self::respondWithError(41004);
         }
     }
@@ -1124,7 +1287,7 @@ class UserService
     {
 
         $nextAttemptAt = $this->calculateNextAttemptDelay($passwordAttempt);
-        
+
         return [
             'status' => 'success',
             'ResponseCode' => "11901",
@@ -1143,17 +1306,13 @@ class UserService
         if (empty($passwordAttempt) || !isset($passwordAttempt['attempt_count'])) {
             return $nextAttemptAt;
         }
-        if($passwordAttempt['attempt_count'] === 1){
+        if ($passwordAttempt['attempt_count'] === 1) {
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(60, $passwordAttempt['last_attempt']);
-        } elseif($passwordAttempt['attempt_count'] === 2){
+        } elseif ($passwordAttempt['attempt_count'] === 2) {
             $nextAttemptAtArray = $this->userMapper->rateLimitResponse(600, $passwordAttempt['last_attempt']);
         }
-        
-        if(isset($nextAttemptAtArray['nextAttemptAt'])){
-            return $nextAttemptAtArray['nextAttemptAt'];
-        }
-        
-        return $nextAttemptAt;
+
+        return $nextAttemptAtArray['nextAttemptAt'] ?? $nextAttemptAt;
     }
 
 

@@ -23,11 +23,6 @@ class PoolService
         $this->currentUserId = $userId;
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -49,16 +44,16 @@ class PoolService
         return $fetchPool;
     }
 
-    public function callGemster(): array
+    public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
 
-        return $this->poolMapper->getTimeSorted();
+        return $this->poolMapper->fetchGemsStats();
     }
 
-    public function callGemsters(string $day = 'D0'): array
+    public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
@@ -70,7 +65,7 @@ class PoolService
             return $this::respondWithError(30223);
         }
 
-        return $this->poolMapper->getTimeSortedMatch($day);
+        return $this->poolMapper->fetchAllGemsForDay($day);
     }
 
     public function getActionPrices(): ?array

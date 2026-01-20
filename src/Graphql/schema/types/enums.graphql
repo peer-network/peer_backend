@@ -126,6 +126,40 @@ enum DayFilterType {
   Y0
 }
 
+enum TransactionCategory {
+  P2P_TRANSFER
+  AD_PINNED
+  POST_CREATE
+  LIKE
+  DISLIKE
+  COMMENT
+  TOKEN_MINT
+  SHOP_PURCHASE
+}
+
 enum OnboardingType {
   INTROONBOARDING
+}
+
+enum ModerationStatus {
+  waiting_for_review
+  hidden
+  restored
+  illegal
+}
+
+enum ModerationContentType {
+  post
+  comment
+  user
+}
+
+enum ContentVisibilityStatus {
+  NORMAL
+  HIDDEN
+  ILLEGAL
+}
+
+enum ShopSupportedDeliveryCountry {
+  GERMANY
 }

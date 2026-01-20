@@ -4,17 +4,31 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\UserInfoMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserPreferencesMapper;
 use Fawaz\Database\ReportsMapper;
+use Fawaz\Database\ModerationMapper;
 use Fawaz\Services\Base64FileHandler;
-use Fawaz\Services\ContentFiltering\ContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\HiddenContentFilterServiceImpl;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
 use Fawaz\Utils\ResponseHelper;
+
+use function grapheme_strlen;
 
 class UserInfoService
 {
@@ -28,7 +42,9 @@ class UserInfoService
         protected UserMapper $userMapper,
         protected UserPreferencesMapper $userPreferencesMapper,
         protected ReportsMapper $reportsMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected ModerationMapper $moderationMapper
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -36,11 +52,6 @@ class UserInfoService
     public function setCurrentUserId(string $userId): void
     {
         $this->currentUserId = $userId;
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
     private function checkAuthentication(): bool
@@ -77,9 +88,7 @@ class UserInfoService
 
                 $this->logger->info("UserInfoService.loadInfoById found", ['affectedRows' => $affectedRows]);
 
-                $contentFilterService = new ContentFilterServiceImpl();
-
-                $resultPreferences['contentFilteringSeverityLevel'] = $contentFilterService->getContentFilteringStringFromSeverityLevel($contentFiltering);
+                $resultPreferences['contentFilteringSeverityLevel'] = HiddenContentFilterServiceImpl::getContentFilteringStringFromSeverityLevel($contentFiltering);
 
                 $affectedRows['userPreferences'] = $resultPreferences;
                 $affectedRows['onboardingsWereShown']   = $onboardings;
@@ -115,6 +124,24 @@ class UserInfoService
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
             return $this::respondWithError(31003);
+        }
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $specs = [
+            $systemUserSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $followedUserId
+        ) === false) {
+            return $this::respondWithError(31107, ['followedUserId' => $followedUserId]);
         }
 
         $this->transactionManager->beginTransaction();
@@ -156,6 +183,30 @@ class UserInfoService
             return $this::respondWithError(31106);
         }
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $peerShopUserSpec = new PeerShopSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        
+
+        $specs = [
+            $systemUserSpec,
+            $peerShopUserSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $blockedUserId
+        ) === false) {
+            return $this::respondWithError(31107, ['blockedUserId' => $blockedUserId]);
+        }
+
         $this->transactionManager->beginTransaction();
 
         $response = $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
@@ -173,65 +224,121 @@ class UserInfoService
     public function loadBlocklist(?array $args = []): array
     {
         $this->logger->debug('UserInfoService.loadBlocklist started');
-
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+
+        $usersHiddenContentFilterSpec = new HiddenContentFilterSpec(
+            ContentFilteringCases::searchById,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentFilterSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentFilterSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $usersHiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
 
         try {
-            $results = $this->userInfoMapper->getBlockRelations($this->currentUserId, $offset, $limit);
-            if (isset($results['status']) && $results['status'] === 'error') {
-                $this->logger->info("No blocked users found for user ID: {$this->currentUserId}");
-                return $results;
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
+
+            $blockedBy = $lists['blockedBy'] ?? [];
+            $iBlocked = $lists['iBlocked'] ?? [];
+
+            foreach ($blockedBy as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
+            }
+            foreach ($iBlocked as $profile) {
+                if ($profile instanceof ProfileReplaceable) {
+                    ContentReplacer::placeholderProfile($profile, $specs);
+                }
             }
 
-            $this->logger->info("UserInfoService.loadBlocklist found", ['results' => $results]);
+            $affected = [
+                'blockedBy' => array_map(fn (Profile $p) => $p->getArrayCopy(), $blockedBy),
+                'iBlocked' => array_map(fn (Profile $p) => $p->getArrayCopy(), $iBlocked),
+            ];
 
-            return $results;
+            $counter = count($affected['blockedBy']) + count($affected['iBlocked']);
 
-        } catch (\Exception $e) {
+            $this->logger->info("UserInfoService.loadBlocklist found", ['counter' => $counter]);
+
+            return [
+                'status' => 'success',
+                'counter' => $counter,
+                'ResponseCode' => '11107',
+                'affectedRows' => $affected,
+            ];
+
+        } catch (\Throwable $e) {
             $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
             return $this::respondWithError(41008);
         }
     }
-/* ----- unused function --------
-    public function toggleProfilePrivacy(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $this->logger->debug('UserInfoService.toggleProfilePrivacy started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-
-            $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
-            if (!$user) {
-                return $this::createSuccessResponse(21001);
+    
+    /* ----- unused function --------
+        public function toggleProfilePrivacy(): array
+        {
+            if (!$this->checkAuthentication()) {
+                return $this::respondWithError(60501);
             }
 
+            $this->logger->debug('UserInfoService.toggleProfilePrivacy started');
 
-            $newIsPrivate = !$user->getIsPrivate();
-            $user->setIsPrivate((int) $newIsPrivate);
+            try {
+                $this->transactionManager->beginTransaction();
 
-            $updatedUser = $this->userInfoMapper->update($user);
+                $user = $this->userInfoMapper->loadInfoById($this->currentUserId);
+                if (!$user) {
+                    return $this::createSuccessResponse(21001);
+                }
 
-            $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
 
-            $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+                $newIsPrivate = !$user->getIsPrivate();
+                $user->setIsPrivate((int) $newIsPrivate);
 
-            $this->transactionManager->commit();
+                $updatedUser = $this->userInfoMapper->update($user);
 
-            return [
-                'status' => 'success',
-                'ResponseCode' => $responseMessage,
-            ];
-        } catch (\Exception $e) {
-            $this->transactionManager->rollback();
-            return $this::respondWithError(00000);//'Failed to toggle profile privacy.'
+                $responseMessage = $newIsPrivate ? 'Profile privacy set to private' : 'Profile privacy set to public';
+
+                $this->logger->info('Profile privacy toggled', ['userId' => $this->currentUserId, 'newPrivacy' => $newIsPrivate]);
+
+                $this->transactionManager->commit();
+
+                return [
+                    'status' => 'success',
+                    'ResponseCode' => $responseMessage,
+                ];
+            } catch (\Exception $e) {
+                $this->transactionManager->rollback();
+                return $this::respondWithError(00000);//'Failed to toggle profile privacy.'
+            }
         }
-    }
-*/
+    */
 
     public function updateBio(string $biography): array
     {
@@ -239,9 +346,26 @@ class UserInfoService
             return $this::respondWithError(60501);
         }
 
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
+        }
+
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
-        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
+        if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this::respondWithError(30228);
         }
 
@@ -250,7 +374,7 @@ class UserInfoService
         try {
             $this->transactionManager->beginTransaction();
 
-            $user = $this->userInfoMapper->loadById($this->currentUserId);
+            $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -273,7 +397,7 @@ class UserInfoService
             }
 
             $user->setBiography($mediaPathFile);
-            $updatedUser = $this->userInfoMapper->updateUsers($user);
+            $updatedUser = $this->userMapper->update($user);
             $responseMessage = "11003";
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
@@ -297,6 +421,23 @@ class UserInfoService
             return $this::respondWithError(60501);
         }
 
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
+        }
+
         if (trim($mediaFile) === '') {
             return $this::respondWithError(31102);
         }
@@ -304,7 +445,7 @@ class UserInfoService
         $this->logger->debug('UserInfoService.setProfilePicture started');
 
         try {
-            $user = $this->userInfoMapper->loadById($this->currentUserId);
+            $user = $this->userMapper->loadById($this->currentUserId);
             if (!$user) {
                 return $this::createSuccessResponse(21001);
             }
@@ -328,7 +469,7 @@ class UserInfoService
             $this->transactionManager->beginTransaction();
 
             $user->setProfilePicture($mediaPathFile);
-            $updatedUser = $this->userInfoMapper->updateUsers($user);
+            $updatedUser = $this->userMapper->update($user);
             $responseMessage = "11004";
 
             $this->logger->info((string)$responseMessage, ['userId' => $this->currentUserId]);
@@ -370,6 +511,29 @@ class UserInfoService
                 return $this->respondWithError(31007);
             }
 
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $peerShopUserSpec = new PeerShopSpec(
+                $contentFilterCase,
+                ContentType::user
+            );
+
+            $specs = [
+                $peerShopUserSpec
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $reported_userid
+            ) === false) {
+                return $this::respondWithError(32201, ['userid' => $reported_userid]);
+            }
+
+            if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
+                $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
+                return $this->respondWithError(32104);
+            }
+
             $userInfo = $this->userInfoMapper->loadInfoById($reported_userid);
 
             if (!$userInfo) {
@@ -388,6 +552,11 @@ class UserInfoService
         }
 
         try {
+            // Moderated items should not be reported again
+            if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
+                $this->logger->warning("UserInfoService.reportUser: User report already exists");
+                return $this::respondWithError(32102); // This content has already been reviewed and noderated by our team.
+            }
 
             $this->transactionManager->beginTransaction();
 
@@ -410,7 +579,8 @@ class UserInfoService
                 return $this::respondWithError(31008); // report already exists
             }
 
-            $userInfo->setReports($userInfo->getReports() + 1);
+            $userInfo->setReports($userInfo->getActiveReports() + 1);
+            $userInfo->setTotalReports($userInfo->getTotalReports() + 1);
             $this->userInfoMapper->update($userInfo);
 
             $this->transactionManager->commit();

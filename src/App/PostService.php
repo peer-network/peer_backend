@@ -6,22 +6,42 @@ namespace Fawaz\App;
 
 use Fawaz\App\Post;
 use Fawaz\App\Comment;
+use Fawaz\App\Interfaces\ProfileService;
+use Fawaz\App\Profile;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\HiddenContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\HiddenContent\NormalVisibilityStatusSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\config\constants\PeerUUID;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\PostMapper;
 use Fawaz\Database\TagMapper;
 use Fawaz\Database\TagPostMapper;
+use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\ContentLimitsPerPost;
 use Fawaz\Services\JWTService;
-
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\Interfaces\ProfileRepository;
+use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
+
+use function grapheme_strlen;
 
 class PostService
 {
@@ -33,6 +53,7 @@ class PostService
         protected PeerLoggerInterface $logger,
         protected PostMapper $postMapper,
         protected CommentMapper $commentMapper,
+        protected CommentService $commentService,
         protected PostInfoMapper $postInfoMapper,
         protected CommentService $commentService,
         protected PostInfoService $postInfoService,
@@ -44,18 +65,16 @@ class PostService
         protected DailyFreeService $dailyFreeService,
         protected WalletService $walletService,
         protected JWTService $tokenService,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected ProfileRepository $profileRepository,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected PostInfoService $postInfoService
     ) {
     }
 
     public function setCurrentUserId(string $userid): void
     {
         $this->currentUserId = $userid;
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
     }
 
     private static function validateDate($date, $format = 'Y-m-d')
@@ -76,11 +95,6 @@ class PostService
     private function argsToJsString($args)
     {
         return json_encode($args);
-    }
-
-    private function argsToString($args)
-    {
-        return serialize($args);
     }
 
     private function validateCoverCount(array $args, string $contenttype): array
@@ -145,6 +159,240 @@ class PostService
             return ['success' => true, 'error' => null];
         }
     }
+    public function resolveActionPost(?array $args = []): ?array
+    {
+        $tokenomicsConfig = ConstantsConfig::tokenomics();
+        $dailyfreeConfig = ConstantsConfig::dailyFree();
+        $actions = ConstantsConfig::wallet()['ACTIONS'];
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveActionPost started');
+
+        $postId = $args['postid'] ?? null;
+        $action = $args['action'] = strtolower($args['action'] ?? 'LIKE');
+
+        $freeActions = ['report', 'save', 'share', 'view'];
+
+        if (!empty($postId) && !self::isValidUUID($postId)) {
+            return $this::respondWithError(30209, ['postid' => $postId]);
+        }
+
+        if ($postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $deletedUserSpec = new DeletedUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $systemUserSpec = new SystemUserSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $illegalContentSpec = new IllegalContentFilterSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+
+            $specs = [
+                $illegalContentSpec,
+                $systemUserSpec,
+                $deletedUserSpec,
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31513, ['postid' => $postId]);
+            }
+        }
+
+        if (in_array($action, $freeActions, true)) {
+            $response = $this->postInfoService->{$action . 'Post'}($postId);
+            return $response;
+        }
+
+        $paidActions = ['like', 'dislike', 'comment', 'post'];
+
+        if (!in_array($action, $paidActions, true)) {
+            return $this::respondWithError(30105);
+        }
+
+        $dailyLimits = [
+            'like' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['like'],
+            'comment' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['comment'],
+            'post' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['post'],
+            'dislike' => $dailyfreeConfig['DAILY_FREE_ACTIONS']['dislike'],
+        ];
+
+        $actionPrices = [
+            'like' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['like'],
+            'comment' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['comment'],
+            'post' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['post'],
+            'dislike' => $tokenomicsConfig['ACTION_TOKEN_PRICES']['dislike'],
+        ];
+
+        $actionMaps = [
+            'like' => $actions['LIKE'],
+            'comment' => $actions['COMMENT'],
+            'post' => $actions['POST'],
+            'dislike' => $actions['DISLIKE'],
+        ];
+
+        // Validations
+        if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
+            $this->logger->warning('Invalid action parameter', ['action' => $action]);
+            return $this::respondWithError(30105);
+        }
+
+        $limit = $dailyLimits[$action];
+        $price = $actionPrices[$action];
+        $actionMap = $args['art'] = $actionMaps[$action];
+
+        $this->transactionManager->beginTransaction();
+        try {
+            if ($limit > 0) {
+                $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
+
+                // Return ResponseCode with Daily Free Code
+                if ($DailyUsage < $limit) {
+                    if ($action === 'comment') {
+                        $response = $this->commentService->createComment($args);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11608";
+
+                    } elseif ($action === 'post') {
+                        $response = $this->createPost($args['input']);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        $response['ResponseCode'] = "11513";
+                    } elseif ($action === 'like') {
+                        $response = $this->postInfoService->likePost($postId);
+                        if (isset($response['status']) && $response['status'] === 'error') {
+                            $this->transactionManager->rollback();
+                            return $response;
+                        }
+                        
+                        $response['ResponseCode'] = "11514";
+                    } else {
+                        $this->transactionManager->rollback();
+                        return $this::respondWithError(30105);
+                    }
+
+                    if (isset($response['status']) && $response['status'] === 'success') {
+                        $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
+
+                        if ($incrementResult === false) {
+                            $this->logger->error('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                            $this->transactionManager->rollback();
+                            return $this::respondWithError(40301);
+                        }
+
+                        $this->transactionManager->commit();
+                        return $response;
+                    }
+
+                    $this->logger->error("{$action}Post failed", ['response' => $response]);
+                    $response['affectedRows'] = $args;
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+            }
+            $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
+
+            // Return ResponseCode with Daily Free Code
+
+            if ($balance < $price) {
+                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->transactionManager->rollback();
+                return $this::respondWithError(51301);
+            }
+
+            
+            if ($action === 'comment') {
+                $response = $this->commentService->createComment($args);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11605";
+            } elseif ($action === 'post') {
+                $response = $this->createPost($args['input']);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11508";
+
+                if (isset($response['affectedRows']['postid']) && !empty($response['affectedRows']['postid'])) {
+                    unset($args['input'], $args['action']);
+                    $args['postid'] = $response['affectedRows']['postid'];
+                }
+            } elseif ($action === 'like') {
+                $response = $this->postInfoService->likePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11503";
+            } elseif ($action === 'dislike') {
+                $response = $this->postInfoService->dislikePost($postId);
+                if (isset($response['status']) && $response['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $response;
+                }
+                $response['ResponseCode'] = "11504";
+            } else {
+                $this->transactionManager->rollback();
+                return $this::respondWithError(30105);
+            }
+
+            if (isset($response['status']) && $response['status'] === 'success') {
+                assert(in_array($action, ['post', 'like', 'comment', 'dislike'], true));
+            
+                $transferStrategy = match($action) {
+                    'post' => new PaidPostTransferStrategy(),
+                    'like' => new PaidLikeTransferStrategy(),
+                    'comment' => new PaidCommentTransferStrategy(),
+                    'dislike' => new PaidDislikeTransferStrategy(),
+                };
+
+                $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
+                if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->transactionManager->rollback();
+                    return $deducted;
+                }
+
+                if (!$deducted) {
+                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
+                    $this->transactionManager->rollback();
+                    return $this::respondWithError(40301);
+                }
+                $this->transactionManager->commit();
+                return $response;
+            }
+
+            $this->logger->error("{$action}Post failed after wallet deduction", ['response' => $response]);
+            $response['affectedRows'] = $args;
+            $this->transactionManager->rollback();
+            return $response;
+        } catch (\Throwable $e) {
+            $this->logger->error('Unexpected error in resolveActionPost', [
+                'exception' => $e->getMessage(),
+                'args' => $args,
+            ]);
+            $this->transactionManager->rollback();
+            return $this::respondWithError(40301);
+        }
+    }
 
     public function createPost(array $args = []): array
     {
@@ -166,7 +414,7 @@ class PostService
 
         $postId = self::generateUUID();
 
-        $createdAt = (new \DateTime())->format('Y-m-d H:i:s.u');
+        $createdAt = new \DateTime()->format('Y-m-d H:i:s.u');
 
         $postData = [
             'postid' => $postId,
@@ -178,6 +426,7 @@ class PostService
             'cover' => null,
             'mediadescription' => $args['mediadescription'] ?? null,
             'createdat' => $createdAt,
+            'visibility_status' => 'normal',
         ];
 
         try {
@@ -283,12 +532,8 @@ class PostService
                     'trace' => $e->getTraceAsString(),
                 ]);
                 return $this::respondWithError(30263);
-                if (isset($args['uploadedFiles'])) {
-                    $this->postMapper->revertFileToTmp($args['uploadedFiles']);
-                }
-                return $this::respondWithError($e->getMessage());
             }
-            $this->postMapper->insert($post);
+            $this->postMapper->insert(post: $post);
 
             if (isset($mediaPath['path']) && !empty($mediaPath['path'])) {
                 // Media Posts_media
@@ -603,14 +848,22 @@ class PostService
     {
         $maxTags = 10;
         $tagNameConfig = ConstantsConfig::post()['TAG'];
+        $minLength = (int) $tagNameConfig['MIN_LENGTH'];
+        $maxLength = (int) $tagNameConfig['MAX_LENGTH'];
         if (count($tags) > $maxTags) {
             throw new \Exception('Maximum tag limit exceeded');
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = !empty($tagName) ? trim((string) $tagName) : '';
+            $tagName = strtolower(trim((string) $tagName));
 
-            if (strlen($tagName) < 2 || strlen($tagName) > 53 || !preg_match('/^[a-zA-Z0-9_-]+$/', $tagName)) {
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
+
+            if (strlen($tagName) < $minLength || strlen($tagName) > $maxLength || !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
                 throw new \Exception('Invalid tag name');
             }
 
@@ -648,6 +901,7 @@ class PostService
 
     private function createTag(string $tagName): Tag|false
     {
+        $tagName = strtolower(trim($tagName));
         $tagId = 0;
         $tagData = ['tagid' => $tagId, 'name' => $tagName];
 
@@ -705,7 +959,7 @@ class PostService
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
         }
-
+        $userId = $args['userid'] ?? null;
         $from = $args['from'] ?? null;
         $to = $args['to'] ?? null;
         $filterBy = $args['filterBy'] ?? [];
@@ -714,8 +968,12 @@ class PostService
         $title = $args['title'] ?? null;
         $tag = $args['tag'] ?? null;
         $postId = $args['postid'] ?? null;
-        $userId = $args['userid'] ?? null;
         $titleConfig = ConstantsConfig::post()['TITLE'];
+        $inputConfig  = ConstantsConfig::input();
+        $controlPattern = '/'.$inputConfig['FORBID_CONTROL_CHARS_PATTERN'].'/u';
+        $contentFilterBy = $args['contentFilterBy'] ?? null;
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
             return $this::respondWithError(30209);
@@ -725,7 +983,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
@@ -738,7 +996,7 @@ class PostService
         }
 
         if ($tag !== null) {
-            if (!preg_match('/' . $titleConfig['PATTERN'] . '/u', $tag)) {
+            if (preg_match($controlPattern, $tag) === 1) {
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
@@ -762,67 +1020,77 @@ class PostService
         }
 
         $this->logger->debug("PostService.findPostser started");
+        $contentFilterCase = ContentFilteringCases::postFeed;
 
-        $results = $this->postMapper->findPostser($this->currentUserId, $args);
-        if (empty($results) && $postId != null) {
-            return $this::respondWithError(31510);
+        if ($title || $tag) {
+            $contentFilterCase = ContentFilteringCases::searchByMeta;
+        }
+        if ($userId || $postId) {
+            $contentFilterCase = ContentFilteringCases::searchById;
+        }
+        if ($userId && $userId === $this->currentUserId) {
+            $contentFilterCase = ContentFilteringCases::myprofile;
         }
 
-        return $results;
-    }
-
-    private function mapCommentsWithReplies(array $comments): array
-    {
-        return array_map(
-            function (Comment $comment) {
-                $commentArray = $comment->getArrayCopy();
-                $replies = $this->commentMapper->fetchAllByParentId($comment->getId());
-                $commentArray['replies'] = $this->mapCommentsWithReplies($replies);
-                return $commentArray;
-            },
-            $comments
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
         );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::post,
+            $this->currentUserId,
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $excludeAdvertisementsForNormalFeedSpec,
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
+        try {
+            $results = $this->postMapper->findPostser($this->currentUserId, $specs, $args);
+            if (empty($results) && $postId != null) {
+                return $this::respondWithError(31510);
+            }
+            $postsEnriched = $this->enrichWithProfileAndComment(
+                $results,
+                $specs,
+                $this->currentUserId,
+                $commentOffset,
+                $commentLimit
+            );
+
+            foreach ($postsEnriched as $post) {
+                ContentReplacer::placeholderPost($post, $specs);
+            }
+            return $postsEnriched;
+        } catch (\Throwable $e) {
+            // Log and fall back to original results
+            $this->logger->error('Failed to load list post', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return false;
+        }
     }
-
-    // public function deletePost(string $id): array
-    // {
-    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-    //         return $this::respondWithError('Invalid feed ID');
-    //     }
-
-    //     if (!self::isValidUUID($id)) {
-    //         return $this::respondWithError(30209);
-    //     }
-
-    //     $this->logger->debug('PostService.deletePost started');
-
-    //     $posts = $this->postMapper->loadById($id);
-    //     if (!$posts) {
-    //         return $this::createSuccessResponse(21516);
-    //     }
-
-    //     $post = $posts->getArrayCopy();
-
-    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-    //         return $this::respondWithError('Unauthorized: You can only delete your own posts.');
-    //     }
-
-    //     try {
-    //         $postid = $this->postMapper->delete($id);
-
-    //         if ($postid) {
-    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-    //             return [
-    //                 'status' => 'success',
-    //                 'ResponseCode' => "11510",
-    //             ];
-    //         }
-    //     } catch (\Throwable $e) {
-    //         return $this::respondWithError(41510);
-    //     }
-
-    //     return $this::respondWithError(41510);
-    // }
 
 
     /**
@@ -949,18 +1217,56 @@ class PostService
             return $this::respondWithError(30201);
         }
 
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+
+        $hiddenContentFilterSpec = new HiddenContentFilterSpec(
+            $contentFilterCase,
+            $contentFilterBy,
+            ContentType::user,
+            $this->currentUserId,
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec($contentFilterBy);
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $hiddenContentFilterSpec,
+            $normalVisibilityStatusSpec
+        ];
+
         try {
             $result = $this->postMapper->getInteractions(
+                $specs,
                 $getOnly,
                 $postOrCommentId,
                 $this->currentUserId,
                 $offset,
-                $limit,
-                $contentFilterBy
+                $limit
             );
 
+            $usersArray = [];
+
+            foreach ($result as $user) {
+                ContentReplacer::placeholderProfile($user, $specs);
+                $usersArray[] = $user->getArrayCopy();
+            }
             $this->logger->info("Interaction fetched successfully", ['count' => count($result)]);
-            return $this::createSuccessResponse(11205, $result);
+            return $this::createSuccessResponse(11205, $usersArray);
 
         } catch (\Throwable $e) {
             $this->logger->error("Error fetching Posts", [
@@ -975,6 +1281,8 @@ class PostService
      */
     public function getGuestListPost(?array $args = []): array|false
     {
+        $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
+        $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
         $postId = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
@@ -983,13 +1291,158 @@ class PostService
 
         $this->logger->debug("PostService.getGuestListPost started");
 
-        $results = $this->postMapper->getGuestListPost($args);
+        $contentFilterCase = ContentFilteringCases::searchById;
 
-        if (empty($results)) {
-            return $this::respondWithError(31510);
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::post
+        );
+        $excludeAdvertisementsForNormalFeedSpec = new ExcludeAdvertisementsForNormalFeedSpec($postId);
+        $normalVisibilityStatusSpec = new NormalVisibilityStatusSpec(null);
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec,
+            $excludeAdvertisementsForNormalFeedSpec,
+            $normalVisibilityStatusSpec
+        ];
+
+        try {
+            $results = $this->postMapper->findPostser(
+                PeerUUID::empty->value,
+                $specs,
+                $args
+            );
+
+            if (empty($results)) {
+                return $this::respondWithError(31510);
+            }
+            $postsEnriched = $this->enrichWithProfileAndComment(
+                $results,
+                $specs,
+                PeerUUID::empty->value,
+                $commentOffset,
+                $commentLimit
+            );
+            foreach ($postsEnriched as $post) {
+                ContentReplacer::placeholderPost($post, $specs);
+            }
+            return $postsEnriched;
+        } catch (\Throwable $e) {
+            // Log and fall back to original results
+            $this->logger->error('Failed to load guest list post', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Enrich a list of PostAdvanced with user profiles and return PostAdvancedWithUser objects.
+     * Falls back gracefully if no profiles found.
+     *
+     * @param PostAdvanced[] $posts Array of PostAdvanced
+     * @param \Fawaz\Services\ContentFiltering\Specs\Specification[] $specs Content filtering specs
+     * @param string $currentUserId Current/guest user id for profile fetch
+     * @param int $commentOffset
+     * @param int $commentLimit
+     * @return PostAdvanced[]
+     */
+    private function enrichWithProfileAndComment(
+        array $posts,
+        array $specs,
+        string $currentUserId,
+        int $commentOffset,
+        int $commentLimit
+    ): array {
+
+        $userIdsFromPosts = array_values(
+            array_unique(
+                array_filter(
+                    array_map(fn (PostAdvanced $post) => $post->getUserId(), $posts)
+                )
+            )
+        );
+
+        if (empty($userIdsFromPosts)) {
+            return $posts;
         }
 
-        return $results;
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromPosts, $currentUserId, $specs);
+
+        $enriched = [];
+        foreach ($posts as $post) {
+            $data = $post->getArrayCopy();
+            $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($data, $profiles[$post->getUserId()], $specs);
+            $enrichedWithCommentsAndProfiles = $this->enrichAndPlaceholderWithComments(
+                $enrichedWithProfiles,
+                $specs,
+                $commentOffset,
+                $commentLimit,
+                $currentUserId
+            );
+            $post = new PostAdvanced($enrichedWithCommentsAndProfiles, [], false);
+            $enriched[] = $post;
+        }
+
+        return $enriched;
+    }
+
+    /**
+     * Enrich a single PostAdvanced with a Profile and return PostAdvancedWithUser.
+     */
+    private function enrichAndPlaceholderWithProfile(array $data, ?Profile $profile, array $specs): array
+    {
+        if ($profile instanceof Profile) {
+            ContentReplacer::placeholderProfile($profile, $specs);
+            $data['user'] = $profile->getArrayCopy();
+        }
+        return $data;
+    }
+
+    private function enrichAndPlaceholderWithComments(array $data, array $specs, int $commentOffset, int $commentLimit, string $currentUserId): array
+    {
+        $comments = $this->commentMapper->fetchAllByPostIdetaild($data['postid'], $specs, $currentUserId, $commentOffset, $commentLimit);
+        if (empty($comments)) {
+            return $data;
+        }
+
+        $userIdsFromComments = array_values(
+            array_unique(
+                array_filter(
+                    array_map(fn (CommentAdvanced $c) => $c->getUserId(), $comments)
+                )
+            )
+        );
+
+        if (empty($userIdsFromComments)) {
+            return $comments;
+        }
+
+        $profiles = $this->profileRepository->fetchByIds($userIdsFromComments, $currentUserId, $specs);
+        $commentsArray = [];
+
+        foreach ($comments as $comment) {
+            if ($comment instanceof CommentAdvanced) {
+                ContentReplacer::placeholderComments($comment, $specs);
+                $dataComment = $comment->getArrayCopy();
+                $enrichedWithProfiles = $this->enrichAndPlaceholderWithProfile($dataComment, $profiles[$comment->getUserId()], $specs);
+                $commentsArray[] = $enrichedWithProfiles;
+            }
+        }
+        $data['comments'] = $commentsArray;
+        return $data;
     }
 
     public function postExistsById(string $postId): bool|array

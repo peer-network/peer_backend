@@ -7,6 +7,7 @@ namespace Fawaz\Database;
 use PDO;
 use Fawaz\App\Tag;
 use Fawaz\Utils\PeerLoggerInterface;
+use PDOException;
 
 class TagMapper
 {
@@ -27,8 +28,8 @@ class TagMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
 
             $results = array_map(fn ($row) => new Tag($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -39,7 +40,7 @@ class TagMapper
             );
 
             return $results;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Error fetching tags from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -55,7 +56,7 @@ class TagMapper
         $sql = "SELECT * FROM tags WHERE tagid = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             return new Tag($data);
@@ -73,7 +74,7 @@ class TagMapper
         $sql = "SELECT * FROM tags WHERE name = :name";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['name' => $name]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
             $this->logger->info("tag found with name", ['data' => $data]);
@@ -93,19 +94,19 @@ class TagMapper
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
 
-        $name = strtolower($args['tagName']);
+        $name = strtolower(trim((string) ($args['tagName'] ?? '')));
         $sql = "SELECT * FROM tags WHERE name ILIKE :name ORDER BY name ASC LIMIT :limit OFFSET :offset";
 
         try {
             $stmt = $this->db->prepare($sql);
 
             $searchTerm = '%' . $name . '%';
-            $stmt->bindValue(':name', $searchTerm, \PDO::PARAM_STR);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':name', $searchTerm, PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 
             $stmt->execute();
-            $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (!empty($data)) {
                 $this->logger->info("Tags found with name", ['data' => $data]);
@@ -120,7 +121,7 @@ class TagMapper
 
             return false;
 
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             $this->logger->error("Error fetching tags from database", [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -138,7 +139,7 @@ class TagMapper
             $query = "INSERT INTO tags (name) VALUES (:name) RETURNING tagid";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
+            $stmt->bindValue(':name', $data['name'], PDO::PARAM_STR);
             $stmt->execute();
 
             // Get the auto-generated tagid from RETURNING

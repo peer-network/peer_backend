@@ -32,7 +32,7 @@ class ConfigUrl implements DataGeneratable
 
             $this->data[$config->getName()] = new ConfigUrlEntry(
                 $fileCreatedAt,
-                Constants::$configUrlBase . $config->outputFileName(),
+                Constants::configUrlBase() . $config->outputFileName(),
                 $hash
             );
         }

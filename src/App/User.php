@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use DateTime;
+use Fawaz\App\Models\Core\Model;
 use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Database\Interfaces\Hashable;
+use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
 use Fawaz\Utils\HashObject;
 use Fawaz\config\constants\ConstantsConfig;
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-class User implements Hashable
+class User extends Model implements Hashable, ProfileReplaceable, HasWalletId
 {
     use HashObject;
 
@@ -28,6 +31,9 @@ class User implements Hashable
     protected string $biography;
     protected string $createdat;
     protected string $updatedat;
+    protected ?int $activeReports = null;
+    protected string $visibilityStatus;
+    protected string $visibilityStatusForUser;
 
     // Constructor
     public function __construct(array $data = [], array $elements = [], bool $validate = true)
@@ -47,15 +53,12 @@ class User implements Hashable
         $this->ip = $data['ip'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
         $this->img = $data['img'] ?? '';
         $this->biography = $data['biography'] ?? '';
-        $this->createdat = $data['createdat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->createdat = $data['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
         $this->referral_uuid = $data['referral_uuid'] ?? $this->uid;
-
-        if ($this->status == 6) {
-            $this->username = 'Deleted_Account';
-            $this->img = '/profile/00000000-0000-0000-0000-000000000000.jpeg';
-            $this->biography = '/userData/00000000-0000-0000-0000-000000000000.txt';
-        }
+        $this->activeReports = $data['user_reports'] ?? ($data['reports'] ?? null);
+        $this->visibilityStatus = $data['visibility_status'] ?? 'normal';
+        $this->visibilityStatusForUser = $data['visibility_status'] ?? 'normal';
     }
 
     // Array Copy methods
@@ -75,6 +78,9 @@ class User implements Hashable
             'biography' => $this->biography,
             'createdat' => $this->createdat,
             'updatedat' => $this->updatedat,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -86,7 +92,7 @@ class User implements Hashable
             'uid' => $this->uid,
             'password' => $this->password,
             'ip' => $this->ip,
-            'updatedat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+            'updatedat' => new DateTime()->format('Y-m-d H:i:s.u'),
         ];
         return $att;
     }
@@ -101,6 +107,9 @@ class User implements Hashable
             'slug' => $this->slug,
             'img' => $this->img,
             'biography' => $this->biography,
+            'visibility_status' => $this->visibilityStatusForUser,
+            'hasActiveReports' => $this->hasActiveReports(),
+            'isHiddenForUsers' => $this->isHiddenForUsers(),
         ];
         return $att;
     }
@@ -126,6 +135,11 @@ class User implements Hashable
 
     // Getter and Setter
     public function getUserId(): string
+    {
+        return $this->uid;
+    }
+
+    public function getWalletId(): string
     {
         return $this->uid;
     }
@@ -205,6 +219,12 @@ class User implements Hashable
         $this->verified = $verified;
     }
 
+    // ProfileReplaceable: roles mask accessor with expected name
+    public function getRolesmask(): int
+    {
+        return (int)$this->roles_mask;
+    }
+
     public function getRoles(): int|null
     {
         return $this->roles_mask;
@@ -245,6 +265,34 @@ class User implements Hashable
         $this->biography = $biography;
     }
 
+    // ContentFiltering capabilities
+    public function getActiveReports(): ?int
+    {
+        return $this->activeReports;
+    }
+
+    // Computed property: hidden for others when hidden or many reports
+    public function isHiddenForUsers(): bool
+    {
+        $reports = (int)($this->activeReports ?? 0);
+        return $this->visibilityStatus === 'hidden' || $reports > 4;
+    }
+
+    public function hasActiveReports(): bool
+    {
+        return (int)($this->activeReports ?? 0) > 0;
+    }
+
+    public function visibilityStatus(): string
+    {
+        return $this->visibilityStatusForUser;
+    }
+
+    public function setVisibilityStatus(string $status): void
+    {
+        $this->visibilityStatusForUser = $status;
+    }
+
     public function updateBio(string $biography): void
     {
         $this->biography = $biography;
@@ -272,7 +320,7 @@ class User implements Hashable
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Password Verify methods
@@ -425,6 +473,15 @@ class User implements Hashable
                     ['name' => 'Date', 'options' => ['format' => 'Y-m-d H:i:s.u']],
                 ],
             ],
+            'visibility_status' => [
+                'required' => true,
+                'filters' => [
+                    ['name' => 'StringTrim'],
+                ],
+                'validators' => [
+                    ['name' => 'IsString'],
+                ],
+            ],
         ];
 
         if ($elements) {
@@ -449,4 +506,11 @@ class User implements Hashable
     {
         return $this->hashObject($this);
     }
+
+    // Table name for the model
+    protected static function table(): string
+    {
+        return 'users';
+    }
+
 }

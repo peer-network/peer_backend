@@ -6,8 +6,15 @@ namespace Fawaz\App;
 
 use Fawaz\Database\CommentInfoMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\ReportsMapper;
+use Fawaz\Database\ModerationMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -22,7 +29,9 @@ class CommentInfoService
         protected CommentInfoMapper $commentInfoMapper,
         protected ReportsMapper $reportsMapper,
         protected CommentMapper $commentMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected ModerationMapper $moderationMapper
     ) {
     }
 
@@ -107,6 +116,35 @@ class CommentInfoService
             return $this::respondWithError(31606);
         }
 
+
+        $contentFilterCase = ContentFilteringCases::searchById;
+
+        $deletedUserSpec = new DeletedUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+        $systemUserSpec = new SystemUserSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            $contentFilterCase,
+            ContentType::comment
+        );
+
+        $specs = [
+            $illegalContentSpec,
+            $systemUserSpec,
+            $deletedUserSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $commentId
+        ) === false) {
+            return $this::respondWithError(31608, ['commentid' => $commentId]);
+        }
         try {
             $this->transactionManager->beginTransaction();
 
@@ -148,6 +186,11 @@ class CommentInfoService
                 return $this->respondWithError(31601);
             }
 
+            if ($this->moderationMapper->wasContentRestored($commentId, 'comment')) {
+                $this->logger->warning('CommentInfoService: reportComment: User tries to report a restored comment');
+                return $this->respondWithError(32104);
+            }
+
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
             if (!$commentInfo) {
@@ -171,6 +214,12 @@ class CommentInfoService
         }
 
         try {
+            // User Should NOT be possible to report the same
+            if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
+                $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
+                return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
+            }
+
             $this->transactionManager->beginTransaction();
 
             $exists = $this->reportsMapper->addReport(
@@ -186,11 +235,12 @@ class CommentInfoService
             }
 
             if ($exists === true) {
-                $this->logger->warning('Post report already exists');
+                $this->logger->warning('Comment report already exists');
                 return $this->respondWithError(31605);
             }
 
-            $commentInfo->setReports($commentInfo->getReports() + 1);
+            $commentInfo->setReports($commentInfo->getActiveReports() + 1);
+            $commentInfo->setTotalReports($commentInfo->getTotalReports() + 1);
             $this->commentInfoMapper->update($commentInfo);
 
             $this->transactionManager->commit();

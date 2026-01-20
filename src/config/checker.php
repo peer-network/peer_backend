@@ -59,7 +59,7 @@ if ($db_driver === 'postgres') {
 
         $conn = @pg_connect($conn_string);
 
-        if ($conn) {
+        if ($conn !== false) {
 
             $result = pg_query($conn, "SELECT version();");
 

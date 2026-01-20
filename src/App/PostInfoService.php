@@ -7,10 +7,16 @@ namespace Fawaz\App;
 use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Database\PostMapper;
+use Fawaz\Database\ModerationMapper;
+use Fawaz\Database\UserMapper;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
+use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
+use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -23,19 +29,17 @@ class PostInfoService
         protected PostInfoMapper $postInfoMapper,
         protected CommentMapper $commentMapper,
         protected ReportsMapper $reportMapper,
+        protected UserMapper $userMapper,
         protected PostMapper $postMapper,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected ModerationMapper $moderationMapper
     ) {
     }
 
     public function setCurrentUserId(string $userId): void
     {
         $this->currentUserId = $userId;
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
     }
 
 
@@ -194,10 +198,32 @@ class PostInfoService
                 return $this->respondWithError(31510);
             }
 
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $peerShopUserSpec = new PeerShopSpec(
+                $contentFilterCase,
+                ContentType::post
+            );
+            $specs = [
+                $peerShopUserSpec
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $postId
+            ) === false) {
+                return $this::respondWithError(31107, ['postId' => $postId]);
+            }
+
+            if ($this->moderationMapper->wasContentRestored($postId, 'post')) {
+                $this->logger->warning('PostInfoService: reportPost: User tries to report a restored post');
+                return $this->respondWithError(32104);
+            }
+
             $postInfo = $this->postInfoMapper->loadById($postId);
             if ($postInfo === null) {
                 $this->logger->warning('PostInfoService: reportPost: Error while fetching comment data from db');
-                return $this->respondWithError(31602);
+                return $this->respondWithError(responseCode: 31602);
             }
         } catch (\Exception $e) {
             $this->logger->error('PostInfoService: reportPost: Error while fetching data for report generation ', ['exception' => $e]);
@@ -216,7 +242,11 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
+            // Moderated items should not be reported again
+            if ($this->reportMapper->isModerated($postId, ReportTargetType::POST->value)) {
+                $this->logger->warning("PostInfoService: reportPost: User tries to report a moderated post");
+                return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
+            }
 
             $exists = $this->reportMapper->addReport(
                 $this->currentUserId,
@@ -226,27 +256,24 @@ class PostInfoService
             );
 
             if ($exists === null) {
-                $this->transactionManager->rollback();
                 $this->logger->error("PostInfoService: reportPost: Failed to add report");
                 return $this::respondWithError(41505);
             }
 
             if ($exists === true) {
-                $this->transactionManager->rollback();
                 $this->logger->warning("PostInfoService: reportPost: User tries to add duplicating report");
                 return $this::respondWithError(31503);
             }
 
-            $postInfo->setReports($postInfo->getReports() + 1);
+            $postInfo->setReports($postInfo->getActiveReports() + 1);
+            $postInfo->setTotalReports($postInfo->getTotalReports() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => "11505",
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: reportPost: Error while adding report to db or updating _info data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
@@ -273,25 +300,21 @@ class PostInfoService
             return $this::respondWithError(31509);
         }
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('viewPost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31505);
             }
 
             $postInfo->setViews($postInfo->getViews() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => "11506",
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: viewPost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
@@ -315,59 +338,24 @@ class PostInfoService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
 
             $exists = $this->postInfoMapper->addUserActivity('sharePost', $this->currentUserId, $postId);
 
             if (!$exists) {
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31504);
             }
 
             $postInfo->setShares($postInfo->getShares() + 1);
             $this->postInfoMapper->update($postInfo);
 
-            $this->transactionManager->commit();
             return [
                 'status' => 'success',
                 'ResponseCode' => "11507",
             ];
         } catch (\Exception $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('PostInfoService: sharePost: Error while fetching post data', ['exception' => $e]);
             return $this::respondWithError(41505);
         }
-    }
-
-    public function toggleUserFollow(string $followedUserId): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        if (!self::isValidUUID($followedUserId)) {
-            return $this::respondWithError(30201);
-        }
-
-        $this->logger->debug('PostInfoService.toggleUserFollow started');
-
-        if (!$this->postInfoMapper->isUserExistById($followedUserId)) {
-            return $this::respondWithError(31105);
-        }
-
-        $this->transactionManager->beginTransaction();
-
-        $response = $this->postInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
-
-        if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('PostInfoService.toggleUserFollow Error toggling user follow', ['error' => $response]);
-            $this->transactionManager->rollback();
-            return $response;
-        }
-        $this->transactionManager->commit();
-
-        return $response;
-
     }
 
     public function savePost(string $postId): array
@@ -382,16 +370,13 @@ class PostInfoService
 
         $this->logger->debug('PostInfoService.savePost started');
 
-        $this->transactionManager->beginTransaction();
 
         $response = $this->postInfoMapper->togglePostSaved($this->currentUserId, $postId);
 
         if (isset($response['status']) && $response['status'] === 'error') {
             $this->logger->error('PostInfoService.savePost Error save post', ['error' => $response]);
-            $this->transactionManager->rollback();
             return $response;
         }
-        $this->transactionManager->commit();
 
         return $response;
 

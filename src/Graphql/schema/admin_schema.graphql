@@ -5,17 +5,18 @@ extend type Query {
   gemster: GemsterResponse!
   postcomments(postid: ID!, offset: Int, limit: Int): PostCommentsResponse!
   dailygemstatus: DailyGemStatusResponse!
-  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!
+  dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
+  getMintAccount: MintAccountResponse!
+  logWinMigration04: DefaultResponse
+  logWinMigration05: DefaultResponse
 }
 
 extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
+  alphaMint: DefaultResponse!
 }
 
-extend type HelloResponse {
-  userroles: Int
-}
 
 extend type User {
   situation: String
@@ -24,4 +25,9 @@ extend type User {
   roles_mask: Int
   ip: String
   liquidity: Decimal
+}
+
+extend type HelloResponse {
+  userroles: Int!
+  userRoleString: String!
 }

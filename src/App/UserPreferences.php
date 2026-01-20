@@ -24,7 +24,7 @@ class UserPreferences
         }
         $this->userid = $data['userid'] ?? '';
         $this->contentFilteringSeverityLevel = $data['contentFilteringSeverityLevel'];
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
 
         $raw = $data['onboardingsWereShown'] ?? [];
         if (is_array($raw)) {
@@ -64,7 +64,7 @@ class UserPreferences
 
     public function setUpdatedAt(): void
     {
-        $this->updatedat = (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     public function setContentFilteringSeverityLevel(int $contentFilteringSeverityLevel): void
