@@ -109,6 +109,22 @@ VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0, 0, 0, 0, 0, 0, NULL, NUL
 
 INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('85d5f836-b1f5-4c4e-9381-1b058e13df94', 0.1, 0);
 
+-- peer_shop
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography)
+VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 'peer_shop@system.com', 'peer_shop_account',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 32, '127.0.0.1',
+'/profile/9adaad3b-b75f-4045-b48a-33d4ec8d06b8.jpg',
+'/userData/9adaad3b-b75f-4045-b48a-33d4ec8d06b8.txt');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', null, '[]');
+
 
 --action_prices
 INSERT INTO action_prices (post_price, like_price, dislike_price, comment_price, currency) 

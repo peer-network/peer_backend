@@ -40,6 +40,7 @@ class ConstantsConfig implements ConstantsConfigInterface
             "TOKENOMICS" => self::tokenomics(),
             "MINTING" => self::minting(),
             "INPUT" => self::input(),
+            "PEER_SHOP" => self::shop(),
         ];
     }
     /**
@@ -246,6 +247,11 @@ class ConstantsConfig implements ConstantsConfigInterface
         return ConstantsConfig::INPUT;
     }
 
+    public static function shop(): array
+    {
+        return ConstantsConfig::PEER_SHOP;
+    }
+
     private const ONBOARDING = [
         'AVAILABLE_ONBOARDINGS' => [
             'INTROONBOARDING',
@@ -293,7 +299,7 @@ class ConstantsConfig implements ConstantsConfigInterface
 
     private const COMMENT = [
         'CONTENT' => [
-            'MIN_LENGTH' => 2,
+            'MIN_LENGTH' => 1,
             'MAX_LENGTH' => 200,
         ],
     ];
@@ -519,6 +525,32 @@ class ConstantsConfig implements ConstantsConfigInterface
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.000001,
             'MAX_DECIMALS' => 8, 
+        ],
+    ];
+
+
+    private const PEER_SHOP = [
+        'ADDRESS' => [
+            'MIN_LENGTH' => 6,
+            'MAX_LENGTH' => 100,
+        ],
+        'CITY' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 100,
+        ],
+        'ZIPCODE' => [
+            'LENGTH' => 5
+        ],
+        'NAME' => [
+            'MIN_LENGTH' => 2,
+            'MAX_LENGTH' => 100,
+        ],
+        'COUNTRIES' => [
+            'Germany',
+        ],
+        'SIZE' => [
+            'MIN_LENGTH' => 1,
+            'MAX_LENGTH' => 100,
         ],
     ];
 }

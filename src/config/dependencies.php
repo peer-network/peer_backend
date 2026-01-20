@@ -34,6 +34,8 @@ use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\App\Assembler\ProfileEnrichmentAssembler;
+use Fawaz\Database\Interfaces\ShopOrderPermissionsMapper;
+use Fawaz\Database\ShopOrderPermissionsMapperImpl;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\UserService;
 use Fawaz\App\UserServiceInterface;
@@ -85,7 +87,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         LiquidityPool::class => function (ContainerInterface $c) {
             $settings = $c->get('settings')['liquidity'];
             $Envi = [];
-            $Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool']];
+            $Envi = ['peer' => (string)$settings['peer'], 'pool' => (string)$settings['pool'], 'burn' => (string)$settings['burn'], 'btcpool' => (string)$settings['btcpool'], 'peerShop' => (string)$settings['peerShop']];
             return new LiquidityPool(
                 $Envi
             );
@@ -111,6 +113,7 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
             return new ResponseMessagesProviderImpl($path);
         },
         InteractionsPermissionsMapper::class => \DI\autowire(InteractionsPermissionsMapperImpl::class),
+        ShopOrderPermissionsMapper::class => \DI\autowire(ShopOrderPermissionsMapperImpl::class),
         WalletHandlerFactory::class => function (ContainerInterface $c) {
             return new WalletHandlerFactory(
                 $c->get(WalletMapper::class),
