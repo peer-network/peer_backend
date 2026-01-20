@@ -119,9 +119,9 @@ VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 'peer_shop@system.com', 'peer_sh
 INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 0, 0, 0);
 
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
-VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 0, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0);
 
 INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', null, '[]');
 
@@ -226,25 +226,6 @@ INSERT INTO advertisements_log (
     date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds'
 );
 
--- shop_post
-INSERT INTO posts (
-    postid, userid, feedid, contenttype, title, mediadescription,
-    media, cover, options, status, createdat, visibility_status
-) VALUES (
-    '2008c0dd-296c-46d3-811d-f90a2c077757',
-    '9adaad3b-b75f-4045-b48a-33d4ec8d06b8',
-    NULL,
-    'image',
-    'Test Shop Post',
-    'This is a test post used for shop CI tests.',
-    '[{"path":"/image/1c9448a1-3608-423f-a038-2f267c943151.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
-    NULL,
-    NULL,
-    1,
-    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
-    'normal'
-);
-
 -- post_info for advertisement posts
 INSERT INTO post_info (
     postid, userid, likes, dislikes, reports, views, saves, shares, comments, createdat, count_content_moderation_dismissed, totalreports
@@ -265,6 +246,5 @@ SELECT
 FROM posts p
 WHERE p.postid IN (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
-    '1008c0dd-296c-46d3-811d-f90a2c077757',
-    '2008c0dd-296c-46d3-811d-f90a2c077757'
+    '1008c0dd-296c-46d3-811d-f90a2c077757'
 );
