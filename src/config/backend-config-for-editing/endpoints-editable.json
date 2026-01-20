@@ -6,7 +6,7 @@
         },
         {
             "version" : "1.12.0",
-            "url" : "https://getpeer.eu/graphql"
+            "url" : "https://peerapp.eu/graphql"
         }
     ],
     "android" : [
@@ -16,7 +16,7 @@
         },
         {
             "version" : "1.10.0",
-            "url" : "https://getpeer.eu/graphql"
+            "url" : "https://peerapp.eu/graphql"
         }
     ],
     "web" : [
@@ -26,7 +26,7 @@
         },
         {
             "version" : "1.12.0",
-            "url" : "https://getpeer.eu/graphql"
+            "url" : "https://peerapp.eu/graphql"
         }
     ]
 }
