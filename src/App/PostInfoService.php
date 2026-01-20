@@ -33,6 +33,7 @@ class PostInfoService
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ModerationMapper $moderationMapper
     ) {
     }
@@ -124,6 +125,9 @@ class PostInfoService
 
             $postInfo->setLikes($postInfo->getLikes() + 1);
             $this->postInfoMapper->update($postInfo);
+
+            // Add Logic for Notification
+
 
             return [
                 'status' => 'success',
