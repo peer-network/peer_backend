@@ -163,3 +163,9 @@ enum ContentVisibilityStatus {
 enum ShopSupportedDeliveryCountry {
   GERMANY
 }
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+  WEB
+}

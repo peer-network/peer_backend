@@ -1772,6 +1772,7 @@ class GraphQLSchemaBuilder
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
+            'updateUserDeviceToken' => fn(mixed $root, array $args) => $this->updateUserDeviceToken($args),
         ];
     }
 
@@ -3337,6 +3338,26 @@ class GraphQLSchemaBuilder
             return ErrorMapper::toResponse($e);
         }
 
+    }
+
+    /**
+     * Update User Device's Token for sending notifications
+     * 
+     */
+    public function updateUserDeviceToken(array $args): ?array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.updateUserDeviceToken started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        try {
+            return $this->userService->updateUserDeviceToken($args);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.updateUserDeviceToken", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
+        }
     }
 
 }

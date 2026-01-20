@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
+use DateTime;
+use Fawaz\App\Models\UserDeviceToken;
 use PDO;
 use Fawaz\App\User;
 use Fawaz\App\UserInfo;
@@ -1958,6 +1960,44 @@ class UserMapper implements UserMapperInterface
                 return $result["invited"];
             }
             return null;
+        } catch (\Throwable $e) {
+            throw new \RuntimeException($e->getMessage());
+        }
+    }
+
+
+    /**
+     * Store device information for notification
+     * 
+     * Check if user has already registered the device token
+     *    if Yes, Update user's token
+     *      No, Insert new records
+     * 
+     * 
+     * Needs to be discussed about multiple user's device token
+     * 
+     * @return void
+     */
+    public function updateUserDeviceToken(array $args){
+
+        try{
+            if(!UserDeviceToken::query()->where('userid', $args['userid'])->exists()){
+                UserDeviceToken::insert([
+                    'userid' => $args['userid'],
+                    'token' => $args['token'],
+                    'platform' => $args['platform'],
+                    'language' => $args['language'],
+                    'debug' => isset($args['debug']) && ($args['debug']) ? true : false,
+                    'createdat' => (new DateTime())->format('Y-m-d H:i:s.u'),
+                ]);
+            }else{
+                UserDeviceToken::query()->where('userid', $args['userid'])->updateColumns([
+                    'token' => $args['token'],
+                    'platform' => $args['platform'],
+                    'language' => $args['language'],
+                    'debug' => isset($args['debug']) && ($args['debug']) ? true : false
+                ]);
+            }
         } catch (\Throwable $e) {
             throw new \RuntimeException($e->getMessage());
         }
