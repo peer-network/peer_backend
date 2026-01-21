@@ -8,15 +8,14 @@ use AndroidApiService;
 use AndroidPayloadStructure;
 use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Database\Interfaces\NotificationsMapper;
+use Fawaz\Services\Notifications\Helpers\UserNotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Services\Notifications\Interface\NotificationReceiver;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
 use IosApiService;
-use IosPayloadStructureHelper;
-use NotificationPayload;
-use UserNotificationContent;
 
 class NotificationMapperImpl implements NotificationsMapper
 {
@@ -36,7 +35,9 @@ class NotificationMapperImpl implements NotificationsMapper
         $this->notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor);
         
         // Prepare receivers
-        $receivers = UserDeviceToken::query()->whereIn('userid', $notificationReceivers->receiver())->join('users', 'user_device_tokens.userid', '=', 'users.id')->all();
+        $receivers = $notificationReceivers->receiver();
+
+        $allReceivers = UserDeviceToken::query()->whereIn('userid', array_values($receivers))->all();
 
         // Check if iOS, Android or WEB
         if(!empty($receivers) && is_array($receivers)){
