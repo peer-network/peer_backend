@@ -1,7 +1,11 @@
 <?php
 
+namespace Fawaz\Services\Notifications\Helpers;
+
+
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
 class UserNotificationContent implements NotificationPayload

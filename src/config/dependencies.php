@@ -39,10 +39,12 @@ use Fawaz\Database\ShopOrderPermissionsMapperImpl;
 use Fawaz\App\Repositories\MintAccountRepository;
 use Fawaz\App\UserService;
 use Fawaz\App\UserServiceInterface;
+use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\PeerTokenMapperInterface;
 use Fawaz\Database\UserMapper;
 use Fawaz\Database\UserMapperInterface;
+use Fawaz\Services\Notifications\NotificationMapperImpl;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -127,6 +129,8 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
         MintAccountRepository::class => \DI\autowire(MintAccountRepositoryImpl::class),
         UserMapperInterface::class => \DI\autowire(UserMapper::class),
         PeerTokenMapperInterface::class => \DI\autowire(PeerTokenMapper::class),
-        UserServiceInterface::class => \DI\autowire(UserService::class)
+        UserServiceInterface::class => \DI\autowire(UserService::class),
+        NotificationsMapper::class => \DI\autowire(NotificationMapperImpl::class),
+
     ]);
 };
