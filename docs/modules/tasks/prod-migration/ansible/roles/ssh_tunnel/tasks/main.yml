@@ -1,0 +1,79 @@
+---
+- name: Ensure backend password provided
+  ansible.builtin.assert:
+    that:
+      - backend_password is defined
+      - backend_password | length > 0
+    quiet: true
+    fail_msg: "Set backend_password via inventory, extra vars, or env before running."
+
+- name: Ensure bastion/backend connection vars provided
+  ansible.builtin.assert:
+    that:
+      - bastion_host is defined
+      - bastion_user is defined
+      - bastion_port is defined
+      - backend_private_ip is defined
+      - backend_ssh_port is defined
+      - local_tunnel_port is defined
+      - ssh_private_key is defined
+      - ssh_private_key | length > 0
+    quiet: true
+    fail_msg: "Populate bastion/backend hosts and ssh_private_key in group_vars/ovh_backend_vault.yml."
+
+- name: Show resolved tunnel inputs
+  ansible.builtin.debug:
+    msg: |
+      Using bastion {{ bastion_user }}@{{ bastion_host }}:{{ bastion_port }}
+      Backend {{ backend_private_ip }}:{{ backend_ssh_port }} via local port {{ local_tunnel_port }}
+      Control path {{ local_control_path }} timeout {{ ssh_tunnel_timeout }}s
+
+- name: Ensure directory for SSH control masters exists
+  ansible.builtin.file:
+    path: "{{ local_control_path | expanduser }}"
+    state: directory
+    mode: "0700"
+
+- name: Create SSH tunnel from local workstation to new backend via bastion
+  ansible.builtin.command:
+    argv:
+      - sshpass
+      - -p
+      - "{{ backend_password }}"
+      - ssh
+      - -f
+      - -N
+      - -M
+      - -S
+      - "{{ local_control_path | expanduser }}/control-%h-%p-%r"
+      - -o
+      - ExitOnForwardFailure=yes
+      - -o
+      - ControlPersist=600
+      - -o
+      - ServerAliveInterval=30
+      - -o
+      - ServerAliveCountMax=3
+      - -i
+      - "{{ ssh_private_key }}"
+      - -p
+      - "{{ bastion_port }}"
+      - -L
+      - "{{ local_tunnel_port }}:{{ backend_private_ip }}:{{ backend_ssh_port }}"
+      - "{{ bastion_user }}@{{ bastion_host }}"
+  async: "{{ ssh_tunnel_timeout }}"
+  poll: 0
+  changed_when: true
+
+- name: Wait for tunnel to respond on local port
+  ansible.builtin.wait_for:
+    host: "{{ backend_private_ip }}"
+    port: "{{ local_tunnel_port }}"
+    state: started
+    timeout: "{{ ssh_tunnel_timeout }}"
+
+- name: Document tunnel endpoint for downstream tasks
+  ansible.builtin.debug:
+    msg: >-
+      SSH tunnel established. Use `ssh -p {{ local_tunnel_port }} {{ bastion_user }}@{{ backend_private_ip }}`
+      (or configure Ansible inventory) to reach the new backend server.

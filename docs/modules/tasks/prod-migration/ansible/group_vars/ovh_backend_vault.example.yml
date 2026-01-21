@@ -1,0 +1,10 @@
+# Copy to group_vars/ovh_backend_vault.yml and encrypt with ansible-vault.
+# Replace placeholder values with real bastion/backend connection info.
+bastion_host: bastion.example.com
+bastion_user: peer
+bastion_port: 2222
+backend_private_ip: 10.0.0.10
+backend_ssh_port: 22
+local_tunnel_port: 4222
+ssh_private_key: ~/.ssh/prod-migration
+backend_password: CHANGE_ME

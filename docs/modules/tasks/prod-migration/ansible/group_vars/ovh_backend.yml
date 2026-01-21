@@ -1,0 +1,5 @@
+---
+# Variables consumed by the SSH tunnel role.
+# Replace placeholder values or override them via extra-vars/host vars.
+local_control_path: "~/.ssh/ansible-mux-%h-%p-%r"
+ssh_tunnel_timeout: 30

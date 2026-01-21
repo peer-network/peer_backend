@@ -1,0 +1,9 @@
+---
+- name: Step 1 - Establish SSH tunnel to new backend
+  hosts: ovh_backend
+  connection: local
+  gather_facts: false
+  vars_files:
+    - ../group_vars/ovh_backend_vault.yml
+  roles:
+    - role: ssh_tunnel
