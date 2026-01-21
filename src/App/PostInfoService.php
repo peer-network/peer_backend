@@ -8,6 +8,7 @@ use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
+use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -17,6 +18,9 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\Notifications\InitiatorReceiver\UserInitiator;
+use Fawaz\Services\Notifications\InitiatorReceiver\UserReceiver;
+use Fawaz\Services\Notifications\Strategies\PostLikeStrategy;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -33,7 +37,7 @@ class PostInfoService
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected NotificationsMapper $notificationsMapper,
         protected ModerationMapper $moderationMapper
     ) {
     }
@@ -127,7 +131,7 @@ class PostInfoService
             $this->postInfoMapper->update($postInfo);
 
             // Add Logic for Notification
-
+            $this->notificationsMapper->notify(new PostLikeStrategy($postId), new UserInitiator($this->currentUserId), new UserReceiver([$postInfo->getOwnerId()]));
 
             return [
                 'status' => 'success',
