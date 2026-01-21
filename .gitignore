@@ -40,9 +40,12 @@ settings.json
 
 
 # Ansible folders (inventories, vaults, keys) anywhere in the repo
-*/ansible/inventory/hosts.*.ini
+*/main.yml
+*/ansible/inventory/hosts*.ini
 */ansible/inventory/*.local
 *_vault.yml
+!**/*_vault.example.yml
 */ansible/vault_pass.txt
 */ansible/.vault_pass
 */ansible/private_keys/
+vault/
