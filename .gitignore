@@ -37,11 +37,12 @@ changelog
 *.cache
 .gitleaksignore
 settings.json
+
+
 # Ansible folders (inventories, vaults, keys) anywhere in the repo
 */ansible/inventory/hosts.*.ini
 */ansible/inventory/*.local
-*/ansible/group_vars/*_vault.yml
-*/ansible/*.vault.yml
+*_vault.yml
 */ansible/vault_pass.txt
 */ansible/.vault_pass
 */ansible/private_keys/
