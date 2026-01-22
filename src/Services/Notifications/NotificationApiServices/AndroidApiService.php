@@ -11,11 +11,8 @@ class AndroidApiService implements ApiService
 {
     public static function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
-
         $payload = (new AndroidPayloadStructure())->payload($payload);
-
         $deviceToken = $receiver->getDeviceToken();
-
 
         return (new self())->send($payload, $deviceToken);
     }
@@ -23,7 +20,8 @@ class AndroidApiService implements ApiService
 
     protected function send($payload, $deviceToken): bool
     {
-        $projectId   = 'peer-de113';
+        $projectId   = 'fir-peer'; // NEEDs to be in ENV
+        
         $accessToken = $this->getAccessToken(); // OAuth 2.0 token
 
         $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
@@ -55,71 +53,75 @@ class AndroidApiService implements ApiService
 
         // 200 = success
         return $httpCode === 200;
-
     }
 
-     /**
+    /**
      * Returns OAuth 2.0 access token for Firebase
      * (Service Account based)
      */
     protected function getAccessToken(): string
     {
-        // Put the real service account JSON here 
-        $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/google-iam-private-key.json';
+        try {
 
-        if (!is_file($serviceAccountPath)) {
-            throw new \RuntimeException("Service account file not found: {$serviceAccountPath}");
-        }
+            // Put the real service account JSON here 
+            $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/google-iam-private-key.json';
 
-        $serviceAccount = json_decode((string) file_get_contents($serviceAccountPath), true);
-        if (!is_array($serviceAccount)) {
-            throw new \RuntimeException("Service account JSON is invalid.");
-        }
+            if (!is_file($serviceAccountPath)) {
+                throw new \RuntimeException("Service account file not found: {$serviceAccountPath}");
+            }
 
-        if (empty($serviceAccount['client_email']) || empty($serviceAccount['private_key'])) {
-            throw new \RuntimeException("Service account JSON missing client_email or private_key.");
-        }
+            $serviceAccount = json_decode((string) file_get_contents($serviceAccountPath), true);
+            if (!is_array($serviceAccount)) {
+                throw new \RuntimeException("Service account JSON is invalid.");
+            }
 
-        $jwt = $this->generateJwt($serviceAccount);
+            if (empty($serviceAccount['client_email']) || empty($serviceAccount['private_key'])) {
+                throw new \RuntimeException("Service account JSON missing client_email or private_key.");
+            }
 
-        $ch = curl_init('https://oauth2.googleapis.com/token');
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
-            CURLOPT_POSTFIELDS     => http_build_query([
-                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-                'assertion'  => $jwt,
-            ]),
-            CURLOPT_TIMEOUT        => 15,
-        ]);
+            $jwt = $this->generateJwt($serviceAccount);
 
-        $response = curl_exec($ch);
-        if ($response === false) {
-            $err = curl_error($ch);
+            $ch = curl_init('https://oauth2.googleapis.com/token');
+            curl_setopt_array($ch, [
+                CURLOPT_POST           => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
+                CURLOPT_POSTFIELDS     => http_build_query([
+                    'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                    'assertion'  => $jwt,
+                ]),
+                CURLOPT_TIMEOUT        => 15,
+            ]);
+
+            $response = curl_exec($ch);
+            if ($response === false) {
+                $err = curl_error($ch);
+                curl_close($ch);
+                throw new \RuntimeException("Curl error calling token endpoint: {$err}");
+            }
+
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            throw new \RuntimeException("Curl error calling token endpoint: {$err}");
+
+            $data = json_decode($response, true);
+            if (!is_array($data)) {
+                throw new \RuntimeException("Token endpoint returned non-JSON: {$response}");
+            }
+
+            if ($httpCode < 200 || $httpCode >= 300) {
+                // This is the real reason you currently get null
+                $msg = $data['error_description'] ?? ($data['error'] ?? 'unknown_error');
+                throw new \RuntimeException("Google token error ({$httpCode}): {$msg}");
+            }
+
+            if (empty($data['access_token'])) {
+                throw new \RuntimeException("No access_token in response: " . json_encode($data));
+            }
+
+            return (string) $data['access_token'];
+        } catch (\Exception $e) {
+            return '';
         }
-
-        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        $data = json_decode($response, true);
-        if (!is_array($data)) {
-            throw new \RuntimeException("Token endpoint returned non-JSON: {$response}");
-        }
-
-        if ($httpCode < 200 || $httpCode >= 300) {
-            // This is the real reason you currently get null
-            $msg = $data['error_description'] ?? ($data['error'] ?? 'unknown_error');
-            throw new \RuntimeException("Google token error ({$httpCode}): {$msg}");
-        }
-
-        if (empty($data['access_token'])) {
-            throw new \RuntimeException("No access_token in response: " . json_encode($data));
-        }
-
-        return (string) $data['access_token'];
     }
 
     protected function generateJwt(array $serviceAccount): string

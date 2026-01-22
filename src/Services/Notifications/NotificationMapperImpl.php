@@ -6,7 +6,7 @@ namespace Fawaz\Services\Notifications;
 
 use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
-use Fawaz\App\Services\Notifications\NotificationApiServices\IosApiService;
+use Fawaz\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Services\Notifications\Helpers\UserNotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
