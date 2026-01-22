@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications;
 
-use AndroidApiService;
-use AndroidPayloadStructure;
 use Fawaz\App\Models\UserDeviceToken;
+use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
+use Fawaz\App\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Services\Notifications\Helpers\UserNotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
@@ -15,7 +15,6 @@ use Fawaz\Services\Notifications\Interface\NotificationReceiver;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
-use IosApiService;
 
 class NotificationMapperImpl implements NotificationsMapper
 {
@@ -37,12 +36,10 @@ class NotificationMapperImpl implements NotificationsMapper
         // Prepare receivers
         $receivers = $notificationReceivers->receiver();
 
-        $allReceivers = UserDeviceToken::query()->whereIn('userid', array_values($receivers))->all();
+        $allReceivers = UserDeviceToken::query()->where('userid', '34b9e1cd-6845-4456-bbf3-d9c8c5356dac')->first();
 
         // Check if iOS, Android or WEB
-        if(!empty($receivers) && is_array($receivers)){
-            $this->sendNotification($notificationStrategy, $notificationInititor, $receivers);
-        }
+        $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers);
 
         // // Send Push in application
 
@@ -64,13 +61,14 @@ class NotificationMapperImpl implements NotificationsMapper
      */
     private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers): bool
     {
-        foreach($receivers as $key => $receiver){
-            if($receiver->platform == 'android'){
-                AndroidApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
-            }else if($receiver->platform == 'ios'){
-                IosApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
+
+        // foreach($receivers as $key => $receiver){
+            if($receivers['platform'] == 'ANDROID'){
+                AndroidApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receivers));
+            }else if($receivers['platform'] == 'IOS'){
+                IosApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receivers));
             }
-        }
+        // }
 
         return true;
     }

@@ -1,14 +1,21 @@
 <?php
 
+namespace Fawaz\Services\Notifications\NotificationApiServices;
+
 use Fawaz\App\Models\UserDeviceToken;
+use Fawaz\Services\Notifications\Interface\ApiService;
+use Fawaz\Services\Notifications\Helpers\AndroidPayloadStructure;
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
 
 class AndroidApiService implements ApiService
 {
     public static function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
+
         $payload = (new AndroidPayloadStructure())->payload($payload);
 
         $deviceToken = $receiver->getDeviceToken();
+
 
         return (new self())->send($payload, $deviceToken);
     }
@@ -57,7 +64,7 @@ class AndroidApiService implements ApiService
      */
     protected function getAccessToken(): string
     {
-        $serviceAccountPath = __DIR__ . '/firebase-google-services.json';
+        $serviceAccountPath = __DIR__ . '/google-services.json';
 
         $jwt = $this->generateJwt(
             json_decode(file_get_contents($serviceAccountPath), true)

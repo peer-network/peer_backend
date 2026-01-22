@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fawaz\Services\Notifications\InitiatorReceiver;
 
 use Fawaz\Services\Notifications\Enums\NotificationAction;
-use Fawaz\Services\Notifications\Enums\NotificationPayload;
 use Fawaz\Services\Notifications\Interface\NotificationInititor;
 use Fawaz\Services\Notifications\Interface\NotificationReceiver;
 

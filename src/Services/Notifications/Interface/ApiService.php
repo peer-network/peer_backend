@@ -1,6 +1,8 @@
 <?php
+namespace Fawaz\Services\Notifications\Interface;
 
 use Fawaz\App\Models\UserDeviceToken;
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
 
 interface ApiService
 {

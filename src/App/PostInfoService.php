@@ -121,14 +121,14 @@ class PostInfoService
 
         try {
 
-            $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
+            // $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
-            if (!$exists) {
-                return $this::respondWithError(31501);
-            }
+            // if (!$exists) {
+            //     return $this::respondWithError(31501);
+            // }
 
-            $postInfo->setLikes($postInfo->getLikes() + 1);
-            $this->postInfoMapper->update($postInfo);
+            // $postInfo->setLikes($postInfo->getLikes() + 1);
+            // $this->postInfoMapper->update($postInfo);
 
             // Add Logic for Notification
             $this->notificationsMapper->notify(new PostLikeStrategy($postId), new UserInitiator($this->currentUserId), new UserReceiver([$postInfo->getOwnerId()]));

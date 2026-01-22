@@ -1,6 +1,10 @@
 <?php
+namespace Fawaz\Services\Notifications\Helpers;
 
-class WebStructureHelper implements PayloadStructure
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
+use Fawaz\Services\Notifications\Interface\PayloadStructure;
+
+class WebPayloadHelper implements PayloadStructure
 {
     public function payload(NotificationPayload $contentType): array
     {

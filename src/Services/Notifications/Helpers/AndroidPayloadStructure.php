@@ -1,4 +1,8 @@
 <?php
+namespace Fawaz\Services\Notifications\Helpers;
+
+use Fawaz\Services\Notifications\Interface\NotificationPayload;
+use Fawaz\Services\Notifications\Interface\PayloadStructure;
 
 class AndroidPayloadStructure implements PayloadStructure
 {

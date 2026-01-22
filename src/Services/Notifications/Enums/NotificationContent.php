@@ -7,7 +7,7 @@ namespace Fawaz\Services\Notifications\Enums;
 /**
  * Refers to Content
  */
-enum NotificationPayload: string
+enum NotificationContent: string
 {
     case POST = 'POST';
 

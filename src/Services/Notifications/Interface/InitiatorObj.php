@@ -7,7 +7,7 @@ namespace Fawaz\Services\Notifications\Interface;
 use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
-interface NotificationInitiator
+interface InitiatorObj
 {
     /**
      * Notification Initiator refernce to trigger's action
@@ -16,7 +16,7 @@ interface NotificationInitiator
      *  1. Normal
      *  2. System User 
      * 
-     * @return void
+     * @return string
      */
     public function initiator(): string;
 

@@ -13,7 +13,7 @@ interface NotificationInitiator
      *  1. Normal
      *  2. System User 
      * 
-     * @return void
+     * @return string
      */
     public function initiator(): string;
 }
