@@ -36,7 +36,7 @@ class NotificationMapperImpl implements NotificationsMapper
         // Prepare receivers
         $receivers = $notificationReceivers->receiver();
 
-        $allReceivers = UserDeviceToken::query()->where('userid', '34b9e1cd-6845-4456-bbf3-d9c8c5356dac')->first();
+        $allReceivers = UserDeviceToken::query()->whereIn('userid', $receivers)->all();
 
         // Check if iOS, Android or WEB
         $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers);
@@ -61,14 +61,13 @@ class NotificationMapperImpl implements NotificationsMapper
      */
     private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers): bool
     {
-
-        // foreach($receivers as $key => $receiver){
-            if($receivers['platform'] == 'ANDROID'){
-                AndroidApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receivers));
-            }else if($receivers['platform'] == 'IOS'){
-                IosApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receivers));
+        foreach($receivers as $key => $receiver){
+            if($receiver['platform'] == 'ANDROID'){
+                AndroidApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
+            }else if($receiver['platform'] == 'IOS'){
+                IosApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
             }
-        // }
+        }
 
         return true;
     }

@@ -64,14 +64,25 @@ class AndroidApiService implements ApiService
      */
     protected function getAccessToken(): string
     {
-        $serviceAccountPath = __DIR__ . '/google-services.json';
+        // Put the real service account JSON here 
+        $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/google-iam-private-key.json';
 
-        $jwt = $this->generateJwt(
-            json_decode(file_get_contents($serviceAccountPath), true)
-        );
+        if (!is_file($serviceAccountPath)) {
+            throw new \RuntimeException("Service account file not found: {$serviceAccountPath}");
+        }
+
+        $serviceAccount = json_decode((string) file_get_contents($serviceAccountPath), true);
+        if (!is_array($serviceAccount)) {
+            throw new \RuntimeException("Service account JSON is invalid.");
+        }
+
+        if (empty($serviceAccount['client_email']) || empty($serviceAccount['private_key'])) {
+            throw new \RuntimeException("Service account JSON missing client_email or private_key.");
+        }
+
+        $jwt = $this->generateJwt($serviceAccount);
 
         $ch = curl_init('https://oauth2.googleapis.com/token');
-
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
@@ -80,28 +91,47 @@ class AndroidApiService implements ApiService
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
                 'assertion'  => $jwt,
             ]),
+            CURLOPT_TIMEOUT        => 15,
         ]);
 
         $response = curl_exec($ch);
+        if ($response === false) {
+            $err = curl_error($ch);
+            curl_close($ch);
+            throw new \RuntimeException("Curl error calling token endpoint: {$err}");
+        }
+
+        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         $data = json_decode($response, true);
+        if (!is_array($data)) {
+            throw new \RuntimeException("Token endpoint returned non-JSON: {$response}");
+        }
 
-        return $data['access_token'];
+        if ($httpCode < 200 || $httpCode >= 300) {
+            // This is the real reason you currently get null
+            $msg = $data['error_description'] ?? ($data['error'] ?? 'unknown_error');
+            throw new \RuntimeException("Google token error ({$httpCode}): {$msg}");
+        }
+
+        if (empty($data['access_token'])) {
+            throw new \RuntimeException("No access_token in response: " . json_encode($data));
+        }
+
+        return (string) $data['access_token'];
     }
 
-    /**
-     * Generates signed JWT for Google OAuth
-     */
     protected function generateJwt(array $serviceAccount): string
     {
-        $header = [
-            'alg' => 'RS256',
-            'typ' => 'JWT',
-        ];
+        $header = ['alg' => 'RS256', 'typ' => 'JWT'];
+
+        // Optional but recommended if present:
+        if (!empty($serviceAccount['private_key_id'])) {
+            $header['kid'] = $serviceAccount['private_key_id'];
+        }
 
         $now = time();
-
         $claims = [
             'iss'   => $serviceAccount['client_email'],
             'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
@@ -112,18 +142,16 @@ class AndroidApiService implements ApiService
 
         $base64Header = rtrim(strtr(base64_encode(json_encode($header)), '+/', '-_'), '=');
         $base64Claims = rtrim(strtr(base64_encode(json_encode($claims)), '+/', '-_'), '=');
-
         $data = $base64Header . '.' . $base64Claims;
 
-        openssl_sign(
-            $data,
-            $signature,
-            $serviceAccount['private_key'],
-            OPENSSL_ALGO_SHA256
-        );
+        $signature = '';
+        $ok = openssl_sign($data, $signature, $serviceAccount['private_key'], OPENSSL_ALGO_SHA256);
+
+        if (!$ok) {
+            throw new \RuntimeException("openssl_sign failed. Check that private_key is valid PEM.");
+        }
 
         $base64Signature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
-
         return $data . '.' . $base64Signature;
     }
 }

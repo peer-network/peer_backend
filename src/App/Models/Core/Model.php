@@ -426,13 +426,14 @@ abstract class Model
      */
     public function whereIn(string $column, array $values): static
     {
-        $placeholders = [];
-        foreach ($values as $i => $value) {
-            $param = ":in{$i}";
-            $placeholders[] = $param;
-            // Add to params
-            $this->wheres[] = ['AND', $column, 'IN', $value];
-        }
+        $this->wheres[] = ['AND', $column, 'IN' , $values];
+        // $placeholders = [];
+        // foreach ($values as $i => $value) {
+        //     $param = ":in{$i}";
+        //     $placeholders[] = $param;
+        //     // Add to params
+        //     $this->wheres[] = ['AND', $column, '=' , $value];
+        // }
         return $this;
     }
 
