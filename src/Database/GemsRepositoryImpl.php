@@ -352,16 +352,17 @@ class GemsRepositoryImpl implements GemsRepository
 
         foreach ($uncollectedGems->rows as $row) {
             $userId = (string)$row->userid;
-            $transactionId = (string)$mintLogItems[$userId]['logItem']->transactionid;
+            $transactionId = $mintLogItems[$userId]['logItem']->transactionid ?? null;
 
             if (!$transactionId) {
-                $this->logger->error('mintlogItem for userid not found. Revert.', ['userId' => $userId]);
-                throw new \RuntimeException("mintlogItem for userid not found. Revert.", 40301);
+                $this->logger->info('No mint transaction found for userid. Due to thing, that User has 0 tokens to distribute(because of less than 0 gems). Transactionid will remain empty', ['userId' => $userId]);
+                // $this->logger->info('mintlogItem for userid not found. Revert.', ['userId' => $userId]);
             }
-            $stmt->bindValue(':mintid', $mintId, PDO::PARAM_STR);
-            $stmt->bindValue(':tx', $transactionId, PDO::PARAM_STR);
-            $stmt->bindValue(':gemid', (string)$row->gemid, PDO::PARAM_STR);
-            $stmt->execute();
+            $stmt->execute([
+                ':mintid' => $mintId,
+                ':tx'     => $transactionId,
+                ':gemid'  => (string)$row->gemid,
+            ]);
         }
         
         $this->logger->info('GemsRepositoryImpl.applyMintInfo succeeded');
