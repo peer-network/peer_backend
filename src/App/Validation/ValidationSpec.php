@@ -267,6 +267,8 @@ class ValidationSpec
             'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
 
             'dateOffset' => fn (string $f, bool $r) => self::dateOffset($f, $r),
+            
+            'dateYYYYMMDD' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
 
