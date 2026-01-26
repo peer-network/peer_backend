@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Services\Notifications;
 
 use Fawaz\App\Models\UserDeviceToken;
+use Fawaz\App\User;
 use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
 use Fawaz\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
@@ -18,7 +19,6 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class NotificationMapperImpl implements NotificationsMapper
 {
-    private NotificationPayload $notificationPayload;
 
     public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
     {
@@ -28,31 +28,31 @@ class NotificationMapperImpl implements NotificationsMapper
     {
         $this->logger->debug("NotificationMapperImpl.notify started");
 
-        // Prepare Content to be sent
-        // $message = $this->prepareContent($notificationStrategy, $notificationInititor);
-
-        $this->notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor);
         
         // Prepare receivers
         $receivers = $notificationReceivers->receiver();
 
-        $allReceivers = UserDeviceToken::query()->whereIn('userid', $receivers)->all();
+        $allReceivers = UserDeviceToken::query()
+                                        // ->select('user_device_tokens.*', 'users.username')
+                                        ->whereIn('userid', $receivers)
+                                        ->join('users', 'users.uid', '=', 'user_device_tokens.userid', 'LEFT')
+                                        ->orderBy('user_device_tokens.createdat', 'desc')
+                                        ->all();
 
-        // Check if iOS, Android or WEB
+        // Send Push in application
         $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers);
-
-        // // Send Push in application
 
         return true;
     }
 
     // ProfileReplaceable
 
-    private function prepareContent(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor): NotificationPayload
+    private function prepareContent(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, UserDeviceToken $receiverObj): NotificationPayload
     {
-       $userNotificationContent = new UserNotificationContent( $notificationStrategy, $notificationInititor);
+        $notificationStrategy = $this->contentReplacer($notificationStrategy, $notificationInititor, $receiverObj);
+        $userNotificationContent = new UserNotificationContent( $notificationStrategy, $notificationInititor);
 
-       return $userNotificationContent;
+        return $userNotificationContent;
     }
 
 
@@ -62,14 +62,56 @@ class NotificationMapperImpl implements NotificationsMapper
     private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers): bool
     {
         foreach($receivers as $key => $receiver){
+            $receiverObj = new UserDeviceToken($receiver);
+            $notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor, $receiverObj);
+
             if($receiver['platform'] == 'ANDROID'){
-                AndroidApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
+                AndroidApiService::sendNotification($notificationPayload, $receiverObj);
             }else if($receiver['platform'] == 'IOS'){
-                IosApiService::sendNotification($this->notificationPayload, new UserDeviceToken((array)$receiver));
+                IosApiService::sendNotification($notificationPayload, $receiverObj);
             }
         }
 
         return true;
     }
     
+    private function contentReplacer(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInitiator, UserDeviceToken $receiverObj): NotificationStrategy
+    {
+        $bodyTemplate = $notificationStrategy->bodyContent(); // must exist in your class
+
+        // replace initiator
+        if(!empty($notificationInitiator) && str_contains($bodyTemplate, 'initiator.username')){
+            $initiator = $notificationInitiator->initiatorUserObj()->getName();
+
+            if(empty($initiator)){
+                return $notificationStrategy;
+            }
+            $username = $initiator ?? '';
+
+            // Replace placeholder with initiator.username
+            $bodyContent = str_replace('{{initiator.username}}', $username, $bodyTemplate);
+
+            $notificationStrategy->setBodyContent($bodyContent);
+
+        }
+
+        $receiverArray = $receiverObj->getArrayCopy();
+        // replace receiver
+        if(!empty($receiverArray) && str_contains($bodyTemplate, 'receiver.username')){
+            
+            if(empty($receiverArray)){
+                return $notificationStrategy;
+            }
+
+            $username = $receiverArray['userObj']['username'] ?? '';
+
+            // Replace placeholder with receiver.username
+            $bodyContent = str_replace('{{receiver.username}}', $username, $bodyTemplate);
+
+            $notificationStrategy->setBodyContent($bodyContent);
+        }
+
+        return $notificationStrategy;
+    }
+
 }

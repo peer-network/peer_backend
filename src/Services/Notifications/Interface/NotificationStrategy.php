@@ -29,6 +29,9 @@ interface NotificationStrategy
      */
     public function bodyContent(): string;
 
+    public function setBodyContent(string $bodyContent): void;
+
+
     public function title(): string;
 
     /**

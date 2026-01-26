@@ -24,7 +24,7 @@ class UserInitiator implements NotificationInitiator
         return $this->initiator;
     }
 
-    public function initiatorObj(): ProfileReplaceable
+    public function initiatorUserObj(): ProfileReplaceable
     {
         $user = User::query()->where('uid', $this->initiator)->first();
         

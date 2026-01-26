@@ -3,6 +3,7 @@
 namespace Fawaz\App\Models;
 
 use Fawaz\App\Models\Core\Model;
+use Fawaz\App\User;
 
 /**
  * UserDeviceToken stores device tokens for users to enable push notifications.
@@ -19,6 +20,8 @@ class UserDeviceToken extends Model
     protected string $language;
     protected bool $debug;
     protected string $createdat;
+    protected User $userObj;
+
     public function __construct(array $data = []){
 
         $this->userid = $data['userid'] ?? '';
@@ -27,6 +30,8 @@ class UserDeviceToken extends Model
         $this->language = $data['language'] ?? '';
         $this->debug = $data['debug'] ?? false;
         $this->createdat = $data['createdat'] ?? '';
+
+        $this->userObj = new User($data, [], false);
     }
 
     // Table name for the model
@@ -44,6 +49,7 @@ class UserDeviceToken extends Model
             'language' => $this->language,
             'debug' => $this->debug,
             'createdat' => $this->createdat,
+            'userObj' => $this->userObj->getArrayCopy()
         ];
     }
 

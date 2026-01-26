@@ -6,12 +6,16 @@ use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\Interface\ApiService;
 use Fawaz\Services\Notifications\Helpers\AndroidPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
+use Fawaz\Utils\PeerLoggerInterface;
 
 class AndroidApiService implements ApiService
 {
+    public function __construct(protected PeerLoggerInterface $logger){}
+    
     public static function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
         $payload = (new AndroidPayloadStructure())->payload($payload);
+
         $deviceToken = $receiver->getDeviceToken();
 
         return (new self())->send($payload, $deviceToken);
@@ -20,51 +24,59 @@ class AndroidApiService implements ApiService
 
     protected function send($payload, $deviceToken): bool
     {
-        $projectId   = 'fir-peer'; // NEEDs to be in ENV
-        
-        $accessToken = $this->getAccessToken(); // OAuth 2.0 token
+        try{
+            $projectIdNToken = $this->getAccessToken(); // OAuth 2.0 token
 
-        $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
+            if(empty($projectIdNToken['access_token']) || empty($projectIdNToken['project_id'])) {
+                throw new \RuntimeException("Failed to get access token or project ID.");
+            }
 
-        // Inject device token
-        $payload['message']['token'] = $deviceToken;
+            $url = "https://fcm.googleapis.com/v1/projects/{$projectIdNToken['project_id']}/messages:send";
 
-        $ch = curl_init($url);
+            // Inject device token
+            $payload['message']['token'] = $deviceToken;
 
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => [
-                'Authorization: Bearer ' . $accessToken,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_SLASHES),
-        ]);
+            $ch = curl_init($url);
 
-        $response = curl_exec($ch);
+            curl_setopt_array($ch, [
+                CURLOPT_POST           => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Bearer ' . $projectIdNToken['access_token'],
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_SLASHES),
+            ]);
 
-        if ($response === false) {
+            $response = curl_exec($ch);
+
+            if ($response === false) {
+                curl_close($ch);
+                return false;
+            }
+
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+
+            // 200 = success
+            return $httpCode === 200;
+        
+        }catch(\Exception $e){
+            $this->logger->error("Error sending notification: " . $e->getMessage());
             return false;
         }
-
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // 200 = success
-        return $httpCode === 200;
     }
 
     /**
      * Returns OAuth 2.0 access token for Firebase
      * (Service Account based)
      */
-    protected function getAccessToken(): string
+    protected function getAccessToken(): array
     {
         try {
 
             // Put the real service account JSON here 
-            $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/google-iam-private-key.json';
+            $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/' . $_ENV['ANDROID_SERVER_KEY_JSON'];
 
             if (!is_file($serviceAccountPath)) {
                 throw new \RuntimeException("Service account file not found: {$serviceAccountPath}");
@@ -75,7 +87,7 @@ class AndroidApiService implements ApiService
                 throw new \RuntimeException("Service account JSON is invalid.");
             }
 
-            if (empty($serviceAccount['client_email']) || empty($serviceAccount['private_key'])) {
+            if (empty($serviceAccount['client_email']) || empty($serviceAccount['private_key']) || empty($serviceAccount['project_id'])) {
                 throw new \RuntimeException("Service account JSON missing client_email or private_key.");
             }
 
@@ -118,9 +130,10 @@ class AndroidApiService implements ApiService
                 throw new \RuntimeException("No access_token in response: " . json_encode($data));
             }
 
-            return (string) $data['access_token'];
+            return ['access_token' => $data['access_token'], 'project_id' => $serviceAccount['project_id'] ?? null ];
         } catch (\Exception $e) {
-            return '';
+            $this->logger->error("Error sending notification: Fail to generate access token: " . $e->getMessage());
+            return [];
         }
     }
 

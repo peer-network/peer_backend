@@ -44,7 +44,7 @@ class UserNotificationContent implements NotificationPayload
 
     public function getInitiatorObj(): ProfileReplaceable
     {
-        return $this->notificationInitiator->initiatorObj();
+        return $this->notificationInitiator->initiatorUserObj();
     }
 
 

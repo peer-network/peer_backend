@@ -13,6 +13,9 @@ class PostLikeStrategy implements NotificationStrategy
     public $initiator;
 
     public $receiver;
+
+    // should be set by default
+    public $bodyContent = "{{receiver.username}} liked your post!";
     
     public function __construct(public string $contentId)
     {
@@ -38,7 +41,12 @@ class PostLikeStrategy implements NotificationStrategy
 
     public function bodyContent(): string
     {
-        return sprintf("{{initiator.username}} liked your post!");
+        return $this->bodyContent;
+    }
+
+    public function setBodyContent(string $bodyContent): void
+    {
+        $this->bodyContent = $bodyContent;
     }
 
     public function title(): string

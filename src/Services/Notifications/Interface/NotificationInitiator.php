@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications\Interface;
 
+use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
+
 interface NotificationInitiator
 {
     /**
@@ -16,4 +18,6 @@ interface NotificationInitiator
      * @return string
      */
     public function initiator(): string;
+
+    public function initiatorUserObj(): ProfileReplaceable;
 }
