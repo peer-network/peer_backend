@@ -24,7 +24,7 @@ class SystemInitiator implements NotificationInitiator
         return '';
     }
 
-    public function initiatorObj(): ProfileReplaceable
+    public function initiatorUserObj(): ProfileReplaceable
     {
         return new SystemUser();
     }

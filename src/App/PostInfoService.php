@@ -20,7 +20,7 @@ use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\Notifications\InitiatorReceiver\UserInitiator;
 use Fawaz\Services\Notifications\InitiatorReceiver\UserReceiver;
-use Fawaz\Services\Notifications\Strategies\PostLikeStrategy;
+use Fawaz\Services\Notifications\Strategies\PostLikeNotification;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -121,17 +121,22 @@ class PostInfoService
 
         try {
 
-            // $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
+            $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
-            // if (!$exists) {
-            //     return $this::respondWithError(31501);
-            // }
+            if (!$exists) {
+                return $this::respondWithError(31501);
+            }
 
-            // $postInfo->setLikes($postInfo->getLikes() + 1);
-            // $this->postInfoMapper->update($postInfo);
+            $postInfo->setLikes($postInfo->getLikes() + 1);
+            $this->postInfoMapper->update($postInfo);
 
             // Add Logic for Notification
-            $this->notificationsMapper->notify(new PostLikeStrategy($postId), new UserInitiator($this->currentUserId), new UserReceiver([$postInfo->getOwnerId()]));
+            $this->notificationsMapper->notifyByType(
+                PostLikeNotification::type(),
+                ['contentId' => $postId],
+                new UserInitiator($this->currentUserId),
+                new UserReceiver([$postInfo->getOwnerId()])
+            );
 
             return [
                 'status' => 'success',

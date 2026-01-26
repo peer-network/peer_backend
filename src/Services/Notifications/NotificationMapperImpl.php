@@ -14,6 +14,10 @@ use Fawaz\Services\Notifications\Interface\NotificationInitiator;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Services\Notifications\Interface\NotificationReceiver;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
+use Fawaz\Services\Notifications\NotificationApiServices\AndroidNotificationSender;
+use Fawaz\Services\Notifications\NotificationApiServices\IosNotificationSender;
+use Fawaz\Services\Notifications\NotificationApiServices\NotificationSenderResolver;
+use Fawaz\Services\Notifications\Strategies\NotificationStrategyRegistry;
 use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
 
@@ -24,7 +28,7 @@ class NotificationMapperImpl implements NotificationsMapper
     {
     }
 
-    public function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor,  NotificationReceiver $notificationReceivers): bool
+    private function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor,  NotificationReceiver $notificationReceivers): bool
     {
         $this->logger->debug("NotificationMapperImpl.notify started");
 
@@ -39,10 +43,22 @@ class NotificationMapperImpl implements NotificationsMapper
                                         ->orderBy('user_device_tokens.createdat', 'desc')
                                         ->all();
 
+        $senderResolver = new NotificationSenderResolver(
+            new AndroidNotificationSender(new AndroidApiService($this->logger)),
+                    new IosNotificationSender(new IosApiService($this->logger))
+        );
         // Send Push in application
-        $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers);
+        $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers, $senderResolver);
 
         return true;
+    }
+
+    public function notifyByType(string $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
+    {
+        $registry = new NotificationStrategyRegistry();
+        $notificationStrategy = $registry->create($type, $payload);
+
+        return $this->notify($notificationStrategy, $notificationInititor, $notificationReceivers);
     }
 
     // ProfileReplaceable
@@ -59,16 +75,17 @@ class NotificationMapperImpl implements NotificationsMapper
     /**
      * sendNotification
      */
-    private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers): bool
+    private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers, NotificationSenderResolver $senderResolver): bool
     {
         foreach($receivers as $key => $receiver){
             $receiverObj = new UserDeviceToken($receiver);
             $notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor, $receiverObj);
 
-            if($receiver['platform'] == 'ANDROID'){
-                AndroidApiService::sendNotification($notificationPayload, $receiverObj);
-            }else if($receiver['platform'] == 'IOS'){
-                IosApiService::sendNotification($notificationPayload, $receiverObj);
+            $sender = $senderResolver->resolve($receiverObj);
+            try{
+                $sender->send($notificationPayload, $receiverObj);
+            }catch(\Exception $e){
+                $this->logger->error("Failed to send notification: " . $e->getMessage());
             }
         }
 
@@ -86,7 +103,7 @@ class NotificationMapperImpl implements NotificationsMapper
             if(empty($initiator)){
                 return $notificationStrategy;
             }
-            $username = $initiator ?? '';
+            $username = $initiator;
 
             // Replace placeholder with initiator.username
             $bodyContent = str_replace('{{initiator.username}}', $username, $bodyTemplate);

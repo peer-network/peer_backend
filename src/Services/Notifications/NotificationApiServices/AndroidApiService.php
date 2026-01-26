@@ -3,31 +3,30 @@
 namespace Fawaz\Services\Notifications\NotificationApiServices;
 
 use Fawaz\App\Models\UserDeviceToken;
-use Fawaz\Services\Notifications\Interface\ApiService;
 use Fawaz\Services\Notifications\Helpers\AndroidPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
+use Fawaz\Services\Notifications\Interface\NotificationSenderStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 
-class AndroidApiService implements ApiService
+final class AndroidApiService
 {
     public function __construct(protected PeerLoggerInterface $logger){}
     
-    public static function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
+    public function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
         $payload = (new AndroidPayloadStructure())->payload($payload);
-
         $deviceToken = $receiver->getDeviceToken();
 
-        return (new self())->send($payload, $deviceToken);
+        return $this->triggerApi($payload, $deviceToken);
     }
 
 
-    protected function send($payload, $deviceToken): bool
+    protected function triggerApi($payload, $deviceToken): bool
     {
         try{
             $projectIdNToken = $this->getAccessToken(); // OAuth 2.0 token
 
-            if(empty($projectIdNToken['access_token']) || empty($projectIdNToken['project_id'])) {
+            if(empty($projectIdNToken['access_token'])) {
                 throw new \RuntimeException("Failed to get access token or project ID.");
             }
 
@@ -130,7 +129,7 @@ class AndroidApiService implements ApiService
                 throw new \RuntimeException("No access_token in response: " . json_encode($data));
             }
 
-            return ['access_token' => $data['access_token'], 'project_id' => $serviceAccount['project_id'] ?? null ];
+            return ['access_token' => $data['access_token'], 'project_id' => $serviceAccount['project_id']];
         } catch (\Exception $e) {
             $this->logger->error("Error sending notification: Fail to generate access token: " . $e->getMessage());
             return [];

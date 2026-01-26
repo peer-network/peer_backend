@@ -10,6 +10,8 @@ use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
 interface NotificationsMapper
 {
-    public function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor,  NotificationReceiver $notificationReceiver): bool;
+    // public function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor,  NotificationReceiver $notificationReceiver): bool;
+
+    public function notifyByType(string $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceiver): bool;
 }
     

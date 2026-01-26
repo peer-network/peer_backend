@@ -8,6 +8,10 @@ use Fawaz\Services\Notifications\Enums\NotificationContent;
 
 interface NotificationStrategy
 {
+    public static function type(): string;
+
+    public static function fromPayload(array $payload): self;
+
     /**
      * Transaction type for the recipient credit.
      * If a fallback is provided, strategy may honor it.

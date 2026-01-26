@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications\Strategies;
 
+use Fawaz\config\constants\ConstantsNotification;
 use Fawaz\Services\Notifications\Enums\NotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
-class PostLikeStrategy implements NotificationStrategy
+class PostLikeNotification implements NotificationStrategy
 {
 
     public $initiator;
@@ -15,11 +16,27 @@ class PostLikeStrategy implements NotificationStrategy
     public $receiver;
 
     // should be set by default
-    public $bodyContent = "{{receiver.username}} liked your post!";
+    public $bodyContent = ConstantsNotification::NOTIFICATIONS['POST_LIKE']['BODY'];
     
     public function __construct(public string $contentId)
     {
         
+    }
+
+    public static function type(): string
+    {
+        return 'post_like';
+    }
+
+    public static function fromPayload(array $payload): NotificationStrategy
+    {
+        $contentId = $payload['contentId'] ?? null;
+
+        if ($contentId === null || $contentId === '') {
+            throw new \InvalidArgumentException('PostLikeNotification requires contentId');
+        }
+
+        return new self($contentId);
     }
 
     public function content(): NotificationContent
@@ -51,6 +68,6 @@ class PostLikeStrategy implements NotificationStrategy
 
     public function title(): string
     {
-        return "Post Liked";
+        return ConstantsNotification::NOTIFICATIONS['POST_LIKE']['TITLE'];
     }
 }
