@@ -65,6 +65,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\PeerShopService;
+use Fawaz\Utils\DateService;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -1766,7 +1767,8 @@ class GraphQLSchemaBuilder
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
-            'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
+            'distributeTokensForGems' => fn (mixed $root, array $args) => $this->resolveMint($args),
+            'gemsters' => fn (mixed $root, array $args) => $this->resolveGemsters($args),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
@@ -2547,6 +2549,76 @@ class GraphQLSchemaBuilder
         return $this::createSuccessResponse(
             11008,
             $result->getArrayCopy(),
+            false
+        );
+    }
+
+
+    protected function resolveGemsters(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveGemsters started');
+
+        $args['dateOffset'] = $args['date'];
+
+        $validation = RequestValidator::validate($args, ['dateOffset']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $dateYYYYMMDD = DateService::dateOffsetToYYYYMMDD($validation['dateOffset']);
+
+        $result = $this->mintService->distributeTokensFromGems($dateYYYYMMDD);
+
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        }
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $this::createSuccessResponse(
+            11008,
+            $result,
+            false
+        );
+    }
+
+
+    protected function resolveMint(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveGemsters started');
+
+        $args['dateYYYYMMDD'] = $args['date'];
+
+        $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+ 
+        $dateYYYYMMDD = $validation['dateYYYYMMDD'];
+
+        $result = $this->mintService->distributeTokensFromGems($dateYYYYMMDD);
+
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        }
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $this::createSuccessResponse(
+            11008,
+            $result,
             false
         );
     }
