@@ -50,12 +50,6 @@ class PostLikeNotification implements NotificationStrategy
     }
 
 
-    public function extraFields(): array
-    {
-        return [];
-    }
-
-
     public function bodyContent(): string
     {
         return $this->bodyContent;

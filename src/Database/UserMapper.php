@@ -1987,7 +1987,6 @@ class UserMapper implements UserMapperInterface
                     'token' => $args['token'],
                     'platform' => $args['platform'],
                     'language' => $args['language'],
-                    'debug' => isset($args['debug']) && ($args['debug']) ? 1 : 0,
                     'createdat' => (new DateTime())->format('Y-m-d H:i:s.u'),
                 ]);
             }else{
@@ -1995,7 +1994,6 @@ class UserMapper implements UserMapperInterface
                     'token' => $args['token'],
                     'platform' => $args['platform'],
                     'language' => $args['language'],
-                    'debug' => isset($args['debug']) && ($args['debug']) ? 1 : 0
                 ]);
             }
         } catch (\Throwable $e) {

@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS user_device_tokens (
     token TEXT NOT NULL,
     platform VARCHAR(20) DEFAULT NULL,
     language VARCHAR(64) DEFAULT NULL,
-    debug INT NOT NULL DEFAULT 0,
     createdat TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_user_device_tokens_user
@@ -22,9 +21,6 @@ CREATE INDEX IF NOT EXISTS idx_user_device_tokens_userid
 
 CREATE INDEX IF NOT EXISTS idx_user_device_tokens_token
     ON user_device_tokens(token);
-
-COMMENT ON COLUMN user_device_tokens.debug
-IS '1 = debug enabled, 0 = debug disabled';
 
 
 COMMIT;

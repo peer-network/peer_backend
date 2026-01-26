@@ -6,6 +6,7 @@ namespace Fawaz\App;
 
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
+// Still needs to be checked
 class SystemUser implements ProfileReplaceable
 {
     protected string $uid;

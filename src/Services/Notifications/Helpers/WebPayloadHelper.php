@@ -24,18 +24,18 @@ class WebPayloadHelper implements PayloadStructure
                         'notification' => [
                             'title' => $contentType->getTitle(),
                             'body'  => $contentType->getBodyContent(),
-                            'icon'  => 'https://example.com/icon-192.png',
-                            'badge' => 'https://example.com/badge-72.png',
+                            // 'icon'  => 'https://example.com/icon-192.png',
+                            // 'badge' => 'https://example.com/badge-72.png',
                         ],
 
                         // Custom data accessible in service worker
                         'data' => [
                             'contentid' => $contentType->getContentId(),
                             'profile' => [
-                                'username' => 'peer_user',
-                                'avatar'  => 'https://example.com/avatar.jpg',
+                                'username' => $contentType->getInitiatorObj()->getName(),
+                                // 'avatar'  => 'https://example.com/avatar.jpg',
                             ],
-                            'url' => 'https://peerapp.de/content/987654',
+                            // 'url' => 'https://peerapp.de/content/987654',
                         ],
                     ],
                 ],

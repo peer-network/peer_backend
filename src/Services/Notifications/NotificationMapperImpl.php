@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Fawaz\Services\Notifications;
 
 use Fawaz\App\Models\UserDeviceToken;
-use Fawaz\App\User;
 use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
 use Fawaz\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
@@ -18,13 +17,12 @@ use Fawaz\Services\Notifications\NotificationApiServices\AndroidNotificationSend
 use Fawaz\Services\Notifications\NotificationApiServices\IosNotificationSender;
 use Fawaz\Services\Notifications\NotificationApiServices\NotificationSenderResolver;
 use Fawaz\Services\Notifications\Strategies\NotificationStrategyRegistry;
-use PDO;
 use Fawaz\Utils\PeerLoggerInterface;
 
 class NotificationMapperImpl implements NotificationsMapper
 {
 
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger)
     {
     }
 

@@ -13,23 +13,23 @@ interface NotificationStrategy
     public static function fromPayload(array $payload): self;
 
     /**
-     * Transaction type for the recipient credit.
-     * If a fallback is provided, strategy may honor it.
+     * Content Type.
+     *  1. Post
+     *  2. User
+     *  3. Comment
      */
     public function content(): NotificationContent;
 
     public function contentId(): string;
 
     /**
-     * This is the message, which will sent to users
+     * This is the body content, which will sent to users
      * 
-     * Replaceable text should be placed inside {{}}
-     * 
-     * Replaceable test should follow structure
+     * Replaceable text should follow structure
      * 
      * - User
-     *      - initiator.username -> if username replace by Initiator
-     *      - receiver.username -> if username replce by Initiator
+     *      - {{initiator.username}} -> if username replace by Initiator
+     *      - {{receiver.username}} -> if username replace by Receiver
      */
     public function bodyContent(): string;
 
@@ -38,9 +38,4 @@ interface NotificationStrategy
 
     public function title(): string;
 
-    /**
-     * This can include additional data related to the notification
-     * 
-     */
-    public function extraFields(): array;
 }
