@@ -10,6 +10,17 @@ namespace Fawaz\App\Validation;
  */
 class ValidationSpec
 {
+    public static function dateOffset(string $field, bool $required = false, int $errorCode = 30223): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateDateOffsetString', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
     public static function dateMonthYearString(string $field, bool $required = false, int $errorCode = 30258): array
     {
         return [
@@ -255,6 +266,7 @@ class ValidationSpec
             'messageOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
 
+            'dateOffset' => fn (string $f, bool $r) => self::dateOffset($f, $r),
             'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
 

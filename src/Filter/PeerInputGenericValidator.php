@@ -713,7 +713,7 @@ class PeerInputGenericValidator
         return true;
     }
     protected function validateDateMonthYearString(string $value, array $options = []): bool {
-        $fieldKey = $options['field'] ?? 'date';
+        $fieldKey = $options['field'];
         $errorCode = (string)($options['errorCode'] ?? '30258');
 
         // Treat empty value as valid (field is optional in schema)
@@ -732,6 +732,25 @@ class PeerInputGenericValidator
         // Validate calendar correctness
         [$year, $month, $day] = array_map('intval', explode('-', $val));
         if (!checkdate($month, $day, $year)) {
+            $this->pushError($options, $fieldKey, $errorCode);
+            return false;
+        }
+
+        return true;
+    }
+
+    protected function validateDateOffsetString(string $value, array $options = []): bool {
+        $fieldKey = $options['field'];
+        $errorCode = (string)($options['errorCode'] ?? '30223');
+
+        // Treat empty value as valid (field is optional in schema)
+        if ($value === '' || $value === null) {
+            return true;
+        }
+
+        $val = trim((string)$value);
+        $allowedOffsets = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
+        if (!in_array($val, $allowedOffsets, true)) {
             $this->pushError($options, $fieldKey, $errorCode);
             return false;
         }
