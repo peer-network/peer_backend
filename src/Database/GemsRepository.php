@@ -31,7 +31,7 @@ interface GemsRepository
      * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
      * @return ?Gems DTO containing rows
      */
-    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): ?Gems;
+    public function fetchUncollectedGemsForMintResult(string $dateYYYYMMDD): ?Gems;
     
     /**
      * Apply mint metadata and mark corresponding gems as collected.
