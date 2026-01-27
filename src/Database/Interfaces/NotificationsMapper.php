@@ -11,6 +11,6 @@ use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
 interface NotificationsMapper
 {
-    public function notifyByType(NotificationAction $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceiver): bool;
+    public function notifyByType(NotificationAction $action, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceiver): bool;
 }
     

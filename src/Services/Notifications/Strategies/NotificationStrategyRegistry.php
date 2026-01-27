@@ -11,15 +11,15 @@ class NotificationStrategyRegistry
 {
     private array $strategyMap = [];
 
-    public function create(NotificationAction $type, array $payload): NotificationStrategy
+    public function create(NotificationAction $action, array $payload): NotificationStrategy
     {
         $strategies = $this->discoverStrategies();
 
-        if (!isset($strategies[$type->value])) {
-            throw new \InvalidArgumentException("Unknown notification type: {$type->value}");
+        if (!isset($strategies[$action->value])) {
+            throw new \InvalidArgumentException("Unknown notification action: {$action->value}");
         }
 
-        $strategyClass = $strategies[$type->value];
+        $strategyClass = $strategies[$action->value];
 
         return $strategyClass::fromPayload($payload);
     }
@@ -49,13 +49,13 @@ class NotificationStrategyRegistry
                 continue;
             }
 
-            $type = $fqcn::type();
+            $action = $fqcn::action();
 
-            if (isset($this->strategyMap[$type->value])) {
-                throw new \LogicException("Duplicate notification type: {$type->value}");
+            if (isset($this->strategyMap[$action->value])) {
+                throw new \LogicException("Duplicate notification action: {$action->value}");
             }
 
-            $this->strategyMap[$type->value] = $fqcn;
+            $this->strategyMap[$action->value] = $fqcn;
         }
 
         return $this->strategyMap;

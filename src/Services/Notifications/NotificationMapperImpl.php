@@ -52,10 +52,10 @@ class NotificationMapperImpl implements NotificationsMapper
         return true;
     }
 
-    public function notifyByType(NotificationAction $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
+    public function notifyByType(NotificationAction $action, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
     {
         $registry = new NotificationStrategyRegistry();
-        $notificationStrategy = $registry->create($type, $payload);
+        $notificationStrategy = $registry->create($action, $payload);
 
         return $this->notify($notificationStrategy, $notificationInititor, $notificationReceivers);
     }

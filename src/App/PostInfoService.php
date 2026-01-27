@@ -132,7 +132,7 @@ class PostInfoService
 
             // Add Logic for Notification
             $this->notificationsMapper->notifyByType(
-                PostLikeNotification::type(),
+                PostLikeNotification::action(),
                 ['contentId' => $postId],
                 new UserInitiator($this->currentUserId),
                 new UserReceiver([$postInfo->getOwnerId()])

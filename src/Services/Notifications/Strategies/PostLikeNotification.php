@@ -24,7 +24,7 @@ class PostLikeNotification implements NotificationStrategy
         
     }
 
-    public static function type(): NotificationAction
+    public static function action(): NotificationAction
     {
         return NotificationAction::POST_LIKE;
     }

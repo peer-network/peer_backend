@@ -9,7 +9,7 @@ use Fawaz\Services\Notifications\Enums\NotificationContent;
 
 interface NotificationStrategy
 {
-    public static function type(): NotificationAction;
+    public static function action(): NotificationAction;
 
     public static function fromPayload(array $payload): self;
 
