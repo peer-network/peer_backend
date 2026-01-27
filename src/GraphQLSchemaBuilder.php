@@ -231,7 +231,6 @@ class GraphQLSchemaBuilder
         $this->peerTokenService->setCurrentUserId($userid);
         $this->peerShopService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
-        $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
         $this->mintService->setCurrentUserId($userid);
     }
