@@ -2573,7 +2573,7 @@ class GraphQLSchemaBuilder
         }
 
         $dateYYYYMMDD = DateService::dateOffsetToYYYYMMDD($validation['dateOffset']);
-
+        
         $result = $this->mintService->distributeTokensFromGems($dateYYYYMMDD);
 
         if ($result instanceof ErrorResponse) {
@@ -2581,11 +2581,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveProfile successful');
-        return $this::createSuccessResponse(
-            11008,
-            $result,
-            false
-        );
+        return $result;
     }
 
 
@@ -2616,11 +2612,7 @@ class GraphQLSchemaBuilder
         }
 
         $this->logger->info('Query.resolveProfile successful');
-        return $this::createSuccessResponse(
-            11008,
-            $result,
-            false
-        );
+        return $result;
     }
 
     protected function resolveVerifyReferral(array $args): array

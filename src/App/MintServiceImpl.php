@@ -291,7 +291,7 @@ class MintServiceImpl implements MintService
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
-            return $this::respondWithError(40301);
+            return $this::respondWithErrorObject(40301);
         }
     }
 
