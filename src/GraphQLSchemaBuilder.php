@@ -7,7 +7,6 @@ const INT32_MAX = 2147483647;
 const BASIC = 50;
 const PINNED = 200;
 
-use Fawaz\App\LogWinService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -75,7 +74,6 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected LogWinService $logWinService,
         protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -1731,8 +1729,6 @@ class GraphQLSchemaBuilder
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
             'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
-            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
-            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
         ];
     }
 
