@@ -74,6 +74,8 @@ if ($redisPassword !== null && $redisPassword !== '') {
 
 $redis = new Client($redisConfig);
 $queueName = $_ENV['NOTIFICATIONS_QUEUE'] ?? 'notifications_queue';
+$workerHeartbeatKey = $_ENV['NOTIFICATIONS_WORKER_HEARTBEAT_KEY'] ?? 'notifications:worker:heartbeat';
+$workerErrorKey = $_ENV['NOTIFICATIONS_WORKER_ERROR_KEY'] ?? 'notifications:worker:last_error';
 $blockTimeout = (int) ($_ENV['NOTIFICATIONS_QUEUE_BLOCK_TIMEOUT'] ?? 5);
 $maxRuntime = (int) ($_ENV['NOTIFICATIONS_WORKER_MAX_RUNTIME'] ?? 0);
 $startedAt = time();
@@ -88,6 +90,7 @@ $logger->info('notifications_worker_started', [
 ]);
 
 while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
+    $redis->set($workerHeartbeatKey, (string) time());
     $job = $redis->brpop([$queueName], $blockTimeout);
     if (empty($job) || !isset($job[1])) {
         continue;
@@ -145,6 +148,7 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
     try {
         $mapper->notifyByType($action, $payload, $initiator, $receiverObj);
     } catch (Throwable $exception) {
+        $redis->set($workerErrorKey, $exception->getMessage());
         $logger->error('notifications_job_failed', [
             'action' => $actionValue,
             'initiator' => $initiatorId,
