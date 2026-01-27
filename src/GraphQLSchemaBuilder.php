@@ -2562,7 +2562,7 @@ class GraphQLSchemaBuilder
 
         $this->logger->debug('Query.resolveGemsters started');
 
-        $args['dateOffset'] = $args['date'];
+        $args['dateOffset'] = $args['day'];
 
         $validation = RequestValidator::validate($args, ['dateOffset']);
 
