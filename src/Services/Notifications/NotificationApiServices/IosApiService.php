@@ -3,10 +3,8 @@
 namespace Fawaz\Services\Notifications\NotificationApiServices;
 
 use Fawaz\App\Models\UserDeviceToken;
-use Fawaz\Services\Notifications\Helpers\IosPayloadStructureHelper;
-use Fawaz\Services\Notifications\Interface\ApiService;
+use Fawaz\Services\Notifications\Helpers\IosPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
-use Fawaz\Services\Notifications\Interface\NotificationSenderStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 
 final class IosApiService
@@ -15,7 +13,7 @@ final class IosApiService
     
     public function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
-        $apnsPayload = (new IosPayloadStructureHelper())->payload($payload);
+        $apnsPayload = (new IosPayloadStructure())->payload($payload);
 
         $deviceToken = $receiver->getDeviceToken();
         if (empty($deviceToken)) {
@@ -25,7 +23,7 @@ final class IosApiService
         return $this->triggerApi($apnsPayload, $deviceToken);
     }
 
-    protected function triggerApi($payload, $deviceToken): bool
+    private function triggerApi($payload, $deviceToken): bool
     {
         try{
             // Ensure JSON string

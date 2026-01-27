@@ -20,7 +20,7 @@ final class AndroidApiService
     }
 
 
-    protected function triggerApi($payload, $deviceToken): bool
+    private function triggerApi($payload, $deviceToken): bool
     {
         try{
             $projectIdNToken = $this->getAccessToken(); // OAuth 2.0 token

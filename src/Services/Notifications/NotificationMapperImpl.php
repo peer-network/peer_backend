@@ -9,7 +9,7 @@ use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
 use Fawaz\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Services\Notifications\Enums\NotificationAction;
-use Fawaz\Services\Notifications\Helpers\UserNotificationContent;
+use Fawaz\Services\Notifications\Helpers\NotificationContentStructure;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Services\Notifications\Interface\NotificationReceiver;
@@ -65,9 +65,9 @@ class NotificationMapperImpl implements NotificationsMapper
     private function prepareContent(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, UserDeviceToken $receiverObj): NotificationPayload
     {
         $notificationStrategy = $this->contentReplacer($notificationStrategy, $notificationInititor, $receiverObj);
-        $userNotificationContent = new UserNotificationContent( $notificationStrategy, $notificationInititor);
+        $notificationContent = new NotificationContentStructure( $notificationStrategy, $notificationInititor);
 
-        return $userNotificationContent;
+        return $notificationContent;
     }
 
 
