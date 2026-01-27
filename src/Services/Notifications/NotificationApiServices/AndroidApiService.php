@@ -5,7 +5,6 @@ namespace Fawaz\Services\Notifications\NotificationApiServices;
 use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\Helpers\AndroidPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
-use Fawaz\Services\Notifications\Interface\NotificationSenderStrategy;
 use Fawaz\Utils\PeerLoggerInterface;
 
 final class AndroidApiService

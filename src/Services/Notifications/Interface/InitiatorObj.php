@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications\Interface;
 
-use Fawaz\App\Profile;
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
 interface InitiatorObj

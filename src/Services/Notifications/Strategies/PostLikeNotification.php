@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\Services\Notifications\Strategies;
 
 use Fawaz\config\constants\ConstantsNotification;
+use Fawaz\Services\Notifications\Enums\NotificationAction;
 use Fawaz\Services\Notifications\Enums\NotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
@@ -23,9 +24,9 @@ class PostLikeNotification implements NotificationStrategy
         
     }
 
-    public static function type(): string
+    public static function type(): NotificationAction
     {
-        return 'post_like';
+        return NotificationAction::POST_LIKE;
     }
 
     public static function fromPayload(array $payload): NotificationStrategy

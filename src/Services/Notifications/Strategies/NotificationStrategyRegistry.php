@@ -4,21 +4,22 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications\Strategies;
 
+use Fawaz\Services\Notifications\Enums\NotificationAction;
 use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
 class NotificationStrategyRegistry
 {
     private array $strategyMap = [];
 
-    public function create(string $type, array $payload): NotificationStrategy
+    public function create(NotificationAction $type, array $payload): NotificationStrategy
     {
         $strategies = $this->discoverStrategies();
 
-        if (!isset($strategies[$type])) {
-            throw new \InvalidArgumentException("Unknown notification type: {$type}");
+        if (!isset($strategies[$type->value])) {
+            throw new \InvalidArgumentException("Unknown notification type: {$type->value}");
         }
 
-        $strategyClass = $strategies[$type];
+        $strategyClass = $strategies[$type->value];
 
         return $strategyClass::fromPayload($payload);
     }
@@ -50,11 +51,11 @@ class NotificationStrategyRegistry
 
             $type = $fqcn::type();
 
-            if (isset($this->strategyMap[$type])) {
-                throw new \LogicException("Duplicate notification type: {$type}");
+            if (isset($this->strategyMap[$type->value])) {
+                throw new \LogicException("Duplicate notification type: {$type->value}");
             }
 
-            $this->strategyMap[$type] = $fqcn;
+            $this->strategyMap[$type->value] = $fqcn;
         }
 
         return $this->strategyMap;

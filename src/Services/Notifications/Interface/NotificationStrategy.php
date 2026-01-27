@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Fawaz\Services\Notifications\Interface;
 
+use Fawaz\Services\Notifications\Enums\NotificationAction;
 use Fawaz\Services\Notifications\Enums\NotificationContent;
 
 interface NotificationStrategy
 {
-    public static function type(): string;
+    public static function type(): NotificationAction;
 
     public static function fromPayload(array $payload): self;
 

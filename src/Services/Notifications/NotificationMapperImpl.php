@@ -8,6 +8,7 @@ use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\NotificationApiServices\AndroidApiService;
 use Fawaz\Services\Notifications\NotificationApiServices\IosApiService;
 use Fawaz\Database\Interfaces\NotificationsMapper;
+use Fawaz\Services\Notifications\Enums\NotificationAction;
 use Fawaz\Services\Notifications\Helpers\UserNotificationContent;
 use Fawaz\Services\Notifications\Interface\NotificationInitiator;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
@@ -51,7 +52,7 @@ class NotificationMapperImpl implements NotificationsMapper
         return true;
     }
 
-    public function notifyByType(string $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
+    public function notifyByType(NotificationAction $type, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
     {
         $registry = new NotificationStrategyRegistry();
         $notificationStrategy = $registry->create($type, $payload);

@@ -8,7 +8,7 @@ class ConstantsNotification
 {
     /**
     * @return array{
-    *     POST_LIKE: array<string, array{TITLE: string, BODY: string}>
+    *     POST_LIKE: array{TITLE: string, BODY: string}
     * }
     */
     public static function notifications()
