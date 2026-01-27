@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "1c847d67-8104-4835-ac8c-d38f76beb562",
-    "name": "007_type_injections_graphql",
+    "_postman_id": "84c23999-0e4d-4ed6-abdb-2dc75fcfb35e",
+    "name": "008_type_injections_graphql",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "43606001",
-    "_collection_link": "https://go.postman.co/collection/43606001-1c847d67-8104-4835-ac8c-d38f76beb562?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/43606001-84c23999-0e4d-4ed6-abdb-2dc75fcfb35e?source=collection_link"
   },
   "item": [
     {
