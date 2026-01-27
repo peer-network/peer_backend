@@ -9,13 +9,43 @@ use Fawaz\Services\Notifications\InitiatorReceiver\SystemInitiator;
 use Fawaz\Services\Notifications\InitiatorReceiver\UserInitiator;
 use Fawaz\Services\Notifications\InitiatorReceiver\UserReceiver;
 use Fawaz\Services\Notifications\NotificationMapperImpl;
-use Fawaz\Utils\PeerNullLogger;
+use Fawaz\Utils\PeerLoggerInterface;
 use Predis\Client;
+use Psr\Log\AbstractLogger;
 
 require __DIR__ . '/../../../vendor/autoload.php';
 
 if (file_exists(__DIR__ . '/../../../.env')) {
     Dotenv::createImmutable(__DIR__ . '/../../../')->load();
+}
+
+class JsonStdoutLogger extends AbstractLogger implements PeerLoggerInterface
+{
+    public function __construct(private ?string $logFile = null)
+    {
+    }
+
+    public function getRequestUid(): ?string
+    {
+        return null;
+    }
+
+    public function log($level, $message, array $context = []): void
+    {
+        $payload = [
+            'timestamp' => gmdate('c'),
+            'level' => $level,
+            'message' => $message,
+            'context' => $context,
+        ];
+
+        $line = json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL;
+        fwrite(STDOUT, $line);
+
+        if ($this->logFile !== null) {
+            file_put_contents($this->logFile, $line, FILE_APPEND);
+        }
+    }
 }
 
 $dbHost = $_ENV['DB_HOST'] ?? '';
@@ -48,8 +78,14 @@ $blockTimeout = (int) ($_ENV['NOTIFICATIONS_QUEUE_BLOCK_TIMEOUT'] ?? 5);
 $maxRuntime = (int) ($_ENV['NOTIFICATIONS_WORKER_MAX_RUNTIME'] ?? 0);
 $startedAt = time();
 
-$logger = new PeerNullLogger();
+$logFile = __DIR__ . '/../../../runtime-data/logs/notifications-worker.log';
+$logger = new JsonStdoutLogger($logFile);
 $mapper = new NotificationMapperImpl($logger);
+$logger->info('notifications_worker_started', [
+    'queue' => $queueName,
+    'block_timeout' => $blockTimeout,
+    'max_runtime' => $maxRuntime,
+]);
 
 while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
     $job = $redis->brpop([$queueName], $blockTimeout);
@@ -59,6 +95,7 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
 
     $data = json_decode($job[1], true);
     if (!is_array($data)) {
+        $logger->warning('notifications_job_invalid_json', ['raw' => $job[1]]);
         continue;
     }
 
@@ -68,11 +105,17 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
     $initiatorData = $data['initiator'] ?? [];
 
     if (!is_string($actionValue) || !is_array($payload) || !is_array($receivers)) {
+        $logger->warning('notifications_job_invalid_shape', [
+            'action' => $actionValue,
+            'payload_type' => gettype($payload),
+            'receivers_type' => gettype($receivers),
+        ]);
         continue;
     }
 
     $action = NotificationAction::tryFrom($actionValue);
     if ($action === null) {
+        $logger->warning('notifications_action_unknown', ['action' => $actionValue]);
         continue;
     }
 
@@ -81,6 +124,7 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
     $initiatorId = is_string($initiatorId) ? $initiatorId : '';
 
     if (!is_string($initiatorClass) || $initiatorClass === '') {
+        $logger->warning('notifications_initiator_missing', ['initiator' => $initiatorData]);
         continue;
     }
 
@@ -90,6 +134,7 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
     ];
 
     if (!in_array($initiatorClass, $allowedInitiators, true)) {
+        $logger->warning('notifications_initiator_not_allowed', ['initiator_class' => $initiatorClass]);
         continue;
     }
 
@@ -97,5 +142,14 @@ while ($maxRuntime === 0 || (time() - $startedAt) < $maxRuntime) {
 
     $receiverObj = new UserReceiver($receivers);
 
-    $mapper->notifyByType($action, $payload, $initiator, $receiverObj);
+    try {
+        $mapper->notifyByType($action, $payload, $initiator, $receiverObj);
+    } catch (Throwable $exception) {
+        $logger->error('notifications_job_failed', [
+            'action' => $actionValue,
+            'initiator' => $initiatorId,
+            'receiver' => $receivers,
+            'error' => $exception->getMessage(),
+        ]);
+    }
 }

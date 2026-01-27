@@ -6,6 +6,7 @@ use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\Helpers\AndroidPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Utils\PeerLoggerInterface;
+use RuntimeException;
 
 final class AndroidApiService
 {
@@ -22,47 +23,45 @@ final class AndroidApiService
 
     private function triggerApi($payload, $deviceToken): bool
     {
-        try{
-            $projectIdNToken = $this->getAccessToken(); // OAuth 2.0 token
+        $projectIdNToken = $this->getAccessToken(); // OAuth 2.0 token
 
-            if(empty($projectIdNToken['access_token'])) {
-                throw new \RuntimeException("Failed to get access token or project ID.");
-            }
-
-            $url = "https://fcm.googleapis.com/v1/projects/{$projectIdNToken['project_id']}/messages:send";
-
-            // Inject device token
-            $payload['message']['token'] = $deviceToken;
-
-            $ch = curl_init($url);
-
-            curl_setopt_array($ch, [
-                CURLOPT_POST           => true,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HTTPHEADER     => [
-                    'Authorization: Bearer ' . $projectIdNToken['access_token'],
-                    'Content-Type: application/json',
-                ],
-                CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_SLASHES),
-            ]);
-
-            $response = curl_exec($ch);
-
-            if ($response === false) {
-                curl_close($ch);
-                return false;
-            }
-
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-
-            // 200 = success
-            return $httpCode === 200;
-        
-        }catch(\Exception $e){
-            $this->logger->error("Error sending notification: " . $e->getMessage());
-            return false;
+        if (empty($projectIdNToken['access_token'])) {
+            throw new \RuntimeException("Failed to get access token or project ID.");
         }
+
+        $url = "https://fcm.googleapis.com/v1/projects/{$projectIdNToken['project_id']}/messages:send";
+
+        // Inject device token
+        $payload['message']['token'] = $deviceToken;
+
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $projectIdNToken['access_token'],
+                'Content-Type: application/json',
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_SLASHES),
+        ]);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new RuntimeException("Android notification request failed: {$error}");
+        }
+
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new RuntimeException("Android notification API error ({$httpCode}): {$response}");
+        }
+
+        return true;
     }
 
     /**

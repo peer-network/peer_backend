@@ -12,9 +12,11 @@
 
 3. **Trigger the notification from the right action**
 
-   * Implement the logic where the event happens (the “trigger”).
+   * Implement the logic where the event happens (the “trigger”/queue).
    * Example: if it should fire when a post is liked, add it in:
      `src/App/PostInfoService.php` → `likePost()`
+
+4. ### **Make Sure to restart Worker on Server after any changes related to notifications**
 
 **Tip:** Reuse existing notifications as a reference to keep naming, constants, and triggering consistent.
 
@@ -50,6 +52,8 @@ NOTIFICATIONS_WORKER_MAX_RUNTIME=0
 
 4. Set Notification server worker on server. use file `docs\notifications-worker.service`.
 Please set `WorkingDirectory` and `ExecStart` as per OS setup.
+
+5. Restart Worker after any changes to the worker script, messages or configuration.
 
 
 ### Redis & Worker Health Checks

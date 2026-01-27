@@ -6,6 +6,7 @@ use Fawaz\App\Models\UserDeviceToken;
 use Fawaz\Services\Notifications\Helpers\IosPayloadStructure;
 use Fawaz\Services\Notifications\Interface\NotificationPayload;
 use Fawaz\Utils\PeerLoggerInterface;
+use RuntimeException;
 
 final class IosApiService
 {
@@ -25,82 +26,78 @@ final class IosApiService
 
     private function triggerApi($payload, $deviceToken): bool
     {
-        try{
-            // Ensure JSON string
-            $json = is_string($payload) ? $payload : json_encode($payload, JSON_UNESCAPED_UNICODE);
+        // Ensure JSON string
+        $json = is_string($payload) ? $payload : json_encode($payload, JSON_UNESCAPED_UNICODE);
 
-            if ($json === false) {
-                return false;
-            }
-
-            $config = $this->apnsConfig();
-
-            $jwt = $this->generateApnsJwt(
-                $config['team_id'],
-                $config['key_id'],
-                $config['private_key_path']
-            );
-
-            if ($jwt === null) {
-                return false;
-            }
-
-            $host = $config['use_sandbox'] ? 'https://api.sandbox.push.apple.com' :  'https://api.push.apple.com';
-
-            // Device token must be hex, no spaces
-            $deviceToken = preg_replace('/\s+/', '', $deviceToken);
-            $url = $host . "/3/device/{$deviceToken}";
-
-            $headers = [
-                "authorization: bearer {$jwt}",
-                "apns-topic: {$config['topic']}",
-                "content-type: application/json",
-            ];
-
-            // Optional: if you carry an id to dedupe
-            // $headers[] = "apns-id: " . $uuid;
-
-            // Optional: immediate delivery (0) vs background (5)
-            // If you send "content-available": 1 only, consider apns-push-type: background
-            $headers[] = "apns-push-type: alert";
-
-            // Optional: collapse id to collapse multiple notifications
-            // $headers[] = "apns-collapse-id: some_key";
-
-            $ch = curl_init($url);
-
-            curl_setopt_array($ch, [
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $json,
-                CURLOPT_HTTPHEADER => $headers,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => true, // so we can parse status + headers
-                CURLOPT_TIMEOUT => (int)$config['timeout'],
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
-            ]);
-
-            $response = curl_exec($ch);
-
-            if ($response === false) {
-                curl_close($ch);
-                return false;
-            }
-
-            $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $body = substr($response, $headerSize);
-
-            curl_close($ch);
-
-            // APNs success is 200
-            if ($statusCode === 200) {
-                return true;
-            }
-            return false;
-        
-        }catch(\Exception $e){
-            return true;
+        if ($json === false) {
+            throw new RuntimeException('Failed to encode iOS payload to JSON.');
         }
+
+        $config = $this->apnsConfig();
+
+        $jwt = $this->generateApnsJwt(
+            $config['team_id'],
+            $config['key_id'],
+            $config['private_key_path']
+        );
+
+        if ($jwt === null) {
+            throw new RuntimeException('Failed to generate APNs JWT.');
+        }
+
+        $host = $config['use_sandbox'] ? 'https://api.sandbox.push.apple.com' :  'https://api.push.apple.com';
+
+        // Device token must be hex, no spaces
+        $deviceToken = preg_replace('/\s+/', '', $deviceToken);
+        $url = $host . "/3/device/{$deviceToken}";
+
+        $headers = [
+            "authorization: bearer {$jwt}",
+            "apns-topic: {$config['topic']}",
+            "content-type: application/json",
+        ];
+
+        // Optional: if you carry an id to dedupe
+        // $headers[] = "apns-id: " . $uuid;
+
+        // Optional: immediate delivery (0) vs background (5)
+        // If you send "content-available": 1 only, consider apns-push-type: background
+        $headers[] = "apns-push-type: alert";
+
+        // Optional: collapse id to collapse multiple notifications
+        // $headers[] = "apns-collapse-id: some_key";
+
+        $ch = curl_init($url);
+
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $json,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true, // so we can parse status + headers
+            CURLOPT_TIMEOUT => (int)$config['timeout'],
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
+        ]);
+
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            throw new RuntimeException("iOS notification request failed: {$error}");
+        }
+
+        $statusCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $body = substr($response, $headerSize);
+
+        curl_close($ch);
+
+        if ($statusCode !== 200) {
+            throw new RuntimeException("iOS notification API error ({$statusCode}): {$body}");
+        }
+
+        return true;
     }
 
     private function apnsConfig(): array

@@ -8,7 +8,6 @@ use Fawaz\Database\PostInfoMapper;
 use Fawaz\Database\ReportsMapper;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
-use Fawaz\Database\Interfaces\NotificationsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -38,7 +37,6 @@ class PostInfoService
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected NotificationsMapper $notificationsMapper,
         protected NotificationQueue $notificationQueue,
         protected ModerationMapper $moderationMapper
     ) {
@@ -123,17 +121,17 @@ class PostInfoService
 
         try {
 
-            // $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
+            $exists = $this->postInfoMapper->addUserActivity('likePost', $this->currentUserId, $postId);
 
-            // if (!$exists) {
-            //     return $this::respondWithError(31501);
-            // }
+            if (!$exists) {
+                return $this::respondWithError(31501);
+            }
 
-            // $postInfo->setLikes($postInfo->getLikes() + 1);
-            // $this->postInfoMapper->update($postInfo);
+            $postInfo->setLikes($postInfo->getLikes() + 1);
+            $this->postInfoMapper->update($postInfo);
 
             // Add Logic for Notification
-            $this->notificationQueue->enqueue(
+            $isQueued = $this->notificationQueue->enqueue(
                 PostLikeNotification::action(),
                 ['contentId' => $postId],
                 new UserInitiator($this->currentUserId),

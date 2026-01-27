@@ -81,10 +81,13 @@ class NotificationMapperImpl implements NotificationsMapper
             $notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor, $receiverObj);
 
             $sender = $senderResolver->resolve($receiverObj);
-            try{
+            try {
                 $sender->send($notificationPayload, $receiverObj);
-            }catch(\Exception $e){
-                $this->logger->error("Failed to send notification: " . $e->getMessage());
+            } catch (\Exception $exception) {
+                $this->logger->error('Failed to send notification', [
+                    'error' => $exception->getMessage(),
+                ]);
+                throw $exception;
             }
         }
 
