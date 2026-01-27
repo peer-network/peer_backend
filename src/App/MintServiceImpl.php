@@ -202,11 +202,18 @@ class MintServiceImpl implements MintService
         try {
             $mintDate = new DateTime($date);
         } catch (\Exception $e) {
+            $this->logger->warning('Invalid mint date provided', [
+                'day' => $date,
+                'error' => $e->getMessage(),
+            ]);
             return $this::respondWithErrorObject(30105);
         }
         $mintDate->setTime(0, 0, 0);
         $today = new DateTime('today');
-        if ($mintDate >= $today) {
+        if ($mintDate > $today) {
+            $this->logger->warning('Mint date is today or in the future', [
+                'day' => $date,
+            ]);
             return $this::respondWithErrorObject(30105);
         }
 
@@ -225,6 +232,9 @@ class MintServiceImpl implements MintService
             $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($date);
 
             if ($gems === null || empty($gems->rows)) {
+                $this->logger->info('No uncollected gems found for mint date', [
+                    'day' => $date,
+                ]);
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
@@ -232,6 +242,10 @@ class MintServiceImpl implements MintService
             $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
 
             if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
+                $this->logger->info('No distributable gems found after normalization', [
+                    'day' => $date,
+                    'overallTotal' => $gemsForDistribution->overallTotal,
+                ]);
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
