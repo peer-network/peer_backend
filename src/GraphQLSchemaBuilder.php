@@ -64,6 +64,7 @@ use Fawaz\App\AlphaMintService;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
+use Fawaz\App\PeerShopService;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -92,6 +93,7 @@ class GraphQLSchemaBuilder
         protected CommentInfoService $commentInfoService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
+        protected PeerShopService $peerShopService,
         protected AdvertisementService $advertisementService,
         protected MintService $mintService,
         protected JWTService $tokenService,
@@ -131,6 +133,8 @@ class GraphQLSchemaBuilder
                 $schema = $adminSchema;
             } elseif ($this->userRoles === Role::MODERATOR) { // Role::MODERATOR
                 $schema = $moderatorSchema;
+            }if ($this->userRoles === Role::PEER_SHOP) {
+                $schema = $userSchema;
             }
         }
 
@@ -227,6 +231,7 @@ class GraphQLSchemaBuilder
         $this->dailyFreeService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
+        $this->peerShopService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
@@ -1407,6 +1412,9 @@ class GraphQLSchemaBuilder
                 'operationid' => function (array $root): string {
                     return $root['operationid'] ?? '';
                 },
+                'transactionId' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
                 },
@@ -1634,6 +1642,43 @@ class GraphQLSchemaBuilder
                 'comment' => fn(array|null $root): ?array => $root['comment'] ?? null,
                 'user' => fn(array|null $root): ?array => $root['user'] ?? null,
             ],
+            'ShopOrderDetailsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ShopOrderDetailsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
+                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+                'meta' => fn(array $root): array => [
+                    'status' => $root['status'] ?? '',
+                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                    'RequestId' => $this->logger->getRequestUid(),
+                ],
+            ],
+            'ShopOrderDetails' => [
+                'shopOrderId' => fn(array $root): string => $root['shopOrderId'] ?? '',
+                'shopItemId' => fn(array $root): string => $root['shopItemId'] ?? '',
+                'shopItemSpecs' => fn(array $root): array => $root['shopItemSpecs'] ?? [],
+                'deliveryDetails' => fn(array $root): array => $root['deliveryDetails'] ?? [],
+                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+            ],
+            'ShopItemSpecs' =>[
+                'size' => fn(array $root): string => $root['size'] ?? '',
+            ],
+            'ShopOrderDeliveryDetails' => [
+                'name' => fn(array $root): string => $root['name'] ?? '',
+                'email' => fn(array $root): string => $root['email'] ?? '',
+                'addressline1' => fn(array $root): string => $root['addressline1'] ?? '',
+                'addressline2' => fn(array $root): string => $root['addressline2'] ?? '',
+                'city' => fn(array $root): string => $root['city'] ?? '',
+                'zipcode' => fn(array $root): string => $root['zipcode'] ?? '',
+                'country' => fn(array $root): string => $root['country'] ?? '',
+            ],
+            'ShopSupportedDeliveryCountry' => [
+                'country' => fn(array $root): string => $root['country'] ?? '',
+            ],
+
         ];
     }
 
@@ -1684,6 +1729,7 @@ class GraphQLSchemaBuilder
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
             'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
             'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
@@ -1725,6 +1771,7 @@ class GraphQLSchemaBuilder
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
         ];
     }
 
@@ -3220,4 +3267,76 @@ class GraphQLSchemaBuilder
             return self::respondWithError(40301);
         }
     }
+
+    
+    protected function performShopOrder(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.performShopOrder started');
+
+        $validation = RequestValidator::validate($args, ['tokenAmount', 'shopItemId']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'addressline2']);
+
+        if ($orderValidation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $orderValidation->errors[0]
+            );
+        }
+
+        if($args['orderDetails']['shopItemSpecs'] && !empty($args['orderDetails']['shopItemSpecs'])){
+            $orderValidation = RequestValidator::validate($args['orderDetails']['shopItemSpecs'], ['size']);
+            if ($orderValidation instanceof ValidatorErrors) {
+                return $this::respondWithError(
+                    $orderValidation->errors[0]
+                );
+            }
+        }
+
+        $results = $this->peerShopService->performShopOrder($args);
+
+
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        }
+
+        $this->logger->info('Query.performShopOrder successful');
+        return $results;
+    }
+
+
+    public function shopOrderDetails(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.shopOrderDetails started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validation = RequestValidator::validate($args, ['transactionId']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        try {
+            return $this->peerShopService->shopOrderDetails($validation);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.shopOrderDetails", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
+        }
+
+    }
+
 }

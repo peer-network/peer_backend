@@ -638,6 +638,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                 )
                 SELECT 
                     r.operationid,
+                    r.transactionid,
                     r.transactiontype,
                     r.transactioncategory,
                     r.senderid,
@@ -675,6 +676,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
 
             $tiData = [
+                'transactionid' => (string)($row['transactionid'] ?? ''),
                 'operationid' => (string)($row['operationid'] ?? ''),
                 'transactiontype' => (string)($row['transactiontype'] ?? ''),
                 'transactioncategory' => (string)($row['transactioncategory'] ?? ''),
