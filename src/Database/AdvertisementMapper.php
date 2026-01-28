@@ -841,11 +841,16 @@ class AdvertisementMapper
         $tag    = $args['tag']    ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
+        $title    = $args['title']    ?? null;
 
         $whereClauses[] = "p.feedid IS NULL";
         $params['currentUserId'] = $currentUserId;
 
 
+        if ($title !== null) {
+            $whereClauses[] = "p.title ILIKE :title";
+            $params['title'] = '%' . $title . '%';
+        }
 
         if ($postId !== null) {
             $whereClauses[] = "p.postid = :postId";
