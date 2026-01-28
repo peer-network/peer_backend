@@ -2937,6 +2937,77 @@
       "response": []
     },
     {
+      "name": "Advertisement history shops post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"12002\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "pm.test(\"Ad and post IDs match env\", function () {",
+              "    const ad = pm.response.json()",
+              "        ?.data?.advertisementHistory?.affectedRows?.advertisements?.[0];",
+              "",
+              "    pm.expect(ad.id).to.eql(pm.environment.get(\"shopAddId\"));",
+              "    pm.expect(ad.post.id).to.eql(pm.environment.get(\"shopItemId_2\"));",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query AdvertisementHistory {\n    advertisementHistory(filter: { userId: \"{{shop}}\" }) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    iFollowThisUser\n                    thisUserFollowsMe\n                    isreported\n                    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        visibilityStatus\n                        isHiddenForUsers\n                        hasActiveReports\n                        isfollowed\n                        isfollowing\n                        iFollowThisUser\n                        thisUserFollowsMe\n                        isreported\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        visibilityStatus\n                        isHiddenForUsers\n                        hasActiveReports\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isreported\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            visibilityStatus\n                            isHiddenForUsers\n                            hasActiveReports\n                            isfollowed\n                            isfollowing\n                            iFollowThisUser\n                            thisUserFollowsMe\n                            isreported\n                            isfriend\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Like boosted shop post",
       "event": [
         {
