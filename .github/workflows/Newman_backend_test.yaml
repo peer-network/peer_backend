@@ -266,6 +266,7 @@ jobs:
           BURN_ACCOUNT="${{ secrets.BURN_ACCOUNT }}"
           LIQUIDITY_POOL="${{ secrets.LIQUIDITY_POOL }}"
           BTC_POOL="${{ secrets.BTC_POOL }}"
+          PEER_SHOP="${{ secrets.PEER_SHOP }}"
           EOF
  
       - name: Show .env File (excluding password)

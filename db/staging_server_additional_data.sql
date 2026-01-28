@@ -125,6 +125,38 @@ INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b
 
 INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', null, '[]');
 
+-- illegal_user
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, visibility_status)
+VALUES ('4c24550b-1229-413b-a9dd-ba0dcaef42bc', 'illegal@mail.com', 'legal',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 0, '75.50.101.245',
+'/profile/4c24550b-1229-413b-a9dd-ba0dcaef42bc.jpg',
+'/userData/4c24550b-1229-413b-a9dd-ba0dcaef42bc.txt', 'illegal');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('4c24550b-1229-413b-a9dd-ba0dcaef42bc', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('4c24550b-1229-413b-a9dd-ba0dcaef42bc', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('4c24550b-1229-413b-a9dd-ba0dcaef42bc', 100000, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('4c24550b-1229-413b-a9dd-ba0dcaef42bc', null, '[]');
+
+-- hidden_user
+INSERT INTO users (uid, email, username, password, status, verified, slug, roles_mask, ip, img, biography, visibility_status)
+VALUES ('7ac6183f-024f-4df0-9e53-0d16967d22ad', 'hidden@mail.com', 'nothidden',
+'$argon2id$v=19$m=65536,t=3,p=2$OXF0NlY5R09xRDRXLkREaw$E/P8IL1rNIRboG0Bl39kkNm9ozcoVxtNH/6NogztAD0', 0, 1, 97183, 0, '75.50.101.245',
+'/profile/7ac6183f-024f-4df0-9e53-0d16967d22ad.jpg',
+'/userData/7ac6183f-024f-4df0-9e53-0d16967d22ad.txt', 'hidden');
+
+INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('7ac6183f-024f-4df0-9e53-0d16967d22ad', 0, 0, 0);
+
+INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
+VALUES ('7ac6183f-024f-4df0-9e53-0d16967d22ad', 100000, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('7ac6183f-024f-4df0-9e53-0d16967d22ad', 100000, 0);
+
+INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('7ac6183f-024f-4df0-9e53-0d16967d22ad', null, '[]');
+
 
 --action_prices
 INSERT INTO action_prices (post_price, like_price, dislike_price, comment_price, currency) 
@@ -226,7 +258,201 @@ INSERT INTO advertisements_log (
     date_trunc('day', NOW()) - INTERVAL '2 days' + INTERVAL '001 milliseconds'
 );
 
--- post_info for advertisement posts
+-- hidden_image_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    '1cda4a51-1f9f-4511-a4a8-3ddaaa3ad0fe',
+    '7ac6183f-024f-4df0-9e53-0d16967d22ad',
+    NULL,
+    'image',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/image/1cda4a51-1f9f-4511-a4a8-3ddaaa3ad0fe.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'hidden'
+);
+
+-- hidden_video_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    'da20bb66-de6c-4b7a-a70e-326c83c6c51e',
+    '7ac6183f-024f-4df0-9e53-0d16967d22ad',
+    NULL,
+    'video',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/video/da20bb66-de6c-4b7a-a70e-326c83c6c51e.mp4","options":{"size":"363.12 KB","duration":"00:00:00","ratio":"9:16","resolution":"720x1280"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'hidden'
+);
+
+-- hidden_audio_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    '591449de-718a-45e4-919e-08c997763bcf',
+    '7ac6183f-024f-4df0-9e53-0d16967d22ad',
+    NULL,
+    'audio',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/audio/591449de-718a-45e4-919e-08c997763bcf.mp3","options":{"size":"907.41 KB","duration":"00:02:12"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'hidden'
+);
+
+-- hidden_text_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    'dfa7926c-ca50-460d-a79f-9327db9d0da4',
+    '7ac6183f-024f-4df0-9e53-0d16967d22ad',
+    NULL,
+    'text',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/text/dfa7926c-ca50-460d-a79f-9327db9d0da4.txt","options":{"size":"22.00 B"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'hidden'
+);
+
+--hidden_comment
+INSERT INTO comments (
+    commentid,
+    userid,
+    postid,
+    parentid,
+    content,
+    status,
+    createdat,
+    visibility_status
+) VALUES (
+    '3c0d64f9-18a1-4148-9ec8-2bed5c40b90d',
+    '7ac6183f-024f-4df0-9e53-0d16967d22ad',
+    '1cda4a51-1f9f-4511-a4a8-3ddaaa3ad0fe',
+    NULL,
+    'Test Moderation Comment',
+    10,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'hidden'
+);
+
+-- illegal_image_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    '7c7087a9-b485-4025-bb0b-67ac35fc1623',
+    '4c24550b-1229-413b-a9dd-ba0dcaef42bc',
+    NULL,
+    'image',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/image/7c7087a9-b485-4025-bb0b-67ac35fc1623.webp","options":{"size":"4.27 KB","resolution":"200x300"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'illegal'
+);
+
+-- illegal_video_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    '4a17e013-23aa-402e-b905-bbca6afaa503',
+    '4c24550b-1229-413b-a9dd-ba0dcaef42bc',
+    NULL,
+    'video',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/video/4a17e013-23aa-402e-b905-bbca6afaa503.mp4","options":{"size":"363.12 KB","duration":"00:00:00","ratio":"9:16","resolution":"720x1280"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'illegal'
+);
+
+-- illegal_audio_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    'af55542f-4214-414d-8803-403049dc3c19',
+    '4c24550b-1229-413b-a9dd-ba0dcaef42bc',
+    NULL,
+    'audio',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/audio/af55542f-4214-414d-8803-403049dc3c19.mp3","options":{"size":"907.41 KB","duration":"00:02:12"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'illegal'
+);
+
+-- illegal_text_post
+INSERT INTO posts (
+    postid, userid, feedid, contenttype, title, mediadescription,
+    media, cover, options, status, createdat, visibility_status
+) VALUES (
+    '86f66adc-678c-41fd-9d18-fcd49b3f18d6',
+    '4c24550b-1229-413b-a9dd-ba0dcaef42bc',
+    NULL,
+    'text',
+    'Test Moderation Post',
+    'This is a test post used for moderation tests.',
+    '[{"path":"/text/86f66adc-678c-41fd-9d18-fcd49b3f18d6.txt","options":{"size":"22.00 B"}}]',
+    NULL,
+    NULL,
+    1,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'illegal'
+);
+
+--illegal_comment
+INSERT INTO comments (
+    commentid,
+    userid,
+    postid,
+    parentid,
+    content,
+    status,
+    createdat,
+    visibility_status
+) VALUES (
+    '07570955-ce46-4b52-b784-6b47683f1872',
+    '4c24550b-1229-413b-a9dd-ba0dcaef42bc',
+    '7c7087a9-b485-4025-bb0b-67ac35fc1623',
+    NULL,
+    'Test Moderation Comment',
+    10,
+    date_trunc('day', NOW()) - INTERVAL '3 days' + INTERVAL '001 milliseconds',
+    'illegal'
+);
+
+-- post_info 
 INSERT INTO post_info (
     postid, userid, likes, dislikes, reports, views, saves, shares, comments, createdat, count_content_moderation_dismissed, totalreports
 )
@@ -246,5 +472,13 @@ SELECT
 FROM posts p
 WHERE p.postid IN (
     '4008c0dd-296c-46d3-811d-f90a2c077757',
-    '1008c0dd-296c-46d3-811d-f90a2c077757'
+    '1008c0dd-296c-46d3-811d-f90a2c077757',
+    '1cda4a51-1f9f-4511-a4a8-3ddaaa3ad0fe',
+    'da20bb66-de6c-4b7a-a70e-326c83c6c51e',
+    '591449de-718a-45e4-919e-08c997763bcf',
+    'dfa7926c-ca50-460d-a79f-9327db9d0da4',
+    '7c7087a9-b485-4025-bb0b-67ac35fc1623',
+    '4a17e013-23aa-402e-b905-bbca6afaa503',
+    'af55542f-4214-414d-8803-403049dc3c19',
+    '86f66adc-678c-41fd-9d18-fcd49b3f18d6'
 );
