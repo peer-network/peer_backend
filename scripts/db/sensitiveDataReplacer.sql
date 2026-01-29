@@ -48,7 +48,7 @@ UPDATE posts SET
         ELSE NULL END,
     media = CASE WHEN media IS NOT NULL THEN 
         CONCAT('media_', (RANDOM()*1000000)::INT, '.jpg') 
-        ELSEs NULL END,
+        ELSE NULL END,
     cover = CASE WHEN cover IS NOT NULL THEN 
         CONCAT('cover_', (RANDOM()*1000000)::INT, '.jpg') 
         ELSE NULL END;
@@ -149,28 +149,5 @@ UPDATE logdaten SET
     url = CONCAT('/path/', (RANDOM()*1000)::INT),
     location = CASE WHEN location IS NOT NULL THEN 
         CONCAT('City ', (RANDOM()*100)::INT) 
-        ELSE NULL END,
-    request_payload = NULL;
-
--- Financial data randomization (preserving structure but changing values)
--- UPDATE wallet SET
---     numbers = (RANDOM()*1000)::NUMERIC(30,10),
---     numbersq = (RANDOM()*1000)::NUMERIC(64);
-
--- UPDATE wallett SET
---     liquidity = (RANDOM()*10000)::NUMERIC(30,10),
---     liquiditq = (RANDOM()*10000)::NUMERIC(64);
-
--- UPDATE gems SET
---     gems = (RANDOM()*100)::NUMERIC(30,10);
-
--- UPDATE mcap SET
---     coverage = (RANDOM()*1000000)::NUMERIC(30,10),
---     tokenprice = (RANDOM()*100)::NUMERIC(30,10),
---     gemprice = (RANDOM()*10)::NUMERIC(30,10),
---     daygems = (RANDOM()*1000)::NUMERIC(30,10),
---     daytokens = (RANDOM()*1000)::NUMERIC(30,10),
---     totaltokens = (RANDOM()*1000000)::NUMERIC(30,10);
-
--- Commit transaction
+        ELSE NULL END;
 COMMIT;
