@@ -49,11 +49,6 @@ class CommentService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
     protected function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -119,7 +114,6 @@ class CommentService
         }
 
         try {
-            $this->transactionManager->beginTransaction();
             $commentId = $this->generateUUID();
 
             $commentData = [
@@ -128,6 +122,7 @@ class CommentService
                 'postid' => $postId,
                 'parentid' => $parentId,
                 'content' => $content,
+                'visibility_status' => 'normal',
             ];
 
             // Post speichern
@@ -145,14 +140,12 @@ class CommentService
 
             if (!$result) {
                 $this->logger->error('Failed to insert comment into database', ['commentData' => $commentData]);
-                $this->transactionManager->rollback();
                 return $this::respondWithError(41602);
             }
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
                 $this->logger->warning('PostInfo not found for postId', ['postId' => $postId]);
-                $this->transactionManager->rollback();
                 return $this::respondWithError(31602);
             }
 
@@ -164,7 +157,7 @@ class CommentService
                 'userid' => $this->currentUserId,
                 'likes' => 0,
                 'reports' => 0,
-                'comments' => 0,
+                'comments' => 0
             ];
             $commentInfo = new CommentInfo($commentInfoData);
             $this->commentInfoMapper->insert($commentInfo);
@@ -185,7 +178,6 @@ class CommentService
             $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
             $response = [$commentResponse];
 
-            $this->transactionManager->commit();
             $this->logger->info('CommentService.createComment completed successfully');
             return [
                 'status' => 'success',
@@ -194,7 +186,6 @@ class CommentService
                 'affectedRows' => $response,
             ];
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('Error occurred while creating comment', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -248,16 +239,8 @@ class CommentService
         return $results;
     }
 
-    public function fetchAllByPostIdetaild(string $postId, int $offset = 0, int $limit = 10, ?string $contentFilterBy = null): array
+    public function fetchAllByPostIdetaild(string $postId, int $offset, int $limit, array $specifications): array
     {
-        return $this->commentMapper->fetchAllByPostIdetaild($postId, $this->currentUserId, $offset, $limit, $contentFilterBy);
-    }
-
-    /**
-     * Get Comments for Geust based on Filter
-     */
-    public function fetchAllByGuestPostIdetaild(string $postId, int $offset = 0, int $limit = 10): array
-    {
-        return $this->commentMapper->fetchAllByGuestPostIdetaild($postId, $offset, $limit);
+        return $this->commentMapper->fetchAllByPostIdetaild($postId, $specifications, $this->currentUserId, $offset, $limit);
     }
 }

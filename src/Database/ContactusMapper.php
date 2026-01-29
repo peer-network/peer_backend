@@ -29,7 +29,7 @@ class ContactusMapper
                           LIMIT 1
                       ) AS exists_flag";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':email', $email, \PDO::PARAM_STR);
+            $stmt->bindValue(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
 
             $exists = (bool) $stmt->fetchColumn();
@@ -58,10 +58,10 @@ class ContactusMapper
         try {
             $query = "SELECT request_count, last_request FROM contactus_rate_limit WHERE ip = :ip";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
             $stmt->execute();
 
-            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
             $now = new \DateTime();
 
             if ($result) {
@@ -77,15 +77,15 @@ class ContactusMapper
                           SET request_count = request_count + 1, last_request = :now
                           WHERE ip = :ip";
                 $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
+                $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), PDO::PARAM_STR);
                 $stmt->execute();
             } else {
                 $query = "INSERT INTO contactus_rate_limit (ip, request_count, last_request)
                           VALUES (:ip, 1, :now)";
                 $stmt = $this->db->prepare($query);
-                $stmt->bindValue(':ip', $ip, \PDO::PARAM_STR);
-                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), \PDO::PARAM_STR);
+                $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+                $stmt->bindValue(':now', $now->format('Y-m-d H:i:s'), PDO::PARAM_STR);
                 $stmt->execute();
             }
 
@@ -107,8 +107,8 @@ class ContactusMapper
 
         try {
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
 
             $results = array_map(fn ($row) => new Contactus($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -137,10 +137,10 @@ class ContactusMapper
         try {
             $sql = "SELECT * FROM contactus WHERE msgid = :id";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 return new Contactus($data);
@@ -165,10 +165,10 @@ class ContactusMapper
         try {
             $sql = "SELECT * FROM contactus WHERE name = :name";
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':name', $name, \PDO::PARAM_STR);
+            $stmt->bindValue(':name', $name, PDO::PARAM_STR);
             $stmt->execute();
 
-            $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($data !== false) {
                 $this->logger->info("Contact found with name", ['data' => $data]);
@@ -196,11 +196,11 @@ class ContactusMapper
             $query = "INSERT INTO contactus (name, email, message, ip, createdat) VALUES (:name, :email, :message, :ip, :createdat) RETURNING msgid";
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':name', $data['name'], \PDO::PARAM_STR);
-            $stmt->bindValue(':email', $data['email'], \PDO::PARAM_STR);
-            $stmt->bindValue(':message', $data['message'], \PDO::PARAM_STR);
-            $stmt->bindValue(':ip', $data['ip'], \PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $data['createdat'], \PDO::PARAM_STR);
+            $stmt->bindValue(':name', $data['name'], PDO::PARAM_STR);
+            $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+            $stmt->bindValue(':message', $data['message'], PDO::PARAM_STR);
+            $stmt->bindValue(':ip', $data['ip'], PDO::PARAM_STR);
+            $stmt->bindValue(':createdat', $data['createdat'], PDO::PARAM_STR);
             $stmt->execute();
 
             $generatedContactId = $stmt->fetchColumn();
@@ -219,7 +219,6 @@ class ContactusMapper
                 'data' => $contact->getArrayCopy(),
             ]);
             throw new \RuntimeException("Unexpected error during contact creation");
-            return null;
         }
     }
 
@@ -234,8 +233,8 @@ class ContactusMapper
             $query = "UPDATE contactus SET collected = :collected WHERE msgid = :msgid";
             $stmt = $this->db->prepare($query);
 
-            $stmt->bindValue(':collected', $data['collected'], \PDO::PARAM_INT);
-            $stmt->bindValue(':msgid', $data['msgid'], \PDO::PARAM_INT);
+            $stmt->bindValue(':collected', $data['collected'], PDO::PARAM_INT);
+            $stmt->bindValue(':msgid', $data['msgid'], PDO::PARAM_INT);
 
             $stmt->execute();
 
@@ -263,7 +262,7 @@ class ContactusMapper
         try {
             $query = "DELETE FROM contactus WHERE msgid = :id";
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':id', $id, \PDO::PARAM_INT); // Explizite Parameterbindung
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT); // Explizite Parameterbindung
 
             $stmt->execute();
 

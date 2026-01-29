@@ -25,26 +25,6 @@ class ContactusService
         $this->currentUserId = $userId;
     }
 
-    private function generateUUID(): string
-    {
-        return \sprintf(
-            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0x0fff) | 0x4000,
-            \mt_rand(0, 0x3fff) | 0x8000,
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff),
-            \mt_rand(0, 0xffff)
-        );
-    }
-
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -52,25 +32,6 @@ class ContactusService
             return false;
         }
         return true;
-    }
-
-    private function isValidName(?string $Name): bool
-    {
-        $contactConfig = ConstantsConfig::contact();
-        return $Name &&
-            strlen($Name) >= $contactConfig['NAME']['MIN_LENGTH'] &&
-            strlen($Name) <= $contactConfig['NAME']['MAX_LENGTH'] &&
-            preg_match('/' . $contactConfig['NAME']['PATTERN'] . '/u', $Name);
-    }
-
-    private function validateRequiredFields(array $args, array $requiredFields): array
-    {
-        foreach ($requiredFields as $field) {
-            if (empty($args[$field])) {
-                return $this::respondWithError(00000);//"$field is required"
-            }
-        }
-        return [];
     }
 
     public function insert(Contactus $contact): ?Contactus
@@ -87,7 +48,7 @@ class ContactusService
             $this->transactionManager->rollBack();
             $this->logger->error("Error occurred in ContactusService.insert", [
                 'error' => $e->getMessage(),
-                'contact' => $contact->getArrayCopy(),
+                'msgid' => $contact->getMsgId(),
             ]);
             return null;
         }

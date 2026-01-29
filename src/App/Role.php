@@ -12,16 +12,16 @@ final class Role
     public const BURN_ACCOUNT = 4;
     public const WEB3_BRIDGE_USER = 8;
     public const ADMIN = 16;
-    public const CONTRIBUTOR = 32;
+    public const PEER_SHOP = 32;
     public const COORDINATOR = 64;
     public const CREATOR = 128;
-    public const SUPER_MODERATOR = 256;
+    public const MODERATOR = 256;
     public const DIRECTOR = 512;
     public const EDITOR = 1024;
     public const EMPLOYEE = 2048;
     public const MAINTAINER = 4096;
     public const SUPER_EDITOR = 8192;
-    public const MODERATOR = 16384;
+    public const SUPER_MODERATOR = 16384;
     public const PUBLISHER = 32768;
     public const REVIEWER = 65536;
     public const SUBSCRIBER = 131072;
@@ -50,4 +50,21 @@ final class Role
     private function __construct()
     {
     }
+
+    /**
+     * Maps a roles mask to an array of role names.
+     *
+     * Should only return valid roles.
+     */
+    public static function mapRolesMaskToNames(int $rolesMask): array
+    {
+        $map = self::getMap();
+
+        if (isset($map[$rolesMask])) {
+            return [$map[$rolesMask]];
+        }
+
+        return [];
+    }
+
 }

@@ -10,7 +10,6 @@ use Fawaz\Filter\PeerInputFilter;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\ResponseHelper;
 use getID3;
-use FFMpeg\FFProbe;
 
 class MultipartPost
 {
@@ -106,7 +105,7 @@ class MultipartPost
      */
     public function validateMediaContentTypes(): void
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -147,7 +146,7 @@ class MultipartPost
      */
     public function validateMediaAllow(): void
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
         }
 
@@ -199,7 +198,7 @@ class MultipartPost
      */
     public function validateSameContentTypes(): string|bool
     {
-        if (empty($this->media) && !is_array($this->media)) {
+        if (empty($this->media)) {
             return false;
         }
 
@@ -380,7 +379,7 @@ class MultipartPost
             ];
         }
 
-        return isset($allMetadata) && is_array($allMetadata) ? $allMetadata : [];
+        return isset($allMetadata) ? $allMetadata : [];
     }
 
 
@@ -446,8 +445,8 @@ class MultipartPost
             }
 
             $information['duration'] = isset($fileInfo['playtime_seconds']) ? (float)$fileInfo['playtime_seconds'] : null;
-            $information['ratiofrm'] = isset($ratio) ? $ratio : null;
-            $information['resolution'] = isset($auflg) ? $auflg : null;
+            $information['ratiofrm'] = $ratio ?? null;
+            $information['resolution'] = $auflg ?? null;
 
             return isset($information) ? (array)$information : null;
 
@@ -544,50 +543,50 @@ class MultipartPost
 
     }
 
-    /** UNUSED Method
-     *
-     * Subfolder options for Audio and Video only for webm file format
-     *
-     * Keeping it for future use
-     */
-    private function checkForWebmFormat(string $media): string
-    {
+    // /** UNUSED Method
+    //  *
+    //  * Subfolder options for Audio and Video only for webm file format
+    //  *
+    //  * Keeping it for future use
+    //  */
+    // private function checkForWebmFormat(string $media): string
+    // {
 
-        $tempDirectoryPath = __DIR__ . "/../../../runtime-data/media/tmp/";
-        $audioDirectoryPath = __DIR__ . "/../../../runtime-data/media/audio/";
-        $VideoDirectoryPath = __DIR__ . "/../../../runtime-data/media/video/";
+    //     $tempDirectoryPath = __DIR__ . "/../../../runtime-data/media/tmp/";
+    //     $audioDirectoryPath = __DIR__ . "/../../../runtime-data/media/audio/";
+    //     $VideoDirectoryPath = __DIR__ . "/../../../runtime-data/media/video/";
 
 
-        if (file_exists($tempDirectoryPath.$media)) {
-            $filePath = $tempDirectoryPath.$media;
-        } elseif (file_exists($audioDirectoryPath.$media)) {
-            $filePath = $audioDirectoryPath.$media;
-        } elseif (file_exists($VideoDirectoryPath.$media)) {
-            $filePath = $VideoDirectoryPath.$media;
-        } else {
-            throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
-        }
+    //     if (file_exists($tempDirectoryPath.$media)) {
+    //         $filePath = $tempDirectoryPath.$media;
+    //     } elseif (file_exists($audioDirectoryPath.$media)) {
+    //         $filePath = $audioDirectoryPath.$media;
+    //     } elseif (file_exists($VideoDirectoryPath.$media)) {
+    //         $filePath = $VideoDirectoryPath.$media;
+    //     } else {
+    //         throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
+    //     }
 
-        if (file_exists($filePath)) {
-            $ffprobe = FFProbe::create();
-            $streams = $ffprobe->streams($filePath);
+    //     if (file_exists($filePath)) {
+    //         $ffprobe = FFProbe::create();
+    //         $streams = $ffprobe->streams($filePath);
 
-            $videoStrim = [];
-            foreach ($streams as $stream) {
-                $videoStrim[] = $stream->get('codec_type');
-            }
+    //         $videoStrim = [];
+    //         foreach ($streams as $stream) {
+    //             $videoStrim[] = $stream->get('codec_type');
+    //         }
 
-            if (in_array('video', $videoStrim)) {
-                return 'video';
-            } elseif (in_array('audio', $videoStrim)) {
-                return 'audio';
-            } else {
-                throw new ValidationException("Invalid file type", [30102]); // Media should not be empty
-            }
-        }
+    //         if (in_array('video', $videoStrim)) {
+    //             return 'video';
+    //         } elseif (in_array('audio', $videoStrim)) {
+    //             return 'audio';
+    //         } else {
+    //             throw new ValidationException("Invalid file type", [30102]); // Media should not be empty
+    //         }
+    //     }
 
-        throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
-    }
+    //     throw new ValidationException("Media should not be empty", [30102]); // Media should not be empty
+    // }
 
     /**
      * Define validation

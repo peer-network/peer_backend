@@ -26,7 +26,7 @@ class Tokenize
         $this->userid = $data['userid'] ?? '';
         $this->attempt = $data['attempt'] ?? 0;
         $this->expiresat = $data['expiresat'] ?? 0;
-        $this->updatedat = $data['updatedat'] ?? (new DateTime())->format('Y-m-d H:i:s.u');
+        $this->updatedat = $data['updatedat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
     }
 
     // Array Copy methods

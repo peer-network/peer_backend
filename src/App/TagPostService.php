@@ -41,11 +41,6 @@ class TagPostService
         );
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^\{?[a-fA-F0-9]{8}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{4}\-[a-fA-F0-9]{12}\}?$/', $uuid) === 1;
-    }
-
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
@@ -64,23 +59,6 @@ class TagPostService
             preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName);
     }
 
-    private function validateTagName(string $tagName): array|bool
-    {
-        if ($tagName === '') {
-            return $this::respondWithError(30101);
-        }
-
-        $tagNameConfig = ConstantsConfig::post()['TAG'];
-
-        if (strlen($tagName) < $tagNameConfig['MIN_LENGTH'] ||
-            strlen($tagName) > $tagNameConfig['MAX_LENGTH'] ||
-            !preg_match('/' . $tagNameConfig['PATTERN'] . '/u', $tagName)) {
-            return $this::respondWithError(30255);
-        }
-
-        return true;
-    }
-
     public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
@@ -92,8 +70,14 @@ class TagPostService
             return $this::respondWithError(30211);
         }
 
+        $seenTags = [];
         foreach ($tags as $tagName) {
-            $tagName = trim($tagName);
+            $tagName = strtolower(trim((string) $tagName));
+
+            if (isset($seenTags[$tagName])) {
+                continue;
+            }
+            $seenTags[$tagName] = true;
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
                 return $this::respondWithError(30255);
@@ -106,7 +90,7 @@ class TagPostService
             $tagPost = new TagPost([
                 'postid' => $postId,
                 'tagid' => $tag->getTagId(),
-                'createdat' => (new \DateTime())->format('Y-m-d H:i:s.u'),
+                'createdat' => new \DateTime()->format('Y-m-d H:i:s.u'),
             ]);
             $this->tagPostMapper->insert($tagPost);
         }
@@ -122,7 +106,7 @@ class TagPostService
 
         $this->logger->debug('TagService.createTag started');
 
-        $tagName = trim($tagName);
+        $tagName = strtolower(trim($tagName));
         if (!$this->isValidTagName($tagName)) {
             return $this::respondWithError(30255);
         }

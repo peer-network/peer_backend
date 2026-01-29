@@ -151,6 +151,10 @@
         "comment": "Success: Successfully returned static tokenomics information",
         "userFriendlyComment": "Tokenomics information loaded successfully"
     },
+    "11215": {
+        "comment": "Success: Successfully retrieved transaction history.",
+        "userFriendlyComment": "Transaction history loaded successfully."
+    },
     "11301": {
         "comment": "Success: Payment completed successfully",
         "userFriendlyComment": "Payment processed successfully!"
@@ -319,6 +323,10 @@
         "comment": "Success: An email will be sent to your mail address if an account associated with it exists",
         "userFriendlyComment": "If an account exists, you'll receive an email with instructions."
     },
+    "11902": {
+        "comment": "Success: Reset Password Token is valid",
+        "userFriendlyComment": "Reset Password Token is valid"
+    },
     "12001": {
         "comment": "Advertisement post created successfully.",
         "userFriendlyComment": "Success: Advertisement post created successfully."
@@ -339,6 +347,15 @@
         "comment": "Advertisement post updated successfully.",
         "userFriendlyComment": "Success: Advertisement post updated successfully."
     },
+    "12201": {
+        "comment": "Shop order placed successfully.",
+        "userFriendlyComment": "Success: Your order has been placed."
+    },
+    "12202": {
+        "comment": "Shop order retrieved successfully.",
+        "userFriendlyComment": "Shop order loaded."
+    },
+
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
@@ -470,6 +487,10 @@
     "22002": {
         "comment": "Information Not Found: No advertisements found. Please try again later or create an advertisement",
         "userFriendlyComment": "No advertisements available. Try again later or create one!"
+    },
+    "22101": {
+        "comment": "Shop order not found. No matching order exists right now. Try again later or create a new shop order.",
+        "userFriendlyComment": "We couldn’t find a shop order yet. Please try again later or create one."
     },
     "30101": {
         "comment": "All required fields must be provided",
@@ -660,8 +681,8 @@
         "userFriendlyComment": "Transaction ID is required."
     },
     "30243": {
-        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_TOKENS} tokens",
-        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_TOKENS} tokens."
+        "comment": "The 'tokenAmount' field (Transaction amount) must be more than {USER.TRANSACTION.MIN_AMOUNT} tokens",
+        "userFriendlyComment": "Minimum transaction is {USER.TRANSACTION.MIN_AMOUNT} tokens."
     },
     "30244": {
         "comment": "The 'value' field must be an integer",
@@ -740,8 +761,8 @@
         "userFriendlyComment": "Media description must be {POST.MEDIADESCRIPTION.MIN_LENGTH}-{POST.MEDIADESCRIPTION.MAX_LENGTH} characters."
     },
     "30264": {
-        "comment": "The numberoftokens field must be a number, greater than zero, and less than the account balance",
-        "userFriendlyComment": "Token amount must be positive and within your balance."
+        "comment": "The 'amount' field must be at least {USER.TRANSACTION.MIN_AMOUNT} and contain no more than {USER.TRANSACTION.MAX_DECIMALS} decimal places.",
+        "userFriendlyComment": "Amount must be at least {USER.TRANSACTION.MIN_AMOUNT} and include a maximum of {USER.TRANSACTION.MAX_DECIMALS} decimal places."
     },
     "30265": {
         "comment": "The 'content' field must be between {COMMENT.CONTENT.MIN_LENGTH} and {COMMENT.CONTENT.MAX_LENGTH} characters long",
@@ -762,6 +783,46 @@
     "30269": {
         "comment": "The 'advertisementId' field must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)",
         "userFriendlyComment": "Advertisement ID format. Please check and try again."
+    },
+    "30270": {
+        "comment": "The 'transfer message' field must be between {USER.TRANSFER_MESSAGE.MIN_LENGTH} and {USER.TRANSFER_MESSAGE.MAX_LENGTH} characters long",
+        "userFriendlyComment": "Message must be {USER.TRANSFER_MESSAGE.MIN_LENGTH}-{USER.TRANSFER_MESSAGE.MAX_LENGTH} characters."
+    },
+    "30271": {
+        "comment": "The 'transfer message' field must not contain control symbols and links.",
+        "userFriendlyComment": "Message must not contain control symbols and links."
+    },
+    "30272": {
+        "comment": "UUID must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX).",
+        "userFriendlyComment": "That ID doesn’t look right. Please check it and try again."
+    },
+    "30273": {
+        "comment": "addressLine1 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
+    },
+    "30274": {
+        "comment": "city must be a valid city name.",
+        "userFriendlyComment": "Please enter a valid city."
+    },
+    "30275": {
+        "comment": "zipCode must be a valid postal/ZIP code.",
+        "userFriendlyComment": "Please enter a valid ZIP/postal code."
+    },
+    "30276": {
+        "comment": "country must be a valid country value.",
+        "userFriendlyComment": "Please select a valid country."
+    },
+    "30277": {
+        "comment": "name must be a valid name.",
+        "userFriendlyComment": "Please enter a valid name."
+    },
+    "30278": {
+        "comment": "size must be not more than {PEER_SHOP.SIZE.MAX_LENGTH}.",
+        "userFriendlyComment": "Please enter a valid size {PEER_SHOP.SIZE.MAX_LENGTH}."
+    },
+    "30279": {
+        "comment": "addressLine2 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
     },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
@@ -847,7 +908,15 @@
         "comment": "INVALID_ONBOARDING_VALUE — input contains onboarding not listed in AVAILABLE_ONBOARDINGS",
         "userFriendlyComment": "The onboarding value you entered is not valid. Please select a valid option and try again."
     },
-     "31101": {
+    "31012": {
+        "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
+        "userFriendlyComment": "Please provide either a user ID or a username, not both."
+    },
+    "31013": {
+        "comment": "Profile updates blocked due to moderation",
+        "userFriendlyComment": "Profile updates blocked due to moderation."
+    },
+    "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
     },
@@ -871,6 +940,10 @@
         "comment": "Information Not Found: The user you tried to block does not exist. ",
         "userFriendlyComment": "User not found."
     },
+    "31107": {
+        "comment": "It is forbidden to interact with this User(System Account)",
+        "userFriendlyComment": "It is forbidden to interact with this User(System Account)"
+    },
     "31201": {
         "comment": "Market capitalization data is not available for the provided UUID",
         "userFriendlyComment": "Market data unavailable for this ID."
@@ -882,6 +955,14 @@
     "31203": {
         "comment": "Unauthorized to initiate transfers to Pool accounts.",
         "userFriendlyComment": "You are not authorized to transfer to pool accounts."
+    },
+    "31204": {
+        "comment": "Minting for the given day has already been performed.",
+        "userFriendlyComment": "Minting for this day has already been completed."
+    },
+    "31205": {
+        "comment": "Unauthorized to place shop order.",
+        "userFriendlyComment": "You are not authorized to place a shop order."
     },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
@@ -931,6 +1012,10 @@
         "comment": " Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED.",
         "userFriendlyComment": "You have reached the limit of five files. Please try again in 1 hour."
     },
+    "31513": {
+        "comment": "It is forbidden to interact with this Post(illegal Post)",
+        "userFriendlyComment": "It is forbidden to interact with this Post(illegal Post)"
+    },
     "31601": {
         "comment": "Information Not Found: No comment found for the provided comment ID. Please check the ID and try again",
         "userFriendlyComment": "Comment not found. Check the ID and try again."
@@ -958,6 +1043,10 @@
     "31607": {
         "comment": "Not Allowed: Comment owner cannot report their own comment",
         "userFriendlyComment": "You can't report your own comment."
+    },
+    "31608": {
+        "comment": "It is forbidden to interact with this Comment(illegal Comment / illegal Post)",
+        "userFriendlyComment": "It is forbidden to interact with this Comment(illegal Comment/ illegal Post)"
     },
     "31801": {
         "comment": "Forbidden: Access denied. You do not have the required permissions for this action",
@@ -1103,6 +1192,54 @@
         "comment": "Information Not Found: No advertisement found for the provided ID. Please check the ID and try again.",
         "userFriendlyComment": "Advertisement not found. Check the ID and try again."
     },
+    "32020": {
+        "comment": "It is forbidden to advertise this Post(illegal Post)",
+        "userFriendlyComment": "It is forbidden to advertise  this Post(illegal Post)"
+    },
+    "12101": {
+        "comment": "Success: Moderation stats retrieved successfully",
+        "userFriendlyComment": "Moderation statistics loaded."
+    },
+    "12102": {
+        "comment": "Success: Moderation items retrieved successfully",
+        "userFriendlyComment": "Moderation items loaded."
+    },
+    "12103": {
+        "comment": "Success: Moderation action performed successfully",
+        "userFriendlyComment": "Your moderation decision has been applied."
+    },
+    "22103": {
+        "comment": "Moderation item not found",
+        "userFriendlyComment": "Moderation item not found."
+    },
+    "62101": {
+        "comment": "Forbidden: Unauthorized access to moderation",
+        "userFriendlyComment": "You don't have permission to use moderation."
+    },
+    "32101": {
+        "comment": "Bad Request: Invalid input",
+        "userFriendlyComment": "Invalid input. Please check the fields and try again."
+    },
+    "32102": {
+        "comment": "Error: Content already reviewed and decided",
+        "userFriendlyComment": "This content was already decided and moderated."
+    },
+    "32103": {
+        "comment": "Error: Moderation action already performed",
+        "userFriendlyComment": "This item has already been decided."
+    },
+    "32104": {
+        "comment": "Error: Content already reviewed and restored",
+        "userFriendlyComment": "This content was already decided and restored."
+    },
+    "32201": {
+        "comment": "Forbidden: You are not allowed to perform this action.",
+        "userFriendlyComment": "You don’t have permission to perform this action."
+    },
+    "42101": {
+        "comment": "Error: Failed while performing moderation action",
+        "userFriendlyComment": "Error: Failed while performing moderation action"
+    },    
     "40301": {
         "comment": "Unexpected Error: An unexpected error occurred. Please try again later or contact support",
         "userFriendlyComment": "Something went wrong on our end. Please try again or contact support if it continues."
@@ -1342,6 +1479,10 @@
     "41222": {
         "comment": "Unexpected Error: One of the pool accounts in the env file is missing.",
         "userFriendlyComment": "A configuration error occurred. Please contact support."
+    },
+    "41223": {
+         "comment": "Unexpected error: Internal server error while placing shop order.",
+          "userFriendlyComment": "We're having trouble placing your order right now. Please try again later."
     },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",

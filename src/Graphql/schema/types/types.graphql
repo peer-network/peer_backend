@@ -1,3 +1,24 @@
+type TransactionHistoryItem {
+  operationid: String!
+  transactionId: String!
+  transactionCategory: TransactionCategory
+  transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
+  tokenamount: String! #sum with all fees transactions
+  netTokenAmount: String! #value of CREDIT transaction
+  message: String
+  createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
+  fees: TransactionFeeSummary
+}
+
+type TransactionFeeSummary {
+  total: Decimal # sum of all fees transactions
+  burn: Decimal 
+  peer: Decimal
+  inviter: Decimal # can be null
+}
+
 type AdvertisementPost {
   post: Post!
   advertisement: AdvCreator!
@@ -51,7 +72,8 @@ type AdvertisementHistoryResult {
 
 type ListedAdvertisementData {
   status: String!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: AdvertisementHistoryResult
 }
 
@@ -76,7 +98,8 @@ type ContactusResponsePayload {
 
 type ListAdvertisementData {
   status: String!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: [AdvertisementRow]
 }
 
@@ -88,6 +111,10 @@ type Post {
   cover: String!
   mediadescription: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
+  amountreports: Int!
   amountlikes: Int!
   amountviews: Int!
   amountcomments: Int!
@@ -111,8 +138,13 @@ type Comment {
   parentid: ID
   content: String!
   createdat: Date!
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
   amountlikes: Int!
   amountreplies: Int!
+  amountreports: Int!
+  isreported: Boolean!
   isliked: Boolean!
   user: ProfileUser!
 }
@@ -122,8 +154,14 @@ type ProfileUser {
   username: String
   slug: Int
   img: String
-  isfollowed: Boolean
-  isfollowing: Boolean
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
+  isreported: Boolean
   isfriend: Boolean
 }
 
@@ -149,11 +187,15 @@ type Transaction {
   transferaction: String!
   message: String!
   createdat: String!
+  sender: BasicUserInfo!
+  recipient: BasicUserInfo!
 }
 
 type TransferToken {
-  tokenSend: Decimal
-  tokensSubstractedFromWallet: Decimal
+  tokenSend: Decimal @deprecated(reason: "Use tokenSendFormatted")
+  tokensSubstractedFromWallet: Decimal @deprecated(reason: "Use tokensSubstractedFromWalletFormatted")
+  tokenSendFormatted: String!
+  tokensSubstractedFromWalletFormatted: String!
   createdat: String
 }
 
@@ -185,17 +227,18 @@ type LogWins {
 }
 
 type UserLogWins {
-  status: String
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   affectedRows: [LogWins]
-  meta: DefaultResponse
+  meta: DefaultResponse!
 }
 
 type UserInfo {
   userid: ID!
   liquidity: Decimal!
   amountposts: Int!
+  amountreports: Int!
   amountblocked: Int!
   amountfollower: Int!
   amountfollowed: Int!
@@ -211,32 +254,6 @@ type CommentInfo {
   comments: Int!
 }
 
-type Chat {
-  id: ID!
-  image: String!
-  name: String!
-  createdat: Date
-  updatedat: Date
-  chatmessages: [ChatMessage!]!
-  chatparticipants: [ChatParticipant!]!
-}
-
-type ChatMessage {
-  id: ID!
-  senderid: ID!
-  chatid: ID!
-  content: String!
-  createdat: Date!
-}
-
-type ChatParticipant {
-  userid: ID!
-  img: String!
-  username: String!
-  slug: Int!
-  hasaccess: Int!
-}
-
 type Profile {
   id: ID
   username: String
@@ -244,23 +261,31 @@ type Profile {
   slug: Int
   img: String
   biography: String
-  isfollowed: Boolean
-  isfollowing: Boolean
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
+  isfollowed: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  isfollowing: Boolean @deprecated(reason: "Use iFollowThisUser / thisUserFollowsMe")
+  iFollowThisUser: Boolean!
+  thisUserFollowsMe: Boolean!
+  isreported: Boolean
   amountposts: Int
   amounttrending: Int
   amountfollowed: Int
   amountfollower: Int
   amountfriends: Int
   amountblocked: Int
-  imageposts: [ProfilePostMedia!]
-  textposts: [ProfilePostMedia!]
-  videoposts: [ProfilePostMedia!]
-  audioposts: [ProfilePostMedia!]
+  amountreports: Int
+  imageposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  textposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  videoposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
+  audioposts: [ProfilePostMedia!] @deprecated(reason: "use listPosts by userid")
 }
 
 type ProfileInfo {
-  status: String
-  ResponseCode: String
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: Profile
 }
 
@@ -274,6 +299,9 @@ type BlockedUser {
   img: String
   username: String
   slug: Int
+  hasActiveReports: Boolean!
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type BlockedUsers {
@@ -308,10 +336,17 @@ type MintingData {
   tokensMintedYesterday: Float!
 }
 
+type MintAccount {
+  accountid: ID!
+  initialBalance: Decimal!
+  currentBalance: Decimal!
+  updatedat: String!
+}
+
 type CurrentLiquidity {
-  status: String
-  ResponseCode: String
-  meta: DefaultResponse
+  status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   currentliquidity: Decimal
 }
 
@@ -322,6 +357,8 @@ type DailyGemStatusData {
   d3: Decimal
   d4: Decimal
   d5: Decimal
+  d6: Decimal
+  d7: Decimal
   w0: Decimal
   m0: Decimal
   y0: Decimal
@@ -387,6 +424,8 @@ type ProfilePostMedia {
   contenttype: String!
   media: String!
   createdat: String
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type PostCommentsData {
@@ -400,6 +439,8 @@ type PostCommentsData {
   isliked: Boolean
   user: BasicUserInfo
   subcomments: [PostSubCommentsData]
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type PostSubCommentsData {
@@ -413,6 +454,8 @@ type PostSubCommentsData {
   amountreplies: Decimal,
   isliked: Boolean
   user: BasicUserInfo
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
 }
 
 type BasicUserInfo {
@@ -421,6 +464,9 @@ type BasicUserInfo {
   username: String
   slug: Int
   biography: String
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
   updatedat: Date!
 }
 
@@ -431,6 +477,9 @@ type User {
   slug: Int
   img: String
   biography: String
+  visibilityStatus: ContentVisibilityStatus!
+  isHiddenForUsers: Boolean!
+  hasActiveReports: Boolean!
   createdat: Date
   updatedat: Date
 }
@@ -459,18 +508,6 @@ type PostInfo {
   comments: Int!
 }
 
-type ChatMessageInfo {
-  messid: ID
-  chatid: ID
-  userid: ID
-  content: String
-  createdat: Date
-}
-
-type ChatInfo {
-  chatid: ID
-}
-
 type AllUserInfo {
   followerid: ID
   followername: String
@@ -481,6 +518,72 @@ type AllUserInfo {
 type AllUserFriends {
   status: String!
   counter: Int!
-  ResponseCode: String
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  meta: DefaultResponse!
   affectedRows: [AllUserInfo]
+}
+
+type ModerationStatsResponse {
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ModerationStats
+  meta: DefaultResponse!
+}
+type ModerationStats {
+  AmountAwaitingReview: Int!
+  AmountHidden: Int!
+  AmountRestored: Int!
+  AmountIllegal: Int!
+}
+type ModerationItemListResponse {
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: [ModerationItem!]!
+  meta: DefaultResponse!
+}
+type ModerationItem {
+  moderationTicketId: ID!
+  targetContentId: ID!
+  targettype: String!
+  reportscount: Int!
+  status: String!
+  createdat: String!
+  targetcontent: TargetContent!
+  reporters: [BasicUserInfo!]!
+  moderatedBy: BasicUserInfo
+}
+
+type TargetContent {
+  post: Post
+  comment: Comment
+  user: BasicUserInfo
+}
+
+type ShopItemSpecs {
+  size: String!
+}
+
+type ShopOrderDetailsResponse {
+  meta: DefaultResponse!
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ShopOrderDetails!
+}
+
+type ShopOrderDetails {
+  shopOrderId: String!
+  shopItemId: String!
+  shopItemSpecs: ShopItemSpecs
+  deliveryDetails: ShopOrderDeliveryDetails!
+  createdat: Date!
+}
+
+type ShopOrderDeliveryDetails {
+  name: String!
+  email: String!
+  addressline1: String!
+  addressline2: String
+  city: String!
+  zipcode: String!
+  country: String!
 }

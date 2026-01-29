@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Fawaz\Handler\GraphQLHandler;
+use Fawaz\Handler\HealthHandler;
 use Fawaz\Handler\NotFoundHandler;
 use Fawaz\Handler\MultipartPostHandler;
 use Slim\App;
@@ -26,12 +27,12 @@ return static function (App $app) {
             ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
             ->withHeader('Access-Control-Allow-Credentials', 'true')
             ->withHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-            ->withHeader('Pragma', 'no-cache')
-            ->withStatus(200);
+            ->withHeader('Pragma', 'no-cache');
     });
 
     // Routes
     $app->post('/graphql', GraphQLHandler::class);
+    $app->get('/health', HealthHandler::class);
     $app->post('/upload-post', MultipartPostHandler::class);
     $app->any('/{routes:.*}', NotFoundHandler::class);
 };

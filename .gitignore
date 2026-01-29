@@ -1,3 +1,4 @@
+.idea
 vendor
 tools
 test
@@ -23,7 +24,6 @@ runtime-data/media/video/*
 runtime-data/media/tmp/*
 runtime-data/logs/*
 runtime-data/ratelimiter/*
-runtime-data/media/tmp/*
 !/**/placeholder.txt
 *_rate_limiter_storage.json
 tests/postman_collection/tmp_*.json
@@ -34,4 +34,10 @@ changelog
 .idea
 .gitleaks_out/
 *.generated
+<<<<<<< HEAD
 .phpunit.result.cache
+=======
+*.cache
+.gitleaksignore
+settings.json
+>>>>>>> development

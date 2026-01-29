@@ -1,0 +1,13 @@
+extend type Query {
+  moderationStats: ModerationStatsResponse!
+  moderationItems(status: ModerationStatus, contentType: ModerationContentType, offset: Int, limit: Int): ModerationItemListResponse!
+}
+
+extend type Mutation {
+  performModeration(moderationTicketId: ID!, moderationAction: ModerationStatus!): DefaultResponse!
+}
+
+extend type HelloResponse {
+  userroles: Int!
+  userRoleString: String!
+}

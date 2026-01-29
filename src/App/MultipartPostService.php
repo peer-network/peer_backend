@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Fawaz\App;
 
 use DateTime;
 use Fawaz\App\Models\MultipartPost;
+use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
@@ -21,7 +20,8 @@ class MultipartPostService
         protected PeerLoggerInterface $logger,
         protected PDO $db,
         protected PostService $postService,
-        protected JWTService $tokenService
+        protected JWTService $tokenService,
+        protected UserMapper $userMapper
     ) {
     }
 
@@ -33,12 +33,17 @@ class MultipartPostService
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                if ($decodedToken) {
-                    $this->currentUserId = $decodedToken->uid;
-                    $this->logger->debug('Query.setCurrentUserId started');
-                } else {
-                    $this->currentUserId = null;
-                }
+                // Validate that the provided bearer access token exists in DB and is not expired
+                // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
+                //     $this->logger->warning('Access token not found or expired for user', [
+                //         'userId' => $decodedToken->uid,
+                //     ]);
+                //     $this->currentUserId = null;
+                //     return;
+                // }
+
+                $this->currentUserId = $decodedToken->uid;
+                $this->logger->debug('Query.setCurrentUserId started');
             } catch (\Throwable $e) {
                 $this->logger->error('Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
@@ -78,7 +83,7 @@ class MultipartPostService
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -132,7 +137,7 @@ class MultipartPostService
             $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -153,8 +158,8 @@ class MultipartPostService
                     WHERE token = :token
                 ";
             $updateStmt = $this->db->prepare($updateSql);
-            $updateStmt->bindValue(':status', 'FILE_UPLOADED', \PDO::PARAM_STR);
-            $updateStmt->bindValue(':token', $eligibilityToken, \PDO::PARAM_STR);
+            $updateStmt->bindValue(':status', 'FILE_UPLOADED', PDO::PARAM_STR);
+            $updateStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
             $updateStmt->execute();
             $this->logger->info("Inserted new token into database", ['eligibilityToken' => $eligibilityToken]);
 
@@ -177,13 +182,11 @@ class MultipartPostService
         if (empty($requestObj['token'])) {
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
-        $isValidated = $this->tokenService->validateToken($requestObj['token']);
-
-        if (empty($isValidated)) {
-            throw new ValidationException("Token Should be valid.", [40902]);
-        }
 
         try {
+            $this->tokenService->validateToken($requestObj['token']);
+
+
             $sql = "SELECT 1 FROM eligibility_token WHERE token = :token AND status IN ('FILE_UPLOADED', 'POST_CREATED')";
             $stmt = $this->db->prepare($sql);
             $stmt->bindValue(':token', $requestObj['token']);

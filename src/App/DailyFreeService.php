@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App;
 
-const LIKE_ = 2;
-const COMMENT_ = 4;
-const POST_ = 5;
-
 use Fawaz\App\DailyFree;
 use Fawaz\Database\DailyFreeMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -28,20 +24,6 @@ class DailyFreeService
         $this->currentUserId = $userId;
     }
 
-    public static function isValidUUID(string $uuid): bool
-    {
-        return preg_match('/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/', $uuid) === 1;
-    }
-
-    private function checkAuthentication(): bool
-    {
-        if ($this->currentUserId === null) {
-            $this->logger->warning("Unauthorized action attempted.");
-            return false;
-        }
-        return true;
-    }
-
     public function getUserDailyAvailability(string $userId): array
     {
         $this->logger->debug('DailyFreeService.getUserDailyAvailability started', ['userId' => $userId]);
@@ -50,7 +32,7 @@ class DailyFreeService
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
             if ($affectedRows === false) {
-                $this->logger->warning('DailyFree availability not found', ['userId' => $userId]);
+                $this->logger->error('DailyFree availability not found', ['userId' => $userId]);
                 return $this::respondWithError(40301);
             }
 
@@ -82,20 +64,16 @@ class DailyFreeService
         $this->logger->debug('DailyFreeService.incrementUserDailyUsage started', ['userId' => $userId, 'artType' => $artType]);
 
         try {
-            $this->transactionManager->beginTransaction();
             $response =  $this->dailyFreeMapper->incrementUserDailyUsage($userId, $artType);
 
             if (!$response) {
                 $this->logger->error('Failed to increment daily usage', ['userId' => $userId, 'artType' => $artType]);
-                $this->transactionManager->rollback();
                 return false;
             }
-            $this->transactionManager->commit();
             $this->logger->info('Daily usage incremented successfully');
 
             return true;
         } catch (\Throwable $e) {
-            $this->transactionManager->rollback();
             $this->logger->error('Error in incrementUserDailyUsage', ['exception' => $e->getMessage()]);
             return false;
         }

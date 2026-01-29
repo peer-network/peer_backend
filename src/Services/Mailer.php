@@ -26,16 +26,16 @@ class Mailer
 
         // Basic validation
         if (empty($mailApiLink) || empty($mailApiKey)) {
-            $this->logger->error('Mailer config missing', ['link' => $mailApiLink, 'key' => $mailApiKey]);
+            $this->logger->error('Mailer config missing', ['link' => $mailApiLink]);
             return ['status' => 'error', 'message' => 'Mailer config missing'];
         }
 
-        $this->logger->info("Sending mail with payload:", ['payload' => $payload]);
+        $this->logger->info("Sending mail with payload:", ['to' => $payload['to'] , 'template' => $payload['template'] ]);
 
         $ch = curl_init($mailApiLink);
 
         curl_setopt_array($ch, [
-            CURLOPT_POST => 1,
+            CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($payload),
             CURLOPT_HTTPHEADER => [
                 'api-key: ' . $mailApiKey,

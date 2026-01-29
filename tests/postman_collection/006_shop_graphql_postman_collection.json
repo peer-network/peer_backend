@@ -1,0 +1,4055 @@
+{
+  "info": {
+    "_postman_id": "ebd5320a-29f3-449f-85be-3c13e7a3e83b",
+    "name": "006_shop_graphql",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43606001",
+    "_collection_link": "https://go.postman.co/collection/43606001-ebd5320a-29f3-449f-85be-3c13e7a3e83b?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Hello",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Null is in there\", function () {",
+              "    let responseJson = pm.response.json();",
+              "    pm.expect(responseJson.data.hello.currentuserid).to.eql(\"\");",
+              "});",
+              "",
+              "pm.test(\"Save companyAccountId as referralUuid\", function () {",
+              "    const response = pm.response.json();",
+              "    const id = response.data?.hello?.companyAccountId;",
+              "",
+              "    pm.expect(id, \"companyAccountId should exist\").to.be.a(\"string\").that.is.not.empty;",
+              "",
+              "    pm.environment.set(\"referralUuid\", id);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Hello {\n    hello {\n        currentuserid\n        currentVersion\n        wikiLink\n        lastMergedPullRequestNumber\n        companyAccountId\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login shop",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation {\n  login(email: \"{{shop_email}}\",\n    password: \"{{shop_password}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    const responseText = pm.response.text();",
+              "    pm.expect(",
+              "        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+              "    ).to.be.true;",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let postResponse = {};",
+              "try {",
+              "    postResponse = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse response as JSON:\", err);",
+              "}",
+              "",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+              "        if (postId) {",
+              "            pm.environment.set(\"shopItemId\", postId);",
+              "            console.log(\"postid set to:\", postId);",
+              "        } else {",
+              "            console.log(\"No postid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Couldn't access post ID:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping postid set.\");",
+              "}",
+              "",
+              "let postResponseCode = \"\";",
+              "try {",
+              "    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+              "} catch (err) {",
+              "    console.log(\"Couldn't access ResponseCode:\", err);",
+              "}",
+              "",
+              "if (postResponseCode === \"11513\") {",
+              "    pm.environment.set(\"isDailyFreePost\", \"true\");",
+              "    console.log(\"This was a Daily Free Post (code 11513).\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreePost\");",
+              "    console.log(\"Not a Daily Free Post (code not 11513).\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"Test Shop Post\"\n            mediadescription: \"This is a test post used for shop CI tests.\"\n            contenttype: image\n            media: [\"{{base64_photo1}}\"]\n        }\n    ) {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                iFollowThisUser\n                thisUserFollowsMe\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    iFollowThisUser\n                    thisUserFollowsMe\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create post 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    const responseText = pm.response.text();",
+              "    pm.expect(",
+              "        responseText.includes(\"11513\") || responseText.includes(\"11508\")",
+              "    ).to.be.true;",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let postResponse = {};",
+              "try {",
+              "    postResponse = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse response as JSON:\", err);",
+              "}",
+              "",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+              "        if (postId) {",
+              "            pm.environment.set(\"shopItemId_2\", postId);",
+              "            console.log(\"postid set to:\", postId);",
+              "        } else {",
+              "            console.log(\"No postid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Couldn't access post ID:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping postid set.\");",
+              "}",
+              "",
+              "let postResponseCode = \"\";",
+              "try {",
+              "    postResponseCode = postResponse?.data?.createPost?.ResponseCode || \"\";",
+              "} catch (err) {",
+              "    console.log(\"Couldn't access ResponseCode:\", err);",
+              "}",
+              "",
+              "if (postResponseCode === \"11513\") {",
+              "    pm.environment.set(\"isDailyFreePost\", \"true\");",
+              "    console.log(\"This was a Daily Free Post (code 11513).\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreePost\");",
+              "    console.log(\"Not a Daily Free Post (code not 11513).\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation CreatePost {\n    createPost(\n        action: POST\n        input: {\n            title: \"Test Shop Post\"\n            mediadescription: \"This is a test post used for shop CI tests.\"\n            contenttype: image\n            media: [\"{{base64_photo1}}\"]\n        }\n    ) {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                iFollowThisUser\n                thisUserFollowsMe\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    iFollowThisUser\n                    thisUserFollowsMe\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order as shop (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"31202\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"tokenamount\", 0.000001);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"{{tokenamount}}\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: null\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login tester 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get shop profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11008\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query GetProfile {\n    getProfile(userid: \"{{shop}}\") {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            isfollowed\n            isfollowing\n            iFollowThisUser\n            thisUserFollowsMe\n            isreported\n            amountposts\n            amounttrending\n            amountfollowed\n            amountfollower\n            amountfriends\n            amountblocked\n            amountreports\n            imageposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n            }\n            textposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n            }\n            videoposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n            }\n            audioposts {\n                id\n                title\n                contenttype\n                media\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List shop posts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11501\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.listPosts?.affectedRows ?? [];",
+              "",
+              "pm.test(\"Exactly 2 posts returned\", () => {",
+              "    pm.expect(rows.length).to.equal(2);",
+              "});",
+              "",
+              "const id1 = pm.environment.get(\"shopItemId\");",
+              "const id2 = pm.environment.get(\"shopItemId_2\");",
+              "",
+              "pm.test(\"Post IDs match expected shopItemIds\", () => {",
+              "    const returnedIds = rows.map(p => p.id);",
+              "    pm.expect(returnedIds).to.include(id1);",
+              "    pm.expect(returnedIds).to.include(id2);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ListPosts {\n    listPosts(userid: \"{{shop}}\") {\n        status\n        counter\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n            isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                iFollowThisUser\n                thisUserFollowsMe\n                isreported\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isreported\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    iFollowThisUser\n                    thisUserFollowsMe\n                    isreported\n                    isfriend\n                }\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let liquidity = response.data.balance.currentliquidity;",
+              "pm.environment.set(\"liquidity\", liquidity);",
+              "console.log(\"Saved liquidity:\", liquidity);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Like shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let likeResponse = {};",
+              "try {",
+              "    likeResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let likeResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = likeResponse?.data?.resolvePostAction?.status || \"\";",
+              "    likeResponseCode = likeResponse?.data?.resolvePostAction?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11503\", \"11514\"]).to.include(likeResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (likeResponseCode === \"11514\") {",
+              "    pm.environment.set(\"isDailyFreeLike\", \"true\");",
+              "    console.log(\"This was a Daily Free Like.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeLike\");",
+              "    console.log(\"Not a Daily Free Like.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId}}\"\n        action: LIKE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dislike shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11504\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId}}\"\n        action: DISLIKE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Share shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11507\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId}}\"\n        action: SHARE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11506\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId}}\"\n        action: VIEW\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Save shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11512\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolvePostAction {\n    resolvePostAction(action: SAVE, postid: \"{{shopItemId}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Comment shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let commentResponse = {};",
+              "try {",
+              "    commentResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let commentResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+              "    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (commentResponseCode === \"11608\") {",
+              "    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+              "    console.log(\"This was a Daily Free Comment.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeComment\");",
+              "    console.log(\"Not a Daily Free Comment.\");",
+              "}",
+              "let response = {};",
+              "try {",
+              "    response = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse JSON:\", err);",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+              "        if (commentId) {",
+              "            pm.environment.set(\"commentid\", commentId);",
+              "            console.log(\"commentid set to:\", commentId);",
+              "        } else {",
+              "            console.log(\"No commentid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Error extracting commentid:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping commentid set.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{shopItemId}}\", content: \"{{comment_content}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Block shop (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"31107\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation UserBlock {\n    toggleBlockUserStatus(userid: \"{{shop}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Report shop (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"32201\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ReportUser {\n    reportUser(userid: \"{{shop}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Report shop post (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"31107\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId}}\"\n        action: REPORT\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let newLiquidity = response.data.balance.currentliquidity;",
+              "let oldLiquidity = pm.environment.get(\"liquidity\");",
+              "pm.test(\"Previous liquidity exists\", function () {",
+              "    pm.expect(oldLiquidity).to.be.a(\"number\");",
+              "});",
+              "pm.test(\"Liquidity should decrease after spending\", function () {",
+              "    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+              "});",
+              "pm.environment.set(\"liquidity\", newLiquidity);",
+              "console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform unaffordable shop order (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"51301\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"1000000\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order empty name (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30277\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid uuid (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30272\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"lelele\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid name (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30277\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"{{long_message}}\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid email (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30224\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"email\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid address (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30273\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"kk 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid address (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30273\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"{{long_message}}\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid city (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30274\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"B\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid city (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30274\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"{{long_message}}\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid zip (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30275\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"1111\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid country (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('error');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: IRAN\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order invalid size (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"30278\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"10\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"{{long_message}}\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"12201\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"tokenamount\", 0.000001);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"{{tokenamount}}\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const balance = json?.data?.balance;",
+              "",
+              "const current = Number(balance.currentliquidity);",
+              "const prevLiquidity = Number(pm.environment.get(\"liquidity\"));",
+              "const tokenAmount = Number(pm.environment.get(\"tokenamount\"));",
+              "",
+              "pm.test(\"liquidity decreased correctly\", () => {",
+              "    const expected = prevLiquidity - tokenAmount;",
+              "    pm.expect(current).to.equal(expected);",
+              "});",
+              "",
+              "pm.environment.set(\"liquidity\", String(current));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+              "",
+              "pm.test(\"affectedRows is non-empty array\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+              "});",
+              "",
+              "const txid = rows[0]?.transactionId;",
+              "if (txid) {",
+              "    pm.environment.set(\"transactionid\", txid);",
+              "}",
+              "",
+              "const currentOpIds = rows.map(tx => tx.operationid);",
+              "",
+              "let prevOpIds = pm.environment.get(\"operationid\");",
+              "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+              "",
+              "const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+              "",
+              "pm.test(\"No duplicate operationid from previous request\", () => {",
+              "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+              "});",
+              "",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+              "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+              "",
+              "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+              "const TOLERANCE = 0.0001;",
+              "",
+              "function num(v) {",
+              "    return Number(v);",
+              "}",
+              "",
+              "function expectNotNull(value, path) {",
+              "    pm.expect(",
+              "        value !== null && value !== undefined && value !== \"\",",
+              "        `${path} is null/empty`",
+              "    ).to.be.true;",
+              "}",
+              "",
+              "function expectPercent(actual, base, percent, path) {",
+              "    const expected = +(base * percent / 100).toFixed(6);",
+              "    pm.expect(",
+              "        actual,",
+              "        `${path} expected ${percent}% (${expected}), got ${actual}`",
+              "    ).to.be.closeTo(expected, TOLERANCE);",
+              "}",
+              "",
+              "rows.forEach((tx, i) => {",
+              "    const p = `affectedRows[${i}]`;",
+              "",
+              "    pm.test(`${p} mandatory fields not null`, () => {",
+              "        [",
+              "            \"operationid\",",
+              "            \"transactionCategory\",",
+              "            \"transactiontype\",",
+              "            \"tokenamount\",",
+              "            \"netTokenAmount\",",
+              "            \"createdat\"",
+              "        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+              "",
+              "        Object.entries(tx.recipient).forEach(([k, v]) => {",
+              "            if (k !== \"updatedat\") {",
+              "                expectNotNull(v, `${p}.recipient.${k}`);",
+              "            }",
+              "        });",
+              "",
+              "        if (tx.transactionCategory !== \"TOKEN_MINT\") {",
+              "            Object.entries(tx.sender).forEach(([k, v]) => {",
+              "                if (k !== \"updatedat\") {",
+              "                    expectNotNull(v, `${p}.sender.${k}`);",
+              "                }",
+              "            });",
+              "        }",
+              "",
+              "        expectNotNull(tx.fees.total, `${p}.fees.total`);",
+              "    });",
+              "",
+              "    pm.test(`${p} fees calculation`, () => {",
+              "        const base = Math.abs(num(tx.netTokenAmount));",
+              "",
+              "        if (tx.transactionCategory === \"TOKEN_MINT\") {",
+              "            pm.expect(num(tx.fees.total)).to.equal(0);",
+              "            pm.expect(tx.fees.burn).to.equal(null);",
+              "            pm.expect(tx.fees.peer).to.equal(null);",
+              "            pm.expect(tx.fees.inviter).to.equal(null);",
+              "            return;",
+              "        }",
+              "",
+              "        const hasInviter = tx.fees.inviter !== null;",
+              "",
+              "        expectPercent(",
+              "            num(tx.fees.total),",
+              "            base,",
+              "            hasInviter ? 4 : 3,",
+              "            `${p}.fees.total`",
+              "        );",
+              "",
+              "        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+              "        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+              "",
+              "        if (hasInviter) {",
+              "            expectPercent(",
+              "                num(tx.fees.inviter),",
+              "                base,",
+              "                1,",
+              "                `${p}.fees.inviter`",
+              "            );",
+              "        }",
+              "    });",
+              "",
+              "    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+              "        const token = Math.abs(num(tx.tokenamount));",
+              "",
+              "        switch (tx.transactionCategory) {",
+              "            case \"LIKE\":",
+              "            case \"DISLIKE\":",
+              "                pm.expect(token).to.equal(3);",
+              "                break;",
+              "",
+              "            case \"COMMENT\":",
+              "                pm.expect(token).to.equal(1);",
+              "                break;",
+              "",
+              "            case \"AD_PINNED\":",
+              "                pm.expect(",
+              "                    token === 160 || token % 50 === 0,",
+              "                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+              "                ).to.be.true;",
+              "                break;",
+              "",
+              "            case \"POST_CREATE\":",
+              "                pm.expect(token).to.equal(20);",
+              "                break;",
+              "",
+              "            case \"P2P_TRANSFER\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"SHOP_PURCHASE\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"TOKEN_MINT\":",
+              "                pm.expect(token, `${p}.TOKEN_MINT tokenamount must be > 0`).to.be.above(0);",
+              "                pm.expect(",
+              "                    num(tx.tokenamount),",
+              "                    `${p}.TOKEN_MINT tokenamount must equal netTokenAmount`",
+              "                ).to.equal(num(tx.netTokenAmount));",
+              "                break;",
+              "",
+              "            default:",
+              "                pm.test(`${p} transactionCategory is known`, () => {",
+              "                    pm.expect.fail(`Unhandled transactionCategory: ${tx.transactionCategory}`);",
+              "                });",
+              "        }",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionId\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Shop order details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"12202\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const affected = json?.data?.shopOrderDetails?.affectedRows;",
+              "",
+              "pm.test(\"affectedRows exists\", () => {",
+              "    pm.expect(affected, \"affectedRows is missing\").to.be.an(\"object\");",
+              "});",
+              "",
+              "function checkNotEmpty(obj, path = \"\") {",
+              "    Object.entries(obj).forEach(([key, value]) => {",
+              "        const currentPath = path ? `${path}.${key}` : key;",
+              "",
+              "        pm.test(`${currentPath} is not empty`, () => {",
+              "            pm.expect(",
+              "                value !== null && value !== undefined && value !== \"\",",
+              "                `${currentPath} is null or empty`",
+              "            ).to.be.true;",
+              "        });",
+              "",
+              "        if (typeof value === \"object\" && !Array.isArray(value)) {",
+              "            checkNotEmpty(value, currentPath);",
+              "        }",
+              "    });",
+              "}",
+              "",
+              "const expectedShopItemId = pm.environment.get(\"shopItemId\");",
+              "",
+              "pm.test(\"shopItemId matches environment\", () => {",
+              "    pm.expect(",
+              "        affected.shopItemId,",
+              "        \"shopItemId does not match environment value\"",
+              "    ).to.equal(expectedShopItemId);",
+              "});",
+              "",
+              "checkNotEmpty(affected);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ShopOrderDetails {\n    shopOrderDetails(transactionId: \"{{transactionid}}\") {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            shopOrderId\n            shopItemId\n            createdat\n            shopItemSpecs {\n                size\n            }\n            deliveryDetails {\n                name\n                email\n                addressline1\n                addressline2\n                city\n                zipcode\n                country\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pin shops post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"12001\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation AdvertisePostPinned {\n    advertisePostPinned(\n        postid: \"{{shopItemId_2}}\"\n        advertisePlan: PINNED\n    ) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            createdAt\n            type\n            timeframeStart\n            timeframeEnd\n            totalTokenCost\n            totalEuroCost\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let newLiquidity = response.data.balance.currentliquidity;",
+              "let oldLiquidity = pm.environment.get(\"liquidity\");",
+              "",
+              "pm.test(\"Previous liquidity exists\", function () {",
+              "    pm.expect(oldLiquidity).to.not.be.undefined;",
+              "    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+              "});",
+              "",
+              "let expectedDifference = 200;",
+              "let actualDifference = Number(oldLiquidity) - Number(newLiquidity);",
+              "",
+              "pm.test(\"Liquidity should decrease exactly by 200\", function () {",
+              "    pm.expect(actualDifference).to.equal(expectedDifference);",
+              "});",
+              "",
+              "pm.environment.set(\"liquidity\", newLiquidity);",
+              "",
+              "console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+              "",
+              "const currentOpIds = rows.map(tx => tx.operationid);",
+              "",
+              "let prevOpIds = pm.environment.get(\"operationid\");",
+              "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+              "",
+              "const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+              "",
+              "pm.test(\"No duplicate operationid from previous request\", () => {",
+              "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+              "});",
+              "",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+              "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+              "",
+              "pm.test(\"affectedRows is non-empty array\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+              "});",
+              "",
+              "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+              "const TOLERANCE = 0.0001;",
+              "",
+              "function num(v) {",
+              "    return Number(v);",
+              "}",
+              "",
+              "function expectNotNull(value, path) {",
+              "    pm.expect(",
+              "        value !== null && value !== undefined && value !== \"\",",
+              "        `${path} is null/empty`",
+              "    ).to.be.true;",
+              "}",
+              "",
+              "function expectPercent(actual, base, percent, path) {",
+              "    const expected = +(base * percent / 100).toFixed(6);",
+              "    pm.expect(",
+              "        actual,",
+              "        `${path} expected ${percent}% (${expected}), got ${actual}`",
+              "    ).to.be.closeTo(expected, TOLERANCE);",
+              "}",
+              "",
+              "rows.forEach((tx, i) => {",
+              "    const p = `affectedRows[${i}]`;",
+              "",
+              "    pm.test(`${p} mandatory fields not null`, () => {",
+              "        [",
+              "            \"operationid\",",
+              "            \"transactionCategory\",",
+              "            \"transactiontype\",",
+              "            \"tokenamount\",",
+              "            \"netTokenAmount\",",
+              "            \"createdat\"",
+              "        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+              "",
+              "        [\"sender\", \"recipient\"].forEach(role => {",
+              "            Object.entries(tx[role]).forEach(([k, v]) => {",
+              "                if (k !== \"updatedat\") {",
+              "                    expectNotNull(v, `${p}.${role}.${k}`);",
+              "                }",
+              "            });",
+              "        });",
+              "",
+              "        [\"total\", \"burn\", \"peer\"].forEach(f =>",
+              "            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
+              "        );",
+              "    });",
+              "",
+              "    pm.test(`${p} fees calculation`, () => {",
+              "        const base = Math.abs(num(tx.netTokenAmount));",
+              "        const hasInviter = tx.fees.inviter !== null;",
+              "",
+              "        expectPercent(",
+              "            num(tx.fees.total),",
+              "            base,",
+              "            hasInviter ? 4 : 3,",
+              "            `${p}.fees.total`",
+              "        );",
+              "",
+              "        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+              "        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+              "",
+              "        if (hasInviter) {",
+              "            expectPercent(",
+              "                num(tx.fees.inviter),",
+              "                base,",
+              "                1,",
+              "                `${p}.fees.inviter`",
+              "            );",
+              "        }",
+              "    });",
+              "",
+              "    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+              "        const token = Math.abs(num(tx.tokenamount));",
+              "",
+              "        switch (tx.transactionCategory) {",
+              "            case \"LIKE\":",
+              "            case \"DISLIKE\":",
+              "                pm.expect(token).to.equal(3);",
+              "                break;",
+              "",
+              "            case \"COMMENT\":",
+              "                pm.expect(token).to.equal(1);",
+              "                break;",
+              "",
+              "            case \"AD_PINNED\":",
+              "                pm.expect(",
+              "                    token === 160 || token % 50 === 0,",
+              "                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+              "                ).to.be.true;",
+              "                break;",
+              "",
+              "            case \"POST_CREATE\":",
+              "                pm.expect(token).to.equal(20);",
+              "                break;",
+              "",
+              "            case \"P2P_TRANSFER\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            default:",
+              "                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+              "        }",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List boosted shops post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11501\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.listAdvertisementPosts?.affectedRows ?? [];",
+              "",
+              "pm.test(\"Exactly 1 advertisement post returned\", () => {",
+              "    pm.expect(rows.length).to.equal(1);",
+              "});",
+              "",
+              "const id2 = pm.environment.get(\"shopItemId_2\");",
+              "",
+              "pm.test(\"Post ID matches shopItemId_2\", () => {",
+              "    const postId = rows[0]?.post?.id;",
+              "    pm.expect(postId).to.equal(id2);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{shop}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Like boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let likeResponse = {};",
+              "try {",
+              "    likeResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let likeResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = likeResponse?.data?.resolvePostAction?.status || \"\";",
+              "    likeResponseCode = likeResponse?.data?.resolvePostAction?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11503\", \"11514\"]).to.include(likeResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (likeResponseCode === \"11514\") {",
+              "    pm.environment.set(\"isDailyFreeLike\", \"true\");",
+              "    console.log(\"This was a Daily Free Like.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeLike\");",
+              "    console.log(\"Not a Daily Free Like.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId_2}}\"\n        action: LIKE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dislike boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11504\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId_2}}\"\n        action: DISLIKE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Share boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11507\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId_2}}\"\n        action: SHARE\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11506\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId_2}}\"\n        action: VIEW\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Save boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11512\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolvePostAction {\n    resolvePostAction(action: SAVE, postid: \"{{shopItemId_2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Comment boosted shop post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let commentResponse = {};",
+              "try {",
+              "    commentResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let commentResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+              "    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (commentResponseCode === \"11608\") {",
+              "    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+              "    console.log(\"This was a Daily Free Comment.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeComment\");",
+              "    console.log(\"Not a Daily Free Comment.\");",
+              "}",
+              "let response = {};",
+              "try {",
+              "    response = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse JSON:\", err);",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+              "        if (commentId) {",
+              "            pm.environment.set(\"commentid\", commentId);",
+              "            console.log(\"commentid set to:\", commentId);",
+              "        } else {",
+              "            console.log(\"No commentid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Error extracting commentid:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping commentid set.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{shopItemId_2}}\", content: \"{{comment_content}}\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Report boosted shop post (fail)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"31107\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(\n        postid: \"{{shopItemId_2}}\"\n        action: REPORT\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let newLiquidity = response.data.balance.currentliquidity;",
+              "let oldLiquidity = pm.environment.get(\"liquidity\");",
+              "pm.test(\"Previous liquidity exists\", function () {",
+              "    pm.expect(oldLiquidity).to.be.a(\"number\");",
+              "});",
+              "pm.test(\"Liquidity should decrease after spending\", function () {",
+              "    pm.expect(newLiquidity).to.be.below(oldLiquidity);",
+              "});",
+              "pm.environment.set(\"liquidity\", newLiquidity);",
+              "console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}`);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Perform shop order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"12201\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"tokenamount\", 10000);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"{{tokenamount}}\"\n        shopItemId: \"{{shopItemId_2}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: \"4 stock\"\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const balance = json?.data?.balance;",
+              "",
+              "const current = Number(balance.currentliquidity);",
+              "const prevLiquidity = Number(pm.environment.get(\"liquidity\"));",
+              "const tokenAmount = Number(pm.environment.get(\"tokenamount\"));",
+              "",
+              "pm.test(\"liquidity decreased correctly\", () => {",
+              "    const expected = prevLiquidity - tokenAmount;",
+              "    pm.expect(current).to.equal(expected);",
+              "});",
+              "",
+              "pm.environment.set(\"liquidity\", String(current));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+              "",
+              "pm.test(\"affectedRows is non-empty array\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+              "});",
+              "",
+              "const txid = rows[0]?.transactionId;",
+              "if (txid) {",
+              "    pm.environment.set(\"transactionid\", txid);",
+              "}",
+              "",
+              "const currentOpIds = rows.map(tx => tx.operationid);",
+              "",
+              "let prevOpIds = pm.environment.get(\"operationid\");",
+              "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+              "",
+              "const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+              "",
+              "pm.test(\"No duplicate operationid from previous request\", () => {",
+              "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+              "});",
+              "",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+              "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+              "",
+              "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+              "const TOLERANCE = 0.0001;",
+              "",
+              "function num(v) {",
+              "    return Number(v);",
+              "}",
+              "",
+              "function expectNotNull(value, path) {",
+              "    pm.expect(",
+              "        value !== null && value !== undefined && value !== \"\",",
+              "        `${path} is null/empty`",
+              "    ).to.be.true;",
+              "}",
+              "",
+              "function expectPercent(actual, base, percent, path) {",
+              "    const expected = +(base * percent / 100).toFixed(6);",
+              "    pm.expect(",
+              "        actual,",
+              "        `${path} expected ${percent}% (${expected}), got ${actual}`",
+              "    ).to.be.closeTo(expected, TOLERANCE);",
+              "}",
+              "",
+              "rows.forEach((tx, i) => {",
+              "    const p = `affectedRows[${i}]`;",
+              "",
+              "    pm.test(`${p} mandatory fields not null`, () => {",
+              "        [",
+              "            \"operationid\",",
+              "            \"transactionCategory\",",
+              "            \"transactiontype\",",
+              "            \"tokenamount\",",
+              "            \"netTokenAmount\",",
+              "            \"createdat\"",
+              "        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+              "",
+              "        Object.entries(tx.recipient).forEach(([k, v]) => {",
+              "            if (k !== \"updatedat\") {",
+              "                expectNotNull(v, `${p}.recipient.${k}`);",
+              "            }",
+              "        });",
+              "",
+              "        if (tx.transactionCategory !== \"TOKEN_MINT\") {",
+              "            Object.entries(tx.sender).forEach(([k, v]) => {",
+              "                if (k !== \"updatedat\") {",
+              "                    expectNotNull(v, `${p}.sender.${k}`);",
+              "                }",
+              "            });",
+              "        }",
+              "",
+              "        expectNotNull(tx.fees.total, `${p}.fees.total`);",
+              "    });",
+              "",
+              "    pm.test(`${p} fees calculation`, () => {",
+              "        const base = Math.abs(num(tx.netTokenAmount));",
+              "",
+              "        if (tx.transactionCategory === \"TOKEN_MINT\") {",
+              "            pm.expect(num(tx.fees.total)).to.equal(0);",
+              "            pm.expect(tx.fees.burn).to.equal(null);",
+              "            pm.expect(tx.fees.peer).to.equal(null);",
+              "            pm.expect(tx.fees.inviter).to.equal(null);",
+              "            return;",
+              "        }",
+              "",
+              "        const hasInviter = tx.fees.inviter !== null;",
+              "",
+              "        expectPercent(",
+              "            num(tx.fees.total),",
+              "            base,",
+              "            hasInviter ? 4 : 3,",
+              "            `${p}.fees.total`",
+              "        );",
+              "",
+              "        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+              "        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+              "",
+              "        if (hasInviter) {",
+              "            expectPercent(",
+              "                num(tx.fees.inviter),",
+              "                base,",
+              "                1,",
+              "                `${p}.fees.inviter`",
+              "            );",
+              "        }",
+              "    });",
+              "",
+              "    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+              "        const token = Math.abs(num(tx.tokenamount));",
+              "",
+              "        switch (tx.transactionCategory) {",
+              "            case \"LIKE\":",
+              "            case \"DISLIKE\":",
+              "                pm.expect(token).to.equal(3);",
+              "                break;",
+              "",
+              "            case \"COMMENT\":",
+              "                pm.expect(token).to.equal(1);",
+              "                break;",
+              "",
+              "            case \"AD_PINNED\":",
+              "                pm.expect(",
+              "                    token === 160 || token % 50 === 0,",
+              "                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+              "                ).to.be.true;",
+              "                break;",
+              "",
+              "            case \"POST_CREATE\":",
+              "                pm.expect(token).to.equal(20);",
+              "                break;",
+              "",
+              "            case \"P2P_TRANSFER\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"SHOP_PURCHASE\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"TOKEN_MINT\":",
+              "                pm.expect(token, `${p}.TOKEN_MINT tokenamount must be > 0`).to.be.above(0);",
+              "                pm.expect(",
+              "                    num(tx.tokenamount),",
+              "                    `${p}.TOKEN_MINT tokenamount must equal netTokenAmount`",
+              "                ).to.equal(num(tx.netTokenAmount));",
+              "                break;",
+              "",
+              "            default:",
+              "                pm.test(`${p} transactionCategory is known`, () => {",
+              "                    pm.expect.fail(`Unhandled transactionCategory: ${tx.transactionCategory}`);",
+              "                });",
+              "        }",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionId\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Shop order details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"12202\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const affected = json?.data?.shopOrderDetails?.affectedRows;",
+              "",
+              "pm.test(\"affectedRows exists\", () => {",
+              "    pm.expect(affected, \"affectedRows is missing\").to.be.an(\"object\");",
+              "});",
+              "",
+              "function checkNotEmpty(obj, path = \"\") {",
+              "    Object.entries(obj).forEach(([key, value]) => {",
+              "        const currentPath = path ? `${path}.${key}` : key;",
+              "",
+              "        pm.test(`${currentPath} is not empty`, () => {",
+              "            pm.expect(",
+              "                value !== null && value !== undefined && value !== \"\",",
+              "                `${currentPath} is null or empty`",
+              "            ).to.be.true;",
+              "        });",
+              "",
+              "        if (typeof value === \"object\" && !Array.isArray(value)) {",
+              "            checkNotEmpty(value, currentPath);",
+              "        }",
+              "    });",
+              "}",
+              "",
+              "const expectedShopItemId = pm.environment.get(\"shopItemId_2\");",
+              "",
+              "pm.test(\"shopItemId_2 matches environment\", () => {",
+              "    pm.expect(",
+              "        affected.shopItemId,",
+              "        \"shopItemId does not match environment value\"",
+              "    ).to.equal(expectedShopItemId);",
+              "});",
+              "",
+              "checkNotEmpty(affected);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ShopOrderDetails {\n    shopOrderDetails(transactionId: \"{{transactionid}}\") {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            shopOrderId\n            shopItemId\n            createdat\n            shopItemSpecs {\n                size\n            }\n            deliveryDetails {\n                name\n                email\n                addressline1\n                addressline2\n                city\n                zipcode\n                country\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Shop order details invalid transactionid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"22101\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ShopOrderDetails {\n    shopOrderDetails(transactionId: \"{{uuid}}\") {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            shopOrderId\n            shopItemId\n            createdat\n            shopItemSpecs {\n                size\n            }\n            deliveryDetails {\n                name\n                email\n                addressline1\n                addressline2\n                city\n                zipcode\n                country\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Shop order details invalid uuid",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"30272\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query ShopOrderDetails {\n    shopOrderDetails(transactionId: \"lelele\") {\n        status\n        ResponseCode\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            shopOrderId\n            shopItemId\n            createdat\n            shopItemSpecs {\n                size\n            }\n            deliveryDetails {\n                name\n                email\n                addressline1\n                addressline2\n                city\n                zipcode\n                country\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
