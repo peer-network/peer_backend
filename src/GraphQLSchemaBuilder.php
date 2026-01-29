@@ -33,7 +33,6 @@ use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
-use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
@@ -64,6 +63,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\PeerShopService;
+use Fawaz\Utils\AppVersion;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -312,8 +312,8 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => fn(array $root): int => $root['userroles'] ?? 0,
                 'userRoleString' => fn(array $root): string => $root['userRoleString'] ?? '',
-                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '1.2.0',
-                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0',
+                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '',
+                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? '',
                 'lastMergedPullRequestNumber' => fn(array $root): string => $root['lastMergedPullRequestNumber'] ?? '',
                 'companyAccountId' => fn(array $root): string => $root['companyAccountId'] ?? '',
             ],
@@ -1774,8 +1774,6 @@ class GraphQLSchemaBuilder
     {
         $this->logger->debug('Query.hello started', ['args' => $args]);
 
-        $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
-
         /**
          * Map Role Mask
          */
@@ -1788,7 +1786,9 @@ class GraphQLSchemaBuilder
             'userroles' => $this->userRoles,
             'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'currentVersion' => AppVersion::get(),
+            'wikiLink' => 'https://github.com/peer-network/peer_backend/releases/latest',
+            'lastMergedPullRequestNumber' => "thingy is replaced with 'currentVersion' field",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }

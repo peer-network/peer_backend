@@ -20,8 +20,7 @@
         "phpmailer/phpmailer": "^7.0",
         "robmorgan/phinx": "^0.16.9",
         "php-ffmpeg/php-ffmpeg": "^1.3.2",
-        "cboden/ratchet": "^0.4.4",
-        "ratchet/pawl": "^0.4.3"
+        "czproject/git-php": "^4.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0",
