@@ -808,9 +808,6 @@ class AdvertisementService
                 $commentLimit
             );
 
-            // foreach ($results as $post) {
-            //     ContentReplacer::placeholderPost($post, $specs);
-            // }
         }
 
         return $results;
