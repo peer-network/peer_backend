@@ -1,4 +1,3 @@
--- Adjusts wallet and users_info liquidity when the transaction balance mismatch is within more than zero and less than -10.
 BEGIN;
 
 WITH
