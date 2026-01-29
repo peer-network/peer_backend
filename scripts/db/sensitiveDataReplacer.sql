@@ -5,7 +5,7 @@ BEGIN;
 UPDATE users SET
     email = CONCAT('user_', uid::text, '@example.com'),
     username = CONCAT('user_', (RANDOM()*1000000)::INT),
-    password = '$2a$12$' || SUBSTRING(MD5(RANDOM()::text), 1, 22) || SUBSTRING(MD5(RANDOM()::text), 1, 31),
+    password = '$2a$12$A' || SUBSTRING(MD5(RANDOM()::text), 1, 22) || SUBSTRING(MD5(RANDOM()::text), 1, 31),
     ip = CONCAT(
         (RANDOM()*255)::INT, '.',
         (RANDOM()*255)::INT, '.',
@@ -48,7 +48,7 @@ UPDATE posts SET
         ELSE NULL END,
     media = CASE WHEN media IS NOT NULL THEN 
         CONCAT('media_', (RANDOM()*1000000)::INT, '.jpg') 
-        ELSE NULL END,
+        ELSEs NULL END,
     cover = CASE WHEN cover IS NOT NULL THEN 
         CONCAT('cover_', (RANDOM()*1000000)::INT, '.jpg') 
         ELSE NULL END;
