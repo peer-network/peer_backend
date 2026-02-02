@@ -1,6 +1,6 @@
 -- Total Users: 113 - For those users, we are adding transactions records.
 -- Total Balances of 113: -36123.0592191489 (Excluding Tester 01, 02, 03, Alpha a/c, Jakob, LP)
--- IMPORTANT: make sure that tester01 has more than `36123.0592191489` wallet balance
+-- IMPORTANT: make sure that tester02 - `6520ac47-f262-4f7e-b643-9dc5ee4cfa82` has more than `36123.0592191489` wallet balance
 
 BEGIN;
 
