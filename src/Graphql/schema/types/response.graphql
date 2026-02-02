@@ -1,8 +1,8 @@
 type DefaultResponse {
   status: String!
-  RequestId: String
-  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
-  ResponseMessage: String
+  RequestId: String!
+  ResponseCode: String!
+  ResponseMessage: String!
 }
 
 type TransactionHistoryResponse {

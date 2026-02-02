@@ -7,7 +7,6 @@ const INT32_MAX = 2147483647;
 const BASIC = 50;
 const PINNED = 200;
 
-use Fawaz\App\LogWinService;
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -34,7 +33,6 @@ use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
-use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
@@ -65,6 +63,7 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\PeerShopService;
+use Fawaz\Utils\AppVersion;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -75,7 +74,6 @@ class GraphQLSchemaBuilder
     protected ?int $userRoles = 0;
 
     public function __construct(
-        protected LogWinService $logWinService,
         protected PeerLoggerInterface $logger,
         protected UserMapper $userMapper,
         protected TagService $tagService,
@@ -233,7 +231,6 @@ class GraphQLSchemaBuilder
         $this->peerTokenService->setCurrentUserId($userid);
         $this->peerShopService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
-        $this->logWinService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
         $this->mintService->setCurrentUserId($userid);
     }
@@ -315,8 +312,8 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => fn(array $root): int => $root['userroles'] ?? 0,
                 'userRoleString' => fn(array $root): string => $root['userRoleString'] ?? '',
-                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '1.2.0',
-                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0',
+                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '',
+                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? '',
                 'lastMergedPullRequestNumber' => fn(array $root): string => $root['lastMergedPullRequestNumber'] ?? '',
                 'companyAccountId' => fn(array $root): string => $root['companyAccountId'] ?? '',
             ],
@@ -1731,8 +1728,6 @@ class GraphQLSchemaBuilder
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
             'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
-            'logWinMigration04' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration04(),
-            'logWinMigration05' => fn(mixed $root, array $args) => $this->logWinService->logWinMigration05(),
         ];
     }
 
@@ -1780,8 +1775,6 @@ class GraphQLSchemaBuilder
     {
         $this->logger->debug('Query.hello started', ['args' => $args]);
 
-        $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
-
         /**
          * Map Role Mask
          */
@@ -1794,7 +1787,9 @@ class GraphQLSchemaBuilder
             'userroles' => $this->userRoles,
             'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'currentVersion' => AppVersion::get(),
+            'wikiLink' => 'https://github.com/peer-network/peer_backend/releases/latest',
+            'lastMergedPullRequestNumber' => "thingy is replaced with 'currentVersion' field",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
