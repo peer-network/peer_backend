@@ -8,7 +8,7 @@ use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 use Fawaz\Utils\ResponseHelper;
 
-class DefaultTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class ShopTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
 {
     use ResponseHelper;
     public string $operationId;
@@ -18,19 +18,19 @@ class DefaultTransferStrategy extends BaseTransferStrategy implements TransferSt
 
     public function __construct()
     {
-        $this::$mode = FeePolicyMode::ADDED;
+        $this::$mode = FeePolicyMode::INCLUDED; // Needs to be discussed
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
     }
 
     public function getTransactionCategory(): TransactionCategory
     {
-        return TransactionCategory::P2P_TRANSFER;
+        return TransactionCategory::SHOP_PURCHASE;
     }
 
     public function getRecipientTransactionType(): string
     {
-        return 'transferSenderToRecipient';
+        return 'transferForShopPurchase';
     }
 
     public function getTransactionId(): string

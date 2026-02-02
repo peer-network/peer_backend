@@ -25,6 +25,10 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Services\FileUploadDispatcher;
+use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
+use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
 use Fawaz\Services\VideoCoverGenerator;
 use Fawaz\Services\Base64FileHandler;
 use Fawaz\Utils\ResponseHelper;
@@ -36,10 +40,8 @@ use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\Advertisements\ExcludeAdvertisementsForNormalFeedSpec;
-use Fawaz\Services\TokenTransfer\Strategies\PaidCommentTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidDislikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidLikeTransferStrategy;
-use Fawaz\Services\TokenTransfer\Strategies\PaidPostTransferStrategy;
+
+use function grapheme_strlen;
 
 class PostService
 {
@@ -51,6 +53,7 @@ class PostService
         protected PeerLoggerInterface $logger,
         protected PostMapper $postMapper,
         protected CommentMapper $commentMapper,
+        protected CommentService $commentService,
         protected PostInfoMapper $postInfoMapper,
         protected TagMapper $tagMapper,
         protected TagPostMapper $tagPostMapper,
@@ -63,8 +66,7 @@ class PostService
         protected TransactionManager $transactionManager,
         protected ProfileRepository $profileRepository,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected PostInfoService $postInfoService,
-        protected CommentService $commentService,
+        protected PostInfoService $postInfoService
     ) {
     }
 
@@ -91,11 +93,6 @@ class PostService
     private function argsToJsString($args)
     {
         return json_encode($args);
-    }
-
-    private function argsToString($args)
-    {
-        return serialize($args);
     }
 
     private function validateCoverCount(array $args, string $contenttype): array
@@ -254,7 +251,6 @@ class PostService
         $actionMap = $args['art'] = $actionMaps[$action];
 
         $this->transactionManager->beginTransaction();
-        
         try {
             if ($limit > 0) {
                 $DailyUsage = $this->dailyFreeService->getUserDailyUsage($this->currentUserId, $actionMap);
@@ -376,7 +372,7 @@ class PostService
                 if (!$deducted) {
                     $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     $this->transactionManager->rollback();
-                    return $this::respondWithError($deducted['ResponseCode']);
+                    return $this::respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
@@ -790,7 +786,7 @@ class PostService
             return $this::respondWithError(30201);
         }
 
-        if ($title !== null && (strlen((string)$title) < $titleConfig['MIN_LENGTH'] || strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
             return $this::respondWithError(30210);
         }
 
@@ -898,59 +894,6 @@ class PostService
             return false;
         }
     }
-
-    private function mapCommentsWithReplies(array $comments): array
-    {
-        return array_map(
-            function (Comment $comment) {
-                $commentArray = $comment->getArrayCopy();
-                $replies = $this->commentMapper->fetchAllByParentId($comment->getId());
-                $commentArray['replies'] = $this->mapCommentsWithReplies($replies);
-                return $commentArray;
-            },
-            $comments
-        );
-    }
-
-    // public function deletePost(string $id): array
-    // {
-    //     if (!$this->checkAuthentication() || !self::isValidUUID($id)) {
-    //         return $this::respondWithError('Invalid feed ID');
-    //     }
-
-    //     if (!self::isValidUUID($id)) {
-    //         return $this::respondWithError(30209);
-    //     }
-
-    //     $this->logger->debug('PostService.deletePost started');
-
-    //     $posts = $this->postMapper->loadById($id);
-    //     if (!$posts) {
-    //         return $this::createSuccessResponse(21516);
-    //     }
-
-    //     $post = $posts->getArrayCopy();
-
-    //     if ($post['userid'] !== $this->currentUserId && !$this->postMapper->isCreator($id, $this->currentUserId)) {
-    //         return $this::respondWithError('Unauthorized: You can only delete your own posts.');
-    //     }
-
-    //     try {
-    //         $postid = $this->postMapper->delete($id);
-
-    //         if ($postid) {
-    //             $this->logger->info('Post deleted successfully', ['postid' => $postid]);
-    //             return [
-    //                 'status' => 'success',
-    //                 'ResponseCode' => "11510",
-    //             ];
-    //         }
-    //     } catch (\Throwable $e) {
-    //         return $this::respondWithError(41510);
-    //     }
-
-    //     return $this::respondWithError(41510);
-    // }
 
 
     /**

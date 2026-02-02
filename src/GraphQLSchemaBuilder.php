@@ -4,6 +4,9 @@ namespace Fawaz;
 
 const INT32_MAX = 2147483647;
 
+const BASIC = 50;
+const PINNED = 200;
+
 use Fawaz\App\Advertisements;
 use Fawaz\App\AdvertisementService;
 use Fawaz\App\CommentAdvanced;
@@ -14,6 +17,7 @@ use Fawaz\App\DailyFreeService;
 use Fawaz\App\Helpers\FeesAccountHelper;
 use Fawaz\App\Interfaces\ProfileService;
 use Fawaz\App\PoolService;
+use Fawaz\App\Interfaces\GemsService;
 use Fawaz\App\PostAdvanced;
 use Fawaz\App\PostInfoService;
 use Fawaz\App\PostService;
@@ -21,6 +25,7 @@ use Fawaz\App\UserInfoService;
 use Fawaz\App\UserService;
 use Fawaz\App\TagService;
 use Fawaz\App\WalletService;
+use Fawaz\App\MintService;
 use Fawaz\Database\CommentMapper;
 use Fawaz\Database\UserMapper;
 use Fawaz\Services\JWTService;
@@ -28,7 +33,6 @@ use GraphQL\Executor\Executor;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\BuildSchema;
-use Fawaz\Utils\LastGithubPullRequestNumberProvider;
 use Fawaz\App\PeerTokenService;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
@@ -38,6 +42,7 @@ use Fawaz\App\Errors\ErrorMapper;
 use Fawaz\Utils\ArrayNormalizer;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
+use function grapheme_strlen;
 use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
@@ -54,7 +59,11 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
+use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Database\UserActionsRepository;
 use Fawaz\App\Models\TransactionCategory;
+use Fawaz\App\PeerShopService;
+use Fawaz\Utils\AppVersion;
 use PDOException;
 
 class GraphQLSchemaBuilder
@@ -75,18 +84,22 @@ class GraphQLSchemaBuilder
         protected UserService $userService,
         protected UserInfoService $userInfoService,
         protected PoolService $poolService,
+        protected GemsService $gemsService,
         protected PostInfoService $postInfoService,
         protected PostService $postService,
         protected CommentService $commentService,
         protected CommentInfoService $commentInfoService,
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
+        protected PeerShopService $peerShopService,
         protected AdvertisementService $advertisementService,
+        protected MintService $mintService,
         protected JWTService $tokenService,
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService
+        protected AlphaMintService $alphaMintService,
+        protected TransactionManager $transactionManager
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -118,6 +131,8 @@ class GraphQLSchemaBuilder
                 $schema = $adminSchema;
             } elseif ($this->userRoles === Role::MODERATOR) { // Role::MODERATOR
                 $schema = $moderatorSchema;
+            }if ($this->userRoles === Role::PEER_SHOP) {
+                $schema = $userSchema;
             }
         }
 
@@ -137,7 +152,7 @@ class GraphQLSchemaBuilder
 
         $schema = $this->getQueriesDependingOnRole();
         if (empty($schema)) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema]);
+            $this->logger->error('Invalid schema', ['schema' => $schema]);
             return $this::respondWithError(40301);
         }
 
@@ -148,7 +163,7 @@ class GraphQLSchemaBuilder
             Executor::setDefaultFieldResolver($this->fieldResolver(...));
             return $resultSchema;
         } catch (\Throwable $e) {
-            $this->logger->critical('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
+            $this->logger->error('Invalid schema', ['schema' => $schema, 'exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }
@@ -206,6 +221,7 @@ class GraphQLSchemaBuilder
         $this->profileService->setCurrentUserId($userid);
         $this->userInfoService->setCurrentUserId($userid);
         $this->poolService->setCurrentUserId($userid);
+        $this->gemsService->setCurrentUserId($userid);
         $this->postService->setCurrentUserId($userid);
         $this->postInfoService->setCurrentUserId($userid);
         $this->commentService->setCurrentUserId($userid);
@@ -213,8 +229,10 @@ class GraphQLSchemaBuilder
         $this->dailyFreeService->setCurrentUserId($userid);
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
+        $this->peerShopService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
+        $this->mintService->setCurrentUserId($userid);
     }
 
     protected function getStatusNameByID(int $status): ?string
@@ -294,8 +312,8 @@ class GraphQLSchemaBuilder
                 },
                 'userroles' => fn(array $root): int => $root['userroles'] ?? 0,
                 'userRoleString' => fn(array $root): string => $root['userRoleString'] ?? '',
-                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '1.2.0',
-                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? 'https://github.com/peer-network/peer_backend/wiki/Backend-Version-Update-1.2.0',
+                'currentVersion' => fn(array $root): string => $root['currentVersion'] ?? '',
+                'wikiLink' => fn(array $root): string => $root['wikiLink'] ?? '',
                 'lastMergedPullRequestNumber' => fn(array $root): string => $root['lastMergedPullRequestNumber'] ?? '',
                 'companyAccountId' => fn(array $root): string => $root['companyAccountId'] ?? '',
             ],
@@ -326,6 +344,19 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? "",
                 'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+            ],
+            'MintAccountResponse' => [
+                'meta' => function (array $root): array {
+                    return [
+                        'status' => $root['status'] ?? '',
+                        'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                        'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                        'RequestId' => $this->logger->getRequestUid(),
+                    ];
+                },
+                'mintAccount' => function (array $root): array {
+                    return $root['affectedRows'];
+                },
             ],
             'ReferralInfo' => [
                 'uid' => function (array $root): string {
@@ -888,6 +919,21 @@ class GraphQLSchemaBuilder
                     return $root['currentliquidity'] ?? 0.0;
                 },
             ],
+            'MintAccount' => [
+                'accountid' => function (array $root): string {
+                    $this->logger->debug('Query.MintAccount Resolvers');
+                    return $root['accountid'] ?? '';
+                },
+                'initialBalance' => function (array $root): string {
+                    return (string)$root['initial_balance'];
+                },
+                'currentBalance' => function (array $root): string {
+                    return (string)$root['current_balance'];
+                },
+                'updatedat' => function (array $root): string {
+                    return $root['updatedat'] ?? '';
+                },
+            ],
             'UserInfo' => [
                 'userid' => function (array $root): string {
                     $this->logger->debug('Query.UserInfo Resolvers');
@@ -1363,6 +1409,9 @@ class GraphQLSchemaBuilder
                 'operationid' => function (array $root): string {
                     return $root['operationid'] ?? '';
                 },
+                'transactionId' => function (array $root): string {
+                    return $root['transactionid'] ?? '';
+                },
                 'transactiontype' => function (array $root): string {
                     return $root['transactiontype'] ?? '';
                 },
@@ -1590,6 +1639,43 @@ class GraphQLSchemaBuilder
                 'comment' => fn(array|null $root): ?array => $root['comment'] ?? null,
                 'user' => fn(array|null $root): ?array => $root['user'] ?? null,
             ],
+            'ShopOrderDetailsResponse' => [
+                'status' => function (array $root): string {
+                    $this->logger->info('Query.ShopOrderDetailsResponse Resolvers');
+                    return $root['status'] ?? '';
+                },
+                'ResponseCode' => fn(array $root): string => $root['ResponseCode'] ?? '',
+                'affectedRows' => fn(array $root): array => $root['affectedRows'] ?? [],
+                'meta' => fn(array $root): array => [
+                    'status' => $root['status'] ?? '',
+                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                    'RequestId' => $this->logger->getRequestUid(),
+                ],
+            ],
+            'ShopOrderDetails' => [
+                'shopOrderId' => fn(array $root): string => $root['shopOrderId'] ?? '',
+                'shopItemId' => fn(array $root): string => $root['shopItemId'] ?? '',
+                'shopItemSpecs' => fn(array $root): array => $root['shopItemSpecs'] ?? [],
+                'deliveryDetails' => fn(array $root): array => $root['deliveryDetails'] ?? [],
+                'createdat' => fn(array $root): string => $root['createdat'] ?? '',
+            ],
+            'ShopItemSpecs' =>[
+                'size' => fn(array $root): string => $root['size'] ?? '',
+            ],
+            'ShopOrderDeliveryDetails' => [
+                'name' => fn(array $root): string => $root['name'] ?? '',
+                'email' => fn(array $root): string => $root['email'] ?? '',
+                'addressline1' => fn(array $root): string => $root['addressline1'] ?? '',
+                'addressline2' => fn(array $root): string => $root['addressline2'] ?? '',
+                'city' => fn(array $root): string => $root['city'] ?? '',
+                'zipcode' => fn(array $root): string => $root['zipcode'] ?? '',
+                'country' => fn(array $root): string => $root['country'] ?? '',
+            ],
+            'ShopSupportedDeliveryCountry' => [
+                'country' => fn(array $root): string => $root['country'] ?? '',
+            ],
+
         ];
     }
 
@@ -1618,17 +1704,17 @@ class GraphQLSchemaBuilder
             'listTags' => fn (mixed $root, array $args) => $this->resolveTags($args),
             'searchTags' => fn (mixed $root, array $args) => $this->resolveTagsearch($args),
             'getDailyFreeStatus' => fn (mixed $root, array $args) => $this->dailyFreeService->getUserDailyAvailability($this->currentUserId),
-            'gemster' => fn (mixed $root, array $args) => $this->walletService->callGemster(),
+            'gemster' => fn (mixed $root, array $args) => $this->gemsService->gemsStats(),
             'balance' => fn (mixed $root, array $args) => $this->resolveLiquidity(),
             'getUserInfo' => fn (mixed $root, array $args) => $this->resolveUserInfo(),
             'listWinLogs' => fn (mixed $root, array $args) => $this->resolveFetchWinsLog($args),
             'listPaymentLogs' => fn (mixed $root, array $args) => $this->resolveFetchPaysLog($args),
             'listBlockedUsers' => fn (mixed $root, array $args) => $this->resolveBlocklist($args),
-            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->walletService->callUserMove(),
+            'listTodaysInteractions' => fn (mixed $root, array $args) => $this->mintService->listTodaysInteractions(),
             'allfriends' => fn (mixed $root, array $args) => $this->resolveAllFriends($args),
             'postcomments' => fn (mixed $root, array $args) => $this->resolvePostComments($args),
-            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->callGemster(),
-            'dailygemsresults' => fn (mixed $root, array $args) => $this->poolService->callGemsters($args['day']),
+            'dailygemstatus' => fn (mixed $root, array $args) => $this->poolService->gemsStats(),
+            'dailygemsresults' => fn (mixed $root, array $args) => $this->gemsService->allGemsForDay($args['day']),
             'getReferralInfo' => fn (mixed $root, array $args) => $this->resolveReferralInfo(),
             'referralList' => fn (mixed $root, array $args) => $this->resolveReferralList($args),
             'getActionPrices' => fn (mixed $root, array $args) => $this->resolveActionPrices(),
@@ -1639,7 +1725,9 @@ class GraphQLSchemaBuilder
             'advertisementHistory' => fn (mixed $root, array $args) => $this->resolveAdvertisementHistory($args),
             'getTokenomics' => fn (mixed $root, array $args) => $this->resolveTokenomics(),
             'moderationStats' => fn (mixed $root, array $args) => $this->moderationStats(),
-            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args)
+            'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
+            'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
+            'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
         ];
     }
 
@@ -1672,20 +1760,19 @@ class GraphQLSchemaBuilder
             'resolvePostAction' => fn (mixed $root, array $args) => $this->postService->resolveActionPost($args),
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
-            'globalwins' => fn (mixed $root, array $args) => $this->walletService->callGlobalWins(),
-            'gemsters' => fn (mixed $root, array $args) => $this->walletService->callGemsters($args['day']),
+            'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
+            'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
         ];
     }
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
         $this->logger->debug('Query.hello started', ['args' => $args]);
-
-        $lastMergedPullRequestNumber = LastGithubPullRequestNumberProvider::getValue();
 
         /**
          * Map Role Mask
@@ -1699,7 +1786,9 @@ class GraphQLSchemaBuilder
             'userroles' => $this->userRoles,
             'userRoleString' => $userRoleString,
             'currentuserid' => $this->currentUserId,
-            'lastMergedPullRequestNumber' => $lastMergedPullRequestNumber ?? "",
+            'currentVersion' => AppVersion::get(),
+            'wikiLink' => 'https://github.com/peer-network/peer_backend/releases/latest',
+            'lastMergedPullRequestNumber' => "thingy is replaced with 'currentVersion' field",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
     }
@@ -2044,7 +2133,6 @@ class GraphQLSchemaBuilder
         $this->logger->info('Query.getTokenomics finished', ['payload' => $payload]);
         return $payload;
     }
-
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
@@ -2879,7 +2967,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError(30202);
         }
 
-        if (strlen($message) < 3 || strlen($message) > 500) {
+        if (grapheme_strlen($message) < 3 || grapheme_strlen($message) > 500) {
             return $this::respondWithError(30103);
         }
 
@@ -2917,7 +3005,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('Query.verifyAccount started');
 
         try {
-            $user = $this->userMapper->loadById($userid);
+            $user = $this->userService->loadAllUsersById($userid);
             if (!$user) {
                 return $this::respondWithError(31007);
             }
@@ -3043,7 +3131,7 @@ class GraphQLSchemaBuilder
             //     return $this::respondWithError(30901);
             // }
 
-            $users = $this->userMapper->loadById($decodedToken->uid);
+            $users = $this->userService->loadVisibleUsersById($decodedToken->uid);
             if ($users === false) {
                 return $this::respondWithError(30901);
             }
@@ -3174,4 +3262,76 @@ class GraphQLSchemaBuilder
             return self::respondWithError(40301);
         }
     }
+
+    
+    protected function performShopOrder(array $args): ?array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.performShopOrder started');
+
+        $validation = RequestValidator::validate($args, ['tokenAmount', 'shopItemId']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'addressline2']);
+
+        if ($orderValidation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $orderValidation->errors[0]
+            );
+        }
+
+        if($args['orderDetails']['shopItemSpecs'] && !empty($args['orderDetails']['shopItemSpecs'])){
+            $orderValidation = RequestValidator::validate($args['orderDetails']['shopItemSpecs'], ['size']);
+            if ($orderValidation instanceof ValidatorErrors) {
+                return $this::respondWithError(
+                    $orderValidation->errors[0]
+                );
+            }
+        }
+
+        $results = $this->peerShopService->performShopOrder($args);
+
+
+        if ($results instanceof ErrorResponse) {
+            return $results->response;
+        }
+
+        $this->logger->info('Query.performShopOrder successful');
+        return $results;
+    }
+
+
+    public function shopOrderDetails(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.shopOrderDetails started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validation = RequestValidator::validate($args, ['transactionId']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        try {
+            return $this->peerShopService->shopOrderDetails($validation);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.shopOrderDetails", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
+        }
+
+    }
+
 }

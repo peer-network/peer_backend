@@ -25,7 +25,10 @@ use Fawaz\Utils\ReportTargetType;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
+use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
 use Fawaz\Utils\ResponseHelper;
+
+use function grapheme_strlen;
 
 class UserInfoService
 {
@@ -186,9 +189,15 @@ class UserInfoService
             $contentFilterCase,
             ContentType::user
         );
+        $peerShopUserSpec = new PeerShopSpec(
+            $contentFilterCase,
+            ContentType::user
+        );
+        
 
         $specs = [
-            $systemUserSpec
+            $systemUserSpec,
+            $peerShopUserSpec
         ];
 
         if ($this->interactionsPermissionsMapper->isInteractionAllowed(
@@ -337,9 +346,26 @@ class UserInfoService
             return $this::respondWithError(60501);
         }
 
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
+        }
+
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
-        if (trim($biography) === '' || strlen($biography) < $bioConfig['MIN_LENGTH'] || strlen($biography) > $bioConfig['MAX_LENGTH']) {
+        if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
             return $this::respondWithError(30228);
         }
 
@@ -393,6 +419,23 @@ class UserInfoService
     {
         if (!$this->checkAuthentication()) {
             return $this::respondWithError(60501);
+        }
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
         }
 
         if (trim($mediaFile) === '') {
@@ -466,6 +509,24 @@ class UserInfoService
             if (!$user) {
                 $this->logger->warning('UserInfoService.reportUser: User not found');
                 return $this->respondWithError(31007);
+            }
+
+            $contentFilterCase = ContentFilteringCases::searchById;
+
+            $peerShopUserSpec = new PeerShopSpec(
+                $contentFilterCase,
+                ContentType::user
+            );
+
+            $specs = [
+                $peerShopUserSpec
+            ];
+
+            if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+                $specs,
+                $reported_userid
+            ) === false) {
+                return $this::respondWithError(32201, ['userid' => $reported_userid]);
             }
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {

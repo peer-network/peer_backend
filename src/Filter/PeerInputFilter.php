@@ -15,7 +15,7 @@ use function addslashes;
 use function htmlentities;
 use function preg_match;
 use function ctype_digit;
-use function strlen;
+use function grapheme_strlen;
 use function get_debug_type;
 use function filter_var;
 use function in_array;
@@ -355,7 +355,7 @@ class PeerInputFilter
         $min =  (int)($options['min'] ?? 0);
         $max = (int)($options['max'] ?? PHP_INT_MAX);
         $errorCode = $options['errorCode'] ?? 40301;
-        $length = strlen($value);
+        $length = grapheme_strlen((string)$value);
 
         $validationResult = ($length >= $min && $length <= $max);
 
@@ -402,7 +402,7 @@ class PeerInputFilter
         $max = $options['max'] ?? PHP_INT_MAX;
 
         foreach ($value as $item) {
-            if (!is_string($item) || strlen($item) < $min || strlen($item) > $max) {
+            if (!is_string($item) || grapheme_strlen($item) < $min || grapheme_strlen($item) > $max) {
                 return false;
             }
         }

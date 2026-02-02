@@ -1,5 +1,6 @@
 type TransactionHistoryItem {
   operationid: String!
+  transactionId: String!
   transactionCategory: TransactionCategory
   transactiontype: String! #take from transactiontype of CREDIT transaction by operationid
   tokenamount: String! #sum with all fees transactions
@@ -335,6 +336,13 @@ type MintingData {
   tokensMintedYesterday: Float!
 }
 
+type MintAccount {
+  accountid: ID!
+  initialBalance: Decimal!
+  currentBalance: Decimal!
+  updatedat: String!
+}
+
 type CurrentLiquidity {
   status: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
   ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
@@ -549,4 +557,33 @@ type TargetContent {
   post: Post
   comment: Comment
   user: BasicUserInfo
+}
+
+type ShopItemSpecs {
+  size: String!
+}
+
+type ShopOrderDetailsResponse {
+  meta: DefaultResponse!
+  status: String!
+  ResponseCode: String @deprecated(reason: "use meta.ResponseCode . this field will be removed after 15 October`.")
+  affectedRows: ShopOrderDetails!
+}
+
+type ShopOrderDetails {
+  shopOrderId: String!
+  shopItemId: String!
+  shopItemSpecs: ShopItemSpecs
+  deliveryDetails: ShopOrderDeliveryDetails!
+  createdat: Date!
+}
+
+type ShopOrderDeliveryDetails {
+  name: String!
+  email: String!
+  addressline1: String!
+  addressline2: String
+  city: String!
+  zipcode: String!
+  country: String!
 }

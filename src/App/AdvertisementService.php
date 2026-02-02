@@ -34,7 +34,6 @@ class AdvertisementService
     protected ?string $currentUserId = null;
     public const PLAN_BASIC = 'BASIC';
     public const PLAN_PINNED = 'PINNED';
-
     public const DURATION_ONE_DAY = 'ONE_DAY';
     public const DURATION_TWO_DAYS = 'TWO_DAYS';
     public const DURATION_THREE_DAYS = 'THREE_DAYS';
@@ -225,8 +224,8 @@ class AdvertisementService
             // Wallet prüfen
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
-                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 $this->transactionManager->rollback();
+                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
 
@@ -246,14 +245,13 @@ class AdvertisementService
                 }
 
                 if (!$deducted) {
-                    $this->logger->warning('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     $this->transactionManager->rollback();
-                    return $this->respondWithError($deducted['ResponseCode']);
+                    return $this->respondWithError(40301);
                 }
                 $this->transactionManager->commit();
                 return $response;
             }
-
             $this->transactionManager->rollback();
             return $response;
 
@@ -692,10 +690,12 @@ class AdvertisementService
 
         $filterBy = $args['filterBy'] ?? [];
         $tag = $args['tag'] ?? null;
+        $title = $args['title'] ?? null;
         $postId = $args['postid'] ?? null;
         $userId = $args['userid'] ?? null;
         $contentFilterBy = $args['contentFilterBy'] ?? null;
         $tagConfig = ConstantsConfig::post()['TAG'];
+        $titleConfig = ConstantsConfig::post()['TITLE'];
         $commentOffset = max((int)($args['commentOffset'] ?? 0), 0);
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
@@ -720,6 +720,10 @@ class AdvertisementService
                 $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
+        }
+
+        if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+            return $this::respondWithError(30210);
         }
 
         // Normalize and validate filterBy (accept scalar or array)
@@ -749,7 +753,7 @@ class AdvertisementService
 
         $contentFilterCase = ContentFilteringCases::postFeed;
 
-        if ($tag) {
+        if ($title || $tag) {
             $contentFilterCase = ContentFilteringCases::searchByMeta;
         }
         if ($userId || $postId) {
@@ -803,6 +807,7 @@ class AdvertisementService
                 $commentOffset,
                 $commentLimit
             );
+
         }
 
         return $results;

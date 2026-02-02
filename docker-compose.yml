@@ -72,6 +72,7 @@ services:
       BURN_ACCOUNT: ${BURN_ACCOUNT}
       LIQUIDITY_POOL: ${LIQUIDITY_POOL}
       BTC_POOL: ${BTC_POOL}
+      PEER_SHOP: ${PEER_SHOP}
     networks:
       - my-network
     command: >

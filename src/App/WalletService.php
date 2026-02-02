@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fawaz\App;
 
 use Fawaz\App\Wallet;
+use Fawaz\Database\UserMapper;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Exception;
@@ -12,7 +13,6 @@ use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
-use Fawaz\Services\TokenTransfer\Strategies\AdsTransferStrategy;
 use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 class WalletService
@@ -23,10 +23,11 @@ class WalletService
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected WalletMapper $walletMapper,
+        protected UserMapper $userMapper,
+        protected UserService $userService,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
-    ) {
-    }
+    ) {}
 
     public function setCurrentUserId(string $userId): void
     {
@@ -134,65 +135,6 @@ class WalletService
         return $this->walletMapper->fetchWinsLog($this->currentUserId, 'pay', $args);
     }
 
-    public function callGlobalWins(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        return $this->walletMapper->callGlobalWins();
-    }
-
-    public function callGemster(): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        return $this->walletMapper->getTimeSorted();
-    }
-
-    public function callGemsters(string $day = 'D0'): array
-    {
-        if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
-        }
-
-        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'W0', 'M0', 'Y0'];
-
-        // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
-            return $this::respondWithError(30105);
-        }
-
-        $gemsters = $this->walletMapper->getTimeSortedMatch($day);
-
-        if (isset($gemsters['affectedRows']['data'])) {
-            $winstatus = $gemsters['affectedRows']['data'][0];
-            unset($gemsters['affectedRows']['data'][0]);
-
-            $userStatus = array_values($gemsters['affectedRows']['data']);
-
-            $affectedRows = [
-                'winStatus' => $winstatus ?? [],
-                'userStatus' => $userStatus,
-            ];
-
-            return [
-                'status' => $gemsters['status'],
-                'counter' => $gemsters['counter'] ?? 0,
-                'ResponseCode' => $gemsters['ResponseCode'],
-                'affectedRows' => $affectedRows
-            ];
-        }
-        return [
-            'status' => $gemsters['status'],
-            'counter' => 0,
-            'ResponseCode' => $gemsters['ResponseCode'],
-            'affectedRows' => []
-        ];
-    }
-
     public function loadLiquidityById(string $userId): array
     {
         $this->logger->debug('WalletService.loadLiquidityById started');
@@ -218,45 +160,6 @@ class WalletService
             return $this->walletMapper->getUserWalletBalance($userId);
         } catch (Exception $e) {
             return 0.0;
-        }
-    }
-
-    public function deductFromWallet(string $userId, ?array $args = []): ?array
-    {
-        $this->logger->debug('WalletService.deductFromWallet started');
-
-        try {
-            $this->transactionManager->beginTransaction();
-            $response = $this->walletMapper->deductFromWallets($userId, $args);
-            if ($response['status'] === 'success') {
-                $this->transactionManager->commit();
-                return $response;
-            } else {
-                $this->transactionManager->rollBack();
-                return $response;
-            }
-
-        } catch (Exception $e) {
-            $this->transactionManager->rollBack();
-            return $this::respondWithError(40301);
-        }
-    }
-
-    public function callUserMove(): ?array
-    {
-        $this->logger->debug('WalletService.callUserMove started');
-
-        try {
-            $response = $this->walletMapper->callUserMove($this->currentUserId);
-            return $this::createSuccessResponse(
-                $response['ResponseCode'],
-                $response['affectedRows'],
-                false // no counter needed for existing data
-            );
-
-
-        } catch (Exception $e) {
-            return $this::respondWithError(41205);
         }
     }
 
@@ -308,11 +211,14 @@ class WalletService
             }
 
             [$burnWallet, $peerWallet, $btcpool] = $this->peerTokenMapper->initializeLiquidityPool();
-            $fromId = $args['fromid'] ?? $peerWallet;
+            $recipientId = $args['fromid'] ?? $peerWallet;
+
+            $senderUserObj = $this->userService->loadAllUsersById($userId);
+            $receipientUserObj = $this->userService->loadAllUsersById($recipientId);
 
             $args = [
                 'postid' => $postId,
-                'fromid' => $fromId,
+                'fromid' => $userId,
                 'gems' => 0.0,
                 'numbers' => -abs((float)$price),
                 'whereby' => $whereby,
@@ -320,11 +226,11 @@ class WalletService
             ];
 
             $response = $this->peerTokenMapper->transferToken(
-                $userId,
-                $fromId,
                 $price,
                 $transferStrategy,
-                $text
+                $senderUserObj,
+                $receipientUserObj,
+                $text,
             );
 
             $args['gemid'] = $transferStrategy->getOperationId();

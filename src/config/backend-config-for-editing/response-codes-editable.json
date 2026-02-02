@@ -347,6 +347,15 @@
         "comment": "Advertisement post updated successfully.",
         "userFriendlyComment": "Success: Advertisement post updated successfully."
     },
+    "12201": {
+        "comment": "Shop order placed successfully.",
+        "userFriendlyComment": "Success: Your order has been placed."
+    },
+    "12202": {
+        "comment": "Shop order retrieved successfully.",
+        "userFriendlyComment": "Shop order loaded."
+    },
+
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
         "userFriendlyComment": "No users found. Try different search terms."
@@ -478,6 +487,10 @@
     "22002": {
         "comment": "Information Not Found: No advertisements found. Please try again later or create an advertisement",
         "userFriendlyComment": "No advertisements available. Try again later or create one!"
+    },
+    "22101": {
+        "comment": "Shop order not found. No matching order exists right now. Try again later or create a new shop order.",
+        "userFriendlyComment": "We couldn’t find a shop order yet. Please try again later or create one."
     },
     "30101": {
         "comment": "All required fields must be provided",
@@ -779,6 +792,38 @@
         "comment": "The 'transfer message' field must not contain control symbols and links.",
         "userFriendlyComment": "Message must not contain control symbols and links."
     },
+    "30272": {
+        "comment": "UUID must be a valid UUID (format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX).",
+        "userFriendlyComment": "That ID doesn’t look right. Please check it and try again."
+    },
+    "30273": {
+        "comment": "addressLine1 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
+    },
+    "30274": {
+        "comment": "city must be a valid city name.",
+        "userFriendlyComment": "Please enter a valid city."
+    },
+    "30275": {
+        "comment": "zipCode must be a valid postal/ZIP code.",
+        "userFriendlyComment": "Please enter a valid ZIP/postal code."
+    },
+    "30276": {
+        "comment": "country must be a valid country value.",
+        "userFriendlyComment": "Please select a valid country."
+    },
+    "30277": {
+        "comment": "name must be a valid name.",
+        "userFriendlyComment": "Please enter a valid name."
+    },
+    "30278": {
+        "comment": "size must be not more than {PEER_SHOP.SIZE.MAX_LENGTH}.",
+        "userFriendlyComment": "Please enter a valid size {PEER_SHOP.SIZE.MAX_LENGTH}."
+    },
+    "30279": {
+        "comment": "addressLine2 must be a valid street address.",
+        "userFriendlyComment": "Please enter a valid street address."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
@@ -867,6 +912,10 @@
         "comment": "The 'userid' and 'username' fields cannot be used together in the same request",
         "userFriendlyComment": "Please provide either a user ID or a username, not both."
     },
+    "31013": {
+        "comment": "Profile updates blocked due to moderation",
+        "userFriendlyComment": "Profile updates blocked due to moderation."
+    },
     "31101": {
         "comment": "Not Allowed: You can only perform this action with users on your friends list",
         "userFriendlyComment": "This action is only available for friends."
@@ -906,6 +955,14 @@
     "31203": {
         "comment": "Unauthorized to initiate transfers to Pool accounts.",
         "userFriendlyComment": "You are not authorized to transfer to pool accounts."
+    },
+    "31204": {
+        "comment": "Minting for the given day has already been performed.",
+        "userFriendlyComment": "Minting for this day has already been completed."
+    },
+    "31205": {
+        "comment": "Unauthorized to place shop order.",
+        "userFriendlyComment": "You are not authorized to place a shop order."
     },
     "31501": {
         "comment": "Invalid Action: You have already liked this post",
@@ -1175,6 +1232,10 @@
         "comment": "Error: Content already reviewed and restored",
         "userFriendlyComment": "This content was already decided and restored."
     },
+    "32201": {
+        "comment": "Forbidden: You are not allowed to perform this action.",
+        "userFriendlyComment": "You don’t have permission to perform this action."
+    },
     "42101": {
         "comment": "Error: Failed while performing moderation action",
         "userFriendlyComment": "Error: Failed while performing moderation action"
@@ -1418,6 +1479,10 @@
     "41222": {
         "comment": "Unexpected Error: One of the pool accounts in the env file is missing.",
         "userFriendlyComment": "A configuration error occurred. Please contact support."
+    },
+    "41223": {
+         "comment": "Unexpected error: Internal server error while placing shop order.",
+          "userFriendlyComment": "We're having trouble placing your order right now. Please try again later."
     },
     "41401": {
         "comment": "Unexpected Error: Failed to create transaction. Please try again later or contact support",

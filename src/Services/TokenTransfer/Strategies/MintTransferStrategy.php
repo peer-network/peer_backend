@@ -8,7 +8,7 @@ use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class MintTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
 {
     use ResponseHelper;
 
@@ -25,11 +25,11 @@ class NoFeesTransferStrategy extends BaseTransferStrategy implements TransferStr
 
     public function getTransactionCategory(): TransactionCategory
     {
-        return TransactionCategory::P2P_TRANSFER;
+        return TransactionCategory::TOKEN_MINT;
     }
     public function getRecipientTransactionType(): string
     {
-        return 'transferSenderToRecipient';
+        return 'transferMintAccountToRecipient';
     }
 
     public function setTransactionId(string $transactionId): void

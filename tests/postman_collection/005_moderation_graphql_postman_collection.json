@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "40ea8ed2-ba84-47d3-a675-ce666576cc87",
+		"_postman_id": "92a33dec-1b7d-49f8-a25e-cb18574f5b4d",
 		"name": "005_moderation_graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43606001",
-		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/43606001-40ea8ed2-ba84-47d3-a675-ce666576cc87?action=share&source=collection_link&creator=43606001"
+		"_collection_link": "https://automated-testing-with-taso.postman.co/workspace/Peer-Workspace~a910b484-5e62-449c-9ff4-504470bc690f/collection/32542010-92a33dec-1b7d-49f8-a25e-cb18574f5b4d?action=share&source=collection_link&creator=43606001"
 	},
 	"item": [
 		{
@@ -18982,6 +18982,256 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query ListPosts {\n    listPosts(postid: \"{{existing_postid}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            visibilityStatus\n          isHiddenForUsers\n            hasActiveReports\n            amountreports\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            url\n            user {\n                id\n                username\n                slug\n                img\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isfollowed\n                isfollowing\n                isfriend\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                amountlikes\n                amountreplies\n                amountreports\n                isliked\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n          isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    isfriend\n                }\n            }\n        }\n    }\n}\n\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update bio as illegal (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31013\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateBio {\n    updateBio(biography: \"{{new_bio}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update username as illegal (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31013\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Function to generate a random string",
+							"function generateRandomUsername() {",
+							"    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+							"    let username = '';",
+							"    for (let i = 0; i < 10; i++) { // Username length (10 characters)",
+							"        username += chars.charAt(Math.floor(Math.random() * chars.length));",
+							"    }",
+							"    return username;",
+							"}",
+							"",
+							"// Generate and save the random username in the environment",
+							"let randomUsername = generateRandomUsername();",
+							"pm.environment.set(\"new_username\", randomUsername);",
+							"console.log(\"Generated Random Username:\", randomUsername);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateUsername {\n    updateUsername(username: \"{{new_username}}\", password: \"{{password}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update profile picture as illegal (fail)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"31013\");",
+							"});",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"error\"');",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation UpdateProfileImage {\n    updateProfileImage(img: \"{{new_profile_pic}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+						"variables": ""
+					}
+				},
+				"url": {
+					"raw": "{{test-backend}}/graphql",
+					"host": [
+						"{{test-backend}}"
+					],
+					"path": [
+						"graphql"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Confirm no update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"ResponseCode is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"11009\");",
+							"});",
+							"",
+							"pm.test(\"Status is correct\", function () {",
+							"    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+							"});",
+							"",
+							"pm.test(\"User with userid_t6 should have correct moderation data\", function () {",
+							"    const users = pm.response.json().data?.listUsersV2?.affectedRows || [];",
+							"    const userId = pm.environment.get(\"userid_t6\");",
+							"",
+							"    if (!userId) throw new Error(\"Environment variable 'userid_t6' is not set.\");",
+							"",
+							"    const user = users.find(u => u.id === userId);",
+							"    if (!user) throw new Error(`User with ID ${userId} not found in listUsersV2 response.`);",
+							"",
+							"    pm.expect(user.username, \"username\").to.eql(\"illegal_account\");",
+							"    pm.expect(user.visibilityStatus, \"visibilityStatus\").to.eql(\"ILLEGAL\");",
+							"    pm.expect(user.hasActiveReports, \"hasActiveReports\").to.eql(false);",
+							"    pm.expect(user.isHiddenForUsers, \"isHiddenForUsers\").to.eql(false);",
+							"    pm.expect(user.img, \"img\").to.eql('[{\"path\":\"\\\\/image\\\\/default.jpg\",\"options\":{\"size\":\"69.89 KB\",\"resolution\":\"1500x1500\"}}]');",
+							"    pm.expect(user.biography, \"biography\").to.eql(\"/userData/00000000-0000-0000-0000-000000000000.txt\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query ListUsersV2 {\n    listUsersV2(contentFilterBy: MYGRANDMALIKES, userid: \"{{userid_t6}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            username\n            status\n            slug\n            img\n            biography\n            visibilityStatus\n          isHiddenForUsers\n            hasActiveReports\n            createdat\n            updatedat\n        }\n    }\n}\n",
 						"variables": ""
 					}
 				},

@@ -27,9 +27,10 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\UserPreferences;
+use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use PDOException;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     use ResponseHelper;
     protected ?string $currentUserId = null;
@@ -43,7 +44,8 @@ class UserService
         protected PostMapper $postMapper,
         protected WalletMapper $walletMapper,
         protected Mailer $mailer,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
     ) {
         $this->base64filehandler = new Base64FileHandler();
     }
@@ -121,6 +123,70 @@ class UserService
         return null;
     }
 
+    public function loadVisibleUsersById(string $userId): User|false
+    {
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);
+
+        $contentFilterCase = ContentFilteringCases::hideAll;
+
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
+        ];
+
+        try {
+            return $this->userMapper->loadById($userId, $defaultSpecs);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function isVisibleUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isVisibleUserExistById started', ['userId' => $userId]);
+
+        $contentFilterCase = ContentFilteringCases::hideAll;
+
+        $defaultSpecs = [
+            new IllegalContentFilterSpec($contentFilterCase, ContentType::user),
+            new SystemUserSpec($contentFilterCase, ContentType::user),
+            new DeletedUserSpec($contentFilterCase, ContentType::user)
+        ];
+
+        try {
+            return $this->userMapper->isUserExistById($userId, $defaultSpecs);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check visible user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function loadAllUsersById(string $userId): User|false
+    {
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);        
+
+        try {
+            return $this->userMapper->loadById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to load user by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public function isAnyUserExistById(string $userId): bool
+    {
+        $this->logger->debug('UserService.isUserExistById started', ['userId' => $userId]);
+
+        try {
+            return $this->userMapper->isUserExistById($userId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to check user existence by id', ['userId' => $userId, 'error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
     public function createUser(array $args): array
     {
         $this->logger->debug('UserService.createUser started');
@@ -150,7 +216,7 @@ class UserService
                 return self::respondWithError(31007);
             }
 
-            $inviter = $this->userMapper->loadById($referralUuid);
+            $inviter = $this->loadVisibleUsersById($referralUuid);
 
             if (empty($inviter)) {
                 $this->logger->warning('Invalid referral UUID provided.', ['referralUuid' => $referralUuid]);
@@ -289,7 +355,7 @@ class UserService
             $this->userMapper->insertReferralInfo($id, $referralLink);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->warning('Error handling referral info.', ['exception' => $e]);
+            $this->logger->error('Error handling referral info.', ['exception' => $e]);
             return self::respondWithError(41013);
         }
 
@@ -676,6 +742,23 @@ class UserService
     {
         if (!$this->checkAuthentication()) {
             return self::respondWithError(60501);
+        }
+
+        $illegalContentSpec = new IllegalContentFilterSpec(
+            ContentFilteringCases::searchById,
+            ContentType::user
+        );
+
+        $specs = [
+            $illegalContentSpec
+        ];
+
+        if ($this->interactionsPermissionsMapper->isInteractionAllowed(
+            $specs,
+            $this->currentUserId
+        ) === false) {
+            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            return $this::respondWithError(31013);
         }
 
         if (empty($args['username'])) {
