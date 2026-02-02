@@ -1,6 +1,6 @@
 -- Total Users: 113 - For those users, we are adding transactions records.
 -- Total Balances of 113: -36123.0592191489 (Excluding Tester 01, 02, 03, Alpha a/c, Jakob, LP)
--- IMPORTANT: make sure that tester02 - `6520ac47-f262-4f7e-b643-9dc5ee4cfa82` has more than `36123.0592191489` wallet balance
+-- IMPORTANT: make sure that tester01 - `b9e94945-abd7-46a5-8c92-59037f1d73bf` has more than `36123.0592191489` wallet balance
 
 BEGIN;
 
@@ -148,7 +148,7 @@ WITH
             gen_random_uuid(),
             gen_random_uuid(),
             'transferSenderToRecipient',
-            '6520ac47-f262-4f7e-b643-9dc5ee4cfa82'::uuid,
+            'b9e94945-abd7-46a5-8c92-59037f1d73bf'::uuid,
             r.recipientid,
             r.tokenamount,
             'CREDIT',
@@ -169,7 +169,7 @@ SET
 FROM
     total_allocated t
 WHERE
-    w.userid = '6520ac47-f262-4f7e-b643-9dc5ee4cfa82'::uuid;
+    w.userid = 'b9e94945-abd7-46a5-8c92-59037f1d73bf'::uuid;
 
 UPDATE users_info ui
 SET
@@ -179,6 +179,6 @@ FROM
     wallett w
 WHERE
     ui.userid = w.userid
-    AND w.userid = '6520ac47-f262-4f7e-b643-9dc5ee4cfa82'::uuid;
+    AND w.userid = 'b9e94945-abd7-46a5-8c92-59037f1d73bf'::uuid;
 
 COMMIT;
