@@ -152,7 +152,7 @@ WITH
             r.recipientid,
             r.tokenamount,
             'CREDIT',
-            'balance adjustment',
+            'Adjustment to align your balance after migration',
             CURRENT_TIMESTAMP,
             'P2P_TRANSFER'
         FROM
