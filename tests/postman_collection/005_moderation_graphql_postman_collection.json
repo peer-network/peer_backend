@@ -15923,7 +15923,7 @@
               "        throw new Error(\"Environment variables existing_postid or existing_postid_2 are not set.\");",
               "    }",
               "",
-              "    pm.expect(body).not.to.include(id1);",
+              "    pm.expect(body).to.include(id1);",
               "    pm.expect(body).not.to.include(id2);",
               "});"
             ],
