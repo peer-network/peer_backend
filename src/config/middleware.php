@@ -6,11 +6,14 @@ use Slim\App;
 use Psr\Container\ContainerInterface;
 use Fawaz\Middleware\RateLimiterMiddleware;
 use Fawaz\Middleware\SecurityHeadersMiddleware;
+use Fawaz\Middleware\UserRequestQueueMiddleware;
 use Fawaz\RateLimiter\RateLimiter;
 use Fawaz\Utils\PeerLoggerInterface;
 
 return static function (App $app, ContainerInterface $container, array $settings) {
     $app->addBodyParsingMiddleware();
+
+    $app->add(UserRequestQueueMiddleware::class);
 
     $app->add(SecurityHeadersMiddleware::class);
 
