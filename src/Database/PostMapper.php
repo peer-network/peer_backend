@@ -795,7 +795,7 @@ class PostMapper
             'tags' => $row['tags'],
             'visibility_status' => $row['visibility_status'],
             'reports' => $row['post_reports']
-        ]);
+        ], [], false);
     }
 
     /**
