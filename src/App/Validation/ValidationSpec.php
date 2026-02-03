@@ -177,6 +177,18 @@ class ValidationSpec
         ];
     }
 
+    public static function leaderboardUsersCount(string $field, bool $required = false, int $errorCode = 33001): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateLeaderboardUsersCount', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
     public static function genericUuid(string $field, bool $required = false, int $errorCode = 30272): array
     {
         return [
@@ -188,7 +200,6 @@ class ValidationSpec
             ],
         ];
     }
-
 
 
     public static function size(string $field, bool $required = false, int $errorCode = 30278): array
@@ -268,6 +279,8 @@ class ValidationSpec
             'transactionId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
             'size' => fn (string $f, bool $r) => self::size($f, false),
             'addressline2' => fn (string $f, bool $r) => self::addressLine2($f, false),
+
+            'leaderboardUsersCount' => fn (string $f, bool $r) => self::leaderboardUsersCount($f, $r),
         ];
 
         $spec = [];

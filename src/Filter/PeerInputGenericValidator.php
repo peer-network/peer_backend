@@ -738,4 +738,28 @@ class PeerInputGenericValidator
 
         return true;
     }
+
+    /**
+     * validateLeaderboardUsersCount
+     * 
+     * should only contain numberic values
+     */
+    protected function validateLeaderboardUsersCount(int $value, array $options = []): bool
+    {
+        $fieldKey = $options['field'] ?? 'leaderboardUsersCount';
+        $errorCode = (string)($options['errorCode'] ?? '33001');
+
+        if ($value === '' || $value === null) {
+            $this->pushError($options, $fieldKey, $errorCode);
+            return false;
+        }
+
+        if (!is_numeric($value)) {
+            $this->pushError($options, $fieldKey, '33002');
+            return false;
+        }
+
+        return true;
+    }
+
 }
