@@ -138,7 +138,7 @@ class LeaderBoardService
 
         $this->logger->info('LeaderBoardService.generateLeaderboard completed successfully');
 
-        $mediaServer = $_ENV['MEDIA_SERVER'];
+        $mediaServer = $_ENV['MEDIA_SERVER_URL'];
         
         $leaderboardResultLink = $mediaServer . '/' . $mediaDir . '/' . $fileName;
 
