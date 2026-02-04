@@ -117,8 +117,12 @@ class LeaderBoardService
             fclose($handle);
 
             $this->logger->info('LeaderBoardService.generateLeaderboard completed successfully');
+
+            $mediaServer = $_ENV['MEDIA_SERVER'];
             
-            return self::createSuccessResponse(12301, ['leaderboardResultLink' => $mediaDir . '/' . $fileName], false); // leadboard loaded successfully
+            $leaderboardResultLink = $mediaServer . '/' . $mediaDir . '/' . $fileName;
+            
+            return self::createSuccessResponse(12301, ['leaderboardResultLink' => $leaderboardResultLink], false); // leadboard loaded successfully
 
         } catch (\Exception $e) {
             $this->logger->error("Error in LeaderBoardService.generateLeaderboard", ['exception' => $e->getMessage()]);
