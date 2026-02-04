@@ -85,6 +85,7 @@ class LeaderBoardMapper
                 )
                 SELECT u.uid,
                     u.username,
+                    u.slug,
                     COALESCE(pe.comments_on_posts, 0) AS comments_on_posts,
                     COALESCE(pe.likes_on_posts, 0) AS likes_on_posts,
                     COALESCE(ppc.ppc_points, 0) AS ppc_points,

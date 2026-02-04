@@ -1208,6 +1208,10 @@
         "comment": "Missing or invalid field number and number must be a positive number greater than 0",
         "userFriendlyComment": "Please enter a valid number and number must be a positive number greater than 0"
     },
+    "33002": {
+        "comment": "Invalid end date. Please enter a date that is not earlier than the start date.",
+        "userFriendlyComment": "Invalid end date. Please enter a date that is not earlier than the start date."
+    },
     "12101": {
         "comment": "Success: Moderation stats retrieved successfully",
         "userFriendlyComment": "Moderation statistics loaded."
