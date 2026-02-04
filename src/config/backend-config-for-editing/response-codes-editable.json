@@ -355,6 +355,10 @@
         "comment": "Shop order retrieved successfully.",
         "userFriendlyComment": "Shop order loaded."
     },
+    "12301": {
+        "comment": "Leaderboard generated successfully.",
+        "userFriendlyComment": "Leaderboard generated successfully."
+    },
 
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
@@ -491,6 +495,10 @@
     "22101": {
         "comment": "Shop order not found. No matching order exists right now. Try again later or create a new shop order.",
         "userFriendlyComment": "We couldn’t find a shop order yet. Please try again later or create one."
+    },
+    "22201": {
+        "comment": "No user found on leaderboard. Try again with different criteria.",
+        "userFriendlyComment": "We couldn’t find a user on the leaderboard. Please try again later or adjust your criteria."
     },
     "30101": {
         "comment": "All required fields must be provided",
@@ -1196,6 +1204,10 @@
         "comment": "It is forbidden to advertise this Post(illegal Post)",
         "userFriendlyComment": "It is forbidden to advertise  this Post(illegal Post)"
     },
+    "33001": {
+        "comment": "Missing or invalid field number and number must be a positive number greater than 0",
+        "userFriendlyComment": "Please enter a valid number and number must be a positive number greater than 0"
+    },
     "12101": {
         "comment": "Success: Moderation stats retrieved successfully",
         "userFriendlyComment": "Moderation statistics loaded."
@@ -1659,6 +1671,10 @@
     "42007": {
         "comment": "Failed to create advertisement post.",
         "userFriendlyComment": "An error occurred while creating the advertisement post. Please try again."
+    },
+    "42201": {
+        "comment": "Failed to create leaderboard result.",
+        "userFriendlyComment": "An error occurred while creating the leaderboard result. Please try again."
     },
     "51301": {
         "comment": "Failure: Your liquidity is too low to perform this action",
