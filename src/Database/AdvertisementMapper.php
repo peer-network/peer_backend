@@ -572,7 +572,7 @@ class AdvertisementMapper
             $stmt->bindValue(':status', $status, PDO::PARAM_STR);
             $stmt->execute();
 
-            $results = array_map(fn ($row) => new Advertisements($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+            $results = array_map(fn ($row) => new Advertisements($row, [], false), $stmt->fetchAll(PDO::FETCH_ASSOC));
 
             $this->logger->info(
                 $results ? "Fetched advertisementId successfully" : "No advertisements found for userid.",
@@ -1013,7 +1013,7 @@ class AdvertisementMapper
             'tags' => $row['tags'],
             'visibility_status' => $row['visibility_status'],
             'reports' => $row['post_reports'],
-        ]);
+        ], [], false);
     }
 
     private static function mapRowToAdvertisement(array $row): Advertisements
@@ -1026,6 +1026,6 @@ class AdvertisementMapper
             'timestart' => (string)$row['ad_order'],
             'timeend' => (string)$row['end_order'],
             'createdat' => (string)$row['tcreatedat']
-        ]);
+        ], [], false);
     }
 }

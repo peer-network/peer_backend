@@ -7,6 +7,7 @@ extend type Query {
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
   getMintAccount: MintAccountResponse!
+  generateLeaderboard(leaderboardParams: LeaderboardParamsInput!): LeaderboardResponse!
 }
 
 extend type Mutation {

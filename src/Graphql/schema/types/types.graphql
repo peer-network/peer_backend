@@ -587,3 +587,8 @@ type ShopOrderDeliveryDetails {
   zipcode: String!
   country: String!
 }
+
+type LeaderboardResponse {
+  meta: DefaultResponse!
+  leaderboardResultLink: String
+}
