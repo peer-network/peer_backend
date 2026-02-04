@@ -13,6 +13,14 @@ class LeaderBoardMapper
 
     public function __construct(protected PDO $db, protected PeerLoggerInterface $logger){}
 
+    /**
+     * Prepare query and get result from DB
+     * 
+     * @param string $start_date
+     * @param string $end_date
+     * @param int $leaderboardUsersCount
+     * @return array
+     */
     public function getLeaderboardResult(string $start_date, string $end_date, int $leaderboardUsersCount): array
     {
 
@@ -108,7 +116,7 @@ class LeaderBoardMapper
             return $results;
 
         } catch (\Throwable $e) {
-            $this->logger->error('General error in getLeaderboardResult', [
+            $this->logger->error('General error in LeaderBoardMapper.getLeaderboardResult', [
                 'error' => $e->getMessage(),
             ]);
             return [];
