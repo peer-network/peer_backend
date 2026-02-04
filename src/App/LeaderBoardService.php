@@ -66,6 +66,7 @@ class LeaderBoardService
             $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', $end_date);
 
             if ($startDate === false || $endDate === false) {
+                $this->logger->error("Error in LeaderBoardService.generateLeaderboard start or end date parsing");
                 return $this::respondWithError(30301);
             }
 
@@ -102,6 +103,8 @@ class LeaderBoardService
         $targetDir = $basePath . DIRECTORY_SEPARATOR . $relativeDir;
 
         if (!is_dir($targetDir) && !mkdir($targetDir, 0775, true) && !is_dir($targetDir)) {
+            $this->logger->error("Error in LeaderBoardService.generateCsv creating leaderboard directory");
+
             throw new \RuntimeException('Failed to create leaderboard directory');
         }
 
@@ -109,6 +112,7 @@ class LeaderBoardService
         $handle = fopen($filePath, 'wb');
 
         if ($handle === false) {
+            $this->logger->error("Error in LeaderBoardService.generateCsv opening leaderboard CSV file");
             throw new \RuntimeException('Failed to open leaderboard CSV file');
         }
 
