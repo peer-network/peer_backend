@@ -183,7 +183,7 @@ class ValidationSpec
             $field => [
                 'required' => $required,
                 'validators' => [
-                    ['name' => 'validateLeaderboardUsersCount', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                    ['name' => 'validatePositiveNumber', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
                 ],
             ],
         ];

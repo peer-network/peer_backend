@@ -1205,12 +1205,8 @@
         "userFriendlyComment": "It is forbidden to advertise  this Post(illegal Post)"
     },
     "33001": {
-        "comment": "Loader board User count field should be required",
-        "userFriendlyComment": "Loader board User count field should be required"
-    },
-    "33002": {
-        "comment": "Loader board User count field should be numeric",
-        "userFriendlyComment": "Loader board User count field should be numeric"
+        "comment": "Missing or invalid field number and number must be a positive number greater than 0",
+        "userFriendlyComment": "Please enter a valid number and number must be a positive number greater than 0"
     },
     "12101": {
         "comment": "Success: Moderation stats retrieved successfully",

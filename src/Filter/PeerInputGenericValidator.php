@@ -740,13 +740,13 @@ class PeerInputGenericValidator
     }
 
     /**
-     * validateLeaderboardUsersCount
+     * validatePositiveNumber
      * 
-     * should only contain numberic values
+     * should only contain numberic values and more than zero value
      */
-    protected function validateLeaderboardUsersCount(int $value, array $options = []): bool
+    protected function validatePositiveNumber(int $value, array $options = []): bool
     {
-        $fieldKey = $options['field'] ?? 'leaderboardUsersCount';
+        $fieldKey = $options['field'] ?? null;
         $errorCode = (string)($options['errorCode'] ?? '33001');
 
         if ($value === '' || $value === null) {
@@ -755,7 +755,12 @@ class PeerInputGenericValidator
         }
 
         if (!is_numeric($value)) {
-            $this->pushError($options, $fieldKey, '33002');
+            $this->pushError($options, $fieldKey, '33001');
+            return false;
+        }
+
+        if($value <= 0){
+            $this->pushError($options, $fieldKey, '33001');
             return false;
         }
 
