@@ -56,19 +56,25 @@ class LeaderBoardService
             $end_date = (string) $args['end_date'];
             $leaderboardUsersCount = isset($args['leaderboardUsersCount']) ? (int) $args['leaderboardUsersCount'] : 20;
             
-            $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
-            
-            if (empty($getResult)) {
-                return $this::respondWithError(22201); // no leaderboard users found
-            }
-
             $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $start_date);
             $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', $end_date);
 
+            // End date should be not less than start date
+            if($endDate < $startDate) {
+                $this->logger->error("Error in LeaderBoardService.generateLeaderboard: end date is less than start date");
+                return $this::respondWithError(33002);
+            }
+            
             if ($startDate === false || $endDate === false) {
                 $this->logger->error("Error in LeaderBoardService.generateLeaderboard start or end date parsing");
                 return $this::respondWithError(30301);
             }
+            $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
+            
+            if (empty($getResult)) {
+                return $this::respondWithError(22201);
+            }
+
 
             $fileName = sprintf(
                 'leaderboard_%s_%s_top%d.csv',
@@ -79,11 +85,11 @@ class LeaderBoardService
 
             $leaderboardResultLink = $this->generateCsv($getResult, $fileName);
             
-            return self::createSuccessResponse(12301, ['leaderboardResultLink' => $leaderboardResultLink], false); // leadboard loaded successfully
+            return self::createSuccessResponse(12301, ['leaderboardResultLink' => $leaderboardResultLink], false);
 
         } catch (\Exception $e) {
             $this->logger->error("Error in LeaderBoardService.generateLeaderboard", ['exception' => $e->getMessage()]);
-            return $this::respondWithError(42201); // Failed to create leaderboard result
+            return $this::respondWithError(42201);
         }
     }
 
@@ -119,6 +125,7 @@ class LeaderBoardService
         $columns = [
             'uid',
             'username',
+            'slug',
             'comments_on_posts',
             'likes_on_posts',
             'ppc_points',
