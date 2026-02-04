@@ -7,8 +7,6 @@ extend type Query {
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
   getMintAccount: MintAccountResponse!
-  logWinMigration04: DefaultResponse
-  logWinMigration05: DefaultResponse
 }
 
 extend type Mutation {
