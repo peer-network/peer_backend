@@ -52,3 +52,9 @@ input ShopOrderDetailsInput {
 input ShopItemSpecsInput {
   size: String
 }
+
+input LeaderboardParamsInput {
+  start_date: String!,
+  end_date: String!,
+  leaderboardUsersCount: Int!
+}
