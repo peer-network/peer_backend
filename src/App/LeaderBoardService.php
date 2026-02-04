@@ -54,7 +54,7 @@ class LeaderBoardService
         try {
             $start_date = (string) $args['start_date'];
             $end_date = (string) $args['end_date'];
-            $leaderboardUsersCount = (int) $args['leaderboardUsersCount'] ?? 20;
+            $leaderboardUsersCount = isset($args['leaderboardUsersCount']) ? (int) $args['leaderboardUsersCount'] : 20;
             
             $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
             

@@ -177,7 +177,7 @@ class ValidationSpec
         ];
     }
 
-    public static function leaderboardUsersCount(string $field, bool $required = false, int $errorCode = 33001): array
+    public static function validatePositiveNumber(string $field, bool $required = false, int $errorCode = 33001): array
     {
         return [
             $field => [
@@ -280,7 +280,7 @@ class ValidationSpec
             'size' => fn (string $f, bool $r) => self::size($f, false),
             'addressline2' => fn (string $f, bool $r) => self::addressLine2($f, false),
 
-            'leaderboardUsersCount' => fn (string $f, bool $r) => self::leaderboardUsersCount($f, $r),
+            'leaderboardUsersCount' => fn (string $f, bool $r) => self::validatePositiveNumber($f, $r),
         ];
 
         $spec = [];

@@ -744,7 +744,7 @@ class PeerInputGenericValidator
      * 
      * should only contain numberic values and more than zero value
      */
-    protected function validatePositiveNumber(int $value, array $options = []): bool
+    protected function validatePositiveNumber(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? null;
         $errorCode = (string)($options['errorCode'] ?? '33001');
@@ -755,12 +755,12 @@ class PeerInputGenericValidator
         }
 
         if (!is_numeric($value)) {
-            $this->pushError($options, $fieldKey, '33001');
+            $this->pushError($options, $fieldKey, $errorCode);
             return false;
         }
 
-        if($value <= 0){
-            $this->pushError($options, $fieldKey, '33001');
+        if ((float)$value <= 0) {
+            $this->pushError($options, $fieldKey, $errorCode);
             return false;
         }
 
