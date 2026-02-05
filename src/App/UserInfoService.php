@@ -57,7 +57,7 @@ class UserInfoService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized action attempted');
+            $this->logger->error('UserInfoService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -98,6 +98,7 @@ class UserInfoService
 
             return $this::createSuccessResponse(21001);
         } catch (\Exception $e) {
+            $this->logger->error('UserInfoService.loadInfoById: Failed to load user info', ['exception' => $e]);
             return $this::respondWithError(41001);
         }
     }
@@ -105,14 +106,17 @@ class UserInfoService
     public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('UserInfoService.toggleUserFollow: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($followedUserId)) {
+            $this->logger->error('UserInfoService.toggleUserFollow: Invalid followedUserId', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
+            $this->logger->error('UserInfoService.toggleUserFollow: Cannot follow self', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31102);
         }
 
@@ -123,6 +127,7 @@ class UserInfoService
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
+            $this->logger->error('UserInfoService.toggleUserFollow: Followed user not found', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31003);
         }
 
@@ -141,6 +146,7 @@ class UserInfoService
             $specs,
             $followedUserId
         ) === false) {
+            $this->logger->error('UserInfoService.toggleUserFollow: Interaction not allowed', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31107, ['followedUserId' => $followedUserId]);
         }
 
@@ -149,7 +155,7 @@ class UserInfoService
         $response = $this->userInfoMapper->toggleUserFollow($this->currentUserId, $followedUserId);
 
         if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('Error toggling user follow', ['error' => $response]);
+            $this->logger->error('UserInfoService.toggleUserFollow: Error toggling user follow', ['error' => $response]);
             $this->transactionManager->rollback();
             return $response;
         }
@@ -162,14 +168,17 @@ class UserInfoService
     public function toggleUserBlock(string $blockedUserId): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('UserInfoService.toggleUserBlock: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($blockedUserId)) {
+            $this->logger->error('UserInfoService.toggleUserBlock: Invalid blockedUserId', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
+            $this->logger->error('UserInfoService.toggleUserBlock: Cannot block self', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31104);
         }
 
@@ -180,6 +189,7 @@ class UserInfoService
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
+            $this->logger->error('UserInfoService.toggleUserBlock: Blocked user not found', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31106);
         }
 
@@ -204,6 +214,7 @@ class UserInfoService
             $specs,
             $blockedUserId
         ) === false) {
+            $this->logger->error('UserInfoService.toggleUserBlock: Interaction not allowed', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31107, ['blockedUserId' => $blockedUserId]);
         }
 
@@ -212,7 +223,7 @@ class UserInfoService
         $response = $this->userInfoMapper->toggleUserBlock($this->currentUserId, $blockedUserId);
 
         if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('Error toggling user block', ['error' => $response]);
+            $this->logger->error('UserInfoService.toggleUserBlock: Error toggling user block', ['error' => $response]);
             $this->transactionManager->rollback();
             return $response;
         }
@@ -295,7 +306,7 @@ class UserInfoService
             ];
 
         } catch (\Throwable $e) {
-            $this->logger->error("Error in UserInfoService.loadBlocklist", ['exception' => $e->getMessage()]);
+            $this->logger->error("UserInfoService.loadBlocklist: Error", ['exception' => $e->getMessage()]);
             return $this::respondWithError(41008);
         }
     }
@@ -343,6 +354,7 @@ class UserInfoService
     public function updateBio(string $biography): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('UserInfoService.updateBio: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -359,13 +371,14 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->error('UserInfoService.updateBio: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
         if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
+            $this->logger->error('UserInfoService.updateBio: Invalid biography length');
             return $this::respondWithError(30228);
         }
 
@@ -384,15 +397,18 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if (empty($mediaPath)) {
+                    $this->logger->error('UserInfoService.updateBio: Biography upload failed');
                     return $this::respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
+                    $this->logger->error('UserInfoService.updateBio: Biography path missing after upload');
                     return $this::respondWithError(40306);
                 }
             } else {
+                $this->logger->error('UserInfoService.updateBio: Biography is empty');
                 return $this::respondWithError(40307);
             }
 
@@ -410,7 +426,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Error updating biography', ['exception' => $e]);
+            $this->logger->error('UserInfoService.updateBio: Error updating biography', ['exception' => $e]);
             return $this::respondWithError(41002);
         }
     }
@@ -418,6 +434,7 @@ class UserInfoService
     public function setProfilePicture(string $mediaFile, string $contentType = 'image'): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('UserInfoService.setProfilePicture: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -434,11 +451,12 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->error('UserInfoService.setProfilePicture: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
         if (trim($mediaFile) === '') {
+            $this->logger->error('UserInfoService.setProfilePicture: Empty media file');
             return $this::respondWithError(31102);
         }
 
@@ -454,16 +472,19 @@ class UserInfoService
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if (empty($mediaPath)) {
+                    $this->logger->error('UserInfoService.setProfilePicture: Media upload failed');
                     return $this::respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $mediaPathFile = $mediaPath['path'];
                 } else {
+                    $this->logger->error('UserInfoService.setProfilePicture: Media path missing after upload');
                     return $this::respondWithError(40306);
                 }
 
             } else {
+                $this->logger->error('UserInfoService.setProfilePicture: Missing media file');
                 return $this::respondWithError(40307);
             }
             $this->transactionManager->beginTransaction();
@@ -481,7 +502,7 @@ class UserInfoService
             ];
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Error setting profile picture', ['exception' => $e]);
+            $this->logger->error('UserInfoService.setProfilePicture: Error setting profile picture', ['exception' => $e]);
             return $this::respondWithError(41003);
         }
     }
@@ -491,15 +512,17 @@ class UserInfoService
         $this->logger->debug('UserInfoService.reportUser started');
 
         if (!$this->checkAuthentication()) {
+            $this->logger->error('UserInfoService.reportUser: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($reported_userid)) {
+            $this->logger->error('UserInfoService.reportUser: Invalid userId', ['reported_userid' => $reported_userid]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $reported_userid) {
-            $this->logger->warning('UserInfoService.reportUser: Error: currentUserId == $reported_userid');
+            $this->logger->error('UserInfoService.reportUser: Cannot report self', ['reported_userid' => $reported_userid]);
             return $this->respondWithError(31009); // you cant report on yourself
         }
 
@@ -507,7 +530,7 @@ class UserInfoService
             $user = $this->userMapper->loadById($reported_userid);
 
             if (!$user) {
-                $this->logger->warning('UserInfoService.reportUser: User not found');
+                $this->logger->error('UserInfoService.reportUser: User not found', ['reported_userid' => $reported_userid]);
                 return $this->respondWithError(31007);
             }
 
@@ -526,11 +549,12 @@ class UserInfoService
                 $specs,
                 $reported_userid
             ) === false) {
+                $this->logger->error('UserInfoService.reportUser: Interaction not allowed', ['reported_userid' => $reported_userid]);
                 return $this::respondWithError(32201, ['userid' => $reported_userid]);
             }
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
-                $this->logger->warning('UserInfoService: reportUser: User tries to report a restored user');
+                $this->logger->error('UserInfoService.reportUser: User tries to report a restored user', ['reported_userid' => $reported_userid]);
                 return $this->respondWithError(32104);
             }
 
@@ -554,7 +578,7 @@ class UserInfoService
         try {
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
-                $this->logger->warning("UserInfoService.reportUser: User report already exists");
+                $this->logger->error('UserInfoService.reportUser: User report already exists', ['reported_userid' => $reported_userid]);
                 return $this::respondWithError(32102); // This content has already been reviewed and noderated by our team.
             }
 
@@ -574,7 +598,7 @@ class UserInfoService
             }
 
             if ($exists === true) {
-                $this->logger->warning('UserInfoService.reportUser: User report already exists');
+                $this->logger->error('UserInfoService.reportUser: User report already exists', ['reported_userid' => $reported_userid]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(31008); // report already exists
             }
@@ -589,7 +613,7 @@ class UserInfoService
 
         } catch (\Exception $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Error while adding report to db or updating _info data', ['exception' => $e]);
+            $this->logger->error('UserInfoService.reportUser: Error while adding report to db or updating _info data', ['exception' => $e]);
             return $this::respondWithError(41015); // 410xx - failed to report user
         }
     }

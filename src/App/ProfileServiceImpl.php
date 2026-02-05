@@ -87,7 +87,7 @@ final class ProfileServiceImpl implements ProfileService
             );
 
             if (!$profileData) {
-                $this->logger->warning('Query.resolveProfile User not found');
+                $this->logger->error('ProfileService.profile: User not found', ['userid' => $userId]);
                 return self::respondWithErrorObject(31007);
             }
             /** @var Profile $profileData */
@@ -126,12 +126,14 @@ final class ProfileServiceImpl implements ProfileService
 
         if ($offset !== null) {
             if ($offset < $minOffset || $offset > $maxOffset) {
+                $this->logger->error('ProfileService.validateOffsetAndLimit: Invalid offset', ['offset' => $offset]);
                 return $this::respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
             if ($limit < $minLimit || $limit > $maxLimit) {
+                $this->logger->error('ProfileService.validateOffsetAndLimit: Invalid limit', ['limit' => $limit]);
                 return $this::respondWithError(30204);
             }
         }
@@ -142,6 +144,7 @@ final class ProfileServiceImpl implements ProfileService
     public function listUsers(array $args): array
     {
         if ($this->currentUserId === null) {
+            $this->logger->error('ProfileService.listUsers: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -159,23 +162,28 @@ final class ProfileServiceImpl implements ProfileService
         $ip = $args['ip'] ?? null;
 
         if (!empty($username) && !empty($userId)) {
+            $this->logger->error('ProfileService.listUsers: Username and userId both provided', ['username' => $username, 'userId' => $userId]);
             return $this::respondWithError(31012);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
+            $this->logger->error('ProfileService.listUsers: Invalid userId', ['userId' => $userId]);
             return $this::respondWithError(30201);
         }
 
         if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
+            $this->logger->error('ProfileService.listUsers: Invalid username length', ['username' => $username]);
             return $this::respondWithError(30202);
         }
 
         if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
+            $this->logger->error('ProfileService.listUsers: Invalid username format', ['username' => $username]);
             return $this::respondWithError(30202);
         }
 
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
+            $this->logger->error('ProfileService.listUsers: Invalid IP address', ['ip' => $ip]);
             return $this::respondWithError(30257);
         }
 
@@ -243,6 +251,7 @@ final class ProfileServiceImpl implements ProfileService
 
             return self::createSuccessResponse(21001);
         } catch (\Throwable $e) {
+            $this->logger->error('ProfileService.listUsers: Failed to fetch users', ['exception' => $e]);
             return self::respondWithError(41207);
         }
     }
@@ -250,6 +259,7 @@ final class ProfileServiceImpl implements ProfileService
     public function listUsersAdmin(array $args): array
     {
         if ($this->currentUserId === null) {
+            $this->logger->error('ProfileService.listUsersAdmin: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -264,18 +274,22 @@ final class ProfileServiceImpl implements ProfileService
         $ip = $args['ip'] ?? null;
 
         if (!empty($username) && !empty($userId)) {
+            $this->logger->error('ProfileService.listUsersAdmin: Username and userId both provided', ['username' => $username, 'userId' => $userId]);
             return $this::respondWithError(31012);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
+            $this->logger->error('ProfileService.listUsersAdmin: Invalid userId', ['userId' => $userId]);
             return $this::respondWithError(30201);
         }
 
         if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
+            $this->logger->error('ProfileService.listUsersAdmin: Invalid username length', ['username' => $username]);
             return $this::respondWithError(30202);
         }
 
         if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
+            $this->logger->error('ProfileService.listUsersAdmin: Invalid username format', ['username' => $username]);
             return $this::respondWithError(30202);
         }
 
@@ -284,6 +298,7 @@ final class ProfileServiceImpl implements ProfileService
         }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
+            $this->logger->error('ProfileService.listUsersAdmin: Invalid IP address', ['ip' => $ip]);
             return $this::respondWithError(30257);
         }
 

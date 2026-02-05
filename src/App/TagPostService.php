@@ -44,7 +44,7 @@ class TagPostService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning("Unauthorized action attempted.");
+            $this->logger->error('TagPostService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -62,11 +62,13 @@ class TagPostService
     public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('TagPostService.handleTags: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
+            $this->logger->error('TagPostService.handleTags: Tag count exceeds limit', ['tagCount' => count($tags), 'maxTags' => $maxTags]);
             return $this::respondWithError(30211);
         }
 
@@ -80,6 +82,7 @@ class TagPostService
             $seenTags[$tagName] = true;
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
+                $this->logger->error('TagPostService.handleTags: Invalid tag name', ['tagName' => $tagName]);
                 return $this::respondWithError(30255);
             }
 
@@ -101,13 +104,15 @@ class TagPostService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('TagPostService.createTag: Authentication failed');
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug('TagService.createTag started');
+        $this->logger->debug('TagPostService.createTag started');
 
         $tagName = strtolower(trim($tagName));
         if (!$this->isValidTagName($tagName)) {
+            $this->logger->error('TagPostService.createTag: Invalid tag name', ['tagName' => $tagName]);
             return $this::respondWithError(30255);
         }
 
@@ -126,29 +131,30 @@ class TagPostService
 
             if (!$this->tagMapper->insert($tag)) {
                 $this->transactionManager->rollback();
-                $this->logger->error('Failed to insert tag into database', ['tagName' => $tagName]);
+                $this->logger->error('TagPostService.createTag: Failed to insert tag into database', ['tagName' => $tagName]);
                 return $this::respondWithError(41703);
             }
 
             $this->transactionManager->commit();
-            $this->logger->info('Tag created successfully', ['tagName' => $tagName]);
+            $this->logger->info('TagPostService.createTag: Tag created successfully', ['tagName' => $tagName]);
             return $this::createSuccessResponse(11702, [$tagData]);
 
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('Error occurred while creating tag', [
+            $this->logger->error('TagPostService.createTag: Error occurred while creating tag', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             return $this::respondWithError(41701);
         } finally {
-            $this->logger->debug('createTag function execution completed');
+            $this->logger->debug('TagPostService.createTag: createTag function execution completed');
         }
     }
 
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('TagPostService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -161,11 +167,11 @@ class TagPostService
             $TagPost = $this->tagPostMapper->fetchAll($offset, $limit);
             $result = array_map(fn (TagPost $tag) => $tag->getArrayCopy(), $TagPost);
 
-            $this->logger->info('TagPost fetched successfully', ['count' => count($result)]);
+            $this->logger->info('TagPostService.fetchAll: TagPost fetched successfully', ['count' => count($result)]);
             return $this::createSuccessResponse(11701, [$result]);
 
         } catch (\Throwable $e) {
-            $this->logger->error('Error fetching TagPost', [
+            $this->logger->error('TagPostService.fetchAll: Error fetching TagPost', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
