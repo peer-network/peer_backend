@@ -94,6 +94,9 @@ class PeerTokenService
             $recipientId = (string) $args['recipient'];
             $numberOfTokens = (string) $args['numberoftokens'];
 
+            // replace , with . value
+            $numberOfTokens = str_replace(',', '.', $numberOfTokens);
+
             if (!self::isValidUUID($recipientId)) {
                 $this->logger->warning('Incorrect recipientId Exception.', [
                     'recipientId' => $recipientId,
