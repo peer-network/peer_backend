@@ -1773,7 +1773,7 @@ class GraphQLSchemaBuilder
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
-            'globalwinsMintRange' => fn (mixed $root, array $args) => $this->resolveGlobalWinsMintRange($args),
+            '_tokennomics_migration_mint' => fn (mixed $root, array $args) => $this->resolveGlobalWinsMintRange($args),
             'distributeTokensForGems' => fn (mixed $root, array $args) => $this->resolveMint($args),
             'distributeTokensForGemsWithoutBalanceUpdate' => fn (mixed $root, array $args) => $this->resolveMintWithoutBalanceUpdate($args),
             'gemsters' => fn (mixed $root, array $args) => $this->resolveGemsters($args),
