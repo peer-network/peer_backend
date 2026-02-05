@@ -1865,9 +1865,13 @@ class GraphQLSchemaBuilder
 
             $uid = \trim((string) ($row[$uidIndex] ?? ''));
             $diffRaw = \trim((string) ($row[$diffIndex] ?? ''));
-            // if ($diffRaw !== '') {
-            //     $diffRaw = \str_replace('.', ',', $diffRaw);
-            // }
+            if ($diffRaw !== '') {
+                // Truncate fractional part to max 8 digits for both "." and "," decimal separators.
+                if (\preg_match('/^([+-]?\\d+)([\\.,])(\\d+)$/', $diffRaw, $matches) === 1) {
+                    $fraction = \substr($matches[3], 0, 8);
+                    $diffRaw = $matches[1] . $matches[2] . $fraction;
+                }
+            }
 
             if ($uid === '' || $diffRaw === '') {
                 $summary['failed']++;
