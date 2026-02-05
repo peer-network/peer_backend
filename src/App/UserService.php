@@ -1394,9 +1394,6 @@ class UserService implements UserServiceInterface
             $user->validatePass($args);
             $this->userMapper->updatePass($user);
 
-            $this->userMapper->deleteAccessTokensByUserId($userId);
-            $this->userMapper->deleteRefreshTokensByUserId($userId);
-
             $this->userMapper->deletePasswordResetToken($args['token']);
 
             $this->logger->info('User password updated and tokens invalidated', [

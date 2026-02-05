@@ -17,11 +17,12 @@ use Fawaz\Mail\PasswordRestMail;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
 use Fawaz\Utils\DateService;
 use Fawaz\App\Status;
+use Fawaz\Services\JWTService;
 use PDOException;
 
 class UserMapper implements UserMapperInterface
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db, protected JWTService $tokenService)
     {
     }
 
@@ -1479,142 +1480,6 @@ class UserMapper implements UserMapperInterface
         }
     }
 
-    public function saveOrUpdateAccessToken(string $userid, string $accessToken): void
-    {
-        $this->logger->debug("UserMapper.saveOrUpdateAccessToken started");
-
-        $accessTokenValidity = 604800; // 7 Tage
-        $createdat = time();
-        $expirationTime = $createdat + $accessTokenValidity;
-
-        try {
-            $query = "SELECT COUNT(*) FROM access_tokens WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-            $stmt->execute();
-            $exists = $stmt->fetchColumn();
-
-            if ($exists) {
-                $query = "UPDATE access_tokens 
-                          SET access_token = :access_token, createdat = :createdat, expiresat = :expiresat 
-                          WHERE userid = :userid";
-            } else {
-                $query = "INSERT INTO access_tokens (userid, access_token, createdat, expiresat) 
-                          VALUES (:userid, :access_token, :createdat, :expiresat)";
-            }
-
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-            $stmt->bindValue(':access_token', $accessToken, PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_INT);
-            $stmt->bindValue(':expiresat', $expirationTime, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $this->logger->info("Access token successfully saved or updated for user: $userid");
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in saveOrUpdateAccessToken: ", ['error' => $e]);
-        }
-    }
-
-    public function saveOrUpdateRefreshToken(string $userid, string $refreshToken): void
-    {
-        $this->logger->debug("UserMapper.saveOrUpdateRefreshToken started");
-
-        $refreshTokenValidity = 604800; // 7 Tage
-        $createdat = time();
-        $expirationTime = $createdat + $refreshTokenValidity;
-
-        try {
-            $query = "SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-            $stmt->execute();
-            $exists = $stmt->fetchColumn();
-
-            if ($exists) {
-                $query = "UPDATE refresh_tokens 
-                          SET refresh_token = :refresh_token, createdat = :createdat, expiresat = :expiresat 
-                          WHERE userid = :userid";
-            } else {
-                $query = "INSERT INTO refresh_tokens (userid, refresh_token, createdat, expiresat) 
-                          VALUES (:userid, :refresh_token, :createdat, :expiresat)";
-            }
-
-            $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-            $stmt->bindValue(':refresh_token', $refreshToken, PDO::PARAM_STR);
-            $stmt->bindValue(':createdat', $createdat, PDO::PARAM_INT);
-            $stmt->bindValue(':expiresat', $expirationTime, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $this->logger->info("Refresh token successfully saved or updated for user: $userid");
-        } catch (\Throwable $e) {
-            $this->logger->error("Database error in saveOrUpdateRefreshToken: ", ['error' => $e]);
-        }
-    }
-
-    public function deleteAccessTokensByUserId(string $userId): void
-    {
-        $this->logger->info('UserMapper.deleteAccessTokensByUserId started', ['userId' => $userId]);
-
-        $sql = 'DELETE FROM access_tokens WHERE userid = :userId';
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->execute();
-
-            $this->logger->debug('Access tokens deleted', ['userId' => $userId]);
-        } catch (\Throwable $e) {
-            $this->logger->error('UserMapper.deleteAccessTokensByUserId failed', [
-                'userId' => $userId,
-                'error'  => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-    public function deleteRefreshTokensByUserId(string $userId): void
-    {
-        $this->logger->info('UserMapper.deleteRefreshTokensByUserId started', ['userId' => $userId]);
-
-        $sql = 'DELETE FROM refresh_tokens WHERE userid = :userId';
-
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
-            $stmt->execute();
-
-            $this->logger->debug('Refresh tokens deleted', ['userId' => $userId]);
-        } catch (\Throwable $e) {
-            $this->logger->error('UserMapper.deleteRefreshTokensByUserId failed', [
-                'userId' => $userId,
-                'error'  => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-    /**
-     * Check whether a refresh token exists for a specific user and is not expired
-     */
-    public function refreshTokenValidForUser(string $userId, string $refreshToken): bool
-    {
-        $this->logger->debug('UserMapper.refreshTokenValidForUser started', ['userId' => $userId]);
-        $now = (int) \time();
-        try {
-            $sql = 'SELECT COUNT(*) FROM refresh_tokens WHERE userid = :userid AND refresh_token = :token AND expiresat > :now';
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':token', $refreshToken, PDO::PARAM_STR);
-            $stmt->bindValue(':now', $now, PDO::PARAM_INT);
-            $stmt->execute();
-            return ((int)$stmt->fetchColumn()) > 0;
-        } catch (\Throwable $e) {
-            $this->logger->error('Error in refreshTokenValidForUser', ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
 
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array
     {
@@ -1738,27 +1603,6 @@ class UserMapper implements UserMapperInterface
             $this->logger->error("Error checking reset request", ['error' => $e->getMessage()]);
         }
         return [];
-    }
-
-    /**
-     * Check whether an access token exists for a specific user and is not expired
-     */
-    public function accessTokenValidForUser(string $userId, string $accessToken): bool
-    {
-        $this->logger->debug('UserMapper.accessTokenValidForUser started', ['userId' => $userId]);
-        $now = (int) \time();
-        try {
-            $sql = 'SELECT COUNT(*) FROM access_tokens WHERE userid = :userid AND access_token = :token AND expiresat > :now';
-            $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-            $stmt->bindValue(':token', $accessToken, PDO::PARAM_STR);
-            $stmt->bindValue(':now', $now, PDO::PARAM_INT);
-            $stmt->execute();
-            return ((int)$stmt->fetchColumn()) > 0;
-        } catch (\Throwable $e) {
-            $this->logger->error('Error in accessTokenValidForUser', ['error' => $e->getMessage()]);
-            return false;
-        }
     }
 
     /**

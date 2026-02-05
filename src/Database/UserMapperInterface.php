@@ -75,16 +75,6 @@ interface UserMapperInterface
 
     public function deleteUnverifiedUsers(): void;
 
-    public function saveOrUpdateAccessToken(string $userid, string $accessToken): void;
-
-    public function saveOrUpdateRefreshToken(string $userid, string $refreshToken): void;
-
-    public function deleteAccessTokensByUserId(string $userId): void;
-
-    public function deleteRefreshTokensByUserId(string $userId): void;
-
-    public function refreshTokenValidForUser(string $userId, string $refreshToken): bool;
-
     public function fetchAllFriends(int $offset = 0, int $limit = 20): ?array;
 
     public function sendPasswordResetEmail(string $email, array $data): void;
@@ -94,8 +84,6 @@ interface UserMapperInterface
     public function updateAttempt(array $attempt): bool;
 
     public function checkForPasswordResetExpiry(string $userId): array|bool;
-
-    public function accessTokenValidForUser(string $userId, string $accessToken): bool;
 
     public function isFirstAttemptTooSoon(array $attempt): bool;
 

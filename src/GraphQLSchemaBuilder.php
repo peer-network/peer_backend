@@ -177,14 +177,6 @@ class GraphQLSchemaBuilder
         if ($bearerToken !== null && $bearerToken !== '') {
             try {
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
-                // Validate that the provided bearer access token exists in DB and is not expired
-                // if (!$this->userMapper->accessTokenValidForUser($decodedToken->uid, $bearerToken)) {
-                //     $this->logger->warning('Access token not found or expired for user', [
-                //         'userId' => $decodedToken->uid,
-                //     ]);
-                //     $this->currentUserId = null;
-                //     return;
-                // }
 
                 $user = $this->userMapper->loadByIdMAin($decodedToken->uid, $decodedToken->rol);
                 if ($user) {
@@ -3097,9 +3089,6 @@ class GraphQLSchemaBuilder
             $accessToken = $this->tokenService->createAccessToken($payload);
             $refreshToken = $this->tokenService->createRefreshToken($payload);
 
-            $this->userMapper->saveOrUpdateAccessToken($user->getUserId(), $accessToken);
-            $this->userMapper->saveOrUpdateRefreshToken($user->getUserId(), $refreshToken);
-
             $this->userMapper->logLoginData($user->getUserId());
 
             $this->logger->info('Login successful', ['userId' => $user->getUserId()]);
@@ -3136,14 +3125,6 @@ class GraphQLSchemaBuilder
                 return $this::respondWithError(30901);
             }
 
-            // // Validate that the provided refresh token exists in DB and is not expired
-            // if (!$this->userMapper->refreshTokenValidForUser($decodedToken->uid, $refreshToken)) {
-            //     $this->logger->warning('Refresh token not found or expired for user', [
-            //         'userId' => $decodedToken->uid,
-            //     ]);
-            //     return $this::respondWithError(30901);
-            // }
-
             $users = $this->userService->loadVisibleUsersById($decodedToken->uid);
             if ($users === false) {
                 return $this::respondWithError(30901);
@@ -3159,9 +3140,6 @@ class GraphQLSchemaBuilder
 
             $accessToken = $this->tokenService->createAccessToken($payload);
             $newRefreshToken = $this->tokenService->createRefreshToken($payload);
-
-            $this->userMapper->saveOrUpdateAccessToken($decodedToken->uid, $accessToken);
-            $this->userMapper->saveOrUpdateRefreshToken($decodedToken->uid, $newRefreshToken);
 
             $this->userMapper->logLoginData($decodedToken->uid, 'refreshToken');
 
