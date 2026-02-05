@@ -33,7 +33,7 @@ class AlphaMintService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->error('Unauthorized access attempt');
             return false;
         }
         return true;
@@ -48,11 +48,11 @@ class AlphaMintService
     public function alphaMint(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('AlphaMintService.alphaMint: Authentication failed');
             return self::respondWithError(60501);
         }
 
-        $this->logger->info('UserService.alphaMint started');
-
+        $this->logger->info('AlphaMintService.alphaMint started');
         try {
 
             $alphaUserAc = $this->userMapper->loadByEmail('alpha_mint@peerapp.de');
@@ -79,7 +79,7 @@ class AlphaMintService
                 $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
 
                 if(!$alphaUsers || !is_array($alphaUsers)) {
-                    $this->logger->error('Failed to load alpha users data from JSON file');
+                    $this->logger->error('AlphaMintService.alphaMint: Failed to load alpha users data from JSON file');
                     return self::respondWithError(41020);
                 }
                 $userCounts = 0;
@@ -103,7 +103,7 @@ class AlphaMintService
                             // Skip duplicate transfer if same user and amount already credited
                             $amount = (string)$usr['alpha_user_tokens'];
                             if ($this->peerTokenMapper->hasExistingTransfer($mintUserId, $receipientUserId, $amount)) {
-                                $this->logger->info('Duplicate alpha mint transfer skipped', [
+                                $this->logger->info('AlphaMintService.alphaMint: Duplicate alpha mint transfer skipped', [
                                     'recipient' => $receipientUserId,
                                     'amount' => $amount,
                                 ]);
@@ -139,7 +139,7 @@ class AlphaMintService
                 'ResponseCode' => 500
             ];
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to mint alpha', ['exception' => $e]);
+            $this->logger->error('AlphaMintService.alphaMint: Failed to mint alpha', ['exception' => $e]);
             return self::respondWithError(41020);
         }
     }

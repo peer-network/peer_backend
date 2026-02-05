@@ -76,10 +76,9 @@ class AdvertisementService
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Authentication failed');
             return $this->respondWithError(60501);
         }
-
-        //$this->logger->info('Query.resolveAdvertisePost gestartet');
 
         $postId = $args['postid'] ?? null;
         $durationInDays = $args['durationInDays'] ?? null;
@@ -90,10 +89,12 @@ class AdvertisementService
 
         // postId validieren
         if ($postId !== null && !self::isValidUUID($postId)) {
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Invalid postId', ['postId' => $postId]);
             return $this->respondWithError(30209);
         }
 
         if ($this->postService->postExistsById($postId) === false) {
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Post does not exist', ['postId' => $postId]);
             return $this->respondWithError(31510);
         }
 
@@ -118,6 +119,7 @@ class AdvertisementService
             $specs,
             $postId
         ) === false) {
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Interaction not allowed', ['postId' => $postId]);
             return $this::respondWithError(32020, ['postid' => $postId]);
         }
 
@@ -125,7 +127,7 @@ class AdvertisementService
 
         // Werbeplan validieren
         if (!in_array($advertisePlan, $advertiseActions, true)) {
-            $this->logger->warning('Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Ungültiger Werbeplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32006);
         }
 
@@ -138,14 +140,14 @@ class AdvertisementService
 
         // Preisvalidierung
         if (!isset($actionPrices[$advertisePlan])) {
-            $this->logger->warning('Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Ungültiger Preisplan', ['advertisePlan' => $advertisePlan]);
             return $this->respondWithError(32005);
         }
 
         if ($advertisePlan === $this::PLAN_BASIC) {
             // Startdatum validieren
             if (isset($startdayInput) && empty($startdayInput)) {
-                $this->logger->warning('Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
+                $this->logger->error('AdvertisementService.resolveAdvertisePost: Startdatum fehlt oder ist leer', ['startdayInput' => $startdayInput]);
                 return $this->respondWithError(32007);
             }
 
@@ -154,19 +156,19 @@ class AdvertisementService
             $errors = DateTimeImmutable::getLastErrors();
 
             if (!$startday) {
-                $this->logger->warning("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->error("AdvertisementService.resolveAdvertisePost: Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(32008);
             }
 
             if (isset($errors['warning_count']) && $errors['warning_count'] > 0 || isset($errors['error_count']) && $errors['error_count'] > 0) {
-                $this->logger->error("Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
+                $this->logger->error("AdvertisementService.resolveAdvertisePost: Ungültiges Startdatum: '$startdayInput'. Format muss YYYY-MM-DD sein.");
                 return $this->respondWithError(42004);
             }
 
             // Prüfen, ob das Startdatum in der Vergangenheit liegt
             $tomorrow = new DateTimeImmutable('tomorrow');
             if ($startday < $tomorrow) {
-                $this->logger->warning('Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
+                $this->logger->error('AdvertisementService.resolveAdvertisePost: Startdatum darf nicht in der Vergangenheit liegen', ['today' => $startdayInput]);
                 return $this->respondWithError(32008);
             }
 
@@ -174,7 +176,7 @@ class AdvertisementService
 
             // Laufzeit validieren
             if ($durationInDays !== null && !in_array($durationInDays, $durationActions, true)) {
-                $this->logger->warning('Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
+                $this->logger->error('AdvertisementService.resolveAdvertisePost: Ungültige Laufzeit', ['durationInDays' => $durationInDays]);
                 return $this->respondWithError(32009);
             }
         }
@@ -197,17 +199,17 @@ class AdvertisementService
             if ($reducePrice === true) {
                 $CostPlan = $CostPlan - ($CostPlan * 0.20); // 80% vom ursprünglichen Wert
                 //$CostPlan *= 0.80; // 80% vom ursprünglichen Wert
-                $this->logger->info('20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
+                $this->logger->info('AdvertisementService.resolveAdvertisePost: 20% Discount Exestiert:', ['CostPlan' => $CostPlan]);
             }
 
-            $this->logger->info('Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
+            $this->logger->info('AdvertisementService.resolveAdvertisePost: Werbeanzeige PINNED', ['CostPlan' => $CostPlan]);
             $rescode = 12003;
         } elseif ($advertisePlan === $this::PLAN_BASIC) {
             $CostPlan = $this->advertisePostBasicResolver($args); // BASIC Kosten berechnen
-            $this->logger->info('Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
+            $this->logger->info('AdvertisementService.resolveAdvertisePost: Werbeanzeige BASIC', ["Kosten für $durationInDays Tage: " => $CostPlan]);
             $rescode = 12004;
         } else {
-            $this->logger->warning('Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Ungültige Ads Plan', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(32005);
         }
 
@@ -215,7 +217,7 @@ class AdvertisementService
         // Wenn Kosten leer oder 0 sind, Fehler zurückgeben
         $args['eurocost'] = $CostPlan / 10;
         if (empty($CostPlan) || (int)$CostPlan === 0) {
-            $this->logger->error('Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Kostenprüfung fehlgeschlagen', ['CostPlan' => $CostPlan]);
             return $this->respondWithError(42005);
         }
 
@@ -225,7 +227,7 @@ class AdvertisementService
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->transactionManager->rollback();
-                $this->logger->error('Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->logger->error('AdvertisementService.resolveAdvertisePost: Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
 
@@ -240,12 +242,13 @@ class AdvertisementService
 
                 $deducted = $this->walletService->performPayment($this->currentUserId, $transferStrategy, $args);
                 if (isset($deducted['status']) && $deducted['status'] === 'error') {
+                    $this->logger->error('AdvertisementService.resolveAdvertisePost: Error in performPayment', ['userId' => $this->currentUserId, 'details' => $deducted]);
                     $this->transactionManager->rollback();
                     return $deducted;
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
+                    $this->logger->error('AdvertisementService.resolveAdvertisePost: Abbuchung vom Wallet fehlgeschlagen', ['userId' => $this->currentUserId]);
                     $this->transactionManager->rollback();
                     return $this->respondWithError(40301);
                 }
@@ -253,10 +256,12 @@ class AdvertisementService
                 return $response;
             }
             $this->transactionManager->rollback();
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Error in creating advertisement', ['response' => $response]);
             return $response;
 
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
+            $this->logger->error('AdvertisementService.resolveAdvertisePost: Exception caught', ['exception' => $e]);
             return $this->respondWithError(40301);
         }
     }
@@ -265,7 +270,7 @@ class AdvertisementService
     protected function advertisePostBasicResolver(?array $args = []): int
     {
         try {
-            $this->logger->debug('Query.advertisePostBasicResolver started');
+            $this->logger->debug('AdvertisementService.advertisePostBasicResolver started');
 
             $postId = $args['postid'];
             $duration = $args['durationInDays'];
@@ -274,7 +279,7 @@ class AdvertisementService
 
             return $price;
         } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            $this->logger->error('AdvertisementService.advertisePostBasicResolver: Invalid price provided.', ['Error' => $e]);
             return 0;
         }
     }
@@ -283,7 +288,7 @@ class AdvertisementService
     protected function advertisePostPinnedResolver(?array $args = []): int
     {
         try {
-            $this->logger->debug('Query.advertisePostPinnedResolver started');
+            $this->logger->debug('AdvertisementService.advertisePostPinnedResolver started');
 
             $postId = $args['postid'];
 
@@ -291,7 +296,7 @@ class AdvertisementService
 
             return $price;
         } catch (\Throwable $e) {
-            $this->logger->warning('Invalid price provided.', ['Error' => $e]);
+            $this->logger->error('AdvertisementService.advertisePostPinnedResolver: Invalid price provided.', ['Error' => $e]);
             return 0;
         }
     }
@@ -309,23 +314,23 @@ class AdvertisementService
 
         if ($plan === self::PLAN_BASIC) {
             if ($duration === null) {
-                throw new InvalidArgumentException('BASIC plan requires a duration');
+                throw new InvalidArgumentException('AdvertisementService.calculatePrice: BASIC plan requires a duration');
             }
 
             if (!isset(self::$durationDaysMap[$duration])) {
-                throw new InvalidArgumentException('Unknown duration value: ' . $duration);
+                throw new InvalidArgumentException('AdvertisementService.calculatePrice: Unknown duration value: ' . $duration);
             }
 
             return (int)$priceBasic * self::$durationDaysMap[$duration];
         }
 
-        throw new InvalidArgumentException('Unknown advertisement plan: ' . $plan);
+        throw new InvalidArgumentException('AdvertisementService.calculatePrice: Unknown advertisement plan: ' . $plan);
     }
 
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized action attempted.');
+            $this->logger->error('AdvertisementService.checkAuthentication: Unauthorized action attempted.');
             return false;
         }
         return true;
@@ -344,7 +349,7 @@ class AdvertisementService
         ];
 
         if (!isset($dateFilters[$durationKey])) {
-            $this->logger->warning("Ungültige Werbedauer: $durationKey");
+            $this->logger->error("AdvertisementService.formatStartAndEndTimestamps: Ungültige Werbedauer: $durationKey");
             return self::respondWithError(32001);
         }
 
@@ -370,10 +375,12 @@ class AdvertisementService
     public function createAdvertisement(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('AdvertisementService.createAdvertisement: Unauthorized action attempted.');
             return self::respondWithError(60501);
         }
 
         if (empty($args)) {
+            $this->logger->error('AdvertisementService.createAdvertisement: Empty arguments provided.');
             return self::respondWithError(30101);
         }
 
@@ -393,14 +400,17 @@ class AdvertisementService
         $tokencost = $args['tokencost'] ?? 0.0;
 
         if (empty($postId)) {
+            $this->logger->error('AdvertisementService.createAdvertisement: Missing postId.');
             return self::respondWithError(32002);
         }
 
         if (empty($date) && $date !== null) {
+            $this->logger->error('AdvertisementService.createAdvertisement: Missing durationInDays.');
             return self::respondWithError(32003);
         }
 
         if (empty($CostPlan)) {
+            $this->logger->error('AdvertisementService.createAdvertisement: Missing advertisePlan.');
             return self::respondWithError(32004);
         }
 
@@ -415,17 +425,17 @@ class AdvertisementService
                     $timeend = $timestamps['timeend']; // Set Timeend
                     $this->logger->info('PLAN IS BASIC');
                 } else {
-                    $this->logger->warning('BASIC: es fehlt eine teil von (postid, date, costplan)');
+                    $this->logger->error('AdvertisementService.createAdvertisement: BASIC plan missing part of (postid, date, costplan)');
                     return self::respondWithError(32017); // BASIC: es fehlt eine teil von (postid, date, costplan)
                 }
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true) {
-                    $this->logger->warning('Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
+                    $this->logger->error('AdvertisementService.createAdvertisement: Basic reservation conflict: The time period is already occupied. Please change the start time to proceed.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
             } elseif ($CostPlan !== null && $CostPlan === self::PLAN_PINNED) {
                 if ($this->advertisementMapper->hasActiveAdvertisement($postId, \strtolower($CostPlan)) === true) {
-                    $this->logger->warning('Pinned Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                    $this->logger->error('AdvertisementService.createAdvertisement: Pinned reservation conflict: The advertisement is still active (not yet expired). Proceeding under forced usage (‘forcing’).', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Die Anzeige ist noch aktiv (noch nicht abgelaufen). Das Fortfahren erfolgt unter Zwangsnutzung (‘forcing’).
                 }
 
@@ -433,13 +443,13 @@ class AdvertisementService
                 $timeend = new \DateTime('+1 days')->format('Y-m-d H:i:s.u'); // Setze Timeend
 
                 if ($this->advertisementMapper->hasTimeConflict($postId, \strtolower($CostPlan), $timestart, $timeend, $this->currentUserId) === true) {
-                    $this->logger->warning('Pinned.Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.');
+                    $this->logger->error('AdvertisementService.createAdvertisement: Pinned reservation conflict: The time period is already occupied. Please change the start time to proceed.');
                     return self::respondWithError(32018); // Basic Reservierungskonflikt: Der Zeitraum ist bereits belegt. Bitte ändern Sie den Startzeitpunkt, um fortzufahren.
                 }
 
                 $this->logger->info('PLAN IS PINNED');
             } else {
-                $this->logger->error('Fehler, Falsche CostPlan angegeben.', ['CostPlan' => $CostPlan]);
+                $this->logger->error('AdvertisementService.createAdvertisement: Invalid CostPlan provided.', ['CostPlan' => $CostPlan]);
                 return self::respondWithError(42007); // Fehler, Falsche CostPlan angegeben
             }
 
@@ -459,14 +469,14 @@ class AdvertisementService
             try {
                 $advertisement = new Advertisements($advertisementData);
             } catch (\Throwable $e) {
-                $this->logger->error('Fehler beim Validieren des Advertisements', ['exception' => $e]);
+                $this->logger->error('AdvertisementService.createAdvertisement: Error validating advertisement', ['exception' => $e]);
                 // Die richtige errorCode.
                 return self::respondWithError((int)$e->getMessage());
             }
 
             if ($CostPlan === self::PLAN_BASIC) {
                 $resp = $this->advertisementMapper->insert($advertisement);
-                $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                $this->logger->info('AdvertisementService.createAdvertisement: Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } elseif ($CostPlan === self::PLAN_PINNED) {
                 // NOTE: Repinning functionality commented out (not in current feature scope)
@@ -491,19 +501,19 @@ class AdvertisementService
 
                 // Always create new advertisement with unique ID and current timestamp
                 $resp = $this->advertisementMapper->insert($advertisement);
-                $this->logger->info('Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
+                $this->logger->info('AdvertisementService.createAdvertisement: Create Post Advertisement', ['advertisementid' => $advertisementId, 'postId' => $postId]);
                 $rescode = 12001; // Advertisement post erfolgreich erstellt.
             } else {
-                $this->logger->warning('Fehler, Falsche CostPlan angegeben.');
+                $this->logger->error('AdvertisementService.createAdvertisement: Invalid CostPlan provided.', ['CostPlan' => $CostPlan]);
                 return self::respondWithError(32005); // Fehler, Falsche CostPlan angegeben.
             }
 
             $data = $resp->getArrayCopy();
-            $this->logger->info('Erfolgreich alles gut gegangen.', ['data' => $data]);
+            $this->logger->info('AdvertisementService.createAdvertisement: Successfully created advertisement.', ['data' => $data]);
             return self::createSuccessResponse($rescode, [$data]);
 
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to create Post Advertisement', ['exception' => $e]);
+            $this->logger->error('AdvertisementService.createAdvertisement: Failed to create advertisement', ['exception' => $e]);
             return self::respondWithError(42007); // Erstellen der Post Advertisement fehlgeschlagen.
         }
     }
@@ -511,6 +521,7 @@ class AdvertisementService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('AdvertisementService.fetchAll: Authentication failed.');
             return self::respondWithError(60501);
         }
 
@@ -531,38 +542,47 @@ class AdvertisementService
 
 
         if ($from !== null && !self::validateDate($from)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid from date', ['from' => $from]);
             return self::respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid to date', ['to' => $to]);
             return self::respondWithError(30213);
         }
 
         if ($advertisementtype !== null && !in_array($advertisementtype, $advertiseActions, true)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid advertisement type', ['advertisementtype' => $advertisementtype]);
             return $this->respondWithError(32006);
         }
 
         if ($advertisementId !== null && !self::isValidUUID($advertisementId)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid advertisementId', ['advertisementId' => $advertisementId]);
             return $this->respondWithError(30269);
         }
 
         if ($advertisementId !== null && !$this->advertisementMapper->advertisementExistsById($advertisementId)) {
+            $this->logger->error('AdvertisementService.fetchAll: Advertisement not found', ['advertisementId' => $advertisementId]);
             return $this->respondWithError(32019);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid postId', ['postId' => $postId]);
             return $this->respondWithError(30209);
         }
 
         if ($postId !== null && !$this->postMapper->postExistsById($postId)) {
+            $this->logger->error('AdvertisementService.fetchAll: Post does not exist', ['postId' => $postId]);
             return $this->respondWithError(31510);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
+            $this->logger->error('AdvertisementService.fetchAll: Invalid userId', ['userId' => $userId]);
             return $this->respondWithError(30201);
         }
 
         if ($userId !== null && !$this->userMapper->isUserExistById($userId)) {
+            $this->logger->error('AdvertisementService.fetchAll: User does not exist', ['userId' => $userId]);
             return $this->respondWithError(31007);
         }
 
@@ -607,10 +627,12 @@ class AdvertisementService
             } elseif (is_string($sortByInput)) {
                 $sortKey = strtoupper($sortByInput);
             } else {
+                $this->logger->error('AdvertisementService.fetchAll: Invalid sort input type', ['sort' => $sortByInput]);
                 return $this->respondWithError(30103);
             }
 
             if (!in_array($sortKey, $allowedSortTypes, true)) {
+                $this->logger->error('AdvertisementService.fetchAll: Invalid sort value', ['sort' => $sortKey]);
                 return $this->respondWithError(30103);
             }
             $args['sort'] = $sortKey;
@@ -685,6 +707,7 @@ class AdvertisementService
     public function findAdvertiser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Authentication failed');
             return $this->respondWithError(60501);
         }
 
@@ -700,29 +723,34 @@ class AdvertisementService
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Invalid postId', ['postId' => $postId]);
             return $this->respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Invalid userId', ['userId' => $userId]);
             return $this->respondWithError(30201);
         }
 
         if ($userId !== null && !$this->userMapper->isUserExistById($userId)) {
+            $this->logger->error('AdvertisementService.findAdvertiser: User does not exist', ['userId' => $userId]);
             return $this->respondWithError(31007);
         }
 
         if ($postId !== null && !$this->postMapper->postExistsById($postId)) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Post does not exist', ['postId' => $postId]);
             return $this->respondWithError(31510);
         }
 
         if ($tag !== null) {
             if (!preg_match('/' . $tagConfig['PATTERN'] . '/u', $tag)) {
-                $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->error('Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
         }
 
         if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Invalid title length', ['title' => $title]);
             return $this::respondWithError(30210);
         }
 
@@ -733,6 +761,7 @@ class AdvertisementService
             }
 
             if (!is_array($filterBy)) {
+                $this->logger->error('AdvertisementService.findAdvertiser: Invalid filterBy type', ['filterBy' => $filterBy]);
                 return $this->respondWithError(30103);
             }
 
@@ -742,6 +771,7 @@ class AdvertisementService
             );
 
             if (!empty($invalidTypes)) {
+                $this->logger->error('AdvertisementService.findAdvertiser: Invalid filterBy values', ['filterBy' => $filterBy]);
                 return $this->respondWithError(30103);
             }
 
@@ -797,6 +827,7 @@ class AdvertisementService
         //$this->logger->info('findAdvertiser', ['results' => $results]);
         $this->logger->info("AdvertisementService.findAdvertiser Done");
         if (empty($results) && $postId != null) {
+            $this->logger->error('AdvertisementService.findAdvertiser: Post does not exist', ['postId' => $postId]);
             return $this->respondWithError(31510);
         }
 

@@ -28,7 +28,7 @@ class ContactusService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning("Unauthorized action attempted.");
+            $this->logger->error('ContactusService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -84,19 +84,23 @@ class ContactusService
     public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('ContactusService.loadById: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!in_array($type, ['id', 'name'], true)) {
+            $this->logger->error('ContactusService.loadById: Invalid type provided', ['type' => $type]);
             return $this::respondWithError(30105);
         }
 
         if (empty($value)) {
+            $this->logger->error('ContactusService.loadById: Empty value provided', ['type' => $type]);
             return $this::respondWithError(30102);
         }
 
         if ($type === 'id') {
             if (!ctype_digit($value)) {
+                $this->logger->error('ContactusService.loadById: Invalid id value provided', ['value' => $value]);
                 return $this::respondWithError(30105);
             }
             $value = (int)$value;
@@ -111,6 +115,7 @@ class ContactusService
             $exist = ($type === 'id') ? $this->contactUsMapper->loadById($value) : $this->contactUsMapper->loadByName($value);
 
             if ($exist === null) {
+                $this->logger->error('ContactusService.loadById: Contact not found', ['type' => $type, 'value' => $value]);
                 return $this::respondWithError(40401);
             }
 
@@ -138,10 +143,12 @@ class ContactusService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('ContactusService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
+            $this->logger->error('ContactusService.fetchAll: Empty arguments provided');
             return $this::respondWithError(30101);
         }
 
@@ -153,6 +160,7 @@ class ContactusService
             $exist = $this->contactUsMapper->fetchAll($args);
 
             if (empty($exist)) {
+                $this->logger->error('ContactusService.fetchAll: No contacts found', ['args' => $args]);
                 return $this::respondWithError(40401);
             }
 

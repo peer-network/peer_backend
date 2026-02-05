@@ -35,9 +35,9 @@ class MultipartPostService
                 $decodedToken = $this->tokenService->validateToken($bearerToken);
 
                 $this->currentUserId = $decodedToken->uid;
-                $this->logger->debug('Query.setCurrentUserId started');
+                $this->logger->debug('MultipartPostService.setCurrentUserId started');
             } catch (\Throwable $e) {
-                $this->logger->error('Invalid token', ['exception' => $e]);
+                $this->logger->error('MultipartPostService.setCurrentUserId: Invalid token', ['exception' => $e]);
                 $this->currentUserId = null;
             }
         } else {
@@ -58,12 +58,14 @@ class MultipartPostService
     {
         try {
             if (isset($requestObj['contentType'][0]) && !str_contains($requestObj['contentType'][0], 'multipart/form-data')) {
+                $this->logger->error('MultipartPostService.checkForBasicValidation: Invalid header format');
                 throw new ValidationException("Invalid header format", [41514]); // Invalid header format
             }
 
             $maxFileSize = 1024 * 1024 * 500; // 500MB
 
             if (isset($requestObj['contentLength'][0]) && $requestObj['contentLength'][0] > $maxFileSize) {
+                $this->logger->error('MultipartPostService.checkForBasicValidation: File size exceeds maximum limit');
                 throw new ValidationException("Maximum file upload should be less than 500MB", [30261]); // Maximum file upload should be less than 500MB
             }
 
@@ -72,10 +74,10 @@ class MultipartPostService
                 'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->error('MultipartPostService.checkForBasicValidation: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("Validation error in MultipartPostService.checkForBasicValidation (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -92,6 +94,7 @@ class MultipartPostService
     {
         try {
             if (!self::checkAuthentication($this->currentUserId)) {
+                $this->logger->error('MultipartPostService.handleFileUpload: Authentication failed');
                 return self::respondWithError(60501);
             }
             // Check For Wallet Balance
@@ -99,6 +102,7 @@ class MultipartPostService
             $hasPostCredits = $this->postService->postEligibility(false);
 
             if (isset($hasPostCredits['status']) && $hasPostCredits['status'] == 'error') {
+                $this->logger->error('MultipartPostService.handleFileUpload: Post eligibility failed', ['responseCode' => $hasPostCredits['ResponseCode']]);
                 throw new ValidationException("Post Eligibility failed ", [$hasPostCredits['ResponseCode']]); // Post Eligibility failed
             }
 
@@ -126,10 +130,10 @@ class MultipartPostService
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
-            $this->logger->warning("Validation error in MultipartPostService.handleFileUpload", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->error('MultipartPostService.handleFileUpload: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->error("Validation error in MultipartPostService.handleFileUpload (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("MultipartPostService.handleFileUpload:  (Exception)", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -153,7 +157,7 @@ class MultipartPostService
             $updateStmt->bindValue(':status', 'FILE_UPLOADED', PDO::PARAM_STR);
             $updateStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
             $updateStmt->execute();
-            $this->logger->info("Inserted new token into database", ['eligibilityToken' => $eligibilityToken]);
+            $this->logger->info("MultipartPostService.updateTokenStatus: Updated token status to FILE_UPLOADED", ['eligibilityToken' => $eligibilityToken]);
 
         } catch (\Throwable $e) {
             $this->logger->error("MultipartPostService.updateTokenStatus: Exception occurred while inserting token", [
@@ -172,6 +176,7 @@ class MultipartPostService
         $this->logger->debug("MultipartPostService.checkTokenExpiry started");
 
         if (empty($requestObj['token'])) {
+            $this->logger->error('MultipartPostService.checkTokenExpiry: Token should not be empty');
             throw new ValidationException("Token Should not be empty.", [30102]); // Token Should not be empty
         }
 
@@ -193,6 +198,7 @@ class MultipartPostService
         }
 
         if ($tokenExists) {
+            $this->logger->error('MultipartPostService.checkTokenExpiry: Eligibility Token has been expired', ['token' => $requestObj['token']]);
             throw new ValidationException("Eligibility Token has been expired", [40902]);
         }
     }

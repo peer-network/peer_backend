@@ -41,6 +41,7 @@ class GemsServiceImpl implements GemsService
     public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('GemsServiceImpl.gemsStats: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -50,6 +51,7 @@ class GemsServiceImpl implements GemsService
     public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('GemsServiceImpl.allGemsForDay: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -65,6 +67,7 @@ class GemsServiceImpl implements GemsService
     public function generateGemsFromActions(): array
     {
         if (!TABLESTOGEMS) {
+            $this->logger->warning('GemsServiceImpl.generateGemsFromActions: Table to gems conversion is disabled');
             return self::respondWithError(41215);
         }
 
@@ -86,7 +89,7 @@ class GemsServiceImpl implements GemsService
             $result = $this->gemsRepository->setGlobalWins($win['table'], $win['winType'], $win['factor']);
 
             if ($result['status'] === 'error') {
-                $this->logger->error("Failed to set global wins for {$win['table']}");
+                $this->logger->error("GemsServiceImpl.generateGemsFromActions: Failed to set global wins for {$win['table']}");
             }
 
             if (isset($result['insertCount']) && $result['insertCount'] > 0) {
