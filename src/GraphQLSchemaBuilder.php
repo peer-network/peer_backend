@@ -59,6 +59,7 @@ use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
+use Fawaz\App\LeaderBoardService;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\PeerShopService;
 use Fawaz\Utils\DateService;
@@ -91,6 +92,7 @@ class GraphQLSchemaBuilder
         protected WalletService $walletService,
         protected PeerTokenService $peerTokenService,
         protected PeerShopService $peerShopService,
+        protected LeaderBoardService $leaderBoardService,
         protected AdvertisementService $advertisementService,
         protected MintService $mintService,
         protected JWTService $tokenService,
@@ -229,6 +231,7 @@ class GraphQLSchemaBuilder
         $this->walletService->setCurrentUserId($userid);
         $this->peerTokenService->setCurrentUserId($userid);
         $this->peerShopService->setCurrentUserId($userid);
+        $this->leaderBoardService->setCurrentUserId($userid);
         $this->tagService->setCurrentUserId($userid);
         $this->advertisementService->setCurrentUserId($userid);
         $this->mintService->setCurrentUserId($userid);
@@ -1674,6 +1677,15 @@ class GraphQLSchemaBuilder
             'ShopSupportedDeliveryCountry' => [
                 'country' => fn(array $root): string => $root['country'] ?? '',
             ],
+            'LeaderboardResponse' => [
+                'meta' => fn(array $root): array => [
+                    'status' => $root['status'] ?? '',
+                    'ResponseCode' => isset($root['ResponseCode']) ? (string)$root['ResponseCode'] : '',
+                    'ResponseMessage' => $this->responseMessagesProvider->getMessage($root['ResponseCode'] ?? '') ?? '',
+                    'RequestId' => $this->logger->getRequestUid(),
+                ],
+                'leaderboardResultLink' => fn(array $root): string => ($root['affectedRows']['leaderboardResultLink'] ?? ''),
+            ],
 
         ];
     }
@@ -1727,6 +1739,7 @@ class GraphQLSchemaBuilder
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
             'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
+            'generateLeaderboard' => fn (mixed $root, array $args) => $this->generateLeaderboard($args)
         ];
     }
 
@@ -3670,6 +3683,30 @@ class GraphQLSchemaBuilder
             return ErrorMapper::toResponse($e);
         }
 
+    }
+
+    public function generateLeaderboard(array $args): array
+    {
+        $this->logger->debug('GraphQLSchemaBuilder.generateLeaderboard started');
+
+        if (!$this->checkAuthentication()) {
+            return self::respondWithError(60501);
+        }
+
+        $validation = RequestValidator::validate($args['leaderboardParams'], ['start_date', 'end_date', 'leaderboardUsersCount']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return self::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        try {
+            return $this->leaderBoardService->generateLeaderboard($args['leaderboardParams']);
+        } catch (\Throwable $e) {
+            $this->logger->error("Error in GraphQLSchemaBuilder.generateLeaderboard", ['exception' => $e->getMessage()]);
+            return ErrorMapper::toResponse($e);
+        }
     }
 
 }
