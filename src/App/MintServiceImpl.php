@@ -9,7 +9,6 @@ use Fawaz\App\DTO\Gems;
 use Fawaz\App\DTO\MintLogItem;
 use Fawaz\App\DTO\UncollectedGemsResult;
 use Fawaz\App\DTO\UncollectedGemsRow;
-use Fawaz\App\Repositories\MintAccountRepositorysitory;
 use Fawaz\config\constants\ConstantsConfig;
 use Fawaz\Database\GemsRepository;
 use Fawaz\Database\Interfaces\TransactionManager;
@@ -22,11 +21,9 @@ use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\TokenCalculations\TokenHelper;
 use Fawaz\App\DTO\GemsInTokenResult;
+use Fawaz\App\Errors\PermissionDeniedException;
 use Fawaz\App\Repositories\MintAccountRepository;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
-use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
-use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
-use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Utils\ErrorResponse;
 
 class MintServiceImpl implements MintService
 {
@@ -117,7 +114,7 @@ class MintServiceImpl implements MintService
 
         $filteredTotals = [];
         foreach ($userTotals as $uid => $total) {
-            if ((float)$total < 0) {
+            if ((float)$total <= 0) {
                 continue;
             }
             $filteredTotals[$uid] = $total;
@@ -194,25 +191,37 @@ class MintServiceImpl implements MintService
         return $tokenTotals;
     }
 
-    public function distributeTokensFromGems(string $day = 'D0'): array
+    public function distributeTokensFromGems(string $date): array | ErrorResponse
     {
-        $this->logger->debug('MintService.distributeTokensFromGems started', ['day' => $day]);
+        $this->logger->debug('MintService.distributeTokensFromGems started', ['day' => $date]);
         if (!$this->checkAuthentication()) {
-            return $this::respondWithError(60501);
+            throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
-        $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'];
-
         // Validate entry of day
-        if (!in_array($day, $dayActions, true)) {
-            return $this::respondWithError(30105);
+        try {
+            $mintDate = new DateTime($date);
+        } catch (\Exception $e) {
+            $this->logger->warning('Invalid mint date provided', [
+                'day' => $date,
+                'error' => $e->getMessage(),
+            ]);
+            return $this::respondWithErrorObject(30105);
+        }
+        $mintDate->setTime(0, 0, 0);
+        $today = new DateTime('today');
+        if ($mintDate > $today) {
+            $this->logger->warning('Mint date is today or in the future', [
+                'day' => $date,
+            ]);
+            return $this::respondWithErrorObject(30105);
         }
 
         try {
             // Prevent duplicate minting for the selected period
-            if ($this->mintRepository->getMintForDay($day)) {
-                $this->logger->error('Mint already performed for selected period', ['day' => $day]);
-                return $this::respondWithError(31204);
+            if ($this->mintRepository->getMintForDate($date)) {
+                $this->logger->error('Mint already performed for selected period', ['day' => $date]);
+                return $this::respondWithErrorObject(31204);
             }
 
             $this->transactionManager->beginTransaction();
@@ -220,9 +229,12 @@ class MintServiceImpl implements MintService
             $mintid = $this->generateUUID();
 
             // ALL uncollected gems
-            $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($day);
+            $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($date);
 
             if ($gems === null || empty($gems->rows)) {
+                $this->logger->info('No uncollected gems found for mint date', [
+                    'day' => $date,
+                ]);
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
@@ -230,6 +242,10 @@ class MintServiceImpl implements MintService
             $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
 
             if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
+                $this->logger->info('No distributable gems found after normalization', [
+                    'day' => $date,
+                    'overallTotal' => $gemsForDistribution->overallTotal,
+                ]);
                 $this->transactionManager->rollback();
                 return self::createSuccessResponse(21206);
             }
@@ -250,7 +266,7 @@ class MintServiceImpl implements MintService
             
             $this->mintRepository->insertMint(
                 $mintid,
-                $this->resolveMintDate($day),
+                $date,
                 $gemsInTokenResult->gemsInToken
             );
 
@@ -275,7 +291,111 @@ class MintServiceImpl implements MintService
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
-            return $this::respondWithError(40301);
+            return $this::respondWithErrorObject(40301);
+        }
+    }
+
+    public function distributeTokensFromGemsWithoutBalanceUpdate(string $date): array | ErrorResponse
+    {
+        $this->logger->debug('MintService.distributeTokensFromGemsWithoutBalanceUpdate started', ['day' => $date]);
+        if (!$this->checkAuthentication()) {
+            throw new PermissionDeniedException(60501, 'Unauthorized');
+        }
+
+        // Validate entry of day
+        try {
+            $mintDate = new DateTime($date);
+        } catch (\Exception $e) {
+            $this->logger->warning('Invalid mint date provided', [
+                'day' => $date,
+                'error' => $e->getMessage(),
+            ]);
+            return $this::respondWithErrorObject(30105);
+        }
+        $mintDate->setTime(0, 0, 0);
+        $today = new DateTime('today');
+        if ($mintDate > $today) {
+            $this->logger->warning('Mint date is today or in the future', [
+                'day' => $date,
+            ]);
+            return $this::respondWithErrorObject(30105);
+        }
+
+        try {
+            // Prevent duplicate minting for the selected period
+            if ($this->mintRepository->getMintForDate($date)) {
+                $this->logger->error('Mint already performed for selected period', ['day' => $date]);
+                return $this::respondWithErrorObject(31204);
+            }
+
+            $this->transactionManager->beginTransaction();
+
+            $mintid = $this->generateUUID();
+
+            // ALL uncollected gems
+            $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($date);
+
+            if ($gems === null || empty($gems->rows)) {
+                $this->logger->info('No uncollected gems found for mint date', [
+                    'day' => $date,
+                ]);
+                $this->transactionManager->rollback();
+                return self::createSuccessResponse(21206);
+            }
+
+            $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
+
+            if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
+                $this->logger->info('No distributable gems found after normalization', [
+                    'day' => $date,
+                    'overallTotal' => $gemsForDistribution->overallTotal,
+                ]);
+                $this->transactionManager->rollback();
+                return self::createSuccessResponse(21206);
+            }
+            $gemsInTokenResult = $this::calculateGemsInToken(
+                $gemsForDistribution
+            );
+
+            $tokensPerUser = $this->tokensPerUser(
+                $gemsForDistribution,
+                $gemsInTokenResult
+            );
+
+            $args = $this->transferMintTokensWithoutBalanceUpdate(
+                $tokensPerUser,
+                $gemsForDistribution,
+                $gemsInTokenResult
+            );
+
+            $this->mintRepository->insertMint(
+                $mintid,
+                $date,
+                $gemsInTokenResult->gemsInToken
+            );
+
+            $this->gemsRepository->applyMintInfo(
+                $mintid,
+                $gems,
+                $args
+            );
+
+            $this->transactionManager->commit();
+            return $this->createSuccessResponse(
+                11208,
+                [
+                    'winStatus' => $gemsInTokenResult->toWinStatusArray(),
+                    'userStatus' =>  $args,
+                    'counter' => count($args)
+                ],
+                true,
+                'counter'
+            );
+        } catch(\Throwable $e) {
+            $this->logger->error('Error during mint distribution transfers (no balance update)', [
+                'error' => $e->getMessage(),
+            ]);
+            return $this::respondWithErrorObject(40301);
         }
     }
 
@@ -364,6 +484,91 @@ class MintServiceImpl implements MintService
         }
         return $args;
     }
+
+    private function transferMintTokensWithoutBalanceUpdate(
+        array $tokensPerUser,
+        UncollectedGemsResult $uncollectedGems,
+        GemsInTokenResult $gemsInTokenResult
+    ): array {
+        $this->logger->debug('MintService.transferMintTokensWithoutBalanceUpdate started', [
+            'recipients' => count($tokensPerUser),
+        ]);
+        $mintAccount = $this->mintAccountRepository->getDefaultAccount();
+
+        if ($mintAccount === null) {
+            $this->logger->warning('No MintAccount available for distribution');
+            throw new ValidationException('No MintAccount available for distribution', [40301]);
+        }
+
+        $args = [];
+        foreach ($tokensPerUser as $recipientUserId => $amountToTransfer) {
+            // Skip zero or negative amounts
+            if ((float)$amountToTransfer <= 0) {
+                $this->logger->error('amount to transfer is 0', [
+                    'userId' => $recipientUserId,
+                ]);
+                throw new ValidationException('amount to transfer is 0', [40301]);
+            }
+
+            $recipient = $this->userService->loadAllUsersById($recipientUserId); // user loadByIds!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if ($recipient === false) {
+                $this->logger->error('Recipient user not found for token transfer', [
+                    'userId' => $recipientUserId,
+                ]);
+                throw new ValidationException('Recipient user not found for token transfer', [40301]);
+            }
+
+            $transactionStrategy = new MintTransferStrategy();
+
+            $args[$recipientUserId]['operationId'] = $transactionStrategy->getOperationId();
+            $args[$recipientUserId]['transactionId'] = $transactionStrategy->getTransactionId();
+
+            $response = $this->peerTokenMapper->transferTokenWithoutBalanceUpdate(
+                (string)$amountToTransfer,
+                $transactionStrategy,
+                $mintAccount,
+                $recipient
+            );
+
+            if (!is_array($response) || ($response['status'] ?? 'error') === 'error') {
+                $this->logger->error('Mint distribution transfer failed for user', [
+                    'userId' => $recipientUserId,
+                    'amount' => $amountToTransfer,
+                    'response' => $response,
+                ]);
+                throw new ValidationException('Mint distribution transfer failed', [40301]);
+            }
+        }
+
+        foreach ($uncollectedGems->rows as $row) {
+            $userId = (string)$row->userid;
+
+            $args[$userId]['userid'] = $userId;
+            $args[$userId]['gems'] = (float)$row->totalGems;
+            $args[$userId]['tokens'] = $tokensPerUser[$userId];
+            $args[$userId]['percentage'] = (float)$row->percentage;
+            $args[$userId]['details'] = $args[$userId]['details'] ?? [];
+
+            $args[$userId]['details'][] = [
+                'gemid' => (string)$row->gemid,
+                'userid' => (string)$row->userid,
+                'postid' => (string)$row->postid,
+                'fromid' => (string)$row->fromid,
+                'gems' => (float)$row->gems,
+                'numbers' => $tokensPerUser[$userId],
+                'whereby' => (int)$row->whereby,
+                'createdat' => $row->createdat
+            ];
+
+            $args[$userId]['logItem'] = new MintLogItem(
+                $row->gemid,
+                $args[$row->userid]['transactionId'],
+                $args[$row->userid]['operationId'],
+                $tokensPerUser[$userId]
+            );
+        }
+        return $args;
+    }
     
     /**
      * Get the single Mint Account row.
@@ -391,17 +596,5 @@ class MintServiceImpl implements MintService
             ]);
             return self::respondWithError(40301);
         }
-    }
-
-    private function resolveMintDate(string $day): string
-    {
-        // $day comes as Dx where x is the offset from today
-        $offset = (int)substr($day, 1);
-        $date = new DateTime();
-        if ($offset > 0) {
-            $date->modify(sprintf('-%d day', $offset));
-        }
-
-        return $date->format('Y-m-d');
     }
 }
