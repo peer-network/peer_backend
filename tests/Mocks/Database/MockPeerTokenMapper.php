@@ -29,15 +29,6 @@ final class MockPeerTokenMapper implements PeerTokenMapperInterface
         $this->lpToken = $lpToken;
     }
 
-    public function transferTokenWithoutBalanceUpdate(
-        string $numberOfTokens,
-        TransferStrategy $strategy,
-        HasWalletId $sender,
-        HasWalletId $recipient,
-        ?string $message = null,
-    ): ?array {
-        return null;
-    }
     public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool
     {
         foreach ($this->transfers as $transfer) {

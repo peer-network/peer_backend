@@ -11,12 +11,9 @@ extend type Query {
 }
 
 extend type Mutation {
-  runCompensationTransactionsFromCsv: DefaultResponse!
   globalwins: DefaultResponse!
-  _tokennomics_migration_mint(chunk: Int!): DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
   distributeTokensForGems(date: String!): GemstersResponse!
-  distributeTokensForGemsWithoutBalanceUpdate(date: String!): GemstersResponse!
   alphaMint: DefaultResponse!
 }
 
