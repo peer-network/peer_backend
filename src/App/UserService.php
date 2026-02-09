@@ -230,7 +230,7 @@ class UserService implements UserServiceInterface
 
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->error('UserService.createUser: Email already taken', ['email' => $email]);
+            $this->logger->error('UserService.createUser: Email already taken');
             return self::respondWithError(30601);
         }
 
@@ -255,7 +255,6 @@ class UserService implements UserServiceInterface
 
         $this->logger->debug('UserService.createUser.verificationData started', [
             'userid' => $verificationData['userid'],
-            'token' => $maskedToken,
             'expiresat' => $verificationData['expiresat']
         ]);
 
@@ -421,6 +420,7 @@ class UserService implements UserServiceInterface
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
 
             if (!$users) {
+                $this->logger->error('UserService.verifyReferral: No valid referral information found', ['referral' => $referralString]);
                 return self::respondWithError(31007); // No valid referral information found
             }
             $userObj = new User($users, [], false)->getArrayCopy();
@@ -460,16 +460,19 @@ class UserService implements UserServiceInterface
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (empty($mediaPath)) {
+                    $this->logger->error('UserService.uploadMedia: Media upload failed', ['userId' => $userId]);
                     return self::respondWithError(30251);
                 }
 
                 if (isset($mediaPath['path'])) {
                     return $mediaPath['path'];
                 } else {
+                    $this->logger->error('UserService.uploadMedia: Media path missing after upload', ['userId' => $userId]);
                     return self::respondWithError(40306);
                 }
 
             } else {
+                $this->logger->error('UserService.uploadMedia: Missing media file', ['userId' => $userId]);
                 return self::respondWithError(40307);
             }
 
@@ -480,6 +483,7 @@ class UserService implements UserServiceInterface
 
         $this->logger->error('UserService.uploadMedia: Error uploading media.', ['exception' => $e]);
 
+        $this->logger->error('UserService.uploadMedia: Upload failed after exception', ['userId' => $userId]);
         return self::respondWithError(40307);
     }
 
@@ -496,6 +500,7 @@ class UserService implements UserServiceInterface
 
             if (!$success) {
                 $this->transactionManager->rollback();
+                $this->logger->error('UserService.verifyAccount: Failed to verify account', ['userId' => $userId]);
                 return self::respondWithError(40701);
             }
 
@@ -709,17 +714,18 @@ class UserService implements UserServiceInterface
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('UserService.setEmail: Invalid email format', ['email' => $email]);
+            $this->logger->error('UserService.setEmail: Invalid email format');
             return self::respondWithError(30224);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
         if ($email === $user->getMail()) {
+            $this->logger->error('UserService.setEmail: Email unchanged');
             return self::respondWithError(31005);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->error('UserService.setEmail: Email already in use', ['email' => $email]);
+            $this->logger->error('UserService.setEmail: Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -1198,7 +1204,7 @@ class UserService implements UserServiceInterface
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('UserService.requestPasswordReset: Invalid email format', ['email' => $email]);
+            $this->logger->error('UserService.requestPasswordReset: Invalid email format');
             return self::respondWithError(30104);
         }
 

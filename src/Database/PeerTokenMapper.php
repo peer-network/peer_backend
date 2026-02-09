@@ -277,6 +277,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
         $this->initializeLiquidityPool();
 
         if (!$this->validateFeesWalletUUIDs()) {
+            $this->logger->error('PeerTokenMapper.transferToken: Invalid fees wallet UUIDs');
             return self::respondWithError(41222);
         }
 

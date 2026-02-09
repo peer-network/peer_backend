@@ -61,11 +61,11 @@ class PeerTokenService
 
     public function transferToken(array $args): array
     {
-        $this->logger->debug('WalletService.transferToken started');
+        $this->logger->debug('PeerTokenService.transferToken started');
 
         if (!$this->checkAuthentication()) {
             $this->logger->error('PeerTokenService.transferToken: Unauthorized access attempt');
-            throw new PermissionDeniedException(60501, 'Unauthorized');
+            throw new PermissionDeniedException(60501, 'Unauthorized access attempt');
         }
 
         $recipientid =  $args['recipient'];
@@ -92,7 +92,7 @@ class PeerTokenService
         }
 
         try {
-            $this->logger->debug('PeerTokenMapper.transferToken started');
+            $this->logger->debug('PeerTokenService.transferToken started');
 
             $recipientId = (string) $args['recipient'];
             $numberOfTokens = (string) $args['numberoftokens'];
@@ -272,7 +272,7 @@ class PeerTokenService
 
     public function transactionsHistoryItems(array $args): array
     {
-        $this->logger->info('WalletService.transactionsHistoryItems started');
+        $this->logger->info('PeerTokenService.transactionsHistoryItems started');
 
         if (!$this->checkAuthentication()) {
             $this->logger->error('PeerTokenService.transactionsHistoryItems: Unauthorized access attempt');

@@ -32,7 +32,7 @@ class DailyFreeService
             $affectedRows = $this->dailyFreeMapper->getUserDailyAvailability($userId);
 
             if ($affectedRows === false) {
-                $this->logger->error('DailyFree availability not found', ['userId' => $userId]);
+                $this->logger->error('DailyFreeService.getUserDailyAvailability: DailyFree availability not found', ['userId' => $userId]);
                 return $this::respondWithError(40301);
             }
 

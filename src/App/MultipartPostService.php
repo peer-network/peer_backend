@@ -77,7 +77,7 @@ class MultipartPostService
             $this->logger->error('MultipartPostService.checkForBasicValidation: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->error("Validation error in MultipartPostService.checkForBasicValidation (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("MultipartPostService.checkForBasicValidation: Validation error", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -133,7 +133,7 @@ class MultipartPostService
             $this->logger->error('MultipartPostService.handleFileUpload: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->error("MultipartPostService.handleFileUpload:  (Exception)", ['error' => $e->getMessage()]);
+            $this->logger->error("MultipartPostService.handleFileUpload: Exception", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 

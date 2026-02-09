@@ -23,7 +23,7 @@ class PoolMapper
 
     public function fetchPool(array $args = []): array
     {
-        $this->logger->debug('WalletMapper.fetchPool started');
+        $this->logger->debug('PoolMapper.fetchPool started');
 
         $offset = max((int)($args['offset'] ?? 0), 0);
         $limit = max((int)($args['limit'] ?? self::DEFAULT_LIMIT), 1);
@@ -81,14 +81,14 @@ class PoolMapper
                     'transaction_count' => (int)$row['transaction_count'],
                 ];
             } catch (\Throwable $e) {
-                $this->logger->error('Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
+                $this->logger->error('PoolMapper.fetchPool: Failed to process row', ['error' => $e->getMessage(), 'data' => $row]);
             }
         }
 
         if (!empty($results['posts'])) {
-            $this->logger->info('Fetched all transactions from database', ['count' => count($results['posts'])]);
+            $this->logger->info('PoolMapper.fetchPool: Fetched all transactions from database', ['count' => count($results['posts'])]);
         } else {
-            $this->logger->warning('No transactions found in database');
+            $this->logger->warning('PoolMapper.fetchPool: No transactions found in database');
         }
 
         return $results;
@@ -114,9 +114,9 @@ class PoolMapper
 
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetch(PDO::FETCH_ASSOC);
-            $this->logger->info('fetching entries for ', ['entries' => $entries]);
+            $this->logger->info('PoolMapper.fetchGemsStats: fetching entries for ', ['entries' => $entries]);
         } catch (\Throwable $e) {
-            $this->logger->error('Error fetching entries for ', ['exception' => $e->getMessage()]);
+            $this->logger->error('PoolMapper.fetchGemsStats: Error fetching entries', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
 
@@ -128,8 +128,7 @@ class PoolMapper
     {
         \ignore_user_abort(true);
 
-        $this->logger->debug('WalletMapper.getTimeSortedMatch started');
-
+        $this->logger->debug('PoolMapper.fetchAllGemsForDay started');
         $dayOptions = [
             "D0" => "createdat::date = CURRENT_DATE",
             "D1" => "createdat::date = CURRENT_DATE - INTERVAL '1 day'",
@@ -143,6 +142,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
+            $this->logger->debug('PoolMapper.fetchAllGemsForDay: Invalid day option', ['day' => $day]);
             return $this::respondWithError(30223);
         }
 
@@ -181,7 +181,7 @@ class PoolMapper
             $stmt = $this->db->query($sql);
             $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
-            $this->logger->error('Error reading gems', ['exception' => $e->getMessage()]);
+            $this->logger->error('PoolMapper.fetchAllGemsForDay: Error reading gems', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
 
@@ -215,6 +215,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
+                $this->logger->warning('PoolMapper.fetchAllGemsForDay: Invalid whereby value', ['whereby' => $whereby]);
                 return $this::respondWithError(41221);
             }
 

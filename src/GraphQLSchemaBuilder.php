@@ -1838,7 +1838,7 @@ class GraphQLSchemaBuilder
 
         $response = $this->userService->createUser($args);
         if (isset($response['status']) && $response['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.createUser: Error creating user', ['response' => $response]);
+            $this->logger->error('GraphQLSchemaBuilder.createUser: Error creating user');
             return $response;
         }
 
@@ -3192,7 +3192,6 @@ class GraphQLSchemaBuilder
             ];
         } catch (\Throwable $e) {
             $this->logger->error('Error during login process', [
-                'email' => $email,
                 'exception' => $e->getMessage(),
                 'stackTrace' => $e->getTraceAsString()
             ]);
