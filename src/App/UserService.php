@@ -167,7 +167,7 @@ class UserService implements UserServiceInterface
 
     public function loadAllUsersById(string $userId): User|false
     {
-        $this->logger->debug('UserService.loadAllUsersById started', ['userId' => $userId]);        
+        $this->logger->debug('UserService.loadAllUsersById started', ['userId' => $userId]);
 
         try {
             return $this->userMapper->loadById($userId);

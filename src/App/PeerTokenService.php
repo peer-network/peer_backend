@@ -185,7 +185,7 @@ class PeerTokenService
 
             // get Fees account and check for existence
             $feesAccountExist = $this->peerTokenMapper->isFeesAccountExist();
-            if(!$feesAccountExist) {
+            if (!$feesAccountExist) {
                 $this->logger->error('PeerTokenService.transferToken: Fees account does not exist');
                 return self::respondWithError(40301);
             }

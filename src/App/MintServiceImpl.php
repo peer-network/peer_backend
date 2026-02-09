@@ -290,7 +290,7 @@ class MintServiceImpl implements MintService
                 true,
                 'counter'
             );
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('MintServiceImpl.distributeTokensFromGems: Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);

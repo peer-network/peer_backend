@@ -78,7 +78,7 @@ class AlphaMintService
                 // Get Alpha Users from Alpha_tokens_to_Peer_tokens.json file
                 $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
 
-                if(!$alphaUsers || !is_array($alphaUsers)) {
+                if (!$alphaUsers || !is_array($alphaUsers)) {
                     $this->logger->error('AlphaMintService.alphaMint: Failed to load alpha users data from JSON file');
                     return self::respondWithError(41020);
                 }

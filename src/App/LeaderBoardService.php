@@ -60,7 +60,7 @@ class LeaderBoardService
             $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', $end_date);
 
             // End date should be not less than start date
-            if($endDate < $startDate) {
+            if ($endDate < $startDate) {
                 $this->logger->error("LeaderBoardService.generateLeaderboard: Error in end date is less than start date");
                 return $this::respondWithError(33002);
             }

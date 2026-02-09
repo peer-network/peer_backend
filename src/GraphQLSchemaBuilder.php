@@ -2358,7 +2358,7 @@ class GraphQLSchemaBuilder
         $postId = $args['postid'] ?? null;
         if (empty($postId) || !self::isValidUUID($postId)) {
             $this->logger->error('GraphQLSchemaBuilder.resolveListComments: Missing or invalid postId');
-            return $this::respondWithError(30209); 
+            return $this::respondWithError(30209);
         }
 
 
