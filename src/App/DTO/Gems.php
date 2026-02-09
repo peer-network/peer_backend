@@ -14,6 +14,6 @@ final class Gems
      */
     public function __construct(
         public readonly array $rows
-    ) {}
+    ) {
+    }
 }
-
