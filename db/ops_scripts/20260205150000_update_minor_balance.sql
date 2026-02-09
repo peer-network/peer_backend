@@ -45,7 +45,7 @@ FROM
     balances b
 WHERE
     w.userid = b.userid
-    AND b.transaction_balance_diff > 0
+    AND b.transaction_balance_diff > -0.01
     AND b.transaction_balance_diff <> 0 RETURNING w.userid,
     b.old_liquidity,
     w.liquidity AS new_liquidity,

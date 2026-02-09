@@ -1,0 +1,1 @@
+update users set roles_mask = '16' where uid = 'b9e94945-abd7-46a5-8c92-59037f1d73bf'
