@@ -196,6 +196,7 @@ class UserService implements UserServiceInterface
         $requiredFields = ['username', 'email', 'password'];
         $validationErrors = self::validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
+            $this->logger->error('UserService.createUser: Missing required field');
             return $validationErrors;
         }
 

@@ -91,6 +91,7 @@ class CommentService
         $requiredFields = ['content', 'postid'];
         $validationErrors = $this->validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
+            $this->logger->error('CommentService.createComment: Validation errors');
             return $validationErrors;
         }
 
