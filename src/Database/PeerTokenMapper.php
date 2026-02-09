@@ -105,6 +105,23 @@ class PeerTokenMapper implements PeerTokenMapperInterface
         ];
     }
 
+    /**
+     * Check for fees account existence
+     */
+    public function isFeesAccountExist(): bool
+    {
+        $peerAcObj = $this->userMapper->loadById($this->peerWallet);
+        if (empty($peerAcObj)) {
+            return false;
+        }
+
+        $burnAcObj = $this->userMapper->loadById($this->burnWallet);
+        if (empty($burnAcObj)) {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Receipient should not be any of the fee wallets.
