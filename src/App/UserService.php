@@ -552,11 +552,9 @@ class UserService implements UserServiceInterface
                 return $this::respondWithError(40301); // 402xx
             }
 
-            if ($contentFiltering && !empty($contentFiltering)) {
-                $contentFilteringSeverityLevel = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
-                $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
-                $userPreferences->setUpdatedAt();
-            }
+            $contentFilteringSeverityLevel = HiddenContentFilterServiceImpl::getContentFilteringSeverityLevel($contentFiltering);
+            $userPreferences->setContentFilteringSeverityLevel($contentFilteringSeverityLevel);
+            $userPreferences->setUpdatedAt();
 
             if (is_array($shownOnboardingsIn) && !empty($shownOnboardingsIn)) {
                 $this->updateOnboardings($userPreferences, $shownOnboardingsIn);

@@ -45,40 +45,6 @@ final class MintServiceDistributeTokensIntegrationTest extends TestCase
         $this->assertWinStatusMatches($expectedResponse['affectedRows']['winStatus'], $response['affectedRows']['winStatus']);
 
         $actualUserStatus = $response['affectedRows']['userStatus'];
-        // $this->assertCount(count($expectedUserMap), $actualUserStatus);
-        // foreach ($expectedUserMap as $userId => $expectedUser) {
-        //     $this->assertArrayHasKey($userId, $actualUserStatus);
-        //     $actual = $actualUserStatus[$userId];
-
-        //     $this->assertEqualsWithDelta((float)$expectedUser['gems'], (float)$actual['gems'], 0.0001, "Gems mismatch for {$userId}");
-        //     $this->assertEqualsWithDelta((float)$expectedUser['tokens'], (float)$actual['tokens'], 0.0001, "Tokens mismatch for {$userId}");
-        //     $this->assertEqualsWithDelta((float)$expectedUser['percentage'], (float)$actual['percentage'], 0.0001, "Percentage mismatch for {$userId}");
-
-        //     $expectedDetails = $this->sortDetails($expectedUser['details']);
-        //     $actualDetails = $this->sortDetails($actual['details']);
-        //     $this->assertCount(count($expectedDetails), $actualDetails, "Details count mismatch for {$userId}");
-
-        //     foreach ($expectedDetails as $index => $expectedDetail) {
-        //         $actualDetail = $actualDetails[$index];
-        //         $this->assertSame($expectedDetail['gemid'], $actualDetail['gemid']);
-        //         $this->assertSame($expectedDetail['userid'], $actualDetail['userid']);
-        //         $this->assertSame($expectedDetail['postid'], $actualDetail['postid']);
-        //         $this->assertSame($expectedDetail['fromid'], $actualDetail['fromid']);
-        //         $this->assertEqualsWithDelta((float)$expectedDetail['gems'], (float)$actualDetail['gems'], 0.0001);
-        //         $this->assertEqualsWithDelta((float)$expectedDetail['numbers'], (float)$actualDetail['numbers'], 0.0001);
-        //         $this->assertSame((int)$expectedDetail['whereby'], (int)$actualDetail['whereby']);
-        //         $this->assertSame($expectedDetail['createdat'], $actualDetail['createdat']);
-        //     }
-        // }
-
-        // $transfers = $peerTokenMapper->getTransfers();
-        // $this->assertCount(count($expectedUserMap), $transfers);
-        // foreach ($transfers as $transfer) {
-        //     $recipientId = $transfer['recipientId'];
-        //     $this->assertArrayHasKey($recipientId, $expectedUserMap);
-        //     $expectedTokens = (float)$expectedUserMap[$recipientId]['tokens'];
-        //     $this->assertEqualsWithDelta($expectedTokens, (float)$transfer['amount'], 0.0001, "Transfer mismatch for {$recipientId}");
-        // }
     }
 
     public function testDistributeTokensFromGemsWinStatusMatchesFixture(): void
@@ -113,13 +79,6 @@ final class MintServiceDistributeTokensIntegrationTest extends TestCase
         $this->assertEqualsWithDelta((float)$expected['totalGems'], (float)$actual['totalGems'], 0.0001);
         $this->assertEqualsWithDelta((float)$expected['gemsintoken'], (float)$actual['gemsintoken'], 0.0001);
         $this->assertEqualsWithDelta((float)$expected['bestatigung'], (float)$actual['bestatigung'], 0.0001);
-    }
-
-    private function sortDetails(array $details): array
-    {
-        usort($details, static fn (array $a, array $b): int => strcmp($a['gemid'], $b['gemid']));
-
-        return $details;
     }
 
     /**

@@ -807,10 +807,9 @@ class PostMapper
 
         $uploadedFilesObj = [];
         try {
-            if (!empty($fileObjs)) {
-                $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
-                $uploadedFilesObj = $multipartPost->moveFileTmpToMedia();
-            }
+            $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
+            $uploadedFilesObj = $multipartPost->moveFileTmpToMedia();
+
         } catch (\Exception $e) {
             $this->logger->info("PostMapper.handelFileMoveToMedia Error". $e->getMessage());
         }
@@ -860,10 +859,8 @@ class PostMapper
     {
         $fileObjs = explode(',', $uploadedFiles);
         try {
-            if (!empty($fileObjs)) {
-                $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
-                $multipartPost->revertFileToTmp();
-            }
+            $multipartPost = new MultipartPost(['media' => $fileObjs], [], false);
+            $multipartPost->revertFileToTmp();
         } catch (\Exception $e) {
             $this->logger->info("PostMapper.revertFileToTmp Error". $e->getMessage());
         }

@@ -379,7 +379,7 @@ class MultipartPost
             ];
         }
 
-        return isset($allMetadata) ? $allMetadata : [];
+        return $allMetadata;
     }
 
 
@@ -448,7 +448,7 @@ class MultipartPost
             $information['ratiofrm'] = $ratio ?? null;
             $information['resolution'] = $auflg ?? null;
 
-            return isset($information) ? (array)$information : null;
+            return (array)$information;
 
         } catch (\Exception $e) {
             \error_log("getID3 Error: " . $e->getMessage());
