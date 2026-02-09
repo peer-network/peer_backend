@@ -35,7 +35,7 @@ final class MockPeerTokenMapper implements PeerTokenMapperInterface
         HasWalletId $sender,
         HasWalletId $recipient,
         ?string $message = null,
-    ): ?array  {
+    ): ?array {
         return null;
     }
     public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool

@@ -199,7 +199,7 @@ class PeerInputGenericValidator
         if ($dateTime) {
             $formatted = $dateTime->format($format);
 
-            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
+            $formatted = preg_replace_callback('/\.(\d{1,6})(0*)$/', fn ($matches) => '.' . str_pad($matches[1], 6, '0'), $formatted);
 
             $value = trim($value);
             $formatted = trim($formatted);
@@ -309,7 +309,7 @@ class PeerInputGenericValidator
             $this->pushError($options, $fieldKey, '30264');
             return false;
         }
-        
+
         if (!is_string($value) && !is_int($value) && !is_float($value) && (float)$value <= 0) {
             $this->pushError($options, $fieldKey, '30264');
             return false;
@@ -365,7 +365,7 @@ class PeerInputGenericValidator
         return true;
     }
 
-    
+
     protected function validateAddressLine2(mixed $value, array $options = []): bool
     {
         $fieldKey = $options['field'] ?? 'addressline2';
@@ -386,7 +386,7 @@ class PeerInputGenericValidator
 
         return true;
     }
-    
+
 
     protected function validateCity(mixed $value, array $options = []): bool
     {
@@ -498,7 +498,7 @@ class PeerInputGenericValidator
 
         return true;
     }
-    
+
 
     // Validate a single offset/limit-like field based on options['field']
     protected function validateOffsetAndLimit(int $value, array $options = []): bool
@@ -712,7 +712,8 @@ class PeerInputGenericValidator
 
         return true;
     }
-    protected function validateDateMonthYearString(string $value, array $options = []): bool {
+    protected function validateDateMonthYearString(string $value, array $options = []): bool
+    {
         $fieldKey = $options['field'];
         $errorCode = (string)($options['errorCode'] ?? '30258');
 
@@ -739,7 +740,8 @@ class PeerInputGenericValidator
         return true;
     }
 
-    protected function validateDateOffsetString(string $value, array $options = []): bool {
+    protected function validateDateOffsetString(string $value, array $options = []): bool
+    {
         $fieldKey = $options['field'];
         $errorCode = (string)($options['errorCode'] ?? '30223');
 
@@ -759,7 +761,7 @@ class PeerInputGenericValidator
     }
     /**
      * validatePositiveNumber
-     * 
+     *
      * should only contain numberic values and more than zero value
      */
     protected function validatePositiveNumber(mixed $value, array $options = []): bool

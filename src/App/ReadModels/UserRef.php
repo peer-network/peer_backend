@@ -9,7 +9,8 @@ class UserRef
     public function __construct(
         private string $key,
         private string $userId
-    ) {}
+    ) {
+    }
 
     public function key(): string
     {
@@ -21,4 +22,3 @@ class UserRef
         return $this->userId;
     }
 }
-

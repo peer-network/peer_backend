@@ -223,9 +223,9 @@ class PoolMapper
         }
 
         return $this->createSuccessResponse(
-            11208, 
-            ['data' => array_values($args), 'totalGems' => $totalGems,'counter' => count($args) - 1 ], 
-            true, 
+            11208,
+            ['data' => array_values($args), 'totalGems' => $totalGems,'counter' => count($args) - 1 ],
+            true,
             'counter'
         );
     }

@@ -27,7 +27,8 @@ class WalletService
         protected UserService $userService,
         protected PeerTokenMapper $peerTokenMapper,
         protected TransactionManager $transactionManager
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {
@@ -80,7 +81,7 @@ class WalletService
             }
 
             $walletData = array_map(
-                static fn(Wallet $wallet) => $wallet->getArrayCopy(),
+                static fn (Wallet $wallet) => $wallet->getArrayCopy(),
                 $wallets
             );
 

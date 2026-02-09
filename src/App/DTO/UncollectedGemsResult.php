@@ -15,6 +15,6 @@ final class UncollectedGemsResult
     public function __construct(
         public readonly array $rows,
         public readonly string $overallTotal,
-    ) {}
+    ) {
+    }
 }
-

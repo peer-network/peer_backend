@@ -38,7 +38,7 @@ class LeaderBoardService
 
     /**
      * Get Records and Prepare CSV
-     * 
+     *
      * @param array $args
      * @return array|ErrorResponse
      *
@@ -55,7 +55,7 @@ class LeaderBoardService
             $start_date = (string) $args['start_date'];
             $end_date = (string) $args['end_date'];
             $leaderboardUsersCount = isset($args['leaderboardUsersCount']) ? (int) $args['leaderboardUsersCount'] : 20;
-            
+
             $startDate = \DateTimeImmutable::createFromFormat('Y-m-d', $start_date);
             $endDate = \DateTimeImmutable::createFromFormat('Y-m-d', $end_date);
 
@@ -64,13 +64,13 @@ class LeaderBoardService
                 $this->logger->error("LeaderBoardService.generateLeaderboard: Error in end date is less than start date");
                 return $this::respondWithError(33002);
             }
-            
+
             if ($startDate === false || $endDate === false) {
                 $this->logger->error("LeaderBoardService.generateLeaderboard: Error in start or end date parsing");
                 return $this::respondWithError(30301);
             }
             $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
-            
+
             if (empty($getResult)) {
                 $this->logger->error("LeaderBoardService.generateLeaderboard: No leaderboard results found");
                 return $this::respondWithError(22201);
@@ -85,7 +85,7 @@ class LeaderBoardService
             );
 
             $leaderboardResultLink = $this->generateCsv($getResult, $fileName);
-            
+
             return self::createSuccessResponse(12301, ['leaderboardResultLink' => $leaderboardResultLink], false);
 
         } catch (\Exception $e) {
@@ -96,14 +96,14 @@ class LeaderBoardService
 
     /**
      * Generate CSV from records
-     * 
+     *
      * @param array $records
      * @param string $fileName
      * @return string
      */
     private function generateCsv(array $records, string $fileName): string
     {
-        
+
         $relativeDir = 'runtime-data/media/other/power_power_contest_leaderboards_data';
         $mediaDir = 'other/power_power_contest_leaderboards_data';
         $basePath = dirname(__DIR__, 2);
@@ -151,7 +151,7 @@ class LeaderBoardService
         $this->logger->info('LeaderBoardService.generateCsv completed successfully');
 
         $mediaServer = $_ENV['MEDIA_SERVER_URL'];
-        
+
         $leaderboardResultLink = $mediaServer . '/' . $mediaDir . '/' . $fileName;
 
         return $leaderboardResultLink;

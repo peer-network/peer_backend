@@ -6,7 +6,7 @@
         }
     },
     "require": {
-        "php": ">=8.1 <8.5",
+        "php": ">=8.3 <8.5",
         "ext-pdo": "*",
         "monolog/monolog": "^3.8",
         "php-di/php-di": "^7.0",
@@ -29,6 +29,7 @@
         "rector/rector": "^2.1"
     },
     "scripts": {
-        "unit": "php vendor/bin/phpunit tests/Unit"
+        "unit": "php vendor/bin/phpunit tests/Unit",
+        "cs:check": "php-cs-fixer fix --dry-run --diff"
     }
 }

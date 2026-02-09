@@ -22,7 +22,8 @@ class GemsRepositoryImpl implements GemsRepository
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected PDO $db,
-    ) {}
+    ) {
+    }
 
     /**
      * Aggregated stats for uncollected gems across common time windows.
@@ -195,7 +196,7 @@ class GemsRepositoryImpl implements GemsRepository
         $stmt->execute(['mintDate' => $dateYYYYMMDD]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     /**
      * Immutable DTO result for uncollected gems over a date.
      *
@@ -315,8 +316,8 @@ class GemsRepositoryImpl implements GemsRepository
      * @return void
      */
     public function applyMintInfo(
-        string $mintId, 
-        Gems $uncollectedGems, 
+        string $mintId,
+        Gems $uncollectedGems,
         array $mintLogItems
     ): void {
 
@@ -349,7 +350,7 @@ class GemsRepositoryImpl implements GemsRepository
                 ':gemid'  => (string)$row->gemid,
             ]);
         }
-        
+
         $this->logger->info('GemsRepositoryImpl.applyMintInfo succeeded');
     }
 }
