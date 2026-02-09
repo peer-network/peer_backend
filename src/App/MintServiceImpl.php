@@ -52,7 +52,7 @@ class MintServiceImpl implements MintService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->warning('MintServiceImpl.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         // Admin-only: allow ADMIN and SUPER_ADMIN
@@ -179,7 +179,7 @@ class MintServiceImpl implements MintService
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInToken
     ): array {
-        $this->logger->debug('MintService.tokensPerUser started');
+        $this->logger->debug('MintServiceImpl.tokensPerUser started');
         $tokenTotals = [];
 
         foreach ($uncollectedGems->rows as $row) {
@@ -194,8 +194,9 @@ class MintServiceImpl implements MintService
 
     public function distributeTokensFromGems(string $date): array | ErrorResponse
     {
-        $this->logger->debug('MintService.distributeTokensFromGems started', ['day' => $date]);
+        $this->logger->debug('MintServiceImpl.distributeTokensFromGems started', ['day' => $date]);
         if (!$this->checkAuthentication()) {
+            $this->logger->error('MintServiceImpl.distributeTokensFromGems unauthorized access attempt', ['day' => $date]);
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -203,7 +204,7 @@ class MintServiceImpl implements MintService
         try {
             $mintDate = new DateTime($date);
         } catch (\Exception $e) {
-            $this->logger->warning('Invalid mint date provided', [
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems: Invalid mint date provided', [
                 'day' => $date,
                 'error' => $e->getMessage(),
             ]);
@@ -212,7 +213,7 @@ class MintServiceImpl implements MintService
         $mintDate->setTime(0, 0, 0);
         $today = new DateTime('today');
         if ($mintDate > $today) {
-            $this->logger->warning('Mint date is today or in the future', [
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems: Mint date is today or in the future', [
                 'day' => $date,
             ]);
             return $this::respondWithErrorObject(30105);
@@ -221,7 +222,7 @@ class MintServiceImpl implements MintService
         try {
             // Prevent duplicate minting for the selected period
             if ($this->mintRepository->getMintForDate($date)) {
-                $this->logger->error('Mint already performed for selected period', ['day' => $date]);
+                $this->logger->error('MintServiceImpl.distributeTokensFromGems: Mint already performed for selected period', ['day' => $date]);
                 return $this::respondWithErrorObject(31204);
             }
 
@@ -233,7 +234,7 @@ class MintServiceImpl implements MintService
             $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($date);
 
             if ($gems === null || empty($gems->rows)) {
-                $this->logger->info('No uncollected gems found for mint date', [
+                $this->logger->info('MintServiceImpl.distributeTokensFromGems: No uncollected gems found for mint date', [
                     'day' => $date,
                 ]);
                 $this->transactionManager->rollback();
@@ -243,7 +244,7 @@ class MintServiceImpl implements MintService
             $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
 
             if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
-                $this->logger->info('No distributable gems found after normalization', [
+                $this->logger->info('MintServiceImpl.distributeTokensFromGems: No distributable gems found after normalization', [
                     'day' => $date,
                     'overallTotal' => $gemsForDistribution->overallTotal,
                 ]);
