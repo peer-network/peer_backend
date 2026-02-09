@@ -13,7 +13,8 @@ final class GemsInTokenResult
         public readonly string $totalGems,
         public readonly string $gemsInToken,
         public readonly string $confirmation
-    ) {}
+    ) {
+    }
 
     /**
      * Array shape used by GraphQL winStatus mapping when needed.

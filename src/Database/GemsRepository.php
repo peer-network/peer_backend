@@ -24,7 +24,7 @@ interface GemsRepository
      * @return array List of per-user aggregates and totals
      */
     public function fetchAllGemsForDay(string $day = 'D0'): array;
-    
+
     /**
      * Immutable DTO result for uncollected gems for a specific date.
      *
@@ -32,7 +32,7 @@ interface GemsRepository
      * @return ?Gems DTO containing rows
      */
     public function fetchUncollectedGemsForMintResult(string $dateYYYYMMDD): ?Gems;
-    
+
     /**
      * Apply mint metadata and mark corresponding gems as collected.
      *

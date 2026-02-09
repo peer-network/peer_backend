@@ -1,7 +1,9 @@
 <?php
 
 declare(strict_types=1);
+
 namespace Fawaz\config;
+
 use Dotenv\Dotenv;
 
 final class SettingsConfig

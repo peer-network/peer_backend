@@ -127,7 +127,7 @@ class ValidationSpec
         ];
     }
 
-    
+
     public static function addressLine2(string $field = 'addressline2', bool $required = false, int $errorCode = 30279): array
     {
         return [
@@ -224,7 +224,7 @@ class ValidationSpec
             ],
         ];
     }
-    
+
     /**
      * Merge multiple partial specs into one spec array.
      */
@@ -278,7 +278,7 @@ class ValidationSpec
             'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
 
             'dateOffset' => fn (string $f, bool $r) => self::dateOffset($f, $r),
-            
+
             'dateYYYYMMDD' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
