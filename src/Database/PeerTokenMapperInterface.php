@@ -17,7 +17,7 @@ interface PeerTokenMapperInterface
         HasWalletId $recipient,
         ?string $message = null,
     ): ?array;
-    
+
     public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool;
 
     public function initializeLiquidityPool(): array;

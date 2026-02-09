@@ -49,7 +49,7 @@ class PeerShopMapper
      */
     public function createShopOrder(ShopOrder $shopOrder): bool
     {
-        try{
+        try {
             $shopOrder = $shopOrder->getArrayCopy();
 
             ShopOrder::insert([

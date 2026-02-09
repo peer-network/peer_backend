@@ -56,7 +56,7 @@ class MintServiceImpl implements MintService
             return false;
         }
         // Admin-only: allow ADMIN and SUPER_ADMIN
-        
+
         $user = $this->userService->loadAllUsersById($this->currentUserId);
         if (!$user) {
             $this->logger->warning('User not found for admin check', ['uid' => $this->currentUserId]);
@@ -69,7 +69,7 @@ class MintServiceImpl implements MintService
         }
         return true;
     }
-    
+
     public function listTodaysInteractions(): ?array
     {
         $this->logger->debug('MintService.listTodaysInteractions started');
@@ -88,7 +88,8 @@ class MintServiceImpl implements MintService
         }
     }
 
-    private static function calculateGemsInToken(UncollectedGemsResult $uncollectedGems): GemsInTokenResult {
+    private static function calculateGemsInToken(UncollectedGemsResult $uncollectedGems): GemsInTokenResult
+    {
         $totalGems = $uncollectedGems->overallTotal;
         $dailyToken = (string)(ConstantsConfig::minting()['DAILY_NUMBER_TOKEN']);
 
@@ -257,13 +258,13 @@ class MintServiceImpl implements MintService
                 $gemsForDistribution,
                 $gemsInTokenResult
             );
-            
+
             $args = $this->transferMintTokens(
                 $tokensPerUser,
                 $gemsForDistribution,
                 $gemsInTokenResult
             );
-            
+
             $this->mintRepository->insertMint(
                 $mintid,
                 $date,
@@ -285,9 +286,9 @@ class MintServiceImpl implements MintService
                     'counter' => count($args)
                 ],
                 true,
-                'counter'    
+                'counter'
             );
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
@@ -391,7 +392,7 @@ class MintServiceImpl implements MintService
                 true,
                 'counter'
             );
-        } catch(\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Error during mint distribution transfers (no balance update)', [
                 'error' => $e->getMessage(),
             ]);
@@ -413,7 +414,7 @@ class MintServiceImpl implements MintService
             $this->logger->warning('No MintAccount available for distribution');
             throw new ValidationException('No MintAccount available for distribution', [40301]);
         }
-        
+
         $args = [];
         foreach ($tokensPerUser as $recipientUserId => $amountToTransfer) {
             // Skip zero or negative amounts
@@ -569,7 +570,7 @@ class MintServiceImpl implements MintService
         }
         return $args;
     }
-    
+
     /**
      * Get the single Mint Account row.
      */

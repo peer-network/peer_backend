@@ -193,7 +193,7 @@ class UserInfoService
             $contentFilterCase,
             ContentType::user
         );
-        
+
 
         $specs = [
             $systemUserSpec,
@@ -262,7 +262,7 @@ class UserInfoService
         ];
 
         try {
-            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs,$offset,$limit);
+            $lists = $this->userInfoMapper->getBlockRelations($this->currentUserId, $specs, $offset, $limit);
 
             $blockedBy = $lists['blockedBy'] ?? [];
             $iBlocked = $lists['iBlocked'] ?? [];
@@ -299,7 +299,7 @@ class UserInfoService
             return $this::respondWithError(41008);
         }
     }
-    
+
     /* ----- unused function --------
         public function toggleProfilePrivacy(): array
         {
@@ -359,7 +359,7 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->warning('Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
@@ -434,7 +434,7 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->warning('Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 

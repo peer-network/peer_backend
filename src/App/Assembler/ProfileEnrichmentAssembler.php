@@ -5,17 +5,20 @@ namespace Fawaz\App\Assembler;
 use Fawaz\App\Contracts\HasUserRefs;
 use Fawaz\Database\Interfaces\ProfileRepository;
 use Fawaz\Services\ContentFiltering\Replacers\ContentReplacer;
-final class ProfileEnrichmentAssembler {
+
+final class ProfileEnrichmentAssembler
+{
     public function __construct(
         private ProfileRepository $profileRepository
-    ) {}
+    ) {
+    }
 
     /**
      * @param array  $items             Array of transaction rows
      * @param array  $specs             Content filtering specifications
      * @param string    $currentUserId     For privacy logic
      * @param array  $mappings          Field → profileKey mapping
-     * 
+     *
      * Example:
      * [
      *    'senderid' => 'sender',
@@ -38,7 +41,7 @@ final class ProfileEnrichmentAssembler {
                 }
             }
         }
-        $ids = array_keys($ids); 
+        $ids = array_keys($ids);
 
         if (!$ids) {
             return $items; // nothing to enrich
@@ -61,7 +64,7 @@ final class ProfileEnrichmentAssembler {
                 if ($userId && isset($profiles[$userId])) {
                     $item[$dstField] = $profiles[$userId]; // attach Profile entity
                 }
-        }
+            }
         }
         unset($item);
 

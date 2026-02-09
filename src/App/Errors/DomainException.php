@@ -19,4 +19,3 @@ class DomainException extends \RuntimeException implements HasResponseCode
         return $this->responseCode;
     }
 }
-

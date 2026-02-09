@@ -9,7 +9,7 @@ use Fawaz\Utils\ErrorResponse;
 interface MintService
 {
     public function setCurrentUserId(string $userId): void;
-    
+
     public function listTodaysInteractions(): ?array;
 
     public function distributeTokensFromGems(string $date): array | ErrorResponse;

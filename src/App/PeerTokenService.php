@@ -38,7 +38,8 @@ class PeerTokenService
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ProfileRepository $profileRepository,
         protected ProfileEnrichmentAssembler $profileAssembler
-    ) {}
+    ) {
+    }
 
     public function setCurrentUserId(string $userId): void
     {
@@ -179,7 +180,7 @@ class PeerTokenService
 
             // get Fees account and check for existence
             $feesAccountExist = $this->peerTokenMapper->isFeesAccountExist();
-            if(!$feesAccountExist) {
+            if (!$feesAccountExist) {
                 $this->logger->warning('Fees account does not exist');
                 return self::respondWithError(40301);
             }
@@ -274,7 +275,7 @@ class PeerTokenService
 
         $contentFilterCase = ContentFilteringCases::searchById;
         $targetContent = ContentType::user;
-        
+
         $deletedUserSpec = new DeletedUserSpec(
             $contentFilterCase,
             $targetContent

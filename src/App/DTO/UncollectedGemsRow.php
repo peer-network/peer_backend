@@ -22,5 +22,6 @@ final class UncollectedGemsRow
         public readonly string $totalGems,
         public readonly string $overallTotal,
         public readonly string $percentage,
-    ) {}
+    ) {
+    }
 }

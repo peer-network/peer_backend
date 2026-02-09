@@ -27,4 +27,3 @@ interface HasUserRefs
      */
     public function attachUserProfile(string $refKey, Profile $profile): void;
 }
-
