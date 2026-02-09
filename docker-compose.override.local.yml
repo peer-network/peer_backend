@@ -32,6 +32,7 @@ services:
       DB_HOST: db
     volumes:
       - ./src:/var/www/html/src
+      - ./docs:/var/www/html/docs
       - ./runtime-data/logs:/var/www/html/runtime-data/logs
       - ./runtime-data/media/assets:/var/www/html/runtime-data/media/assets
     networks:

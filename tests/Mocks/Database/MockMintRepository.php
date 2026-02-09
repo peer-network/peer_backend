@@ -22,11 +22,6 @@ final class MockMintRepository implements MintRepository
         $this->mintsByDayToken = $preExisting;
     }
 
-    public function mintWasPerformedForDay(string $dayAction): bool
-    {
-        return isset($this->mintsByDayToken[$dayAction]);
-    }
-
     public function insertMint(string $mintId, string $day, string $gemsInTokenRatio): void
     {
         $record = [
