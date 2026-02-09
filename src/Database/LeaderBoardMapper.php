@@ -27,8 +27,8 @@ class LeaderBoardMapper
         $this->logger->debug("LeaderBoardMapper.getLeaderboardResult started");
 
         $sql = "WITH date_range AS (
-                    SELECT TIMESTAMP '".$start_date." 00:00:00' AS start_date,
-                        TIMESTAMP '".$end_date." 23:59:59.999999' AS end_date
+                    SELECT CAST(:start_date AS timestamp) AS start_date,
+                        CAST(:end_date AS timestamp) AS end_date
                 ),
                 ppc_tag AS (
                     SELECT tagid
@@ -43,6 +43,12 @@ class LeaderBoardMapper
                     FROM posts p
                     JOIN post_info pi ON pi.postid = p.postid AND pi.userid = p.userid
                     JOIN date_range dr ON pi.createdat >= dr.start_date AND pi.createdat <= dr.end_date
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM post_tags pt
+                        JOIN ppc_tag t ON t.tagid = pt.tagid
+                        WHERE pt.postid = p.postid and pt.tagid = t.tagid
+                    )
                     GROUP BY p.userid
                 ),
                 ppc_posts AS (
@@ -106,11 +112,14 @@ class LeaderBoardMapper
                 LEFT JOIN comments_given cg ON cg.userid = u.uid
                 LEFT JOIN referrals rf ON rf.userid = u.uid
                 ORDER BY total_points DESC, u.username ASC 
-                limit ".$leaderboardUsersCount.";
+                LIMIT :limit;
             ";
 
         try {
             $stmt = $this->db->prepare($sql);
+            $stmt->bindValue(':start_date', $start_date . ' 00:00:00');
+            $stmt->bindValue(':end_date', $end_date . ' 23:59:59.999999');
+            $stmt->bindValue(':limit', $leaderboardUsersCount, PDO::PARAM_INT);
             $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

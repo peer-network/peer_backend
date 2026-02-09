@@ -9,8 +9,6 @@ use Fawaz\App\Errors\PermissionDeniedException;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
-use Fawaz\Database\UserMapper;
-use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -96,6 +94,9 @@ class PeerTokenService
             $recipientId = (string) $args['recipient'];
             $numberOfTokens = (string) $args['numberoftokens'];
 
+            // replace , with . value
+            $numberOfTokens = str_replace(',', '.', $numberOfTokens);
+
             if (!self::isValidUUID($recipientId)) {
                 $this->logger->warning('Incorrect recipientId Exception.', [
                     'recipientId' => $recipientId,
@@ -175,6 +176,14 @@ class PeerTokenService
                 $this->logger->warning('Unauthorized to send token');
                 return self::respondWithError(31203);
             }
+
+            // get Fees account and check for existence
+            $feesAccountExist = $this->peerTokenMapper->isFeesAccountExist();
+            if(!$feesAccountExist) {
+                $this->logger->warning('Fees account does not exist');
+                return self::respondWithError(40301);
+            }
+
 
             $this->transactionManager->beginTransaction();
 

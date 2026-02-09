@@ -43,9 +43,19 @@ SET
     liquidity = b.transaction_total
 FROM
     balances b
+join users u on b.userid = u.uid
 WHERE
-    w.userid = b.userid
-    AND b.transaction_balance_diff > 0
+    w.userid = b.userid and
+	w.userid not in (
+		'85d5f836-b1f5-4c4e-9381-1b058e13d000',
+		'3f6d55c1-9731-4f28-8b85-5a30cd7c5cc4',	
+		'2736677b-57b8-4ee2-87fe-24ed975e55a6',
+		'82079cb8-0a3a-11ef-b7f2-e89c25791d89',
+		'b9e94945-abd7-46a5-8c92-59037f1d73bf',
+		'6520ac47-f262-4f7e-b643-9dc5ee4cfa82',
+		'dbe72768-0d47-4d29-99e7-b6ec4eadfaa3'
+	)
+	and u.status != 6 -- EXCLUDE DELETED USERS
     AND b.transaction_balance_diff <> 0 RETURNING w.userid,
     b.old_liquidity,
     w.liquidity AS new_liquidity,
