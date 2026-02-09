@@ -62,7 +62,7 @@ class ContactusService
             $response = $this->contactUsMapper->checkRateLimit($ip);
 
             if (!$response) {
-                $this->logger->info("Rate limit check failed for IP: $ip");
+                $this->logger->info("Rate limit check failed for IP");
                 $this->transactionManager->rollBack();
                 return false;
             }
@@ -74,7 +74,6 @@ class ContactusService
 
             $this->logger->error("Error occurred in ContactusService.checkRateLimit", [
                 'error' => $e->getMessage(),
-                'ip' => $ip,
             ]);
             return false;
         }

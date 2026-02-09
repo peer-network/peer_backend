@@ -183,7 +183,7 @@ final class ProfileServiceImpl implements ProfileService
 
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            $this->logger->error('ProfileServiceImpl.listUsers: Invalid IP address', ['ip' => $ip]);
+            $this->logger->error('ProfileServiceImpl.listUsers: Invalid IP address');
             return $this::respondWithError(30257);
         }
 
@@ -298,7 +298,7 @@ final class ProfileServiceImpl implements ProfileService
         }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            $this->logger->error('ProfileServiceImpl.listUsersAdmin: Invalid IP address', ['ip' => $ip]);
+            $this->logger->error('ProfileServiceImpl.listUsersAdmin: Invalid IP address');
             return $this::respondWithError(30257);
         }
 

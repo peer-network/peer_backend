@@ -50,7 +50,6 @@ class UserMapper implements UserMapperInterface
 
             $this->logger->info('Login data successfully logged', [
                 'userId' => $userId,
-                'ip' => $ip,
                 'browser' => $browser,
                 'actionType' => $actionType
             ]);
@@ -59,7 +58,6 @@ class UserMapper implements UserMapperInterface
             $this->logger->error('Unexpected error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip,
                 'browser' => $browser,
                 'actionType' => $actionType
             ]);
@@ -107,7 +105,6 @@ class UserMapper implements UserMapperInterface
 
             $this->logger->info('Login data successfully logged', [
                 'userId' => $userId,
-                'ip' => $ip,
                 'browser' => $browser,
                 'actionType' => $actionType
             ]);
@@ -116,20 +113,17 @@ class UserMapper implements UserMapperInterface
             $this->logger->error('Database error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip,
                 'url' => $url
             ]);
         } catch (\JsonException $e) {
             $this->logger->error('JSON encoding error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip
             ]);
         } catch (\Throwable $e) {
             $this->logger->error('An unexpected error occurred while logging login data', [
                 'error' => $e->getMessage(),
                 'userId' => $userId,
-                'ip' => $ip,
                 'url' => $url
             ]);
         }
@@ -150,7 +144,6 @@ class UserMapper implements UserMapperInterface
 
             if ($httpCode !== 200) {
                 $this->logger->error('Failed to get location from IP, HTTP error', [
-                    'ip' => $ip,
                     'httpCode' => $httpCode
                 ]);
                 return null;
@@ -166,7 +159,6 @@ class UserMapper implements UserMapperInterface
 
         } catch (\Throwable $e) {
             $this->logger->error('Failed to get location from IP', [
-                'ip' => $ip,
                 'error' => $e->getMessage()
             ]);
             return null;
