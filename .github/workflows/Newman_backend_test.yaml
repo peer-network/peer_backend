@@ -167,9 +167,9 @@ jobs:
     needs: [
       check_branch_sync,
       gitleaks_scan_staged,
-      validate_sql_files, 
       php_cs_fixer,
-      phpstan_analysis 
+      phpstan_analysis,
+      validate_sql_files
     ]
     if: ${{ 
       github.actor != 'dependabot[bot]' &&
