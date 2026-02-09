@@ -221,7 +221,6 @@ class WalletService
             if ($currentBalance < $requiredAmount) {
                 $this->logger->error('WalletService.performPayment: No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 return self::respondWithError(51301);

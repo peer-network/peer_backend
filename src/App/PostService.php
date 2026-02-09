@@ -314,7 +314,7 @@ class PostService
             // Return ResponseCode with Daily Free Code
 
             if ($balance < $price) {
-                $this->logger->error('PostService.resolveActionPost: Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->logger->error('PostService.resolveActionPost: Insufficient wallet balance', ['userId' => $this->currentUserId, 'price' => $price]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
@@ -984,7 +984,7 @@ class PostService
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             // Return ResponseCode with Daily Free Code
             if ($balance < $price && !$hasFreeDaily) {
-                $this->logger->error('PostService.postEligibility: Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->logger->error('PostService.postEligibility: Insufficient wallet balance', ['userId' => $this->currentUserId, 'price' => $price]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }

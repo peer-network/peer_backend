@@ -109,9 +109,7 @@ class PeerShopService
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
             if (empty($currentBalance) || $currentBalance < $tokenAmount) {
-                $this->logger->error('PeerShopService.performShopOrder: Insufficient balance', [
-                    'Balance' => $currentBalance,
-                ]);
+                $this->logger->error('PeerShopService.performShopOrder: Insufficient balance');
                 $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
@@ -120,7 +118,6 @@ class PeerShopService
             if ($currentBalance < $requiredAmount) {
                 $this->logger->error('PeerShopService.performShopOrder: Not enough balance to perform this action', [
                     'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 $this->transactionManager->rollback();

@@ -1416,7 +1416,7 @@ class UserService implements UserServiceInterface
             if (!$request) {
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 $this->transactionManager->rollback();
-                $this->logger->error('UserService.resetPassword: Invalid reset token', ['token' => $args['token'] ?? null]);
+                $this->logger->error('UserService.resetPassword: Invalid reset token');
                 return self::respondWithError(31904);
             }
             $user = $this->userMapper->loadById($request['user_id']);

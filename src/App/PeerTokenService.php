@@ -161,7 +161,7 @@ class PeerTokenService
             // Accepts unsigned decimal numbers with optional fractional part
             $isStrictDecimal = $numberOfTokens !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numberOfTokens) === 1;
             if (!$isStrictDecimal) {
-                $this->logger->error('PeerTokenService.transferToken: Invalid token amount format', ['numberOfTokens' => $numberOfTokens]);
+                $this->logger->error('PeerTokenService.transferToken: Invalid token amount format');
                 return self::respondWithError(30264);
             }
 
@@ -194,9 +194,7 @@ class PeerTokenService
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
             if (empty($currentBalance) || $currentBalance < $numberOfTokens) {
-                $this->logger->error('PeerTokenService.transferToken: Insufficient balance', [
-                    'Balance' => $currentBalance,
-                ]);
+                $this->logger->error('PeerTokenService.transferToken: Insufficient balance');
                 $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
@@ -205,7 +203,6 @@ class PeerTokenService
             if ($currentBalance < $requiredAmount) {
                 $this->logger->error('PeerTokenService.transferToken: Not enough balance to perform this action', [
                     'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 $this->transactionManager->rollback();

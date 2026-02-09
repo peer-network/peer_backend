@@ -551,7 +551,7 @@ class WalletMapper implements WalletCreditable, WalletDebitable
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->info('Fetched wallet balance');
 
             return (float) $balance;
         } catch (\PDOException $e) {

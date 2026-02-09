@@ -198,7 +198,7 @@ class MultipartPostService
         }
 
         if ($tokenExists) {
-            $this->logger->error('MultipartPostService.checkTokenExpiry: Eligibility Token has been expired', ['token' => $requestObj['token']]);
+            $this->logger->error('MultipartPostService.checkTokenExpiry: Eligibility Token has been expired');
             throw new ValidationException("Eligibility Token has been expired", [40902]);
         }
     }

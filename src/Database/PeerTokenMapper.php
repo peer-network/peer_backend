@@ -616,7 +616,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->debug('Fetched wallet balance');
 
             return $balance;
         } catch (PDOException $e) {

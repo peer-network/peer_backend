@@ -227,7 +227,7 @@ class AdvertisementService
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             if ($balance < $CostPlan) {
                 $this->transactionManager->rollback();
-                $this->logger->error('AdvertisementService.resolveAdvertisePost: Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'balance' => $balance, 'CostPlan' => $CostPlan]);
+                $this->logger->error('AdvertisementService.resolveAdvertisePost: Unzureichendes Wallet-Guthaben', ['userId' => $this->currentUserId, 'CostPlan' => $CostPlan]);
                 return $this->respondWithError(51301);
             }
 
