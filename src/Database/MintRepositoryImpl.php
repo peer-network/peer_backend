@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-
 use PDO;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
@@ -15,10 +14,11 @@ class MintRepositoryImpl implements MintRepository
     use ResponseHelper;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected PDO $db, 
+        protected PeerLoggerInterface $logger,
+        protected PDO $db,
         protected MintAccountRepositoryImpl $mintAccountRepository,
-    ){}
+    ) {
+    }
 
     public function insertMint(string $mintId, string $day, string $gemsInTokenRatio): void
     {

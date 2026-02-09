@@ -6,14 +6,13 @@ namespace Fawaz\config\constants;
 
 use Fawaz\config\constants\ConstantsModeration;
 
-
 /*
- 
 
 
-DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES  
 
-all changes MUST be BACKWARDS COMPATITABLE 
+DONT CHANGE/REMOVE ANY EXISING TYPES/NAMES
+
+all changes MUST be BACKWARDS COMPATITABLE
  otherwise front will crash💥
 
 
@@ -524,7 +523,7 @@ class ConstantsConfig implements ConstantsConfigInterface
         ],
         'TRANSACTION' => [
             'MIN_AMOUNT' => 0.000001,
-            'MAX_DECIMALS' => 8, 
+            'MAX_DECIMALS' => 8,
         ],
     ];
 

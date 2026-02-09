@@ -12,5 +12,6 @@ class MintLogItem
         public readonly string $operationid,
         public readonly string $tokenamount,
         public readonly ?string $createdat = null,
-    ) {}
+    ) {
+    }
 }

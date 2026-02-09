@@ -16,4 +16,3 @@ enum TransactionCategory: string
     case SHOP_PURCHASE = 'SHOP_PURCHASE';
     case FEE = 'FEE';
 }
-

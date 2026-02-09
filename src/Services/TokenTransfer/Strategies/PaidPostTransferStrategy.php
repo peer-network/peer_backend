@@ -8,7 +8,7 @@ use Fawaz\App\Models\TransactionCategory;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Services\TokenTransfer\Fees\FeePolicyMode;
 
-class PaidPostTransferStrategy extends BaseTransferStrategy implements TransferStrategy 
+class PaidPostTransferStrategy extends BaseTransferStrategy implements TransferStrategy
 {
     use ResponseHelper;
 
@@ -16,7 +16,8 @@ class PaidPostTransferStrategy extends BaseTransferStrategy implements TransferS
     public string $transactionId;
     private static FeePolicyMode $mode;
 
-    public function __construct() {   
+    public function __construct()
+    {
         $this::$mode = FeePolicyMode::INCLUDED;
         $this->operationId = self::generateUUID();
         $this->transactionId = self::generateUUID();
@@ -26,7 +27,7 @@ class PaidPostTransferStrategy extends BaseTransferStrategy implements TransferS
     {
         return TransactionCategory::POST_CREATE;
     }
-    
+
     public function getRecipientTransactionType(): string
     {
         return 'transferForPost';
@@ -41,7 +42,7 @@ class PaidPostTransferStrategy extends BaseTransferStrategy implements TransferS
     {
         $this->operationId = $operationId;
     }
-        
+
     public function getTransactionId(): string
     {
         return $this->transactionId;

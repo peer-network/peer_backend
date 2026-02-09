@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\Models\TransactionHistoryItem;
@@ -36,13 +35,14 @@ class PeerTokenMapper implements PeerTokenMapperInterface
     private string $inviterId;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected PDO $db, 
-        protected LiquidityPool $pool, 
-        protected WalletMapper $walletMapper, 
+        protected PeerLoggerInterface $logger,
+        protected PDO $db,
+        protected LiquidityPool $pool,
+        protected WalletMapper $walletMapper,
         protected WalletHandlerFactory $WalletHandlerFactory,
         protected UserMapper $userMapper
-    ){}
+    ) {
+    }
 
     /**
      * Check if a transfer already exists with same sender, recipient and amount.
@@ -291,10 +291,10 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $this->lockBalances($handlesToLock);
             $mode = $strategy->getFeePolicyMode();
             [
-                $requiredAmount, 
-                $netRecipientAmount, 
-                $peerFeeAmount, 
-                $burnFeeAmount, 
+                $requiredAmount,
+                $netRecipientAmount,
+                $peerFeeAmount,
+                $burnFeeAmount,
                 $inviteFeeAmount
             ] = $this->calculateAmountsForMode($sender->getWalletId(), $numberOfTokens, $mode);
 
@@ -849,7 +849,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     'inviter' => (string)$row['inviter_fee'] ?: null,
                 ],
             ];
-            $items[] = new TransactionHistoryItem($tiData,$userId);
+            $items[] = new TransactionHistoryItem($tiData, $userId);
         }
 
         return $items;

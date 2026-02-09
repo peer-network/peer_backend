@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-
 use PDO;
 use Fawaz\Services\LiquidityPool;
 use Fawaz\Utils\ResponseHelper;
@@ -18,14 +17,15 @@ class UserActionsRepositoryImpl implements UserActionsRepository
     use ResponseHelper;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected PDO $db, 
+        protected PeerLoggerInterface $logger,
+        protected PDO $db,
         protected LiquidityPool $pool,
         protected WalletMapper $walletMapper,
         protected PeerTokenMapper $peerTokenMapper,
         protected MintAccountRepositoryImpl $mintAccountRepository,
         protected UserMapper $userMapper,
-    ){}
+    ) {
+    }
 
     public function listTodaysInteractions(string $userId): array
     {

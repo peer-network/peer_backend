@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
+
 use Fawaz\App\Models\MintAccount;
 use Fawaz\Utils\PeerLoggerInterface;
 use PDO;
 
 class MintAccountRepositoryImpl implements MintAccountRepository
 {
-    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db) {}
+    public function __construct(protected PeerLoggerInterface $logger, protected PDO $db)
+    {
+    }
 
     /**
      * Get the default (first) mint account entity or null.
