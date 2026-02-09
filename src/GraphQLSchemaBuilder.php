@@ -61,9 +61,8 @@ use Fawaz\App\Models\TransactionHistoryItem;
 use Fawaz\App\AlphaMintService;
 use Fawaz\App\LeaderBoardService;
 use Fawaz\Database\Interfaces\TransactionManager;
-use Fawaz\Database\UserActionsRepository;
-use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\PeerShopService;
+use Fawaz\Utils\DateService;
 use Fawaz\Utils\AppVersion;
 use PDOException;
 
@@ -1766,13 +1765,177 @@ class GraphQLSchemaBuilder
             'resolveTransfer' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'resolveTransferV2' => fn (mixed $root, array $args) => $this->peerTokenService->transferToken($args),
             'globalwins' => fn (mixed $root, array $args) => $this->gemsService->generateGemsFromActions(),
-            'gemsters' => fn (mixed $root, array $args) => $this->mintService->distributeTokensFromGems($args['day']),
+            '_tokennomics_migration_mint' => fn (mixed $root, array $args) => $this->resolveGlobalWinsMintRange($args),
+            'distributeTokensForGems' => fn (mixed $root, array $args) => $this->resolveMint($args),
+            'distributeTokensForGemsWithoutBalanceUpdate' => fn (mixed $root, array $args) => $this->resolveMintWithoutBalanceUpdate($args),
+            'gemsters' => fn (mixed $root, array $args) => $this->resolveGemsters($args),
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
+            'runCompensationTransactionsFromCsv' => fn(mixed $root, array $args) => $this->runCompensationTransactionsFromCsv()
         ];
+    }
+
+    public function runCompensationTransactionsFromCsv(
+        string $csvPath = 'docs/tasks/tokenomics-migration-correction-transactions/correction-transactions-src-list.csv'
+    ): array
+    {
+        $this->logger->info('GraphQLSchemaBuilder.runCompensationTransactionsFromCsv started', [
+            'csvPath' => $csvPath,
+        ]);
+
+        $basePath = \dirname(__DIR__);
+        $resolvedPath = $csvPath;
+        if (!\str_starts_with($csvPath, '/')) {
+            $resolvedPath = $basePath . '/' . \ltrim($csvPath, '/');
+        }
+
+        if (!\is_file($resolvedPath)) {
+            $this->logger->error('Compensation CSV not found', ['resolvedPath' => $resolvedPath]);
+            return $this::respondWithError(40301, [
+                'message' => 'CSV file not found',
+                'csvPath' => $resolvedPath,
+            ], false);
+        }
+
+        $handle = \fopen($resolvedPath, 'r');
+        if ($handle === false) {
+            $this->logger->error('Unable to open compensation CSV', ['resolvedPath' => $resolvedPath]);
+            return $this::respondWithError(40301, [
+                'message' => 'Unable to open CSV file',
+                'csvPath' => $resolvedPath,
+            ], false);
+        }
+
+        $header = \fgetcsv($handle);
+        if ($header === false) {
+            \fclose($handle);
+            $this->logger->error('Compensation CSV header missing', ['resolvedPath' => $resolvedPath]);
+            return $this::respondWithError(40301, [
+                'message' => 'CSV header missing',
+                'csvPath' => $resolvedPath,
+            ], false);
+        }
+
+        $columns = \array_map(fn($value) => \strtolower(\trim((string) $value)), $header);
+        $uidIndex = \array_search('uid', $columns, true);
+        $diffIndex = \array_search('transaction_balance_diff', $columns, true);
+
+        if ($uidIndex === false || $diffIndex === false) {
+            \fclose($handle);
+            $this->logger->error('Compensation CSV missing required columns', [
+                'resolvedPath' => $resolvedPath,
+                'columns' => $columns,
+            ]);
+            return $this::respondWithError(40301, [
+                'message' => 'CSV must contain uid and transaction_balance_diff columns',
+                'csvPath' => $resolvedPath,
+            ], false);
+        }
+
+        $this->logger->info('Compensation CSV columns validated', [
+            'resolvedPath' => $resolvedPath,
+            'uidIndex' => $uidIndex,
+            'diffIndex' => $diffIndex,
+        ]);
+
+        $results = $this::createSuccessResponse(11211, [
+            'processed' => 0,
+            'succeeded' => 0,
+            'failed' => 0,
+            'items' => [],
+        ], false);
+        $summary = &$results['affectedRows'];
+
+
+
+        while (($row = \fgetcsv($handle)) !== false) {
+            $summary['processed']++;
+            $rowNumber = $summary['processed'] + 1; // header is line 1
+
+            $uid = \trim((string) ($row[$uidIndex] ?? ''));
+            $diffRaw = \trim((string) ($row[$diffIndex] ?? ''));
+            if ($diffRaw !== '') {
+                // Truncate fractional part to max 8 digits for both "." and "," decimal separators.
+                if (\preg_match('/^([+-]?\\d+)([\\.,])(\\d+)$/', $diffRaw, $matches) === 1) {
+                    $fraction = \substr($matches[3], 0, 8);
+                    $diffRaw = $matches[1] . $matches[2] . $fraction;
+                }
+            }
+
+            if ($uid === '' || $diffRaw === '') {
+                $summary['failed']++;
+                $this->logger->warning('Compensation CSV row missing required values', [
+                    'rowNumber' => $rowNumber,
+                    'uid' => $uid,
+                    'transaction_balance_diff' => $diffRaw,
+                ]);
+                $summary['items'][] = [
+                    'uid' => $uid,
+                    'transaction_balance_diff' => $diffRaw,
+                    'status' => 'error',
+                    'message' => 'Missing uid or transaction_balance_diff',
+                ];
+                continue;
+            }
+
+            $negativeDiff = $diffRaw;
+            if (\str_starts_with($diffRaw, '-')) {
+                $negativeDiff = \ltrim($diffRaw, '-');
+            }
+
+            $args = [
+                'recipient' => $uid,
+                'numberoftokens' => $negativeDiff,
+                'message' => 'Adjustment to align your balance after migration',
+            ];
+
+            $this->logger->info('Compensation transfer attempt', [
+                'rowNumber' => $rowNumber,
+                'recipient' => $uid,
+                'numberoftokens' => $negativeDiff,
+            ]);
+
+            $response = $this->transferTokenV2($args);
+            $isSuccess = ($response['status'] ?? '') === 'success';
+            if ($isSuccess) {
+                $summary['succeeded']++;
+            } else {
+                $summary['failed']++;
+                $this->logger->error('Compensation transfer failed', [
+                    'rowNumber' => $rowNumber,
+                    'recipient' => $uid,
+                    'numberoftokens' => $negativeDiff,
+                    'response' => $response,
+                ]);
+            }
+
+            $summary['items'][] = [
+                'uid' => $uid,
+                'transaction_balance_diff' => $diffRaw,
+                'numberoftokens' => $negativeDiff,
+                'status' => $response['status'] ?? 'error',
+                'response' => $response,
+            ];
+        }
+
+        \fclose($handle);
+
+        $this->logger->info('GraphQLSchemaBuilder.runCompensationTransactionsFromCsv completed', [
+            'processed' => $summary['processed'],
+            'succeeded' => $summary['succeeded'],
+            'failed' => $summary['failed'],
+            'csvPath' => $resolvedPath,
+        ]);
+
+        return $results;
+    }
+
+    protected function transferTokenV2(array $args): array
+    {
+        return $this->peerTokenService->transferToken($args);
     }
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
@@ -2595,6 +2758,185 @@ class GraphQLSchemaBuilder
         return $this::createSuccessResponse(
             11008,
             $result->getArrayCopy(),
+            false
+        );
+    }
+
+
+    protected function resolveGemsters(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveGemsters started');
+
+        $args['dateOffset'] = $args['day'];
+
+        $validation = RequestValidator::validate($args, ['dateOffset']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $dateYYYYMMDD = DateService::dateOffsetToYYYYMMDD($validation['dateOffset']);
+        
+        $result = $this->mintService->distributeTokensFromGems($dateYYYYMMDD);
+
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        }
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $result;
+    }
+
+
+    protected function resolveMint(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveGemsters started');
+
+        $args['dateYYYYMMDD'] = $args['date'];
+
+        $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+ 
+        $dateYYYYMMDD = $validation['dateYYYYMMDD'];
+
+        $result = $this->mintService->distributeTokensFromGems($dateYYYYMMDD);
+
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        }
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $result;
+    }
+
+    protected function resolveMintWithoutBalanceUpdate(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Query.resolveGemsters started');
+
+        $args['dateYYYYMMDD'] = $args['date'];
+
+        $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
+
+        if ($validation instanceof ValidatorErrors) {
+            return $this::respondWithError(
+                $validation->errors[0]
+            );
+        }
+
+        $dateYYYYMMDD = $validation['dateYYYYMMDD'];
+
+        $result = $this->mintService->distributeTokensFromGemsWithoutBalanceUpdate($dateYYYYMMDD);
+
+        if ($result instanceof ErrorResponse) {
+            return $result->response;
+        }
+
+        $this->logger->info('Query.resolveProfile successful');
+        return $result;
+    }
+
+    protected function resolveGlobalWinsMintRange(array $args): array
+    {
+        if (!$this->checkAuthentication()) {
+            return $this::respondWithError(60501);
+        }
+
+        $this->logger->debug('Mutation.resolveGlobalWinsMintRange started');
+
+        $chunk = (int)($args['chunk'] ?? 0);
+        if ($chunk < 1 || $chunk > 4) {
+            return $this::respondWithError(30258);
+        }
+
+        $globalWinsResult = $this->gemsService->generateGemsFromActions();
+        if (($globalWinsResult['status'] ?? null) === 'error') {
+            return $globalWinsResult;
+        }
+
+        $startDate = new \DateTime('2025-03-05');
+        $endDate = new \DateTime('yesterday');
+
+        if ($startDate > $endDate) {
+            return $this::createSuccessResponse(
+                21206,
+                [
+                    'startDate' => $startDate->format('Y-m-d'),
+                    'endDate' => $endDate->format('Y-m-d'),
+                    'daysProcessed' => 0,
+                    'chunk' => $chunk,
+                ],
+                false
+            );
+        }
+
+        $totalDays = (int)$startDate->diff($endDate)->days + 1;
+        $chunkSize = (int)ceil($totalDays / 4);
+        $chunkStart = (clone $startDate)->modify('+' . (($chunk - 1) * $chunkSize) . ' day');
+        if ($chunkStart > $endDate) {
+            return $this::createSuccessResponse(
+                21206,
+                [
+                    'startDate' => $startDate->format('Y-m-d'),
+                    'endDate' => $endDate->format('Y-m-d'),
+                    'daysProcessed' => 0,
+                    'chunk' => $chunk,
+                ],
+                false
+            );
+        }
+
+        $chunkEnd = (clone $chunkStart)->modify('+' . ($chunkSize - 1) . ' day');
+        if ($chunkEnd > $endDate) {
+            $chunkEnd = clone $endDate;
+        }
+
+        $daysProcessed = 0;
+        for ($date = clone $chunkStart; $date <= $chunkEnd; $date->modify('+1 day')) {
+            if ($date->format('Y-m-d') === '2026-01-20') {
+                continue;
+            }
+            $result = $this->mintService->distributeTokensFromGemsWithoutBalanceUpdate($date->format('Y-m-d'));
+
+            if ($result instanceof ErrorResponse) {
+                return $result->response;
+            }
+
+            if (($result['status'] ?? null) === 'error') {
+                return $result;
+            }
+
+            $daysProcessed++;
+        }
+
+        return $this::createSuccessResponse(
+            11208,
+            [
+                'startDate' => $startDate->format('Y-m-d'),
+                'endDate' => $endDate->format('Y-m-d'),
+                'chunkStart' => $chunkStart->format('Y-m-d'),
+                'chunkEnd' => $chunkEnd->format('Y-m-d'),
+                'daysProcessed' => $daysProcessed,
+                'chunk' => $chunk,
+            ],
             false
         );
     }

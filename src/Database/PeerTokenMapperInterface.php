@@ -10,6 +10,14 @@ use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 interface PeerTokenMapperInterface
 {
+    public function transferTokenWithoutBalanceUpdate(
+        string $numberOfTokens,
+        TransferStrategy $strategy,
+        HasWalletId $sender,
+        HasWalletId $recipient,
+        ?string $message = null,
+    ): ?array;
+    
     public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool;
 
     public function initializeLiquidityPool(): array;
