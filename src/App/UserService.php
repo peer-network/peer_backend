@@ -1117,6 +1117,7 @@ class UserService implements UserServiceInterface
                 ];
             }
 
+            $this->logger->error('UserService.fetchAllAdvance: No users found');
             return $this::respondWithError(31007);
         } catch (\Throwable $e) {
             $this->logger->error('UserService.fetchAllAdvance: Failed to fetch users', ['exception' => $e]);

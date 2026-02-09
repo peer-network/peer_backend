@@ -41,7 +41,7 @@ class GemsServiceImpl implements GemsService
     public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->warning('GemsServiceImpl.gemsStats: Unauthorized access attempt');
+            $this->logger->error('GemsServiceImpl.gemsStats: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -51,13 +51,14 @@ class GemsServiceImpl implements GemsService
     public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->warning('GemsServiceImpl.allGemsForDay: Unauthorized access attempt');
+            $this->logger->error('GemsServiceImpl.allGemsForDay: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         if (!in_array($day, $dayActions, true)) {
+            $this->logger->error('GemsServiceImpl.allGemsForDay: Invalid day', ['day' => $day]);
             return $this::respondWithError(30223);
         }
 
@@ -67,7 +68,7 @@ class GemsServiceImpl implements GemsService
     public function generateGemsFromActions(): array
     {
         if (!TABLESTOGEMS) {
-            $this->logger->warning('GemsServiceImpl.generateGemsFromActions: Table to gems conversion is disabled');
+            $this->logger->error('GemsServiceImpl.generateGemsFromActions: Table to gems conversion is disabled');
             return self::respondWithError(41215);
         }
 

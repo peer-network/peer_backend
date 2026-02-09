@@ -578,7 +578,7 @@ class MintServiceImpl implements MintService
     public function getMintAccount(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->warning('MintServiceImpl.getMintAccount: Unauthorized access attempt');
+            $this->logger->error('MintServiceImpl.getMintAccount: Unauthorized access attempt');
             return self::respondWithError(60501);
         }
 
@@ -586,7 +586,7 @@ class MintServiceImpl implements MintService
             $this->logger->debug('MintServiceImpl.getMintAccount started');
             $account = $this->mintAccountRepository->getDefaultAccount();
             if (!$account) {
-                $this->logger->debug('MintServiceImpl.getMintAccount result is empty');
+                $this->logger->error('MintServiceImpl.getMintAccount result is empty');
                 return self::respondWithError(40401);
             }
 

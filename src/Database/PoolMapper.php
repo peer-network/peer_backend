@@ -142,7 +142,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            $this->logger->debug('PoolMapper.fetchAllGemsForDay: Invalid day option', ['day' => $day]);
+            $this->logger->error('PoolMapper.fetchAllGemsForDay: Invalid day option', ['day' => $day]);
             return $this::respondWithError(30223);
         }
 
@@ -215,7 +215,7 @@ class PoolMapper
             ];
 
             if (!isset($mapping[$whereby])) {
-                $this->logger->warning('PoolMapper.fetchAllGemsForDay: Invalid whereby value', ['whereby' => $whereby]);
+                $this->logger->error('PoolMapper.fetchAllGemsForDay: Invalid whereby value', ['whereby' => $whereby]);
                 return $this::respondWithError(41221);
             }
 

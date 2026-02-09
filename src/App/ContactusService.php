@@ -136,6 +136,7 @@ class ContactusService
                 'value' => $value,
             ]);
 
+            $this->logger->error('ContactusService.loadById: Returning error response', ['responseCode' => 40301]);
             return $this::respondWithError(40301);
         }
     }

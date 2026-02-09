@@ -2725,7 +2725,7 @@ class GraphQLSchemaBuilder
             return $results->response;
         }
 
-        $this->logger->info('GraphQLSchemaBuilder.resolveProfile successful');
+        $this->logger->info('GraphQLSchemaBuilder.resolveFollows successful');
         return $results;
     }
 
@@ -2766,16 +2766,18 @@ class GraphQLSchemaBuilder
     protected function resolveGemsters(array $args): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveGemsters: Authentication failed');
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug('Query.resolveGemsters started');
+        $this->logger->debug('GraphQLSchemaBuilder.resolveGemsters started');
 
         $args['dateOffset'] = $args['day'];
 
         $validation = RequestValidator::validate($args, ['dateOffset']);
 
         if ($validation instanceof ValidatorErrors) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveGemsters: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2789,7 +2791,7 @@ class GraphQLSchemaBuilder
             return $result->response;
         }
 
-        $this->logger->info('Query.resolveProfile successful');
+        $this->logger->info('GraphQLSchemaBuilder.resolveGemsters successful');
         return $result;
     }
 
@@ -2797,16 +2799,18 @@ class GraphQLSchemaBuilder
     protected function resolveMint(array $args): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveMint: Authentication failed');
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug('Query.resolveGemsters started');
+        $this->logger->debug('GraphQLSchemaBuilder.resolveMint started');
 
         $args['dateYYYYMMDD'] = $args['date'];
 
         $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
 
         if ($validation instanceof ValidatorErrors) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveMint: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2820,23 +2824,25 @@ class GraphQLSchemaBuilder
             return $result->response;
         }
 
-        $this->logger->info('Query.resolveProfile successful');
+        $this->logger->info('GraphQLSchemaBuilder.resolveMint successful');
         return $result;
     }
 
     protected function resolveMintWithoutBalanceUpdate(array $args): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveMintWithoutBalanceUpdate: Authentication failed');
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug('Query.resolveGemsters started');
+        $this->logger->debug('GraphQLSchemaBuilder.resolveMintWithoutBalanceUpdate started');
 
         $args['dateYYYYMMDD'] = $args['date'];
 
         $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
 
         if ($validation instanceof ValidatorErrors) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveMintWithoutBalanceUpdate: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2850,20 +2856,22 @@ class GraphQLSchemaBuilder
             return $result->response;
         }
 
-        $this->logger->info('Query.resolveProfile successful');
+        $this->logger->info('GraphQLSchemaBuilder.resolveMintWithoutBalanceUpdate successful');
         return $result;
     }
 
     protected function resolveGlobalWinsMintRange(array $args): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveGlobalWinsMintRange: Authentication failed');
             return $this::respondWithError(60501);
         }
 
-        $this->logger->debug('Mutation.resolveGlobalWinsMintRange started');
+        $this->logger->debug('GraphQLSchemaBuilder.resolveGlobalWinsMintRange started');
 
         $chunk = (int)($args['chunk'] ?? 0);
         if ($chunk < 1 || $chunk > 4) {
+            $this->logger->error('GraphQLSchemaBuilder.resolveGlobalWinsMintRange: Invalid chunk', ['chunk' => $chunk]);
             return $this::respondWithError(30258);
         }
 
@@ -3418,6 +3426,7 @@ class GraphQLSchemaBuilder
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
+            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Failed to create contact', ['error' => $e->getMessage()]);
             return $this::respondWithError(30401);
         }
     }
@@ -3591,6 +3600,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'stackTrace' => $e->getTraceAsString()
             ]);
+            $this->logger->error('GraphQLSchemaBuilder.refreshToken: Validation error during refreshToken', ['exception' => $e->getMessage()]);
 
             return $this::respondWithError(30901);
         } catch (\Throwable $e) {

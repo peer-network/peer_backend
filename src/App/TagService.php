@@ -52,7 +52,7 @@ class TagService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->warning("TagService.createTag: Unauthorized action attempted.");
+            $this->logger->error("TagService.createTag: Unauthorized action attempted.");
             return $this::respondWithError(60501);
         }
 
@@ -66,7 +66,7 @@ class TagService
 
             if ($tag) {
                 $this->transactionManager->rollback();
-                $this->logger->warning("TagService.createTag: Tag already exists.", ['tagName' => $tagName]);
+                $this->logger->error('TagService.createTag: Tag already exists', ['tagName' => $tagName]);
                 return $this::respondWithError(21702);//'Tag already exists.'
             }
 
@@ -130,7 +130,7 @@ class TagService
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
-                $this->logger->warning("TagService.loadTag: tagName parameter is missing or empty.");
+                $this->logger->error("TagService.loadTag: tagName parameter is missing or empty.");
                 return $this::respondWithError(30101);
             }
 

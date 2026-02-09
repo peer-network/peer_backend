@@ -204,7 +204,7 @@ class WalletService
             ];
 
             if (!isset($mapping[$art])) {
-                $this->logger->warning('WalletService.performPayment: Invalid art type provided.', ['art' => $art]);
+                $this->logger->error('WalletService.performPayment: Invalid art type provided.', ['art' => $art]);
                 return self::respondWithError(30105);
             }
 
@@ -219,7 +219,7 @@ class WalletService
             $mode = $transferStrategy->getFeePolicyMode();
             $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string)$price, $mode);
             if ($currentBalance < $requiredAmount) {
-                $this->logger->warning('WalletService.performPayment: No Coverage Exception: Not enough balance to perform this action.', [
+                $this->logger->error('WalletService.performPayment: No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,
                     'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
