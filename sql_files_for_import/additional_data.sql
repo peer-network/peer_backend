@@ -119,9 +119,9 @@ VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 'peer_shop@system.com', 'peer_sh
 INSERT INTO dailyfree (userid, liken, comments, posten) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 0, 0, 0);
 
 INSERT INTO users_info (userid, liquidity, amountposts, amountfollower, amountfollowed, amountfriends, amountblocked, isprivate, invited, phone, pkey) 
-VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
+VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 220, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL);
 
-INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 20, 0);
+INSERT INTO wallett (userid, liquidity, liquiditq) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', 220, 0);
 
 INSERT INTO user_preferences (userid, content_filtering_severity_level,onboardingsWereShown) VALUES ('9adaad3b-b75f-4045-b48a-33d4ec8d06b8', null, '[]');
 
