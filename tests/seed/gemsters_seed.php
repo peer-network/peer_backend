@@ -2,30 +2,30 @@
 
 declare(strict_types=1);
 
-return array (
+return array(
   'status' => 'success',
   'counter' => 59,
   'ResponseCode' => '11208',
-  'affectedRows' => 
-  array (
-    'winStatus' => 
-    array (
+  'affectedRows' =>
+  array(
+    'winStatus' =>
+    array(
       'totalGems' => 2359,
       'gemsintoken' => 2.1195421788,
       'bestatigung' => 4999.9999997892,
     ),
-    'userStatus' => 
-    array (
-      0 => 
-      array (
+    'userStatus' =>
+    array(
+      0 =>
+      array(
         'userid' => '01d321b7-11b1-4139-8471-b5fec63c1399',
         'gems' => 0.5,
         'tokens' => 1.0597710894,
         'percentage' => 0.0211954217888936,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '483d7716-5b33-423e-ac54-4b0e21a1ee2c',
             'userid' => '01d321b7-11b1-4139-8471-b5fec63c1399',
             'postid' => 'fc47b710-575e-4a76-97ff-fed92f6489d1',
@@ -35,8 +35,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:31:28.579884',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '34176edf-b968-4376-a086-cb5f04f19a31',
             'userid' => '01d321b7-11b1-4139-8471-b5fec63c1399',
             'postid' => 'fc47b710-575e-4a76-97ff-fed92f6489d1',
@@ -48,16 +48,16 @@ return array (
           ),
         ),
       ),
-      1 => 
-      array (
+      1 =>
+      array(
         'userid' => '04389244-b485-481f-9bd5-0af96a861b80',
         'gems' => 1,
         'tokens' => 2.1195421788,
         'percentage' => 0.0423908435777872,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '0e9ab0e2-50c1-4193-97f7-92d84e55ba78',
             'userid' => '04389244-b485-481f-9bd5-0af96a861b80',
             'postid' => '7d503a51-7ee2-46e2-b174-27872ca52e6b',
@@ -67,8 +67,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:12.271471',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'b649363a-c0f2-46b1-abf4-bdc28a552086',
             'userid' => '04389244-b485-481f-9bd5-0af96a861b80',
             'postid' => '7d503a51-7ee2-46e2-b174-27872ca52e6b',
@@ -78,8 +78,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:22:35.344935',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '431f4b28-6b2a-4524-b9a4-260b13aa3698',
             'userid' => '04389244-b485-481f-9bd5-0af96a861b80',
             'postid' => '7d503a51-7ee2-46e2-b174-27872ca52e6b',
@@ -89,8 +89,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:18.837302',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'dbb35e1d-ac0a-487f-b9c9-45eb1cbcdf51',
             'userid' => '04389244-b485-481f-9bd5-0af96a861b80',
             'postid' => '7d503a51-7ee2-46e2-b174-27872ca52e6b',
@@ -102,16 +102,16 @@ return array (
           ),
         ),
       ),
-      2 => 
-      array (
+      2 =>
+      array(
         'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
         'gems' => 2.75,
         'tokens' => 5.8287409917,
         'percentage' => 0.1165748198389148,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '86c7f7bb-72f6-4945-8669-5c5adfe3e1d1',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -121,8 +121,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:09.221093',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'e105ee1c-ac0f-4d2e-b357-4fd5017d4aad',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -132,8 +132,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:17:26.97406',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '9d8fb27e-bfd6-4fa8-91bf-6853bacff392',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -143,8 +143,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:32:02.705204',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'adbcb636-ebb4-4418-b7a0-a69dfb22ace7',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'e56be7a0-d836-4213-a2d2-e4047382788c',
@@ -154,8 +154,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:13.21879',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '361e0ecd-c65d-41bd-946f-f15a42e93a28',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -165,8 +165,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:05:59.501005',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'e57efeb0-6602-4743-ad47-364399e3bcae',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -176,8 +176,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:16:21.078866',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'fbe73a83-4910-4c61-9777-8b5a5ac58b40',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -187,8 +187,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:56.210001',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'fe514ef8-4483-40f2-8685-4ceb2eded6cc',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -198,8 +198,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:36.864674',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'b7e0f36d-562a-42c7-9779-440c41da1ee3',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -209,8 +209,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.834698',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'f14eb120-e0cf-49f4-92ec-c8e8075d38f2',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -220,8 +220,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:35.797974',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '697a28b7-7bb0-4297-915d-862e51e2b3b3',
             'userid' => '07816bd0-6e53-43e0-aa5d-9e54b6920481',
             'postid' => 'af676929-93da-4f0a-8cc8-5484101de6ac',
@@ -233,16 +233,16 @@ return array (
           ),
         ),
       ),
-      3 => 
-      array (
+      3 =>
+      array(
         'userid' => '0f2f32a7-29df-4acb-a776-ee820649ff0a',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '7732c85f-3d49-4459-a84a-24438beb92cc',
             'userid' => '0f2f32a7-29df-4acb-a776-ee820649ff0a',
             'postid' => '68f3cfc8-e2f0-46ba-a731-28c183b474f4',
@@ -254,16 +254,16 @@ return array (
           ),
         ),
       ),
-      4 => 
-      array (
+      4 =>
+      array(
         'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
         'gems' => 1.25,
         'tokens' => 2.6494277235,
         'percentage' => 0.052988554472233995,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'aa3481e2-5729-4637-84b2-157c3573f884',
             'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
             'postid' => 'edcbea0f-9581-4521-92b9-40b538402ace',
@@ -273,8 +273,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:22:35.650924',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'fd900789-1608-4e66-a722-a3b1d9b3ecb1',
             'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
             'postid' => 'edcbea0f-9581-4521-92b9-40b538402ace',
@@ -284,8 +284,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:03:32.347339',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '890fb97c-42e1-4d15-98fd-9dcf5b8fad17',
             'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
             'postid' => '791e4435-6669-49f9-97d2-92b6cbc7d7a0',
@@ -295,8 +295,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:46:52.407023',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '1fc76596-2241-4814-a5e9-5d6e6dc66303',
             'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
             'postid' => '791e4435-6669-49f9-97d2-92b6cbc7d7a0',
@@ -306,8 +306,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:55.313422',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'fc9a525a-6c74-4b0c-a4e7-641242b6f88f',
             'userid' => '114554cf-08d3-4236-b3a3-2137804b96a8',
             'postid' => 'edcbea0f-9581-4521-92b9-40b538402ace',
@@ -319,16 +319,16 @@ return array (
           ),
         ),
       ),
-      5 => 
-      array (
+      5 =>
+      array(
         'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
         'gems' => 3.5,
         'tokens' => 7.4183976258,
         'percentage' => 0.14836795252225518,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'e6257b5c-0cd8-4564-9cf4-4c12a68613fe',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => '7fd062b5-b42e-410e-a247-520fb3ce69d8',
@@ -338,8 +338,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:28:41.828281',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'f83b9d1b-f05c-4d54-8437-90afda4d7b08',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => '7fd062b5-b42e-410e-a247-520fb3ce69d8',
@@ -349,8 +349,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:36:48.155588',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '1555e7f5-6fad-4a77-a383-a9935d01d34a',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => '7fd062b5-b42e-410e-a247-520fb3ce69d8',
@@ -360,8 +360,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:51:17.90526',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '03758374-14a1-4e44-b578-5ae1c3de7ad1',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => '7fd062b5-b42e-410e-a247-520fb3ce69d8',
@@ -371,8 +371,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:46:05.810622',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '98a94e24-7a06-421d-85f0-a8d2cdd860c1',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => '7fd062b5-b42e-410e-a247-520fb3ce69d8',
@@ -382,8 +382,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:52:25.377171',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '1141f405-913b-455d-ac85-74e8c77ff773',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => 'cfee00de-9637-43b9-8ba4-75794c27e2bd',
@@ -393,8 +393,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:23.325434',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'f9304f2c-6dc4-4fa6-aa91-9cc6cc337051',
             'userid' => '1db59ac8-8878-45e4-9d37-a0bc95bb95b7',
             'postid' => 'cfee00de-9637-43b9-8ba4-75794c27e2bd',
@@ -406,16 +406,16 @@ return array (
           ),
         ),
       ),
-      6 => 
-      array (
+      6 =>
+      array(
         'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
         'gems' => 2.75,
         'tokens' => 5.8287409917,
         'percentage' => 0.1165748198389148,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '276e6b7a-ba49-400e-b6cb-de3a4b1dfb5b',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '02384106-c084-45b5-9071-73464123fb68',
@@ -425,8 +425,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:03:42.711577',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'c3cd98e0-4ea8-40dc-9bbf-ef34763595b5',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -436,8 +436,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:12:49.697999',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'ab045293-36e1-457b-81fc-852705052d1e',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -447,8 +447,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:38:20.068305',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '0c9d1eea-c265-414d-9be1-c7e88c2a2ddd',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -458,8 +458,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:46:37.314783',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'f6b084f8-8826-4300-b091-d7892d5d9076',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -469,8 +469,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:24:17.935662',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'f7b5e132-0611-4714-a8ba-d21ae1ec0eca',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -480,8 +480,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:03.445803',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '994f0fe8-134d-4bfd-ba4e-324f49eb832d',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -491,8 +491,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:35:39.261562',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '6a2a06f0-f139-4a18-880b-60a5da5a23cd',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -502,8 +502,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:39:14.387876',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '0d2d5088-f77f-4bcc-a7cd-070a50d2252a',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -513,8 +513,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:12.433244',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'ff5f6c35-ebe6-470b-bb43-ec9d185231ae',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -524,8 +524,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:15.835108',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'e168aa54-63d5-4b00-b219-395148a34e58',
             'userid' => '24fc13b8-6519-4416-b8cc-dc361b1a06b6',
             'postid' => '32744014-06f8-4d71-8be3-3313a06644e9',
@@ -537,16 +537,16 @@ return array (
           ),
         ),
       ),
-      7 => 
-      array (
+      7 =>
+      array(
         'userid' => '295c38b5-d8cd-484a-a531-d56c0d8a86cf',
         'gems' => 0.5,
         'tokens' => 1.0597710894,
         'percentage' => 0.0211954217888936,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '3e1a452a-0fd8-42b9-b31c-abbe2e452651',
             'userid' => '295c38b5-d8cd-484a-a531-d56c0d8a86cf',
             'postid' => '207e070f-532f-4ec7-b95d-a94ba0d56a64',
@@ -556,8 +556,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:13.726348',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'ad9c0524-c8b3-4f4e-ba96-ec1144ba50cc',
             'userid' => '295c38b5-d8cd-484a-a531-d56c0d8a86cf',
             'postid' => '207e070f-532f-4ec7-b95d-a94ba0d56a64',
@@ -569,16 +569,16 @@ return array (
           ),
         ),
       ),
-      8 => 
-      array (
+      8 =>
+      array(
         'userid' => '331c595a-1c6b-4ad0-bc10-1c4e69011527',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'b1d54adc-f708-4200-8e70-76eae806f827',
             'userid' => '331c595a-1c6b-4ad0-bc10-1c4e69011527',
             'postid' => '99e72cc1-95c7-4c4c-85ba-a3fc84a2aa8d',
@@ -590,16 +590,16 @@ return array (
           ),
         ),
       ),
-      9 => 
-      array (
+      9 =>
+      array(
         'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
         'gems' => 9,
         'tokens' => 19.0758796092,
         'percentage' => 0.3815175922000848,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'bf8f5175-24b2-46da-a907-909d7812d6f8',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '932d11ab-e6d8-41e8-a967-2e4ffb0e38ea',
@@ -609,8 +609,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:14:56.834325',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '0438bb22-481e-4ca2-9c08-d9f220628693',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => 'b1d0838f-af95-496a-874b-e8e0677f0720',
@@ -620,8 +620,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:15:32.874728',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'cfd93285-f856-400b-aea8-be194e7e8c91',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -631,8 +631,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:10:47.149949',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'aeb3db00-40e6-43b1-8506-ffea84fce55e',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -642,8 +642,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:14:26.265814',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '1ba692f9-1a96-41ab-870e-4e0c85a6edd3',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => 'e580d931-fed0-4cea-ae7f-a953edf67e03',
@@ -653,8 +653,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:14:56.834284',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '552c538c-b2b5-4bdb-96c8-e8b3a4f637af',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => 'b16eab2f-86c9-49a4-90b1-ab3fa9ad9b44',
@@ -664,8 +664,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:15:23.303205',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '1de76736-0b7c-4340-bf04-2d0b4f7a1cf6',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '3c21bbb5-72ad-4225-b2cf-65d3371282e7',
@@ -675,8 +675,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:15:37.358187',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '8df45259-017b-4572-bf4d-71566e886a90',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -686,8 +686,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:31:31.258116',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '5a5c1313-9304-4709-a946-9b01bf5c08ad',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -697,8 +697,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:36:56.265833',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '1a2a307a-6519-4136-bd2c-8371ffd65cb2',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -708,8 +708,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:46:23.301728',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'dd73cf89-c321-4dac-895e-f1bc84c844f9',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -719,8 +719,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 09:31:50.624523',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '476c702c-b9e9-49f2-8ad1-44a1ce73e3ea',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -730,8 +730,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:06:59.54843',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '8f845dce-098c-48f3-82ab-600d351c2476',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -741,8 +741,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:29.104678',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '4883c2a8-6971-409c-9489-9319fe887a73',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -752,8 +752,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:25:37.88079',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'f2b9a211-791b-4f1c-a353-4510ce28e5b1',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -763,8 +763,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:47.224702',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => 'a7f99280-32c2-489d-8573-24679b8c3a71',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -774,8 +774,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 10:17:42.204578',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '9e35595f-f929-49ca-ba16-7e378f87a927',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -785,8 +785,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:19.351467',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'e6821f4f-7499-4656-9555-72e7dfe19d58',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -796,8 +796,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:47.415971',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '89e8c40e-000f-43b6-8d0e-263a204ac55a',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '47b246c3-2bb9-46fe-8883-ad4bf6f8ea45',
@@ -807,8 +807,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:35:01.151852',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '71cc9aa2-ac84-4fdc-9f67-af5247742e49',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -818,8 +818,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:14:48.374222',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'aeaca1aa-3885-4e0f-bf02-f21fbc94a686',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -829,8 +829,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:43.85197',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '980bc21e-5571-435e-9b64-42c46b10af7b',
             'userid' => '36bd6b35-bb15-4c2a-b231-4018a3300784',
             'postid' => '5e8a8ace-257a-44b7-8efc-d3592e61e147',
@@ -842,16 +842,16 @@ return array (
           ),
         ),
       ),
-      10 => 
-      array (
+      10 =>
+      array(
         'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
         'gems' => 54.75,
         'tokens' => 116.0449342893,
         'percentage' => 2.320898685883849,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'c928b8d0-5139-4ed6-bbcc-201ca6f722fe',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -861,8 +861,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 05:51:18.280988',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '0727791e-a0f1-4aff-8fbc-836b0b8378c6',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'f437f3e0-6751-4f09-ba24-e415fcd9d8ab',
@@ -872,8 +872,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:19:42.89501',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '27f41ed4-d2f9-4d46-9d30-956e839ccae2',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -883,8 +883,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:19:20.465089',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'c662d3ed-4a33-4833-83da-127abc4d0fbd',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '3f418259-4e27-485c-b5c9-12ab6c4133c2',
@@ -894,8 +894,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:19:42.985475',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '799522f2-88e7-4df5-b838-8da5c0887af7',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -905,8 +905,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 05:51:16.649711',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '9137c910-5d29-4d0c-a825-0b7043476ed9',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -916,8 +916,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 07:19:22.013925',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'f5296dbf-a5d7-4090-9e21-a15822f57eac',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '86ceb0a3-018f-47a0-9e6b-c1a100acafd9',
@@ -927,8 +927,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 07:19:35.791065',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'c18833c5-c261-4259-8451-1dc71c8aac09',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -938,8 +938,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 07:19:29.952267',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '6f30e101-b9f8-4118-ae53-288f4962d43c',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '86ceb0a3-018f-47a0-9e6b-c1a100acafd9',
@@ -949,8 +949,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 07:19:39.499457',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '66770e1e-3196-40fb-975b-78d636984919',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'f437f3e0-6751-4f09-ba24-e415fcd9d8ab',
@@ -960,8 +960,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 07:19:48.78316',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '5806671e-a062-4fae-9d1c-5c4de031ef8c',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -971,8 +971,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:12:31.192049',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'ab938612-f73f-428b-a131-a8318927ffe4',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -982,8 +982,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:09.580458',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '810f9116-ece8-45b0-8506-c6a9c6521dcc',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -993,8 +993,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:36:51.687849',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '61229bd9-e1d5-4f8b-9e35-5102e904d3b6',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1004,8 +1004,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:59:47.30428',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '69149c37-9cae-4baa-b649-d23e7fc3808d',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1015,8 +1015,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:22:06.840227',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => 'd3872f49-b3cc-4a6a-8fdb-3a37270252d0',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1026,8 +1026,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:28:44.513316',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => 'bab07455-68a8-4326-bb20-fea8509239e3',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1037,8 +1037,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:52:33.579355',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'e014130e-a6c5-4ee5-8f1f-e89be93d912a',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1048,8 +1048,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:15.079505',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '00c7091d-6bfc-48ce-a9c3-68372dfcceb6',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1059,8 +1059,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:54.877033',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '93610572-a340-4855-8fe2-1356e2073a17',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1070,8 +1070,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:43.85727',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => '553fc5d0-704d-4722-920c-d65cc3fbbc49',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1081,8 +1081,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:32.430941',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '4ee28dce-fd41-4c41-bc11-706e45ccb588',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1092,8 +1092,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 20:12:36.102162',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '8ef43681-8f42-4bc4-a893-5813e3347fb3',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1103,8 +1103,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 20:20:14.888814',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => '8bf3ea58-31b8-4f89-86aa-2f2017ddf306',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1114,8 +1114,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 20:22:08.931172',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => 'e9f935e1-a4d3-4407-a61e-aa381816d0d0',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1125,8 +1125,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:06:17.710059',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => 'c1b75422-74d7-4d24-acfd-8e54fd212fc7',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1136,8 +1136,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 13:34:06.626999',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => 'c041b374-36ab-4f4f-8838-fa0da4a16e3c',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1147,8 +1147,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 20:12:44.005313',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => 'acb7e6d2-16ac-46d2-9ddf-66e9c6a689f7',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1158,8 +1158,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 20:20:20.615327',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => 'ab6e8d11-9521-4d58-82dd-ce2833f2bc6d',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => 'ebecac18-58d3-4141-859a-b8da7004205d',
@@ -1169,8 +1169,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 20:22:15.357744',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => 'c269aaee-5a51-4b94-84ef-d63c522d8721',
             'userid' => '40b442ce-f48f-4010-af7a-011100065fe2',
             'postid' => '434522ee-4978-4ff6-9fae-c2a0b065f681',
@@ -1182,16 +1182,16 @@ return array (
           ),
         ),
       ),
-      11 => 
-      array (
+      11 =>
+      array(
         'userid' => '414622c1-2435-42f2-897f-b9f371a81dfa',
         'gems' => 5.25,
         'tokens' => 11.1275964387,
         'percentage' => 0.22255192878338279,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '71520d20-1c4c-4a04-ba2c-de297445468b',
             'userid' => '414622c1-2435-42f2-897f-b9f371a81dfa',
             'postid' => '86e867db-9beb-4561-aa57-c1f572c3a886',
@@ -1201,8 +1201,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:41.803169',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '046c1ba6-350f-4067-9e81-3a778776401c',
             'userid' => '414622c1-2435-42f2-897f-b9f371a81dfa',
             'postid' => '7168ab11-a9b3-4bcc-9982-5aed6338625f',
@@ -1214,16 +1214,16 @@ return array (
           ),
         ),
       ),
-      12 => 
-      array (
+      12 =>
+      array(
         'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
         'gems' => 56.75,
         'tokens' => 120.2840186469,
         'percentage' => 2.4056803730394236,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '0ad1c966-ef3c-4ae7-966e-f494dc0993db',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c849cf31-b141-4d1b-a606-d1ee5056f8f0',
@@ -1233,8 +1233,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:18:50.030145',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '56d87289-7b39-47fe-81a7-ae42d576bd5f',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1244,8 +1244,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:31:52.65745',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '2d10505d-7015-4716-bf80-9ed586b69664',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1255,8 +1255,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:07:37.403067',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '71711cbd-5ad0-4a4f-adde-46804c8c2cf7',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c849cf31-b141-4d1b-a606-d1ee5056f8f0',
@@ -1266,8 +1266,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:09:32.537442',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'cd432fd0-7eaf-4763-848b-61499a0677d1',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1277,8 +1277,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:58:49.720053',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '4e0be9c4-7c7b-458a-8f36-ab6c77eba629',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1288,8 +1288,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:05:55.588985',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '86a56a6e-994b-4ae4-99b8-f38c09b00481',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1299,8 +1299,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:10:47.37797',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'fe28c585-d9fe-4cb8-8088-02070f8d6bca',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1310,8 +1310,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:30:47.926056',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '6722904e-8d4f-4e02-a1b3-9c33c023bba7',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c849cf31-b141-4d1b-a606-d1ee5056f8f0',
@@ -1321,8 +1321,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 07:18:50.382495',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '33034b69-001b-4a94-8aef-84dd73c5c90f',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1332,8 +1332,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:10:23.359971',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'e86dcae0-9949-4150-b4ea-b6ead7432701',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c849cf31-b141-4d1b-a606-d1ee5056f8f0',
@@ -1343,8 +1343,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 07:18:58.432976',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '87b17745-bba5-48b7-8a18-5d96ec679ede',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1354,8 +1354,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 09:10:20.417439',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '0d358a1d-fbbd-41b1-953b-4eaa63e29c97',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1365,8 +1365,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:11:19.593141',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '4225ef8c-1355-42b8-9d41-a30182480e69',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'ba1a8bc0-ccda-4c80-ba7b-d160aac2a46d',
@@ -1376,8 +1376,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:11:29.119264',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '449d9bbe-5e89-437c-a4bd-ede34ea41ae2',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1387,8 +1387,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:34.363062',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '6f882634-65ee-402a-bdb3-21d478f4b87c',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1398,8 +1398,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:13.993955',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '0165f0f9-3627-4180-8153-0f047dd99276',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'aa8356f0-eb73-4358-a2b9-f35099622ae8',
@@ -1409,8 +1409,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:11:22.762086',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '5d6d8987-aeb5-4d17-b26a-77830feaac7c',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1420,8 +1420,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:34.219282',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'ce5f2dc1-a890-4646-887e-c8c0cc7a7f21',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1431,8 +1431,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:21:36.671792',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => 'a30e5239-f791-4e56-ae8a-8212fee53056',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c849cf31-b141-4d1b-a606-d1ee5056f8f0',
@@ -1442,8 +1442,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:07:37.934407',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'c363198a-9a2b-4bb6-87ae-77990e5c2372',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1453,8 +1453,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:34:14.26208',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => 'd108bf7a-00f6-4cd0-a1a3-d0481cbef245',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1464,8 +1464,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:53:23.092104',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => 'a87c6d99-cd24-42a2-9827-b4ded5fdd388',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1475,8 +1475,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:50.337351',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => '7fa6e7d9-3fa0-4f18-bbba-51d1fc6af6f7',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1486,8 +1486,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:27.307983',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => 'dfef1c79-5deb-4fbe-902d-867f4f3b6c70',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1497,8 +1497,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:21.523736',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => 'bb4f3904-0c9b-4b9f-80fb-39c556bfb54a',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1508,8 +1508,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:47.416133',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => '9814fb04-a32f-42b9-977e-fd2e267f595a',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1519,8 +1519,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:18:59.856323',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => 'f354e8ac-d9a1-4e88-8f21-6565aa985e39',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1530,8 +1530,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 11:04:11.73871',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => 'bbefd983-d514-429b-b020-2d7cb80cbbfe',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1541,8 +1541,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:32:09.115186',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => '55d5e181-fa6f-4ddb-afa6-487682762c38',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1552,8 +1552,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:32:48.668149',
           ),
-          30 => 
-          array (
+          30 =>
+          array(
             'gemid' => '0f295126-5cb6-4b35-8a10-2f6f2142226d',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1563,8 +1563,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 19:53:36.034074',
           ),
-          31 => 
-          array (
+          31 =>
+          array(
             'gemid' => '36f9c5f9-1206-4632-9dc5-7224a82b26fc',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1574,8 +1574,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:05:38.360055',
           ),
-          32 => 
-          array (
+          32 =>
+          array(
             'gemid' => '9f8385c3-a58a-4ec9-a2f9-f81887b3d448',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1585,8 +1585,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 11:04:32.002056',
           ),
-          33 => 
-          array (
+          33 =>
+          array(
             'gemid' => 'b610313a-de7e-44fc-b357-2ddcb2f495d4',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1596,8 +1596,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 13:32:06.705857',
           ),
-          34 => 
-          array (
+          34 =>
+          array(
             'gemid' => '64bc7ebf-188f-4e06-891b-d93af9722eb6',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1607,8 +1607,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:55:06.253346',
           ),
-          35 => 
-          array (
+          35 =>
+          array(
             'gemid' => '1284a01f-6cd9-4787-b697-b1889914d534',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1618,8 +1618,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:55:06.453986',
           ),
-          36 => 
-          array (
+          36 =>
+          array(
             'gemid' => '313dffe2-1f3a-4826-a39d-a4f6f0f6b390',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1629,8 +1629,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 19:53:57.720537',
           ),
-          37 => 
-          array (
+          37 =>
+          array(
             'gemid' => 'd07691d1-b93c-4456-befe-6ba8839d85ad',
             'userid' => '42f790aa-6898-4f16-89ca-c77e6052dfe8',
             'postid' => 'c6ae2deb-6a63-4bcc-b804-02c22a43fe5d',
@@ -1642,16 +1642,16 @@ return array (
           ),
         ),
       ),
-      13 => 
-      array (
+      13 =>
+      array(
         'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
         'gems' => 14,
         'tokens' => 29.6735905032,
         'percentage' => 0.5934718100890207,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'f23cf970-b315-42f4-831e-6c047a9a9e0a',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'eea42ca1-6dde-48a2-bb51-383025c87b99',
@@ -1661,8 +1661,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:18.957439',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'e3290266-99da-4426-acac-db9e3bc928ab',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'd3d26206-8f16-48ea-b488-4b22eb688733',
@@ -1672,8 +1672,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:20.137698',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'ba66d6d2-4f83-4033-a4e8-f73e424eb503',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '18785a4c-f163-44a0-99ab-0e00d7dd05b5',
@@ -1683,8 +1683,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:21.792977',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'b8f74377-5acb-47cd-9491-fd1776b0577b',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '32bf0753-4be2-44ef-a59d-9723e9022f27',
@@ -1694,8 +1694,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:22.402496',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'a5352748-cc6a-4d3e-9e4e-3f9111111e20',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'cda7bbfa-7007-4bf0-a953-583d2758d5ca',
@@ -1705,8 +1705,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:24.743995',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '6e4db7df-268e-4b7f-a462-b44e9febfe87',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '308cdc38-828d-443e-8c12-fcbe7b535247',
@@ -1716,8 +1716,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:26.858466',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '723ed4d3-0a00-46db-830f-ba37fb94fe84',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '0197fcb7-1260-480a-bea0-e997551f0437',
@@ -1727,8 +1727,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:28.211613',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'a83065a2-043f-4d08-a27b-f5757f4c0602',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '16418585-8b43-4516-bcf9-73e4888ef13b',
@@ -1738,8 +1738,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:31.196261',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'bd21610a-40ee-4bc6-a703-a09e6190c274',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '2e1b1c7a-b5d8-46c5-9199-35268b5bb9f5',
@@ -1749,8 +1749,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:35.410509',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'b46522a6-0a8f-49b3-912b-04f867e02377',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '37baf14f-21ec-4183-bd6a-65e381b3e95f',
@@ -1760,8 +1760,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:40.205944',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '53515a51-9950-4ab7-8ea7-f6374f983ece',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '039f1b74-a34f-4518-9df8-93b5e3fa2a5d',
@@ -1771,8 +1771,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:50.566974',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '11fc733c-1c5b-4bc9-96e8-8e15271f51c3',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '0b9bfe3b-0ba4-428a-9f13-26d067856932',
@@ -1782,8 +1782,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:53.330845',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '2b6b31a9-85fd-45ff-bb02-f1677a06552d',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '15ee1bac-4c80-4fe6-94d4-6ed6d3a1ea25',
@@ -1793,8 +1793,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:55.009901',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => 'b4088f93-2f16-4f53-886d-79613786b88c',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'e305836f-962b-4ec7-81fe-abfbf1f8eb50',
@@ -1804,8 +1804,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:57.412235',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'dadd8231-52ea-4930-87bb-19202f819f4a',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '2d7bf369-d744-4dc6-a213-e8e22518c4da',
@@ -1815,8 +1815,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:04.725097',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '72befc07-8da2-4549-ad32-e9f6919dc22c',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '0cd044eb-bccf-4611-a813-1235ac822cf2',
@@ -1826,8 +1826,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:07.892098',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '9c4c80c1-0121-47ef-b8de-bb0c0ebe2e70',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '12f2c5e2-e8e8-4c8d-89b7-e382482b7969',
@@ -1837,8 +1837,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:14.864339',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '456c4fef-82d9-4dc3-b437-0096826fcb08',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '3279bb73-6011-4377-83f6-07f024ad438e',
@@ -1848,8 +1848,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:17.475495',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'b71c32de-fdb4-4eff-b7db-fef123d18df7',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'f2571973-f050-447b-b7a3-e0726504055e',
@@ -1859,8 +1859,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:19.126864',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '71a63ea2-caed-4a79-81e1-93ba1b8c5c97',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '7bdce99e-68ab-48bc-a5ac-b16bf69d7f6c',
@@ -1870,8 +1870,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:20.20104',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => '2fbb4047-1f79-4156-af3c-0acf8e67a16c',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'f5642271-f289-4df7-b2fd-0ce6a65fb808',
@@ -1881,8 +1881,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:21.939324',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '30f5a253-2bd1-4989-af0a-e4f4c5cf9024',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'aaf41064-d91a-49fd-843f-00c42e84203f',
@@ -1892,8 +1892,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:23.531364',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '041b461f-1a33-418c-84ad-3c7a97fc67d9',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'a955676f-5e7b-4e90-ae3c-aa7298660357',
@@ -1903,8 +1903,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:24.511674',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => 'd181325c-8b3b-4a2a-98fe-d3e181cf0d08',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '0beffd69-1813-421f-95b0-3c2be1c4f7d8',
@@ -1914,8 +1914,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:16.891572',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => '41cc9532-60fd-4d3b-b081-e82b6efe9023',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '95040e9b-83e4-45f7-a955-8e5b5b6ed7ae',
@@ -1925,8 +1925,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:19.647923',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => 'e4b4c115-5d72-4a77-a514-325919ac98a6',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '569cff50-1f3f-40af-af25-c340b46ec93f',
@@ -1936,8 +1936,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:20.679751',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => '48ca5100-e617-4bc1-aa1e-9660f7ac9440',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '9a329679-5dba-47be-a6d9-0c30fcfe341a',
@@ -1947,8 +1947,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:21.27018',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => '53824178-f9bc-4337-82c5-7ae3ff651037',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'c67a9ef4-4d04-4a51-bea1-ab426157ac3f',
@@ -1958,8 +1958,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:23.14641',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => '3b0a0a69-d3d0-49ad-b87b-7b1e472be0e3',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'aac4efd6-11b4-4495-bf66-63b321cb0c9c',
@@ -1969,8 +1969,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:24.304091',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => 'd78037d0-0374-45dd-a06b-a6d0bca8fcd7',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'a6f2007e-93d1-4e54-be8c-e1cb43af15f3',
@@ -1980,8 +1980,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:25.660246',
           ),
-          30 => 
-          array (
+          30 =>
+          array(
             'gemid' => '3acf20d5-9f77-4574-8b82-41078d5df1a7',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '4ba509f1-8022-45d0-884f-0ba12701d45a',
@@ -1991,8 +1991,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:26.174758',
           ),
-          31 => 
-          array (
+          31 =>
+          array(
             'gemid' => 'cddff49f-b20a-43de-a176-f10d8c0ce8dc',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'a079766a-8e9a-412d-8558-51c1b205f0b8',
@@ -2002,8 +2002,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:27.835022',
           ),
-          32 => 
-          array (
+          32 =>
+          array(
             'gemid' => 'ac5048d3-722e-4692-858c-73a6823278b7',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '1d205407-5e09-4f7b-a940-19ea42326df0',
@@ -2013,8 +2013,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:30.792353',
           ),
-          33 => 
-          array (
+          33 =>
+          array(
             'gemid' => 'c5a6085f-ae18-4ef0-bd9e-8034e63ec8b4',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '8363ac18-8a61-496d-a3a9-90cf91da3a99',
@@ -2024,8 +2024,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:32.130723',
           ),
-          34 => 
-          array (
+          34 =>
+          array(
             'gemid' => 'eee0f92b-ab59-49c4-ae20-6820100d60e4',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '2aa6a13d-3e16-4618-9823-5b57d4511ee0',
@@ -2035,8 +2035,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:39.02483',
           ),
-          35 => 
-          array (
+          35 =>
+          array(
             'gemid' => '3dbc4d36-b573-4b4f-b8bd-fbdd51444b30',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'af19931c-c286-44db-b363-3f21f39bba24',
@@ -2046,8 +2046,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:40.888262',
           ),
-          36 => 
-          array (
+          36 =>
+          array(
             'gemid' => '561962a9-84af-4c6a-a4cb-c40ffe809517',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'bb221c33-d9f1-4b26-80fa-fb4107405dfc',
@@ -2057,8 +2057,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:46.282655',
           ),
-          37 => 
-          array (
+          37 =>
+          array(
             'gemid' => 'b309f905-cfe6-4610-ac0b-cec750760dde',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '1ee2219e-3c40-4ba5-bead-71dc0b7f67b8',
@@ -2068,8 +2068,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:51.241695',
           ),
-          38 => 
-          array (
+          38 =>
+          array(
             'gemid' => '2f8136f3-5082-4935-87c5-dab4b8eb7808',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '73749d9c-4190-4e72-a8db-e8a1323adae0',
@@ -2079,8 +2079,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:54.100251',
           ),
-          39 => 
-          array (
+          39 =>
+          array(
             'gemid' => 'b20ab53f-ed46-4473-b51c-2038c9822db2',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '6b85e7bb-5af8-430e-8a79-c8bf56d4b1d6',
@@ -2090,8 +2090,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:56.234519',
           ),
-          40 => 
-          array (
+          40 =>
+          array(
             'gemid' => 'ed43fc4b-c706-4a8f-9d1d-a480f9f90bb0',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'dee0e15e-d519-42c2-9dd6-9d6823ccb1df',
@@ -2101,8 +2101,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:56.832332',
           ),
-          41 => 
-          array (
+          41 =>
+          array(
             'gemid' => '39925fe2-eab5-4124-98bc-67cf114e38af',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '70b2ba6b-516b-4793-bcee-b88c76a87591',
@@ -2112,8 +2112,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:57.990397',
           ),
-          42 => 
-          array (
+          42 =>
+          array(
             'gemid' => 'a997f878-e9cd-4cbe-b78c-96854b5bba37',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'b234b40d-5d41-4713-b7c9-e624e2b19f43',
@@ -2123,8 +2123,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:58.61097',
           ),
-          43 => 
-          array (
+          43 =>
+          array(
             'gemid' => '07fb01db-8c30-40ba-91d4-9e6645eaf83a',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'f000bf51-71f9-468b-bbc3-ca48ca2116c9',
@@ -2134,8 +2134,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:59.635802',
           ),
-          44 => 
-          array (
+          44 =>
+          array(
             'gemid' => 'c4ee3b54-92be-41ff-a8e5-0e55e2a39323',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '3aa9e078-b651-44e1-a9b3-61f7cb3ef5d8',
@@ -2145,8 +2145,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:05.492253',
           ),
-          45 => 
-          array (
+          45 =>
+          array(
             'gemid' => '98254d03-b424-42fd-85d6-f61e2fbac538',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'a0adaa29-448e-426f-b7a1-3223c02f656b',
@@ -2156,8 +2156,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:07.19151',
           ),
-          46 => 
-          array (
+          46 =>
+          array(
             'gemid' => 'aa7ce1bc-d3aa-4b5c-b598-ea8385775f3f',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '9838a9a8-baa9-417c-8f10-5deb5b441e81',
@@ -2167,8 +2167,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:10.097221',
           ),
-          47 => 
-          array (
+          47 =>
+          array(
             'gemid' => '7c1eb213-97c8-4eb7-8abb-f71d9016888c',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '18ab3c01-5e82-48a6-b306-91c4dc31a938',
@@ -2178,8 +2178,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:10.737834',
           ),
-          48 => 
-          array (
+          48 =>
+          array(
             'gemid' => '3764bce2-86bb-4234-a582-9ac3a1d3ff9f',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '11d05c24-92a3-43fe-a0c3-60c0c7a908ae',
@@ -2189,8 +2189,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:15.552368',
           ),
-          49 => 
-          array (
+          49 =>
+          array(
             'gemid' => '5b519871-54d0-42e8-bb15-7bcff6bace35',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'bd052570-9fe5-4a84-b668-cf1fb702bae7',
@@ -2200,8 +2200,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:16.63818',
           ),
-          50 => 
-          array (
+          50 =>
+          array(
             'gemid' => '1402c4d7-ed08-4e33-868d-f8b36f7391d1',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '236b1c9f-aa70-43ea-b383-7aca26a89a5c',
@@ -2211,8 +2211,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:18.037776',
           ),
-          51 => 
-          array (
+          51 =>
+          array(
             'gemid' => '8c158c18-57fc-462b-bbb5-1783db7ff00c',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '5a3c85c4-3fc3-4e0a-a509-7e5786135573',
@@ -2222,8 +2222,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:18.619784',
           ),
-          52 => 
-          array (
+          52 =>
+          array(
             'gemid' => 'c66d82a8-0022-4218-8339-bbf4ddc29e4b',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'a242e911-efbb-4bb0-8e3e-a2cb32d95714',
@@ -2233,8 +2233,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:19.775728',
           ),
-          53 => 
-          array (
+          53 =>
+          array(
             'gemid' => 'db34857c-5f23-40de-8cba-43a632020df3',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '4c3b3d10-ccd8-43fb-991b-b5a8f48759db',
@@ -2244,8 +2244,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:20.799642',
           ),
-          54 => 
-          array (
+          54 =>
+          array(
             'gemid' => '0033cd66-1061-4633-981c-fd06fe6770b5',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => 'c42bc70f-e3f7-4566-ae27-eba0d969f3d1',
@@ -2255,8 +2255,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:54:21.372049',
           ),
-          55 => 
-          array (
+          55 =>
+          array(
             'gemid' => 'bba1698f-809b-4599-b1ce-a957addf20f7',
             'userid' => '45aeec6e-eea6-46cc-8e76-953eb2dcf332',
             'postid' => '2d9ce74c-3337-486f-b690-27a49bb86ee7',
@@ -2268,16 +2268,16 @@ return array (
           ),
         ),
       ),
-      14 => 
-      array (
+      14 =>
+      array(
         'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
         'gems' => 1.75,
         'tokens' => 3.7091988129,
         'percentage' => 0.07418397626112759,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '71365156-9866-4d25-839c-1453eab5f9b5',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2287,8 +2287,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 06:52:32.598626',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '0d3ecc6b-d0ea-4ccb-b1f5-8f47c02b5396',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2298,8 +2298,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:50:12.801269',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '65f9c18e-99ec-4df2-8131-64caed3929b0',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2309,8 +2309,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:06:13.118693',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '1f2fc9c0-14f1-4ba7-8682-7a9187046d56',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2320,8 +2320,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:08:29.428042',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '79b79097-bf12-45af-9c4b-35ae34c24681',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2331,8 +2331,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:47.431705',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '7e54a179-8f76-4b6e-ad7c-4e7e5bfe9756',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2342,8 +2342,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:46.949211',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '83708f37-ba1f-4cf3-87d8-0e8d33f85e38',
             'userid' => '45d54689-4a09-4a0a-ada5-26421dd485ef',
             'postid' => '1d8d1cf0-bb46-4a0a-a90a-3c9145577257',
@@ -2355,16 +2355,16 @@ return array (
           ),
         ),
       ),
-      15 => 
-      array (
+      15 =>
+      array(
         'userid' => '469f0658-873f-4378-a481-5590bd3c7d40',
         'gems' => 1,
         'tokens' => 2.1195421788,
         'percentage' => 0.0423908435777872,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '077c2a95-c4af-4a2b-bf94-d1eb2bcb35a9',
             'userid' => '469f0658-873f-4378-a481-5590bd3c7d40',
             'postid' => '1408c341-f23f-46f7-919b-2194b79c67c9',
@@ -2374,8 +2374,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:04.393353',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '8002db69-829d-45cf-81e4-e9625cc9ae9e',
             'userid' => '469f0658-873f-4378-a481-5590bd3c7d40',
             'postid' => 'eb414b59-798e-474b-a6ef-058cefb39f71',
@@ -2385,8 +2385,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:03:55.935536',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '416f3160-8a72-4f7d-97cb-eba0254662c5',
             'userid' => '469f0658-873f-4378-a481-5590bd3c7d40',
             'postid' => '3bc7fd3d-fead-4fda-a698-2bb3f312d023',
@@ -2396,8 +2396,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:01.47758',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '77dbff6f-a94a-4f72-8f0c-dbd8da5f521c',
             'userid' => '469f0658-873f-4378-a481-5590bd3c7d40',
             'postid' => '1bf3f067-643c-48e6-9b61-5061cadb42a0',
@@ -2409,16 +2409,16 @@ return array (
           ),
         ),
       ),
-      16 => 
-      array (
+      16 =>
+      array(
         'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
         'gems' => 2.25,
         'tokens' => 4.7689699023,
         'percentage' => 0.0953793980500212,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'aa8db2a5-454d-4c19-8e28-61e7e01f18ef',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2428,8 +2428,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 06:52:29.344367',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'c618fa8d-7d46-4412-83b8-8ba6621e432e',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2439,8 +2439,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:16:28.785877',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '7298ced5-4682-49ad-acc9-3a4f990ebe21',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2450,8 +2450,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:32:12.607137',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '71a5ebf2-1be0-425f-b2a1-e033b74d463b',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2461,8 +2461,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:51.748157',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'b834c8fc-ee18-4e35-ad4c-d83e156fedc2',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => 'd4dc035f-45d4-45bb-a0e3-3891c8ec9fc5',
@@ -2472,8 +2472,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:35:09.491',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'e87dcaf9-2c07-44ad-94b1-1dc9da6e6da2',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2483,8 +2483,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.719245',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '58a19be8-f196-47c1-aa2e-a4986061332c',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2494,8 +2494,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:04:37.264838',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'a51b6c94-e6b5-4427-9307-bf63e31a9b34',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2505,8 +2505,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:41.75636',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '5ab6d160-ff56-4665-ac8d-2f3a37ccb88d',
             'userid' => '4b0cfe9e-cdf5-4746-b694-c3927653abbe',
             'postid' => '892fe463-d0a9-4462-b68a-5d1068772d02',
@@ -2518,16 +2518,16 @@ return array (
           ),
         ),
       ),
-      17 => 
-      array (
+      17 =>
+      array(
         'userid' => '503c3a9b-1521-4989-8697-ac556b60a304',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '2922a443-b737-4d4f-adae-85903c6af5e1',
             'userid' => '503c3a9b-1521-4989-8697-ac556b60a304',
             'postid' => '3f6c71b1-f0b1-4706-b456-8689be81e2cb',
@@ -2539,16 +2539,16 @@ return array (
           ),
         ),
       ),
-      18 => 
-      array (
+      18 =>
+      array(
         'userid' => '519cad26-ab47-4467-b752-8150347309b8',
         'gems' => 2.5,
         'tokens' => 5.298855447,
         'percentage' => 0.10597710894446799,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'c6460154-ca92-40ea-a4d3-46e8e63682e3',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2558,8 +2558,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:18:45.567603',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '09be747a-3fd6-486a-817a-d74221071539',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2569,8 +2569,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:35:48.127675',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'ee6c777c-4e92-4f0c-aa59-bf939379c9f5',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2580,8 +2580,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:38:18.197',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '450182a2-c13e-45d4-adfc-349d629c946e',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2591,8 +2591,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:07.579797',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '011ab150-8a5e-459d-ab18-48b39b9b204a',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2602,8 +2602,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:20.248159',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'be67e6e4-5c69-4cc0-a2f4-f83bfc636f2c',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2613,8 +2613,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:33.019426',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'f0e006a1-093c-4b4e-abe6-eedfd3dec7c5',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '4bcb10e5-c52f-45d3-8444-5108bc8b6e48',
@@ -2624,8 +2624,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:46.82853',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'a2cbe924-9b4c-4464-a3a9-60c2a99df3fd',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2635,8 +2635,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:00:34.177761',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '7571ea4c-bff3-4b7d-ab68-458e71cf2086',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '5dbcd50b-0fbe-4c53-82b7-cd7cee9fd0ca',
@@ -2646,8 +2646,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:24:36.167043',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'f88eb269-9182-4e18-800f-a8fc1af376ad',
             'userid' => '519cad26-ab47-4467-b752-8150347309b8',
             'postid' => '54841fde-9440-4e30-a387-f5248bdfd62e',
@@ -2659,16 +2659,16 @@ return array (
           ),
         ),
       ),
-      19 => 
-      array (
+      19 =>
+      array(
         'userid' => '53784854-a886-4c16-848f-a51b5b301594',
         'gems' => 7.75,
         'tokens' => 16.4264518857,
         'percentage' => 0.3285290377278508,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'e948f716-ebe6-4a93-8e73-11865a72745e',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2678,8 +2678,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 00:01:56.390163',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '2fe9c3e7-f89c-40e8-8fde-9ddfeffd4e0c',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2689,8 +2689,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:16.049868',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '69df7ccf-a8c8-4e1c-b9e9-ce21f933e575',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => '8e314998-b13e-461d-a2bd-a8114a4dcef6',
@@ -2700,8 +2700,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:05:10.6718',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '1c1b854c-3a7e-4815-8c69-1479bc5620c2',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2711,8 +2711,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:45:25.785157',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'd3129941-8857-4412-9d57-18f3ba6b50bc',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => '00011089-c918-475a-b2a9-bbfb5f66be95',
@@ -2722,8 +2722,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:26:45.726647',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '3c1bbce5-5192-4a66-85dc-d6c4325df16a',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => '618efd6b-3ada-400a-bce5-5d92f5cfd8ec',
@@ -2733,8 +2733,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:26:45.829523',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '88c42010-a529-49b5-9e74-5d539236851b',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2744,8 +2744,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:00.330471',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'adbe28df-0066-45b0-bbda-7ded70e49fb5',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2755,8 +2755,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:52.614266',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'c561aab3-84c7-4ce4-925b-2e5a6c1a78f6',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => '00011089-c918-475a-b2a9-bbfb5f66be95',
@@ -2766,8 +2766,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:35:22.653363',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '68744867-a227-43b7-b931-cb63ee96793b',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2777,8 +2777,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:19:26.247284',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '42ab5c5f-56c1-4d11-a1c5-90f3a0785c41',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2788,8 +2788,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:22:55.183874',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'ee13eef8-17e5-42cd-a574-e50f3dac894e',
             'userid' => '53784854-a886-4c16-848f-a51b5b301594',
             'postid' => 'aef3eced-8eca-4e43-a4d3-aa2ad24d055c',
@@ -2801,16 +2801,16 @@ return array (
           ),
         ),
       ),
-      20 => 
-      array (
+      20 =>
+      array(
         'userid' => '57174a04-9dff-4d69-a6e9-3da3769d6f76',
         'gems' => 0.5,
         'tokens' => 1.0597710894,
         'percentage' => 0.0211954217888936,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '147758ae-332b-4b2e-9c57-19222532fc27',
             'userid' => '57174a04-9dff-4d69-a6e9-3da3769d6f76',
             'postid' => '6de07934-4712-4fcc-b5e9-d869ceb26fa6',
@@ -2820,8 +2820,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:33:34.843708',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'f4f3378f-34b3-4fcb-a2d5-be51c338da0d',
             'userid' => '57174a04-9dff-4d69-a6e9-3da3769d6f76',
             'postid' => '6de07934-4712-4fcc-b5e9-d869ceb26fa6',
@@ -2833,16 +2833,16 @@ return array (
           ),
         ),
       ),
-      21 => 
-      array (
+      21 =>
+      array(
         'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
         'gems' => 39.75,
         'tokens' => 84.2518016073,
         'percentage' => 1.685036032217041,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '37510ce3-e0ec-455a-9ba8-390be8168af6',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2852,8 +2852,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:42:36.600577',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'd04bbbd9-2ff6-4681-9ef5-ac1ee0b887be',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2863,8 +2863,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:31:30.407166',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '61638615-da41-4f64-a200-c5450445f5c6',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2874,8 +2874,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:40:25.539793',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '870ce02f-5d87-4768-a968-c69a20f9d744',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2885,8 +2885,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:42:32.977758',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '05d097c5-f549-4d25-b2e5-139aaec0230b',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2896,8 +2896,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:20.772705',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'b4dbe4d1-c4a5-4a6f-8f97-c7f8155068cd',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2907,8 +2907,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:27.827631',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'b74a7545-45ff-41ce-a5f0-9c7d7712c4c7',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2918,8 +2918,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:54:45.527661',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '28a462c3-a822-41f6-9583-f25ccdf7cd3e',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2929,8 +2929,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:14:51.846988',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '6edc247d-bce7-4494-904a-78d4b96283f1',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2940,8 +2940,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:25:37.704943',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'b61e79f1-682c-4617-b1c1-cdf8ba5976e9',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2951,8 +2951,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:06.187908',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '9ef890d3-da5c-450c-9db1-f6785098f505',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2962,8 +2962,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:47.249117',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '6a54a313-5498-4d1d-992f-53c4b4fb7f67',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2973,8 +2973,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:14:44.799297',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'f417401b-243b-45a2-a1bd-da703f8168dc',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2984,8 +2984,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:53:16.171344',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '004d51bc-b31f-4aca-8dcb-c4cf70405b7c',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -2995,8 +2995,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:04:06.732547',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '887477ea-8e08-4f51-b079-04f7e6b7ae6c',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3006,8 +3006,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:19.184773',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => 'ad798794-f1a6-4a81-b675-e19308ef64c6',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3017,8 +3017,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:42.877918',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '122a33c2-7050-4792-aa99-529441d8f770',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3028,8 +3028,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:56:32.861989',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '739ef8db-53da-4e7c-b900-531ca069145f',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3039,8 +3039,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:31:48.577022',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '6041cf24-c519-4302-a9f5-80e4596b3a4b',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3050,8 +3050,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:54:55.673057',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => 'ccb3bc1e-1a3e-47b0-9c82-62a66540d610',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3061,8 +3061,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 17:14:58.321487',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => '420b28c7-fd3b-43be-8650-a29a24a882ac',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3072,8 +3072,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 19:53:23.513076',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '67a6d90e-3d10-4e09-a622-88eecd3dc872',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3083,8 +3083,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:54:52.089082',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => 'fe8786ae-a60f-4f5b-aad6-79962aca3118',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3094,8 +3094,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 17:14:56.517796',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => 'da8fbed0-c000-4ca6-ad0b-ee429e51e1f6',
             'userid' => '5d43c102-afb2-4065-9124-3e624ce2a7f9',
             'postid' => 'bebf2eb8-31d3-4d36-a7ae-a7a5188f0102',
@@ -3107,16 +3107,16 @@ return array (
           ),
         ),
       ),
-      22 => 
-      array (
+      22 =>
+      array(
         'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
         'gems' => 7.25,
         'tokens' => 15.3666807963,
         'percentage' => 0.3073336159389572,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '38cb4d61-4212-4b75-924d-6f554592473d',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3126,8 +3126,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:50:12.650727',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '2c5085af-e55e-45b6-844a-0a37d71b7441',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3137,8 +3137,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:46:27.494729',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'f7600e37-df09-4499-8556-3de186380e15',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3148,8 +3148,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 00:01:48.017843',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '75b28b75-1b83-4f67-8540-136923658f99',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3159,8 +3159,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 01:04:43.984868',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'a2d3c3e2-715e-42c1-bf56-eb3a2df66815',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3170,8 +3170,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:22:05.81941',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '23a551de-e596-4588-bede-734c49df40e2',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3181,8 +3181,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:28.890748',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'a17a2574-6d4e-4def-97d7-254923198e09',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3192,8 +3192,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.683857',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'c525c1b9-33e0-4bac-a507-98ca4df89c52',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3203,8 +3203,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:53:20.811935',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'a12e09ab-b48e-4772-a918-f188764f8a70',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3214,8 +3214,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:26.443776',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'e25f39e0-b3a0-4030-ba1e-67eb3047ff59',
             'userid' => '6120d4e3-829e-4263-8cab-fffe96a35cdc',
             'postid' => '11ae1565-1555-4f3f-a4d3-9e545b7c34ef',
@@ -3227,16 +3227,16 @@ return array (
           ),
         ),
       ),
-      23 => 
-      array (
+      23 =>
+      array(
         'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
         'gems' => 4.25,
         'tokens' => 9.0080542599,
         'percentage' => 0.1801610852055956,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '1d07454e-8ac2-48ed-b9e9-16276242dfd8',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3246,8 +3246,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:31:58.485479',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'd213480b-b921-42b7-9262-5fa7f39592aa',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3257,8 +3257,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 00:01:43.861614',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '2a0d249b-9659-4636-aa81-95510d7a929d',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3268,8 +3268,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 01:04:40.986637',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '7859d5ef-dc68-4e37-957f-5cd27b0cda09',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3279,8 +3279,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 06:52:41.748453',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'd57446ff-cbf4-408d-b873-1a813aaf19d8',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3290,8 +3290,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:20:06.316936',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '63b5cdb6-a07a-4eb3-a5cb-b6a91596635e',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3301,8 +3301,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:05:57.246283',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '2bb409b9-c252-4eec-8fb6-99df1189b02f',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3312,8 +3312,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:08:42.92375',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '4a16db51-4b02-4097-a934-a50db715cee1',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3323,8 +3323,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:11:00.797505',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'd94d82b6-14b5-44c8-8cfc-9f55c65fed37',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3334,8 +3334,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:20:58.309355',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '780eae87-22ed-46f9-8d34-b0a1c8af7ee5',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3345,8 +3345,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:00.61899',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'ee5b3efb-defc-462a-ba65-47da8c6d0dcc',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3356,8 +3356,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:04.506801',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'e4db5e08-1339-45d3-abbc-d63126828090',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3367,8 +3367,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:31.755729',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '6daebc57-ed33-475b-8dbe-185e8e46fa09',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3378,8 +3378,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:25.997515',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '9196cef3-7d5f-4496-8f87-33c5fb5ae175',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3389,8 +3389,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:19:19.24617',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'e8135054-42d5-4edf-bff3-cd3a17f5d90b',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3400,8 +3400,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:11.421815',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '033650a5-12f7-47cb-aff9-9c5b986e13c4',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => '6ed61249-7220-409f-8f28-f5bd20057bb7',
@@ -3411,8 +3411,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:23.737087',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '30ad805c-6709-46bd-a1d8-38dd47c1e0b4',
             'userid' => '686df453-5ddc-46cd-8ab8-ab22c31b4048',
             'postid' => 'c57437c5-5eb5-4896-82b5-5a1df69414d4',
@@ -3424,16 +3424,16 @@ return array (
           ),
         ),
       ),
-      24 => 
-      array (
+      24 =>
+      array(
         'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
         'gems' => 14.5,
         'tokens' => 30.7333615926,
         'percentage' => 0.6146672318779144,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '1c34a199-e0be-4b51-8442-1b06e96a84e2',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'd15d2a61-8f95-4896-8332-cc66d4a82e23',
@@ -3443,8 +3443,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:54:44.032012',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'f645f901-f8e7-408e-9dbe-6856cdec34bf',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'c410138c-e6b7-4a40-8410-4b44007584af',
@@ -3454,8 +3454,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:54:16.212601',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '3361303e-926f-42a0-8f85-de1fb8b86ed8',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'c410138c-e6b7-4a40-8410-4b44007584af',
@@ -3465,8 +3465,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 12:54:20.301464',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '84b4399a-6dd1-49e7-a3e9-c9d590a73571',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'd15d2a61-8f95-4896-8332-cc66d4a82e23',
@@ -3476,8 +3476,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 12:54:46.254524',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'a4c012fb-49a4-496e-a085-a3f2f1c5cec0',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'c410138c-e6b7-4a40-8410-4b44007584af',
@@ -3487,8 +3487,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 12:54:39.679802',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '45b18060-a2d4-45be-8913-cd11b142f222',
             'userid' => '6d6974a2-93b6-48e7-a11e-cf86adf9af5e',
             'postid' => 'd15d2a61-8f95-4896-8332-cc66d4a82e23',
@@ -3500,16 +3500,16 @@ return array (
           ),
         ),
       ),
-      25 => 
-      array (
+      25 =>
+      array(
         'userid' => '6de98fc6-e43f-4d8f-a389-d8ac51107910',
         'gems' => 0.75,
         'tokens' => 1.5896566341,
         'percentage' => 0.0317931326833404,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '6915e906-785e-48b0-b305-0ea7e252e079',
             'userid' => '6de98fc6-e43f-4d8f-a389-d8ac51107910',
             'postid' => '5a0a9bdd-8f4b-4101-919f-9326473f5282',
@@ -3519,8 +3519,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 00:01:49.57727',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'be1161d0-947e-4f2f-a9e9-b92bd19c9202',
             'userid' => '6de98fc6-e43f-4d8f-a389-d8ac51107910',
             'postid' => '5a0a9bdd-8f4b-4101-919f-9326473f5282',
@@ -3530,8 +3530,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:19:25.247151',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'c34435ab-571b-4205-a990-2972d5d3f35f',
             'userid' => '6de98fc6-e43f-4d8f-a389-d8ac51107910',
             'postid' => '5a0a9bdd-8f4b-4101-919f-9326473f5282',
@@ -3543,16 +3543,16 @@ return array (
           ),
         ),
       ),
-      26 => 
-      array (
+      26 =>
+      array(
         'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
         'gems' => 44,
         'tokens' => 93.2598558672,
         'percentage' => 1.8651971174226367,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '30163246-ade8-4c71-b87b-2149078747fc',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'b32d8c2d-2953-4300-9de9-760ef3d0f457',
@@ -3562,8 +3562,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:43:34.725809',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '3a200bc1-414b-4b09-a473-4afdbfb1e7a8',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '94dfb697-3554-46b3-b497-f0192224f300',
@@ -3573,8 +3573,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:43:48.439684',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'c98db66c-f070-4123-a1ec-a5d0770d6a28',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '94dfb697-3554-46b3-b497-f0192224f300',
@@ -3584,8 +3584,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:22:45.461288',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'df142cc9-5950-40b4-a46b-3475dbdf5e57',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3595,8 +3595,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:35:32.449642',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'b71b8296-802b-454c-b80e-3001dcdb946e',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3606,8 +3606,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 05:51:23.112285',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '78e71d3d-ad9b-48f2-819d-7a6a07ca1fb4',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3617,8 +3617,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:43:44.160393',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '020a7ec2-27a3-4602-b146-055d2579f042',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3628,8 +3628,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:22:45.276594',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '245e4c70-4fd2-4eae-b697-f01211307907',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3639,8 +3639,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:40:50.423032',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '458e8206-5689-42c3-a00a-7ea90fefb9d4',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3650,8 +3650,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:46:10.347226',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'bf9c4e39-3105-46d1-8ef4-2b02687ddb4e',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'b32d8c2d-2953-4300-9de9-760ef3d0f457',
@@ -3661,8 +3661,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 05:51:21.007108',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '741c60f3-917a-48f4-b88e-90d034b71f56',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3672,8 +3672,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 05:51:24.58651',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '6a6dc2e5-b6b0-48e6-a4c4-cdf645d84d03',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3683,8 +3683,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:36:42.798272',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '55431e22-7c3b-460e-a089-e423a72212d4',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'b32d8c2d-2953-4300-9de9-760ef3d0f457',
@@ -3694,8 +3694,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:40.223132',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => 'adcb203b-637a-49bc-aac2-47f41cf88846',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3705,8 +3705,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:45.457045',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '2face947-194f-47cc-b5e1-c9f627ea6969',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3716,8 +3716,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:54:27.767248',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '287c39e8-9631-48c3-86f8-0b1935187a2e',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3727,8 +3727,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:21:13.176872',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => 'aee2e5aa-4ea2-4626-954e-a7ebd8b4cfb5',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '71189b87-6610-4b98-999d-8620ccd0e8b1',
@@ -3738,8 +3738,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:05.305941',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'a34dc4f2-0746-40a6-b77f-0294cdaf5705',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '71189b87-6610-4b98-999d-8620ccd0e8b1',
@@ -3749,8 +3749,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:46:26.366768',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'ee645b9e-7216-4a61-9c34-2e0606d29b72',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3760,8 +3760,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:37:49.989752',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '3d48446e-8777-4c2a-a0cd-b7f9ddcce3ac',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3771,8 +3771,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:03.351111',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'c5a676a8-a0ec-4cf2-9cdc-18c0f6619487',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3782,8 +3782,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:26.808556',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '2a6adee4-f095-434e-b7fe-0e6895ed2d00',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3793,8 +3793,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:26.373682',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '083d4dfc-5f60-4916-bc3c-37e7aa9d5b85',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '71189b87-6610-4b98-999d-8620ccd0e8b1',
@@ -3804,8 +3804,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:02.312181',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => '9ea57fc6-e063-4bfe-b8b1-b971e674185e',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '71189b87-6610-4b98-999d-8620ccd0e8b1',
@@ -3815,8 +3815,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:29:37.507611',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => 'd12073fd-3397-4cb7-966c-8d93bb6f4de1',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3826,8 +3826,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:04:05.872399',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => '3996b508-228b-4848-bbb2-91e55b80291b',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3837,8 +3837,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:12:02.982563',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => 'f122c626-f49b-4b75-bf1a-11953a2d9705',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3848,8 +3848,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:57:54.373187',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => '483577c2-6459-4631-8d97-2153d9c2af47',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'b32d8c2d-2953-4300-9de9-760ef3d0f457',
@@ -3859,8 +3859,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:38.362038',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => 'e126ecce-3734-4f7b-96d8-be84e38a8a3d',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3870,8 +3870,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:22:47.127579',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => '88161f66-5bdc-4a59-a0f6-22d87deedc35',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'eeefd223-e03b-4d91-88d8-db06071102f7',
@@ -3881,8 +3881,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:24:17.685281',
           ),
-          30 => 
-          array (
+          30 =>
+          array(
             'gemid' => '7547fbee-4d55-4ce4-8fdc-26f9039e5649',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '94dfb697-3554-46b3-b497-f0192224f300',
@@ -3892,8 +3892,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:24:47.689031',
           ),
-          31 => 
-          array (
+          31 =>
+          array(
             'gemid' => '7cc2ff58-3884-4258-acdd-60955020b556',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3903,8 +3903,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:39.469362',
           ),
-          32 => 
-          array (
+          32 =>
+          array(
             'gemid' => 'a0cfcd45-d663-4ee8-83a1-35b5a0a691b6',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3914,8 +3914,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.925814',
           ),
-          33 => 
-          array (
+          33 =>
+          array(
             'gemid' => '5371e7f0-f4f2-46de-aa31-edd9f05dab3d',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3925,8 +3925,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:56:15.904034',
           ),
-          34 => 
-          array (
+          34 =>
+          array(
             'gemid' => 'fea72442-d2d4-4f8a-bc49-48e121968cd5',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3936,8 +3936,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 10:42:29.888344',
           ),
-          35 => 
-          array (
+          35 =>
+          array(
             'gemid' => '7c8fbe64-69f4-4db0-8bba-0f9d289909bc',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '71189b87-6610-4b98-999d-8620ccd0e8b1',
@@ -3947,8 +3947,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:34:00.095723',
           ),
-          36 => 
-          array (
+          36 =>
+          array(
             'gemid' => 'cdbcd022-5efe-4edd-a530-0e27f110afa3',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3958,8 +3958,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:34:09.657018',
           ),
-          37 => 
-          array (
+          37 =>
+          array(
             'gemid' => '0754ea65-895e-4e0a-85b6-cb5d5d4157d0',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -3969,8 +3969,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:55:24.516304',
           ),
-          38 => 
-          array (
+          38 =>
+          array(
             'gemid' => '2f1e9ed1-b310-416d-955a-16d41963abf4',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '94dfb697-3554-46b3-b497-f0192224f300',
@@ -3980,8 +3980,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:14:38.285092',
           ),
-          39 => 
-          array (
+          39 =>
+          array(
             'gemid' => '9744d2d4-ad6e-4b33-8f84-756d5ea473b4',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => 'b32d8c2d-2953-4300-9de9-760ef3d0f457',
@@ -3991,8 +3991,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:23:32.416818',
           ),
-          40 => 
-          array (
+          40 =>
+          array(
             'gemid' => '2f019729-7c14-4f7f-9062-38eb91211e35',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '1a2e2d00-418b-41cb-bce1-fcb5ba806bd4',
@@ -4002,8 +4002,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:24:28.91404',
           ),
-          41 => 
-          array (
+          41 =>
+          array(
             'gemid' => '7c58ef36-2b51-4f01-a18a-5551acd62432',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '78b7d3e8-b622-4c71-a79d-be5e1fea7b2c',
@@ -4013,8 +4013,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:26:45.613375',
           ),
-          42 => 
-          array (
+          42 =>
+          array(
             'gemid' => '11f7e1a6-5534-4f7b-81c3-a31899b60c38',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4024,8 +4024,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:32.05855',
           ),
-          43 => 
-          array (
+          43 =>
+          array(
             'gemid' => 'd0639456-5558-4be1-a668-1d27f6ce5b26',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4035,8 +4035,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:54:42.393232',
           ),
-          44 => 
-          array (
+          44 =>
+          array(
             'gemid' => '5ebc82e4-56bf-400d-8c45-eb644c4236cb',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4046,8 +4046,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 20:48:53.957532',
           ),
-          45 => 
-          array (
+          45 =>
+          array(
             'gemid' => 'efb213d4-30ce-4d6d-821d-3e99488f1717',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4057,8 +4057,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:34:12.533907',
           ),
-          46 => 
-          array (
+          46 =>
+          array(
             'gemid' => 'c7744fa6-d66e-423b-bf10-94f0383f4e58',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4068,8 +4068,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 13:17:22.305379',
           ),
-          47 => 
-          array (
+          47 =>
+          array(
             'gemid' => 'c9a1cbef-035b-426a-afab-cb5181493aea',
             'userid' => '6f2e3706-1700-4342-b9aa-5585a6c5eb4d',
             'postid' => '259d9c67-ae86-4244-90ed-138801a786f9',
@@ -4081,16 +4081,16 @@ return array (
           ),
         ),
       ),
-      27 => 
-      array (
+      27 =>
+      array(
         'userid' => '78224423-aba7-49b6-a49d-77f4c906a35d',
         'gems' => 1,
         'tokens' => 2.1195421788,
         'percentage' => 0.0423908435777872,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '94217554-8d8d-437f-930a-6d22830aeb86',
             'userid' => '78224423-aba7-49b6-a49d-77f4c906a35d',
             'postid' => '08b89a66-1f1b-4932-88c4-33602501b1e4',
@@ -4100,8 +4100,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:45.708137',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '6f61f1a8-ba73-42d0-9a8b-dc57984a134d',
             'userid' => '78224423-aba7-49b6-a49d-77f4c906a35d',
             'postid' => 'ebb798cc-d373-4574-9ea3-f23f0c8d80a9',
@@ -4111,8 +4111,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:49.335671',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '6c374416-7c8a-4e9c-99c9-c5851d15f6ca',
             'userid' => '78224423-aba7-49b6-a49d-77f4c906a35d',
             'postid' => '4c6614e9-d904-4c9c-80af-6b30d7d5f541',
@@ -4122,8 +4122,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:04:56.372513',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'fcabdc8c-5781-4e3f-85b2-fbc2d17d3abd',
             'userid' => '78224423-aba7-49b6-a49d-77f4c906a35d',
             'postid' => '414a3435-018f-4e46-a395-45579cf5e397',
@@ -4135,16 +4135,16 @@ return array (
           ),
         ),
       ),
-      28 => 
-      array (
+      28 =>
+      array(
         'userid' => '7b01ca0e-2887-436e-950b-a2e7d648b783',
         'gems' => 0.5,
         'tokens' => 1.0597710894,
         'percentage' => 0.0211954217888936,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'c5852a13-034e-4eb5-b72e-87049899f8d5',
             'userid' => '7b01ca0e-2887-436e-950b-a2e7d648b783',
             'postid' => '7251d7c4-e0eb-4616-9070-21c27950f951',
@@ -4154,8 +4154,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:32:28.004799',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'ebfccba5-60de-4885-90af-8ca1636efbe1',
             'userid' => '7b01ca0e-2887-436e-950b-a2e7d648b783',
             'postid' => '7251d7c4-e0eb-4616-9070-21c27950f951',
@@ -4167,16 +4167,16 @@ return array (
           ),
         ),
       ),
-      29 => 
-      array (
+      29 =>
+      array(
         'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
         'gems' => 3.5,
         'tokens' => 7.4183976258,
         'percentage' => 0.14836795252225518,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'e8002cf2-96b2-4987-9ecd-613f907831ae',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'c62b8519-086f-417b-a77a-0bdaae6d577d',
@@ -4186,8 +4186,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:28:37.149846',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '8c9b6ea5-f377-4cf7-88e3-dd7d84f68441',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'bf05b118-feae-4748-94ee-b79dceaf8368',
@@ -4197,8 +4197,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:31:44.197224',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '54b4d1a7-1998-4669-9e49-11ea9b93e413',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '3f9df024-ba3e-4942-a425-13af8d88134e',
@@ -4208,8 +4208,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:07.527319',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '80747d7e-22b4-44a8-bef2-32a83c784fc0',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '817b00c9-8edb-4403-80b3-2ba88b619cfa',
@@ -4219,8 +4219,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:15.345366',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '6e4e7460-454f-4206-bcb3-0ead716d1a0f',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'e36fe306-ceae-4360-b74a-0abe93adea00',
@@ -4230,8 +4230,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:18.406761',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '59b25cf2-ad45-4f0d-88ab-0c30542e89b1',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '9541a3e1-4d05-4a8a-a0b3-b715afa31b13',
@@ -4241,8 +4241,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:31.712484',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '554f5a8c-2c38-4687-b986-271a50ee5665',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'b3a83f0e-a65d-467f-9a97-472f2e12f672',
@@ -4252,8 +4252,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:31.928942',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '98cc2050-afb1-480b-8bf7-7c7357acb70d',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '7003c017-58b7-4f09-ae81-b209ee63a9ee',
@@ -4263,8 +4263,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:35.585301',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '74bfb24c-b63f-41bf-8c80-5507cc09ed5b',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'fc66c7b4-fbde-48e3-b8a1-c5f189e052b9',
@@ -4274,8 +4274,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:35:14.305865',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'f6dd15b3-e606-40ac-99c6-fed3406ec533',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'be1667c0-d734-4921-a2f5-4739f63e14ee',
@@ -4285,8 +4285,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:06.168314',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'c2ceea6b-e61c-4bbf-af59-4e228d4a21b4',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '0b21a60f-27b1-4043-b60e-f6f69d26eecc',
@@ -4296,8 +4296,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:09.410177',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'a087e007-51ea-40ef-845d-64a1e5fa3c65',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => 'e98aeb86-efd3-4544-99cb-b71f16afb1f6',
@@ -4307,8 +4307,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:32.577791',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'b4e2e187-777d-46ca-9a5f-5a7e5704304f',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '104c6d62-8c95-4411-9aba-62acd1074734',
@@ -4318,8 +4318,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:38.567294',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '204b5f8b-4a1f-40d9-981a-4dffc65a9ce6',
             'userid' => '7f61dc5c-eb42-48b3-964e-0536b2e60a95',
             'postid' => '3f9df024-ba3e-4942-a425-13af8d88134e',
@@ -4331,16 +4331,16 @@ return array (
           ),
         ),
       ),
-      30 => 
-      array (
+      30 =>
+      array(
         'userid' => '85ac0444-1529-4700-a627-37cc952b0d69',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '17a6afde-8e30-416e-9ace-354a9c7e4aab',
             'userid' => '85ac0444-1529-4700-a627-37cc952b0d69',
             'postid' => '912e20b7-130c-475b-ae79-2f437342745c',
@@ -4352,16 +4352,16 @@ return array (
           ),
         ),
       ),
-      31 => 
-      array (
+      31 =>
+      array(
         'userid' => '8bbb6ac0-269e-4acf-ae8c-c3a709173dc2',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'cf47c24b-bca3-41bf-8804-a842d49f9535',
             'userid' => '8bbb6ac0-269e-4acf-ae8c-c3a709173dc2',
             'postid' => 'd13ae93e-35ca-4115-9131-6eaac094d9c6',
@@ -4373,16 +4373,16 @@ return array (
           ),
         ),
       ),
-      32 => 
-      array (
+      32 =>
+      array(
         'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
         'gems' => 10.25,
         'tokens' => 21.7253073327,
         'percentage' => 0.4345061466723188,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '58e86d58-cf04-4ad6-860d-7d6971e33d63',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4392,8 +4392,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:36:00.40814',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'dbdda9d9-9409-4151-9b03-f4a9c0a0c9f4',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4403,8 +4403,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:47.722365',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '211f59ba-ac1c-4e5b-8a0f-bf1305a23a58',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4414,8 +4414,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:14.409942',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '46afec5f-4421-4770-8aab-c2cca26f8c6d',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4425,8 +4425,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:28:48.897434',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'b4ccf62c-e4ca-4f67-9cf9-0753243a267c',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => 'd12c4bc3-e449-4e61-a3b6-21161d20da1c',
@@ -4436,8 +4436,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:28:57.648367',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '3f2398c2-46ac-4c0f-a521-61e77c49937a',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '8f5e01b1-7155-4c98-897b-a673de0718de',
@@ -4447,8 +4447,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:28:59.103183',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '193783a9-e9f9-4932-8b24-4b7d93f4946d',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4458,8 +4458,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:29.406621',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '1d13a858-57f1-4e81-bfc6-bafa96117e11',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4469,8 +4469,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:22.043583',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '803c4d81-b666-4ffd-97cb-3235464d330f',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4480,8 +4480,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:36:34.005343',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'd0bfe84a-51e6-4472-bb9e-ba2c77ff7e30',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4491,8 +4491,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:53:09.541376',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '24bc5f14-a686-4b86-adea-321089f87982',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4502,8 +4502,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:14:51.519655',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'a711afe5-2aaf-4dd0-bb30-8c6c7b88595b',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => 'b6995336-e245-4121-9fcb-5bdb6f586f39',
@@ -4513,8 +4513,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:28:55.981377',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '9b56fb06-636e-4da9-9831-633fc0464832',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4524,8 +4524,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:02.589181',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '8bbe5ba5-154b-4a18-a891-15575c01da0f',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4535,8 +4535,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:02:16.178801',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'a195ad3c-e697-4ffa-81f4-82c19ba3c2f1',
             'userid' => '8d2ecac8-a8d2-4f9d-86e6-bede36441b01',
             'postid' => '1b63699d-1f72-48a9-8616-eccfa23d52f7',
@@ -4548,16 +4548,16 @@ return array (
           ),
         ),
       ),
-      33 => 
-      array (
+      33 =>
+      array(
         'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
         'gems' => 31.75,
         'tokens' => 67.2954641769,
         'percentage' => 1.3459092835947435,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'b1264b28-cbda-4a2c-aa4c-54a7e385a205',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4567,8 +4567,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 06:52:26.98842',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '6fa4f9ed-e4cb-4b10-ad20-ed66e3f90318',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4578,8 +4578,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:32:08.503994',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'da16dd71-5c59-4928-ac4d-c1fdf9315e11',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4589,8 +4589,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:08:18.763381',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '7c57c81e-18be-43cc-bad6-003254ba222f',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '93ec4a84-c814-4b30-97c6-c0200743f06d',
@@ -4600,8 +4600,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:09:31.974385',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '11e6ed8f-286b-40c1-bbfe-3f974b94a0da',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4611,8 +4611,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:30:48.961338',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'dd003a38-cef9-4bc5-9ee7-44de27a71481',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4622,8 +4622,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:08:24.036173',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'dad8bcdf-e8df-429a-9db0-98594a19f537',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4633,8 +4633,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 09:17:11.479933',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '5ef4c400-9408-4d5f-b062-edcdb52026ab',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4644,8 +4644,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:03.587039',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'e445aee5-ec2b-48fc-8a8e-81b4b53cc76c',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '93ec4a84-c814-4b30-97c6-c0200743f06d',
@@ -4655,8 +4655,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:07:05.904781',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'feb6014b-1095-478d-91c8-1d70d1273662',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4666,8 +4666,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:21:40.874087',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'ef262c8b-c1c4-4f7b-9365-e776c5746f80',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4677,8 +4677,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:41.954996',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '18b8fb31-1302-47f0-b6e4-7b74ee99bca1',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4688,8 +4688,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:59.180476',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '58fe10b3-7b3c-4b7f-bf1d-756782c71619',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4699,8 +4699,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:04:36.3358',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '58347764-d1a4-48d8-aad4-9bf72f686be1',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4710,8 +4710,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:41.754411',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '893c9c85-6c23-4728-b005-98cb8cf027d0',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4721,8 +4721,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:28.193643',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '45b931bd-15a3-4c73-bef1-a2f6bd8205fb',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4732,8 +4732,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.821877',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '073de582-3048-4878-85fe-2d0b7f84c848',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4743,8 +4743,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:12.022834',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '5d047ecf-a0e6-48ae-96ac-1524043249b8',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4754,8 +4754,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:32:29.279104',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '1c1174e5-8588-43a2-adb7-685d2efde752',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4765,8 +4765,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 19:54:07.339196',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '487a0580-2c33-476a-85bf-befe75c31148',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '93ec4a84-c814-4b30-97c6-c0200743f06d',
@@ -4776,8 +4776,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:07:12.557129',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'ec2844f8-4b87-4db7-bbf9-095b31117417',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4787,8 +4787,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 13:33:07.765444',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '59c61ecf-681d-4c70-8362-57a33321dd72',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4798,8 +4798,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 19:54:13.400783',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => 'b59ac710-a90b-427a-baab-0be0234476c5',
             'userid' => '8fec5793-459f-465c-925f-64fb96e0a599',
             'postid' => '69251b99-b4c9-46fd-aabe-baedf314abf9',
@@ -4811,16 +4811,16 @@ return array (
           ),
         ),
       ),
-      34 => 
-      array (
+      34 =>
+      array(
         'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
         'gems' => 1.5,
         'tokens' => 3.1793132682,
         'percentage' => 0.0635862653666808,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '9ca2ca2e-0a77-4ba0-b57c-28935e357546',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4830,8 +4830,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:32:17.556642',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '464a344c-1fa1-425d-8903-bc199493df0c',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4841,8 +4841,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:06:32.418012',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'ba71e8f9-3fdf-439b-9171-8b22b7eb478d',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4852,8 +4852,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:47.455388',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '3b776ebe-2da7-4c0c-8df9-3fb6373cbd3c',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4863,8 +4863,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:58.266321',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '1b14b1c8-fda7-4c2f-8ad1-c1faed1dbdc2',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4874,8 +4874,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:23.737142',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'fb432343-1726-4fe6-a87c-022e0af1aa79',
             'userid' => '91b666a6-6ed9-4bf6-a83c-938c1a8ccd0b',
             'postid' => 'a2c0e754-239a-4270-8779-9084a60f9fc5',
@@ -4887,16 +4887,16 @@ return array (
           ),
         ),
       ),
-      35 => 
-      array (
+      35 =>
+      array(
         'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
         'gems' => 47.75,
         'tokens' => 101.2081390377,
         'percentage' => 2.0241627808393385,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '57b07b33-9b14-4847-a59c-5e283edac8ad',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '230d64a0-ca92-494c-b080-75867c8e7a40',
@@ -4906,8 +4906,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:26.806967',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '3f8c8933-1553-4441-b11d-034e5bb4e06e',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '718487e3-a2c2-4f7f-be90-88f73c3815bc',
@@ -4917,8 +4917,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:45.193443',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '59a7c4c5-d36d-467a-9d47-4cf6dccc7997',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '2397f055-570c-449e-bf76-6df00f886ada',
@@ -4928,8 +4928,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:45.324326',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '519c5c7b-0934-4a3c-9c13-a0e5b38ce573',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '6d505e72-f6ba-4024-9f9c-0def82302c63',
@@ -4939,8 +4939,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:55.102937',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'f9e9d0ee-d2e2-4840-8970-496c9480d0cf',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '2e3a9e0d-f502-45bb-a55d-6e3265b6817a',
@@ -4950,8 +4950,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:56.867155',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'ff020e6f-e96a-4461-8d39-e0b1ae4e0236',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '7b35549a-27b0-407a-a6a6-ead0803df8c9',
@@ -4961,8 +4961,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:13:01.124749',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '51964127-4088-4640-a74b-8ff48fd54a08',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '186451f9-7236-4c95-a3bb-d22ae1af4c6b',
@@ -4972,8 +4972,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:13:02.64252',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '8f25ab7a-15e5-4ad1-bcb1-67f3154a3fc2',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => 'df9e3095-8fbe-4387-a220-9dde8d2d4981',
@@ -4983,8 +4983,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:13:04.415794',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '3b2ab17f-2723-4079-a882-6adef7b01f73',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '230d64a0-ca92-494c-b080-75867c8e7a40',
@@ -4994,8 +4994,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:40.440661',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'dbbb0b2f-6193-454b-82d9-d3fd5dadd147',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '230d64a0-ca92-494c-b080-75867c8e7a40',
@@ -5005,8 +5005,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:51.149864',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '7603fdb0-f0c8-4a63-b9bb-90ab3f93522a',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '230d64a0-ca92-494c-b080-75867c8e7a40',
@@ -5016,8 +5016,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:00:45.319822',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '8fbc559e-1423-40dd-9844-a0f68accf16c',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '230d64a0-ca92-494c-b080-75867c8e7a40',
@@ -5027,8 +5027,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:41.717236',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '7ee12fd4-e6ca-4dda-865f-4d898d64b362',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '718487e3-a2c2-4f7f-be90-88f73c3815bc',
@@ -5038,8 +5038,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:47.310822',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '3b84f2df-08a2-48c7-9969-39ae4225eb8d',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '2397f055-570c-449e-bf76-6df00f886ada',
@@ -5049,8 +5049,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:49.573664',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '093fe029-daf8-4467-88a1-15c00ac0063c',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '67949f2a-e163-48fd-a8a2-7106a21bb529',
@@ -5060,8 +5060,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:51.646421',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '35cf55f3-e7b6-4180-893f-066733f40694',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => 'dbb83396-aee9-48f0-b052-031e0f1b997c',
@@ -5071,8 +5071,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:53.610331',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '102af6a6-2fd9-4437-862c-d8fc0f57303d',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '6d505e72-f6ba-4024-9f9c-0def82302c63',
@@ -5082,8 +5082,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:55.62309',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '69d85af3-e04c-4515-82b0-9fd6b621b09f',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '2e3a9e0d-f502-45bb-a55d-6e3265b6817a',
@@ -5093,8 +5093,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:59.529091',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '8aefd636-8b0f-4644-ab22-3747b42aae26',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '7b35549a-27b0-407a-a6a6-ead0803df8c9',
@@ -5104,8 +5104,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:13:01.65744',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => 'ef5af427-bfe1-4d53-a6dd-db35ba9ef632',
             'userid' => '93b65b49-7d4a-477b-a311-e318024b0862',
             'postid' => '186451f9-7236-4c95-a3bb-d22ae1af4c6b',
@@ -5117,16 +5117,16 @@ return array (
           ),
         ),
       ),
-      36 => 
-      array (
+      36 =>
+      array(
         'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
         'gems' => 9.25,
         'tokens' => 19.6057651539,
         'percentage' => 0.3921153030945316,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '328a7215-f251-4653-977c-b26149676d45',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '1f88fda4-672a-48e0-bc8b-5e06541a2ddb',
@@ -5136,8 +5136,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:37.951133',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '99f7c126-ce4c-4264-9a68-f21707b37941',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5147,8 +5147,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:57:55.653271',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'cfc4b6b2-c40e-44bf-bad2-685d2f88f662',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5158,8 +5158,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:10:00.203601',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '8542bc1d-41bf-48c1-9619-a665fedbbde4',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5169,8 +5169,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:15:33.166212',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '7d452887-2904-4c67-9e35-ceba95782635',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5180,8 +5180,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:03:18.258951',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '9696765e-87a7-4d6c-a81e-6b0f1273d47e',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5191,8 +5191,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:18:46.472897',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '9c5e1d88-dd8b-4f9d-b3a1-e17ad940fd4b',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5202,8 +5202,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:23.981064',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '51e82f86-0199-4cf8-8d7c-8f6c8940cb73',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5213,8 +5213,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:55:31.536513',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '060ff35a-7493-4250-adfb-439ebe894122',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '1f88fda4-672a-48e0-bc8b-5e06541a2ddb',
@@ -5224,8 +5224,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:34.23985',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '8de10572-88d7-4b98-a906-c410c2aed6ac',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5235,8 +5235,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 17:15:39.050255',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'e73a25c0-39bc-49da-ae26-11ce678f8429',
             'userid' => '9ac19106-f39f-43f5-8227-ea6dc6e87989',
             'postid' => '9a5ce28e-20fa-46c2-aa33-42a29e793c11',
@@ -5248,16 +5248,16 @@ return array (
           ),
         ),
       ),
-      37 => 
-      array (
+      37 =>
+      array(
         'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
         'gems' => 16,
         'tokens' => 33.9126748608,
         'percentage' => 0.6782534972445952,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '83b14a70-7414-43a5-8c09-9178fbf8e3b8',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => '4db9aa05-6b12-4dae-887d-221de1cca773',
@@ -5267,8 +5267,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:30:46.52916',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '55b111be-a4c1-4944-bfa2-4dcb18ce3bbd',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => 'cf897edd-138a-4450-b8a8-2f8236f830a5',
@@ -5278,8 +5278,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:30:50.821884',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '58f1c288-ee79-49d6-9eae-ecf7e5108c15',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => '36a9b843-2c8c-4ef2-ae6b-365d5d0ffbbd',
@@ -5289,8 +5289,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:30:54.939349',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '348aad2a-51b7-4090-b1a8-6176b6c60b35',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => '1b9de5e8-da0e-4f6c-8a8e-b1ddd310a68e',
@@ -5300,8 +5300,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:30:59.681688',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'b73267c4-6f9b-4879-a8b6-2f8b01f64efe',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => '4db9aa05-6b12-4dae-887d-221de1cca773',
@@ -5311,8 +5311,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:30:48.460453',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '519c5ba6-767a-443c-85a2-edb775a1a788',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => 'cf897edd-138a-4450-b8a8-2f8236f830a5',
@@ -5322,8 +5322,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:30:52.867151',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '531e40c2-aaee-4841-aeb4-17dd0407c1c6',
             'userid' => 'a27b895d-cf9c-404e-8efd-2bcd328d7aa4',
             'postid' => '36a9b843-2c8c-4ef2-ae6b-365d5d0ffbbd',
@@ -5335,16 +5335,16 @@ return array (
           ),
         ),
       ),
-      38 => 
-      array (
+      38 =>
+      array(
         'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
         'gems' => 14.5,
         'tokens' => 30.7333615926,
         'percentage' => 0.6146672318779144,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '9bc668f8-248f-4d69-98fd-c5f271c4ed33',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => '2eee54d1-e801-4372-912c-4391d2ad05ab',
@@ -5354,8 +5354,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:44.23176',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '21c71c15-ac53-4799-995f-35b06c15698c',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5365,8 +5365,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:48:55.27204',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'f9c0f41e-25bd-491a-94a7-b8cc93d283ba',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5376,8 +5376,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:53:04.368372',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '7467c5e5-6c06-4ebe-8e6c-80cbfa5a00b4',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5387,8 +5387,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:04:58.358676',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '4974a4ab-f27f-478e-ad1c-9ef1109afe7f',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5398,8 +5398,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:06.796705',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '5b7a2278-726b-4e35-8ef3-df7ec70e04e3',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5409,8 +5409,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:28:43.518501',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '6d710933-6583-46fd-85ab-8166c546327e',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5420,8 +5420,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:36:49.939171',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '798f90ad-9ba3-4b7e-a161-7f370fd44114',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5431,8 +5431,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:51:23.556355',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '03365d6c-2a26-4249-a414-5334710fa4b3',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5442,8 +5442,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:04:34.865079',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '11d0bf22-1eb8-4662-b9bb-132c41a38501',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5453,8 +5453,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:13.330757',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '7c543897-84c9-4549-a7fd-60280f27c8d6',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5464,8 +5464,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:03:35.010741',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '03938d73-ccb9-4b2e-8e44-fbc3f05dbcb5',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5475,8 +5475,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:26:32.808794',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'cfbbc15f-da2a-4f17-85da-6707c77ae07c',
             'userid' => 'a2cdfe51-34cf-4831-9c1c-99688d0284f0',
             'postid' => 'b7c9e023-55b5-4444-a8ee-40fddb660020',
@@ -5488,16 +5488,16 @@ return array (
           ),
         ),
       ),
-      39 => 
-      array (
+      39 =>
+      array(
         'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
         'gems' => 18,
         'tokens' => 38.1517592184,
         'percentage' => 0.7630351844001696,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '31fc7ced-c1b9-4f51-ac7f-3cfc1389e7e1',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5507,8 +5507,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 07:34:42.524193',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'd2903a3c-98a9-4103-802d-e6547fc94a7b',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5518,8 +5518,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:05:57.587478',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'fefc7303-46af-48fb-abce-7c734f7ac265',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5529,8 +5529,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:11:05.13353',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'dfc0f7a6-3125-4aef-afdd-84174658e4db',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5540,8 +5540,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:31:58.588464',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '9f5d80c1-53ca-4262-a5f9-83ffd236d045',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5551,8 +5551,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:09:40.225031',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '90d7b63a-33e4-43ef-95cb-292124876df7',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5562,8 +5562,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 09:16:17.662406',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'bf1ad7e9-50bb-4999-92e0-215ee03be66e',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5573,8 +5573,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:07.770252',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'c7059472-1d7a-423b-bd65-308ac4e718a1',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5584,8 +5584,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:16:01.241291',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '60cd5811-9879-4662-b3e3-a9527bec62c7',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5595,8 +5595,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:01.725087',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'ebfbf481-fd09-44f3-a802-660e4b809a99',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0ec85f96-f55e-44eb-b4be-46fb29b47056',
@@ -5606,8 +5606,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:07:04.597481',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'a9c368f8-2a8f-4535-9ee0-c75470f5b954',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5617,8 +5617,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:28:00.617192',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '202d420c-9fe8-4945-a1d3-f8e246a9fe13',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5628,8 +5628,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:04:35.65285',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'b4f4e18d-d5d2-481b-b468-63e0f1dd01df',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5639,8 +5639,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:14:49.392715',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => 'b4f70866-ac06-489d-8715-4e8cc247575d',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5650,8 +5650,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:19.036705',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'a68185e4-af54-4d11-a735-80778cf217d3',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0ec85f96-f55e-44eb-b4be-46fb29b47056',
@@ -5661,8 +5661,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:52.077557',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '41d9684b-389f-45c8-b450-a5c2a0bcbddb',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5672,8 +5672,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:58:35.285693',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => 'aedb48ea-f114-4c4a-84e0-e20ea7ca5752',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5683,8 +5683,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:18:26.826643',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '929df632-7ef5-4459-9583-91d57a4c5bad',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5694,8 +5694,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:53:19.893164',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '0fec4e2b-7e5a-457d-95f2-c560de38705a',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5705,8 +5705,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:47.855216',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '04e07f13-3fe9-4bde-a6db-3f67b22dbdff',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5716,8 +5716,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:01.515838',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'a442a347-a612-44a2-9fa3-1eccb45d532d',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0ec85f96-f55e-44eb-b4be-46fb29b47056',
@@ -5727,8 +5727,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:19:34.032165',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => 'da8490f7-74dc-49cc-a508-9aeb829a593c',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5738,8 +5738,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 17:16:09.280079',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '4bcdfa55-09b1-49f7-b6b7-cca04e6a0fb4',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5749,8 +5749,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 17:16:07.670036',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => '7cd0a241-520d-4019-877e-10f21793f97c',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5760,8 +5760,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 19:54:24.162371',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => 'd4b33517-83d0-4279-b22c-4e2917f844e3',
             'userid' => 'a39a4eee-2e27-4ade-997f-e3a546261a77',
             'postid' => '0167402f-1a62-47e4-9ca9-df047d399c63',
@@ -5773,16 +5773,16 @@ return array (
           ),
         ),
       ),
-      40 => 
-      array (
+      40 =>
+      array(
         'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
         'gems' => 13.25,
         'tokens' => 28.0839338691,
         'percentage' => 0.5616786774056803,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '4c9bc7e3-af0d-45b6-8520-f85ef469df6d',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5792,8 +5792,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:08:50.296848',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'b90d11a2-b37a-4b7e-9e76-ebaa9a650b64',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5803,8 +5803,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 08:50:12.253043',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '7402fae7-3a4f-48dc-80c4-01517adb0770',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5814,8 +5814,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 09:08:54.100412',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '14c45f82-f53d-469a-ba32-b7d76bae54a0',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5825,8 +5825,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:54:29.850643',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '9bb3c509-2f55-49d2-8613-507c9a9330c0',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => '7f628647-e675-4ada-85ce-cfb1c726202e',
@@ -5836,8 +5836,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:07:39.806209',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'fe130b5d-033a-43a0-8228-177b9bc267df',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5847,8 +5847,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:36.295861',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '62167b2f-50f0-43b3-b659-c196f3fa9dce',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5858,8 +5858,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 11:04:43.691433',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '4c59b35a-858f-4d1e-abad-9827d1e91145',
             'userid' => 'a5d742df-6f9e-4287-af8c-698d4499c3d8',
             'postid' => 'a86869f7-2cf7-4759-b79a-39c8e92bfc11',
@@ -5871,16 +5871,16 @@ return array (
           ),
         ),
       ),
-      41 => 
-      array (
+      41 =>
+      array(
         'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
         'gems' => 12,
         'tokens' => 25.4345061456,
         'percentage' => 0.5086901229334464,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'b7e0fe87-a5fc-45e5-be43-02ecd0e1211d',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5890,8 +5890,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:58:34.443185',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '4259da20-6ce3-4d72-a057-aa539947552c',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5901,8 +5901,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:54:08.270177',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'a9a43bd5-2d13-4525-abbd-40acb6db781b',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5912,8 +5912,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:03:19.756144',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '86bf1318-8e84-4ae7-8159-a7c57561b80b',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5923,8 +5923,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:06.151207',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '861413c6-be7a-4af7-94e0-04da416bbb0d',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5934,8 +5934,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:22:59.029182',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '13795e8a-4925-495a-983f-a2fe7a6a501f',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5945,8 +5945,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:46.724045',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'e69b98e0-52f1-44be-a689-85461043782c',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5956,8 +5956,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:25.468459',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'e4c855f9-12b1-425a-9e9c-400266083179',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5967,8 +5967,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:18.353635',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '2b4287ba-0952-43d6-82bd-30df77e887db',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5978,8 +5978,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:31:03.115548',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '4a819985-00ef-494e-87e8-6a5aabc9276f',
             'userid' => 'a64e3a9a-2f3a-4bf5-aae1-ce3e39477449',
             'postid' => '11cda90d-8b98-4a3c-b16a-9abb72ed21e4',
@@ -5991,16 +5991,16 @@ return array (
           ),
         ),
       ),
-      42 => 
-      array (
+      42 =>
+      array(
         'userid' => 'aaba7a8d-c4e1-4384-89b7-b077a300783e',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '25eda97a-fed5-429c-971c-b244d82d874e',
             'userid' => 'aaba7a8d-c4e1-4384-89b7-b077a300783e',
             'postid' => 'f1da803f-9190-45ab-baa4-d962f47b1b62',
@@ -6012,16 +6012,16 @@ return array (
           ),
         ),
       ),
-      43 => 
-      array (
+      43 =>
+      array(
         'userid' => 'abaf35e0-058e-470b-ab18-70788d790957',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '2e53ad10-53f0-4d44-99ae-51caa5e84b07',
             'userid' => 'abaf35e0-058e-470b-ab18-70788d790957',
             'postid' => '8f8abd9b-dbdd-4937-b649-96763f9cfbcf',
@@ -6033,16 +6033,16 @@ return array (
           ),
         ),
       ),
-      44 => 
-      array (
+      44 =>
+      array(
         'userid' => 'b174f040-c018-4500-a4cc-d1e9bc9c2fb3',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'c907ed48-9b66-4c7f-8d50-4ec96aee26cd',
             'userid' => 'b174f040-c018-4500-a4cc-d1e9bc9c2fb3',
             'postid' => 'df869cc9-e2b4-4d00-98f1-86f127af5c4c',
@@ -6054,16 +6054,16 @@ return array (
           ),
         ),
       ),
-      45 => 
-      array (
+      45 =>
+      array(
         'userid' => 'b391eae9-0f46-416a-a8be-874f559ab83e',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '9fd395f7-a611-480c-af05-d6c85ee0514f',
             'userid' => 'b391eae9-0f46-416a-a8be-874f559ab83e',
             'postid' => 'acd1ad74-d5ff-4c07-9ccf-6a1505b859b0',
@@ -6075,16 +6075,16 @@ return array (
           ),
         ),
       ),
-      46 => 
-      array (
+      46 =>
+      array(
         'userid' => 'b5abf95c-75c3-4cd9-a08f-8b7e584cc991',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '341f24ab-5369-4614-ba43-ac784368f916',
             'userid' => 'b5abf95c-75c3-4cd9-a08f-8b7e584cc991',
             'postid' => 'cf78ebf0-f6f6-44c2-ad32-bc2e0fa86333',
@@ -6096,16 +6096,16 @@ return array (
           ),
         ),
       ),
-      47 => 
-      array (
+      47 =>
+      array(
         'userid' => 'b861760f-1c19-4a8e-9ccf-51af8bb20e5e',
         'gems' => 0.5,
         'tokens' => 1.0597710894,
         'percentage' => 0.0211954217888936,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'eae83645-28a8-4ec4-86d4-2a5ee70bfa3e',
             'userid' => 'b861760f-1c19-4a8e-9ccf-51af8bb20e5e',
             'postid' => '187d5943-a29f-4bc1-9840-88b2a0d9ba5d',
@@ -6115,8 +6115,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:35:25.061811',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'f6fd619f-8dc8-4da4-8701-ae6704c9e129',
             'userid' => 'b861760f-1c19-4a8e-9ccf-51af8bb20e5e',
             'postid' => 'c18b2033-28c1-4d99-84cb-48ba95a262b6',
@@ -6128,16 +6128,16 @@ return array (
           ),
         ),
       ),
-      48 => 
-      array (
+      48 =>
+      array(
         'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
         'gems' => 6.25,
         'tokens' => 13.2471386175,
         'percentage' => 0.26494277236117,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'ac3625e6-b224-408d-ab55-dfd30b363bd5',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => '66ec06ab-854d-4b0e-847f-1b190a53f473',
@@ -6147,8 +6147,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:34:14.790974',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '1c6f0d49-e038-4a68-979e-0f7129500cd9',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => '97e8231e-a91e-456b-9cdb-6273b990701e',
@@ -6158,8 +6158,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:34:23.550423',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '23665b39-be6f-4291-991d-9ab9e6751727',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => 'aa900efa-8409-4d20-b77b-fdc78a203dbc',
@@ -6169,8 +6169,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:38:54.77588',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'c3d7edbe-f13e-421c-ac02-0b78d555cd66',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => '10e16a61-ee34-4622-9d4d-d52fa2e91139',
@@ -6180,8 +6180,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:01:09.393884',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'd43b160a-648d-4377-b701-59a44a659834',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => '10e16a61-ee34-4622-9d4d-d52fa2e91139',
@@ -6191,8 +6191,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:26.2204',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '66017566-29da-49e1-9eac-effb61613032',
             'userid' => 'b9a40558-e10f-4bb1-922d-3de7d318c193',
             'postid' => '66ec06ab-854d-4b0e-847f-1b190a53f473',
@@ -6204,16 +6204,16 @@ return array (
           ),
         ),
       ),
-      49 => 
-      array (
+      49 =>
+      array(
         'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
         'gems' => 12.5,
         'tokens' => 26.494277235,
         'percentage' => 0.52988554472234,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '1fee7560-c019-40d2-ab15-314b1a201956',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '2f33002c-9b24-41a6-9f83-ec41c69cbb36',
@@ -6223,8 +6223,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:56.682935',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '0503ba48-45b2-4020-9002-e7dabddfda2b',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '16bf5f85-d7b2-403c-9955-fe22ddbf7b51',
@@ -6234,8 +6234,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:01.24584',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '080ae091-9715-432e-ae65-4e9c4914bf71',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '8e638431-b955-4c56-8a74-651143c53fe0',
@@ -6245,8 +6245,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:40.761488',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'a51b9b6a-988d-4395-9a86-e3046b70d588',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '26fea5d4-282e-4130-8eef-1badae5fdd8c',
@@ -6256,8 +6256,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:58.947945',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'f9e102e8-4a06-4eef-a589-1986acadf919',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '314e29b7-722c-4112-bc08-edfc5df2867a',
@@ -6267,8 +6267,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:52.118897',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => 'a0ff477b-4390-48b9-b37c-b070df5a9e23',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '802043b0-8d32-4ebf-ad91-7a528b6940d7',
@@ -6278,8 +6278,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:02.22359',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'b882d38a-9100-4fde-93f8-bc3e8215b322',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => 'aa59c3b5-16cd-4cea-8c32-9210a5e4eef9',
@@ -6289,8 +6289,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:25.721002',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '87fddc7f-a620-454d-8915-a1046e31d5a1',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => 'af1d2295-b1f9-47a6-808d-70077a8e1d15',
@@ -6300,8 +6300,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:37.017684',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '3fb4a7e6-4b7d-455c-92b2-f53c84b59ed6',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '1bcf3aca-26fb-4068-83f4-1a1e0449ae0d',
@@ -6311,8 +6311,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:46.150709',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '726bb03f-d858-44cb-b1a3-40cb9c077ec4',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '0aeb53a6-5102-4b91-8923-d50cfcea55be',
@@ -6322,8 +6322,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:47.652645',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '19af5300-fa92-4d18-a289-051bf729e843',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '488e57f4-1b83-48a8-a452-4712f97b81e2',
@@ -6333,8 +6333,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:01:56.147178',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'fc74b2e3-4bb5-40ac-b98b-33eabb69ac5d',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '8e615928-d898-44f5-a729-dd98ae146954',
@@ -6344,8 +6344,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:02:00.571463',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'a10dc2fb-5964-477d-b260-671e251bed1c',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6355,8 +6355,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:28:46.500977',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => 'ee9a0820-d8ef-424b-8234-32b5dc26d9d0',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6366,8 +6366,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:42:16.148382',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '6da3e62d-23a0-4ce6-99bd-fe2fb8722258',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '5cf54397-0654-40e8-9e86-9f6dd4e54e48',
@@ -6377,8 +6377,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:38:31.676251',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '82e85154-2e26-40b9-af4c-2068e0d69058',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6388,8 +6388,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:00:34.525012',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => 'b24f8bc5-8855-4c12-b223-129e52479327',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6399,8 +6399,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:06:32.783594',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '27ed65c5-8159-4f1c-92a5-ac907d811c3e',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '5cf54397-0654-40e8-9e86-9f6dd4e54e48',
@@ -6410,8 +6410,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:18:45.735195',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => '84afd4d4-d641-46bb-b7b9-1159a240c079',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6421,8 +6421,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:18:46.71989',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '802dbe08-3403-49cf-b165-85614180ec7e',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6432,8 +6432,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:35:46.209003',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'b27229d8-25e6-4f0f-aaac-9c5b98285958',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '5cf54397-0654-40e8-9e86-9f6dd4e54e48',
@@ -6443,8 +6443,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:24:36.385531',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => 'f82ae497-521e-423f-9148-d71dbc405450',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6454,8 +6454,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:57:57.702342',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '21c85d68-f6e5-45fe-afc9-92e44e086761',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '5cf54397-0654-40e8-9e86-9f6dd4e54e48',
@@ -6465,8 +6465,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:24:57.674924',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => 'dae879d5-9353-4889-bead-1d79a292cd60',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6476,8 +6476,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:09:56.131592',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => 'e704696b-d053-4c36-bf26-ed19ecdaf31f',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6487,8 +6487,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:12:49.757984',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => '70f74e47-cf4d-43c2-a300-6aff63072587',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6498,8 +6498,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:39:21.990079',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => 'b08e1f1f-637e-496f-a1d4-56015a11004f',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6509,8 +6509,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:42:40.387697',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => '62b7d712-afb1-4d6a-9d20-cab408bb1fab',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6520,8 +6520,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:03.604536',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => 'bee7644a-2bb7-4228-b702-4c598dbc9851',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '5cf54397-0654-40e8-9e86-9f6dd4e54e48',
@@ -6531,8 +6531,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:08.023864',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => '52169105-19a3-44e5-b8ef-368e298caea3',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '6f6bb917-4026-40f0-8a81-54b96bf7bb8b',
@@ -6542,8 +6542,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:35.013098',
           ),
-          30 => 
-          array (
+          30 =>
+          array(
             'gemid' => '41cd2d17-cc99-40ff-b051-d41726ef4932',
             'userid' => 'be8179fb-93f4-460a-897d-788181f7fb6f',
             'postid' => '22e03823-59dd-44fa-97ab-67b956bcb9de',
@@ -6555,16 +6555,16 @@ return array (
           ),
         ),
       ),
-      50 => 
-      array (
+      50 =>
+      array(
         'userid' => 'c3dc4bd9-e869-47c9-a57b-edb939bd4c35',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '9484e930-1a15-4800-9bfe-e17d2a1189d5',
             'userid' => 'c3dc4bd9-e869-47c9-a57b-edb939bd4c35',
             'postid' => 'f44e54bd-1bca-48bf-9178-d02417148826',
@@ -6576,16 +6576,16 @@ return array (
           ),
         ),
       ),
-      51 => 
-      array (
+      51 =>
+      array(
         'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
         'gems' => 11.25,
         'tokens' => 23.8448495115,
         'percentage' => 0.47689699025010596,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '1833f0b0-970b-49c0-a6b4-fb161125ab31',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '392e4453-5f2d-45e9-925d-3dc42d331b1a',
@@ -6595,8 +6595,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:38.555268',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'a60a2418-2432-44fd-a8b6-8a54aa0ad97d',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '7e99ad48-5c1f-4871-932a-3085195548f3',
@@ -6606,8 +6606,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:52.550275',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'aa425199-b55d-4f31-ae7a-0071258bb2e6',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '392e4453-5f2d-45e9-925d-3dc42d331b1a',
@@ -6617,8 +6617,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:32:54.582417',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '32bf54dc-95c2-433a-994b-d6d389d423f0',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '634970c9-8da5-4c37-9709-1e074a482142',
@@ -6628,8 +6628,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:06.837455',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '6392a557-a3dd-47ad-b9cf-94e2e8c06adf',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '2143d92b-d8bf-4591-b85c-8cd7cc6ae378',
@@ -6639,8 +6639,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:12.076545',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '522bfa10-79cb-4058-8748-bcfd20c860e0',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'ced34dfb-34aa-4ec7-ab47-556abd313e1a',
@@ -6650,8 +6650,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:15.974821',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '02ec2bd1-550e-4110-9b58-eb0db97c8d8a',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '13be8ec1-cd5c-4f68-8024-7b56e8849b6f',
@@ -6661,8 +6661,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:30.35262',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '30440903-4b31-433f-bd43-1fbab5ca5f9e',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '104de9c7-7851-4b09-b660-51704903c016',
@@ -6672,8 +6672,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:30.385268',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '47c4d2a4-a129-4925-a5cf-54a561524d3c',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd3a31b8e-a7a0-4e55-96b2-53c18a8f9964',
@@ -6683,8 +6683,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:33:41.948293',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'd7efcfed-6ebf-4529-9b8a-2fac56a0c210',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '1995c4ac-c7c0-458a-be44-fd2653b3ca2f',
@@ -6694,8 +6694,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:53:05.606721',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'b0fe53cc-c6d7-44a5-aa32-95adf05d89cf',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd26fcee2-7469-4758-8f88-6ac638fd84cb',
@@ -6705,8 +6705,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:04:50.316333',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '7e5b4a8c-a339-4f9c-be56-a1838a9b6f85',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '1995c4ac-c7c0-458a-be44-fd2653b3ca2f',
@@ -6716,8 +6716,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 16:10:57.743306',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'c68c4a57-f7b5-4cde-8430-cdda64e16a68',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '14bcfeef-42b0-4e63-a387-e1bcbbe25413',
@@ -6727,8 +6727,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:01:23.835922',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '61fe8f45-5b73-475e-8334-f88c474800cb',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '682238e2-4a48-45a3-bae0-bb256fb181dc',
@@ -6738,8 +6738,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:31:05.282046',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'a38f7f59-0976-438d-a40b-7d76814965ff',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd26fcee2-7469-4758-8f88-6ac638fd84cb',
@@ -6749,8 +6749,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:04:41.689584',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '2f837961-8c19-4d5e-8f34-a095d12b28df',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd26fcee2-7469-4758-8f88-6ac638fd84cb',
@@ -6760,8 +6760,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:34:01.769739',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => 'ab5c3204-0767-4c1a-8bf8-5a2a64506ed6',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => '14bcfeef-42b0-4e63-a387-e1bcbbe25413',
@@ -6771,8 +6771,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:34:43.551672',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'fb5d29d6-3794-4302-91bc-8ea1e3028a99',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd26fcee2-7469-4758-8f88-6ac638fd84cb',
@@ -6782,8 +6782,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:04:44.245473',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'ae94138d-5ff6-4efe-add4-7071e1d42a9c',
             'userid' => 'ca49685c-9e70-4b30-b1db-7c615b7f1993',
             'postid' => 'd26fcee2-7469-4758-8f88-6ac638fd84cb',
@@ -6795,16 +6795,16 @@ return array (
           ),
         ),
       ),
-      52 => 
-      array (
+      52 =>
+      array(
         'userid' => 'd4401079-41f1-4af8-b752-fc63dfc7df6e',
         'gems' => 0.25,
         'tokens' => 0.5298855447,
         'percentage' => 0.0105977108944468,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'ea86663e-c0a7-49df-be28-b972d5817a78',
             'userid' => 'd4401079-41f1-4af8-b752-fc63dfc7df6e',
             'postid' => '8ff36f29-09ab-4de2-8a0f-56c6d4df33c4',
@@ -6816,16 +6816,16 @@ return array (
           ),
         ),
       ),
-      53 => 
-      array (
+      53 =>
+      array(
         'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
         'gems' => 8.75,
         'tokens' => 18.5459940645,
         'percentage' => 0.37091988130563797,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '15c6d54b-6641-48a1-850f-a01e4e0e8ad6',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6835,8 +6835,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:31:34.485204',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '333edc94-22b5-411b-9592-07fe04e13574',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6846,8 +6846,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:15:17.300602',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '7a455b0c-3351-4f96-87c4-2a4efed04b75',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6857,8 +6857,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:54:55.64756',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '5bfe8a72-1af4-4e3d-9bd5-f8df1544e119',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6868,8 +6868,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:37:02.16932',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '80171274-1a9a-4f0e-8285-4ef7c313efbe',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6879,8 +6879,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:12:32.823068',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '1e9823d5-9a3f-4b91-9658-502b1f8e90af',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6890,8 +6890,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:02.730128',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '416400cd-5643-46c9-a42d-5f9fbfda223b',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => '51b8fa08-5eb8-46b7-a439-ab4a10b45520',
@@ -6901,8 +6901,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:24.488982',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '96d7f139-635b-4d47-b829-503356f29486',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => 'f0db26df-7fec-4ddb-bdba-2ab93d6b7ec4',
@@ -6912,8 +6912,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 18:31:37.564694',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => 'd5414329-cf12-442f-8f0c-0cf9e651dc18',
             'userid' => 'd9aa033e-f39e-4c92-89a4-c808e2783cca',
             'postid' => '51b8fa08-5eb8-46b7-a439-ab4a10b45520',
@@ -6925,16 +6925,16 @@ return array (
           ),
         ),
       ),
-      54 => 
-      array (
+      54 =>
+      array(
         'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
         'gems' => 19.25,
         'tokens' => 40.8011869419,
         'percentage' => 0.8160237388724035,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '02f8002c-d1d2-4d3f-bf54-5c87603059d4',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -6944,8 +6944,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:42:38.535159',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '6d856281-643c-4e92-b21e-df997d106a3a',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -6955,8 +6955,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:54:06.572393',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '1abba7d7-4d63-4460-8388-13247712c84a',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => 'ac9aea81-3264-4809-a3a8-c2d03517b859',
@@ -6966,8 +6966,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:15:28.462006',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'f3db47ed-62ac-49f2-84eb-e8401f65c7b3',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -6977,8 +6977,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:24:51.026423',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'c769f834-e9d6-4ee3-b3f6-9988d7e6c09e',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -6988,8 +6988,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:27.677693',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '8626b086-9c43-45ab-abc6-b6409454925d',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -6999,8 +6999,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:07.501838',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'ebf2c712-5d8f-4809-b153-066cd3f487e4',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7010,8 +7010,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:15:10.676247',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '992cc663-d063-4b9f-9665-cbf8008d197c',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => 'b0d6869c-0872-4bc0-859e-c592e77ff7f3',
@@ -7021,8 +7021,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:15:28.462012',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '1ae46747-10f9-4be9-a9c2-48679adb91e7',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7032,8 +7032,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:35:56.835603',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => 'b1e5d0e1-bb99-4474-b298-320cff4b56c6',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7043,8 +7043,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:41.536924',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'b3cb608a-c2ff-4d51-9c4e-7cdc9599beb7',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7054,8 +7054,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:19.281771',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => 'e746633e-cec2-4e28-9522-3bc1a311772d',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7065,8 +7065,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:01.374712',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => 'e50e0799-ae13-46bc-96dc-4988f01de475',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7076,8 +7076,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:00:47.800343',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '9f9803ff-7c83-42ea-89a1-be6cbec53acf',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7087,8 +7087,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 17:15:22.648008',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '1070ce36-3912-4c69-a6e5-d4f695331bf5',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7098,8 +7098,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:05:12.188803',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => 'e2df00b0-98d4-4085-97b3-61d4b72d8f6b',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7109,8 +7109,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:43:12.18415',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '14bdf761-27e7-4c52-b711-8bca79cd140a',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7120,8 +7120,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 17:15:21.138138',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => '38719f1b-daf7-4140-9d3b-397e92891416',
             'userid' => 'db1ff772-a9f3-4cef-91a1-0ac7cdca8746',
             'postid' => '01ed1dee-6a6f-490b-952e-f52ef46901a6',
@@ -7133,16 +7133,16 @@ return array (
           ),
         ),
       ),
-      55 => 
-      array (
+      55 =>
+      array(
         'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
         'gems' => 6.75,
         'tokens' => 14.3069097069,
         'percentage' => 0.2861381941500636,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'b94a5401-2c93-4aa3-afbb-26c97362b7cb',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => 'e3e0d0c1-6c25-4aba-b729-2af9959c8437',
@@ -7152,8 +7152,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:01:00.527516',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'd6407188-7937-4af9-821e-6c93439a91a6',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => 'e3e0d0c1-6c25-4aba-b729-2af9959c8437',
@@ -7163,8 +7163,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:33:59.789225',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'a841f9c8-7168-4103-880f-230546e07177',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => 'e3e0d0c1-6c25-4aba-b729-2af9959c8437',
@@ -7174,8 +7174,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:31.687838',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '9083e8af-9565-43d1-95ae-e16af0117034',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => '47935428-2f8c-4993-8591-24b6e7ad2185',
@@ -7185,8 +7185,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 11:33:55.762564',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '59fb4e10-5e2b-4cdd-b66d-b069943f971e',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => '47935428-2f8c-4993-8591-24b6e7ad2185',
@@ -7196,8 +7196,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:26:45.848968',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '73d61809-2f27-4276-8dc8-efe9c9b362a0',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => '47935428-2f8c-4993-8591-24b6e7ad2185',
@@ -7207,8 +7207,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:43.154903',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => 'f30fd5e7-11a8-4ab8-ab22-c9b3f1e87906',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => '8d6b63e4-76fc-4c05-8ce7-8db6b22b945f',
@@ -7218,8 +7218,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:34:49.290907',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => 'b32f8905-b39b-413b-9518-da85c06cc763',
             'userid' => 'e03b8f19-5c37-4a07-8109-d61b624aef6b',
             'postid' => 'e3e0d0c1-6c25-4aba-b729-2af9959c8437',
@@ -7231,16 +7231,16 @@ return array (
           ),
         ),
       ),
-      56 => 
-      array (
+      56 =>
+      array(
         'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
         'gems' => 33.75,
         'tokens' => 71.5345485345,
         'percentage' => 1.430690970750318,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'd0db0510-26db-4450-9f68-fd1a99f0fba1',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7250,8 +7250,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:42:24.018973',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => 'c4afdb5f-57db-4c4d-9b81-4e63ce145293',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7261,8 +7261,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:54:10.59607',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => '08d65729-d7ad-4c57-9fbf-cd3077be42db',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7272,8 +7272,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:20:03.418516',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'e8670552-08fc-4ba9-8e41-bd2c096de5a6',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7283,8 +7283,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 20:22:34.598971',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => 'cb9daa6a-3e01-47d2-95f1-0fdcec46a261',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7294,8 +7294,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:35:02.726932',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '44e1ffae-ae0e-4f01-911d-9dea0ebfee17',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7305,8 +7305,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:26.050539',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '15f6ef60-e2d4-4b57-98f8-56c4e1fb6925',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7316,8 +7316,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:27:25.402773',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '04862a3e-f010-4503-bcf8-ae5bb0132cb5',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7327,8 +7327,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:36:03.712935',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '1b90cbbd-f67b-4e87-b291-d0debbc2a20a',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7338,8 +7338,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 17:50:28.360832',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '65bcec21-9d2d-4ebb-b9b4-b5b7256c926e',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7349,8 +7349,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:25:36.083989',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => '2a7d5e83-587d-4816-a09d-ac2162eef70d',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7360,8 +7360,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:26.853094',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '85192cc4-313d-4fa1-ad59-8dda945d2dec',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7371,8 +7371,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:35:03.660934',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '08684d20-fcde-4a93-af6a-41e4873c739b',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7382,8 +7382,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:36:37.413052',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => 'ea20a98c-1087-4e48-aa53-e635c4f68174',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7393,8 +7393,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:31:38.198817',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => '37ab0cf6-0124-4056-9424-280ce2c5a19f',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7404,8 +7404,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:15:17.610223',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '9862d5e1-0168-422f-9f39-6fb31100d129',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7415,8 +7415,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:01.791437',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '4d06641d-e176-4f56-82a5-1578fa4d18ad',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7426,8 +7426,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:23.548975',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'e144f921-8963-4c3f-b0a7-47820cdcd20b',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7437,8 +7437,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:32:35.574672',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'e3b3d5cc-c6a5-43cf-8a13-29ffdf9dbdcc',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7448,8 +7448,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:09.715161',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '60753b58-bdef-4667-869f-4c15ff12d6ff',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7459,8 +7459,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:02:18.136474',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => 'fc57e3cd-b800-4da0-8713-f7115f38d614',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7470,8 +7470,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:32:42.063817',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '4f89cfd1-55b9-4bf7-9126-56fa6df39fad',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7481,8 +7481,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 13:33:12.566609',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => 'b54b6f78-7924-4fc4-a8f1-d681184e888a',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7492,8 +7492,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:54:25.520226',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => 'f5deb73d-acf5-4462-a322-070c8d4190ce',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7503,8 +7503,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 20:22:24.78048',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => '842fbaf1-9279-4022-8eb0-9429b708e400',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => '480d87c6-5dd1-4a47-b335-02de7985d0f7',
@@ -7514,8 +7514,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:54:21.290201',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => 'dc4f0a5f-6871-4fab-b1e6-93edce2857e3',
             'userid' => 'ec03f0f6-b581-43d8-a6b6-22b12e12e2eb',
             'postid' => 'b6effac7-12dd-416e-bf2f-d1513e40763d',
@@ -7527,16 +7527,16 @@ return array (
           ),
         ),
       ),
-      57 => 
-      array (
+      57 =>
+      array(
         'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
         'gems' => 1798.5,
         'tokens' => 3811.9966085718,
         'percentage' => 76.23993217465028,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => '831205b8-ccbf-472a-a41b-e25a8e749a08',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '67aab17d-4639-4364-88d8-3bf42f51bea0',
@@ -7546,8 +7546,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:25.330064',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '9f1cfc0d-15dd-4c32-b853-d1e472e8da5d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '71b2f460-a3f2-4e0d-9415-070c12e3d244',
@@ -7557,8 +7557,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 09:00:26.350579',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'eadcce31-9f97-4cc4-a419-1854fbf423e6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7568,8 +7568,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:35:26.99552',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => '89d0cc28-29ee-4acb-9612-7a88ae6af204',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7579,8 +7579,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:35:30.709464',
           ),
-          4 => 
-          array (
+          4 =>
+          array(
             'gemid' => '0b12bd9e-a51b-4ec6-9c63-2aa98e9009bf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7590,8 +7590,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:35:31.878996',
           ),
-          5 => 
-          array (
+          5 =>
+          array(
             'gemid' => '662a72ea-bc73-45de-ad03-8d2a2f98b4db',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7601,8 +7601,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:35:35.290042',
           ),
-          6 => 
-          array (
+          6 =>
+          array(
             'gemid' => '0ba7a0a3-1b54-449f-8a0e-735264bf32f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7612,8 +7612,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:37:07.548002',
           ),
-          7 => 
-          array (
+          7 =>
+          array(
             'gemid' => '5ad93620-5938-4edb-94e8-ce8125c9359b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7623,8 +7623,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:37:13.608497',
           ),
-          8 => 
-          array (
+          8 =>
+          array(
             'gemid' => '40673980-8e4c-48d0-96a5-58d2538cf14c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7634,8 +7634,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:37:18.56334',
           ),
-          9 => 
-          array (
+          9 =>
+          array(
             'gemid' => '06a44e13-44f5-4aec-b1c8-4cbfe3f6c7b6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7645,8 +7645,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:39:09.032135',
           ),
-          10 => 
-          array (
+          10 =>
+          array(
             'gemid' => 'b26c9c37-1a36-4bad-b86c-efc808cb95a3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7656,8 +7656,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:39:09.812635',
           ),
-          11 => 
-          array (
+          11 =>
+          array(
             'gemid' => '24a94d01-b00a-4dec-9f69-25c620096186',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7667,8 +7667,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:39:17.589103',
           ),
-          12 => 
-          array (
+          12 =>
+          array(
             'gemid' => '6964a655-abc1-4418-9695-a2a0112c2a3f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7678,8 +7678,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:40:45.748664',
           ),
-          13 => 
-          array (
+          13 =>
+          array(
             'gemid' => '5cd1333a-33b8-4602-ba83-309ab38b82bc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7689,8 +7689,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:40:49.566835',
           ),
-          14 => 
-          array (
+          14 =>
+          array(
             'gemid' => 'c5c3b48d-93d5-4c32-8b1f-83f9d9d5ad10',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7700,8 +7700,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:40:53.761847',
           ),
-          15 => 
-          array (
+          15 =>
+          array(
             'gemid' => '469761ca-5636-4202-9869-493336fc2473',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7711,8 +7711,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:42:09.998245',
           ),
-          16 => 
-          array (
+          16 =>
+          array(
             'gemid' => '8e8ddc81-13ac-45f3-8826-c437b2abc75b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7722,8 +7722,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:42:14.948169',
           ),
-          17 => 
-          array (
+          17 =>
+          array(
             'gemid' => 'b75e168f-469f-4dc3-93f8-162c995cc41b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7733,8 +7733,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:42:22.44307',
           ),
-          18 => 
-          array (
+          18 =>
+          array(
             'gemid' => 'c827a7b3-1483-40ef-b401-6fc8571f203b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7744,8 +7744,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:43:27.564212',
           ),
-          19 => 
-          array (
+          19 =>
+          array(
             'gemid' => '2c570922-0b41-424d-8bc8-cd218d792775',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7755,8 +7755,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:43:31.859965',
           ),
-          20 => 
-          array (
+          20 =>
+          array(
             'gemid' => '83c3bdd6-ca40-4ce9-8dc8-efd775f27d85',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7766,8 +7766,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:43:36.56825',
           ),
-          21 => 
-          array (
+          21 =>
+          array(
             'gemid' => '3eaf0b8e-bbcc-4392-af8e-4dc7edce0d7b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7777,8 +7777,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:45:05.061832',
           ),
-          22 => 
-          array (
+          22 =>
+          array(
             'gemid' => '9be3a46d-7ea4-4c63-a91c-8dcb8b4aecc1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7788,8 +7788,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:45:05.801515',
           ),
-          23 => 
-          array (
+          23 =>
+          array(
             'gemid' => '779e94ae-139c-48df-90ea-19da074d6869',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7799,8 +7799,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:45:15.39432',
           ),
-          24 => 
-          array (
+          24 =>
+          array(
             'gemid' => '78a7719c-be4a-41d2-b2bf-35a9d6172818',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7810,8 +7810,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:46:18.714637',
           ),
-          25 => 
-          array (
+          25 =>
+          array(
             'gemid' => 'e67a7b40-9577-4555-a209-6027a563e006',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7821,8 +7821,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:46:23.071396',
           ),
-          26 => 
-          array (
+          26 =>
+          array(
             'gemid' => '7207e6df-843f-4603-ac18-dc8c3d1493a7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7832,8 +7832,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:46:38.157165',
           ),
-          27 => 
-          array (
+          27 =>
+          array(
             'gemid' => '7be21349-1bf1-4cc4-8595-d1d0538411ef',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7843,8 +7843,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:47:32.646182',
           ),
-          28 => 
-          array (
+          28 =>
+          array(
             'gemid' => '77ca38fe-b640-4674-8fbc-8a320ab26a4f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7854,8 +7854,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:48:12.330213',
           ),
-          29 => 
-          array (
+          29 =>
+          array(
             'gemid' => 'eb5daafd-8fde-4695-bbfa-f7ff945fc753',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7865,8 +7865,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:48:16.78063',
           ),
-          30 => 
-          array (
+          30 =>
+          array(
             'gemid' => '3d8dd0ad-bd54-41e0-b169-3a053365d9ab',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7876,8 +7876,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:49:48.095486',
           ),
-          31 => 
-          array (
+          31 =>
+          array(
             'gemid' => 'fd547276-6cfa-4afa-a5fd-b6f3dfaa0718',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7887,8 +7887,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:49:51.709862',
           ),
-          32 => 
-          array (
+          32 =>
+          array(
             'gemid' => '91c55b90-51b1-44ad-9a3e-76929edfd37b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7898,8 +7898,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:49:56.439461',
           ),
-          33 => 
-          array (
+          33 =>
+          array(
             'gemid' => 'ece27f79-a161-4c62-905b-6c0bff24132a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '89201163-54fb-4777-8fe6-456c368e347d',
@@ -7909,8 +7909,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:50:01.220442',
           ),
-          34 => 
-          array (
+          34 =>
+          array(
             'gemid' => '16dc50d7-6511-4be5-81e6-92de8b70807f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7920,8 +7920,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:51:33.302409',
           ),
-          35 => 
-          array (
+          35 =>
+          array(
             'gemid' => '8c95fc42-b8ac-4777-a074-20b933e83ca3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7931,8 +7931,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:51:38.990392',
           ),
-          36 => 
-          array (
+          36 =>
+          array(
             'gemid' => 'e4dd39a0-975e-45ed-87a4-a651687f0d85',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7942,8 +7942,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:51:45.630168',
           ),
-          37 => 
-          array (
+          37 =>
+          array(
             'gemid' => '4ccce7d0-c90d-4084-84b7-44782cd7a979',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '71b2f460-a3f2-4e0d-9415-070c12e3d244',
@@ -7953,8 +7953,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:53:14.51748',
           ),
-          38 => 
-          array (
+          38 =>
+          array(
             'gemid' => '13e7fc7c-2deb-4ab6-9324-8dd061d3bca4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7964,8 +7964,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:53:25.562137',
           ),
-          39 => 
-          array (
+          39 =>
+          array(
             'gemid' => '9e4e4b64-2fa4-47b5-91f4-07b942fd44bf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -7975,8 +7975,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:53:30.214011',
           ),
-          40 => 
-          array (
+          40 =>
+          array(
             'gemid' => 'c9969508-a22d-4391-a9c7-293ba611a81c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -7986,8 +7986,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 14:53:36.347195',
           ),
-          41 => 
-          array (
+          41 =>
+          array(
             'gemid' => 'c9754379-c799-4c72-a436-a31b7f154f8c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -7997,8 +7997,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:02:05.156707',
           ),
-          42 => 
-          array (
+          42 =>
+          array(
             'gemid' => 'deb7b380-1051-4fae-be2c-35cd661504d4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8008,8 +8008,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:02:09.08784',
           ),
-          43 => 
-          array (
+          43 =>
+          array(
             'gemid' => 'bd4df5b7-2a84-4dd6-948e-e2ed03902d5d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8019,8 +8019,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:02:13.276291',
           ),
-          44 => 
-          array (
+          44 =>
+          array(
             'gemid' => 'd95b7940-da56-45d1-8504-5282556b3399',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8030,8 +8030,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:10:39.426535',
           ),
-          45 => 
-          array (
+          45 =>
+          array(
             'gemid' => 'afb5f5f0-18b7-4a9f-8d3f-a9790d075241',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8041,8 +8041,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:12:23.539539',
           ),
-          46 => 
-          array (
+          46 =>
+          array(
             'gemid' => 'b7c27fd3-a5b8-4801-8bd1-42c776efbb00',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8052,8 +8052,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 15:58:01.640881',
           ),
-          47 => 
-          array (
+          47 =>
+          array(
             'gemid' => '169dfe0a-aec5-45ea-a286-eb788f2ccd04',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8063,8 +8063,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:38.297941',
           ),
-          48 => 
-          array (
+          48 =>
+          array(
             'gemid' => '7a8cfcc2-c55b-4162-bdcf-371cf4bbc9f1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8074,8 +8074,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:15.982184',
           ),
-          49 => 
-          array (
+          49 =>
+          array(
             'gemid' => 'f199e59b-cabd-4d8e-ab7c-38c6c3d3c9ff',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8085,8 +8085,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:24.486951',
           ),
-          50 => 
-          array (
+          50 =>
+          array(
             'gemid' => 'a0abc20d-c062-431e-848a-bdc659e2a6f5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8096,8 +8096,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:04:33.490635',
           ),
-          51 => 
-          array (
+          51 =>
+          array(
             'gemid' => 'b40249f0-0a90-4160-93ed-22f31a8b07d3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8107,8 +8107,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:11:57.936204',
           ),
-          52 => 
-          array (
+          52 =>
+          array(
             'gemid' => '25d21495-7f8e-4745-ba6b-e7ae8e67b9bd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8118,8 +8118,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:17:56.309243',
           ),
-          53 => 
-          array (
+          53 =>
+          array(
             'gemid' => '5ad4a219-1c5e-42e4-a8f2-32f9b246f869',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8129,8 +8129,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:18:06.295764',
           ),
-          54 => 
-          array (
+          54 =>
+          array(
             'gemid' => 'c321df38-eda4-491e-bd5f-6a2dee0c5e58',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8140,8 +8140,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:20:25.864866',
           ),
-          55 => 
-          array (
+          55 =>
+          array(
             'gemid' => '2a5841dd-7e80-4986-ad0e-eea1729618a9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8151,8 +8151,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:21:59.637605',
           ),
-          56 => 
-          array (
+          56 =>
+          array(
             'gemid' => 'e648bfa2-7c21-411a-bca1-84e10bd4da80',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8162,8 +8162,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:23:27.697209',
           ),
-          57 => 
-          array (
+          57 =>
+          array(
             'gemid' => '69ba1885-5aee-40aa-9dc0-d0a7e1626205',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8173,8 +8173,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:26:26.560825',
           ),
-          58 => 
-          array (
+          58 =>
+          array(
             'gemid' => '2667bfd1-b0c2-4de4-b6a5-7cd7a9eeab3a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8184,8 +8184,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:26:34.266708',
           ),
-          59 => 
-          array (
+          59 =>
+          array(
             'gemid' => '13999477-1363-4a16-baca-e4493e541ca7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8195,8 +8195,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:27:47.133097',
           ),
-          60 => 
-          array (
+          60 =>
+          array(
             'gemid' => 'e7757baa-aa59-45d8-9022-a7008e72b5cd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8206,8 +8206,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:27:56.662241',
           ),
-          61 => 
-          array (
+          61 =>
+          array(
             'gemid' => '8e229b04-e4bf-4982-9f41-4ef897f535a9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8217,8 +8217,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:29:26.967442',
           ),
-          62 => 
-          array (
+          62 =>
+          array(
             'gemid' => '2cba70ed-5474-4d05-855b-394ff2a00cb0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8228,8 +8228,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:37:49.125089',
           ),
-          63 => 
-          array (
+          63 =>
+          array(
             'gemid' => '84de2fd6-4057-4172-88b8-628a1340ae87',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8239,8 +8239,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:52:26.195853',
           ),
-          64 => 
-          array (
+          64 =>
+          array(
             'gemid' => '494c7d21-9f64-48d1-a96d-3b70f32e838f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8250,8 +8250,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:52:51.75709',
           ),
-          65 => 
-          array (
+          65 =>
+          array(
             'gemid' => '0bd2e83a-a789-4c89-8065-c25172d25db9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8261,8 +8261,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:55:29.84803',
           ),
-          66 => 
-          array (
+          66 =>
+          array(
             'gemid' => '3221ffed-c257-4c83-abfc-28ca1c0973dc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8272,8 +8272,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:55:33.849729',
           ),
-          67 => 
-          array (
+          67 =>
+          array(
             'gemid' => 'c3680ffc-2c94-47e1-a029-84474d62b340',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8283,8 +8283,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:56:35.712247',
           ),
-          68 => 
-          array (
+          68 =>
+          array(
             'gemid' => 'f37def7a-5f92-47cc-a2b6-83a1cec0c425',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8294,8 +8294,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:57:39.060459',
           ),
-          69 => 
-          array (
+          69 =>
+          array(
             'gemid' => '4d817e7f-ea79-45a8-ac7b-2303b42d8aab',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8305,8 +8305,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:57:47.684954',
           ),
-          70 => 
-          array (
+          70 =>
+          array(
             'gemid' => 'd6e2d92c-7271-44d6-9b95-a426754a24d4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8316,8 +8316,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:59:22.355378',
           ),
-          71 => 
-          array (
+          71 =>
+          array(
             'gemid' => 'a7c03ff5-d78c-48ac-8b46-5f3d6b83dee2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8327,8 +8327,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:00:17.520771',
           ),
-          72 => 
-          array (
+          72 =>
+          array(
             'gemid' => 'e7a0859a-a2b4-445f-ac93-ae6b98636a1f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8338,8 +8338,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:02:09.167433',
           ),
-          73 => 
-          array (
+          73 =>
+          array(
             'gemid' => '4c5434d6-c537-40f0-ad67-25ae74715a54',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8349,8 +8349,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:02:19.813922',
           ),
-          74 => 
-          array (
+          74 =>
+          array(
             'gemid' => '9ce69cad-53fc-4388-9d42-7fea323cb03e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8360,8 +8360,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:03:49.319713',
           ),
-          75 => 
-          array (
+          75 =>
+          array(
             'gemid' => 'ca3c956a-7e61-4f76-99c9-0382e56dec5b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8371,8 +8371,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:54.081269',
           ),
-          76 => 
-          array (
+          76 =>
+          array(
             'gemid' => '33881fcf-66c7-4d59-b78f-2dee3dbdd047',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8382,8 +8382,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:56.681131',
           ),
-          77 => 
-          array (
+          77 =>
+          array(
             'gemid' => 'acdc798f-edab-45cb-a89b-12c1d1704d08',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8393,8 +8393,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:10:46.646257',
           ),
-          78 => 
-          array (
+          78 =>
+          array(
             'gemid' => 'd305fe9f-c770-4e67-ad6f-5c4bdb3c2c4e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8404,8 +8404,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:12:44.915968',
           ),
-          79 => 
-          array (
+          79 =>
+          array(
             'gemid' => '1d7178c0-b280-4700-ab97-bfe1ffeff93a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8415,8 +8415,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:26:53.400673',
           ),
-          80 => 
-          array (
+          80 =>
+          array(
             'gemid' => '39a46dbb-ee8b-44de-9cda-f9da2ad688d1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8426,8 +8426,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:28:00.880294',
           ),
-          81 => 
-          array (
+          81 =>
+          array(
             'gemid' => 'ce75598b-472d-43cd-9661-e8ec073c7323',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8437,8 +8437,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:38:33.223111',
           ),
-          82 => 
-          array (
+          82 =>
+          array(
             'gemid' => '9dd63775-6c2d-4a3c-9dd2-09be2d227551',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8448,8 +8448,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:40:45.836139',
           ),
-          83 => 
-          array (
+          83 =>
+          array(
             'gemid' => '26faace8-c9cc-4c81-a239-f974e21187f8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8459,8 +8459,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:40:51.905261',
           ),
-          84 => 
-          array (
+          84 =>
+          array(
             'gemid' => 'b2f49c12-a32f-4ed2-9f6c-c803d22b7077',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8470,8 +8470,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:41:03.902233',
           ),
-          85 => 
-          array (
+          85 =>
+          array(
             'gemid' => '6c1cf97e-e302-41df-a7fe-7d1042514b2d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8481,8 +8481,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:44:03.885323',
           ),
-          86 => 
-          array (
+          86 =>
+          array(
             'gemid' => '2f6dbd14-f41f-4d45-9733-0f78104aa533',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8492,8 +8492,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:44:08.07485',
           ),
-          87 => 
-          array (
+          87 =>
+          array(
             'gemid' => 'a972f33a-4230-4a75-99b0-e2532c962919',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8503,8 +8503,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:36.177681',
           ),
-          88 => 
-          array (
+          88 =>
+          array(
             'gemid' => 'c583ae70-8725-492d-8032-3bc2fa316bc5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8514,8 +8514,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:47:19.868101',
           ),
-          89 => 
-          array (
+          89 =>
+          array(
             'gemid' => '14761f7a-0c82-4070-b787-d1d90a2d4d7c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8525,8 +8525,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:47:25.244707',
           ),
-          90 => 
-          array (
+          90 =>
+          array(
             'gemid' => '0554bf2d-07db-427f-8355-bd81ee83cda4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8536,8 +8536,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:48:53.784315',
           ),
-          91 => 
-          array (
+          91 =>
+          array(
             'gemid' => 'cb2c2133-63e6-4904-9bae-2b09f439962b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8547,8 +8547,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:48:58.73277',
           ),
-          92 => 
-          array (
+          92 =>
+          array(
             'gemid' => '36af7041-4488-4e07-bf7f-7515036e779f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8558,8 +8558,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:51:16.70801',
           ),
-          93 => 
-          array (
+          93 =>
+          array(
             'gemid' => 'e3490ba2-b91a-4443-9a6d-9c71d1b324be',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8569,8 +8569,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:01:57.573148',
           ),
-          94 => 
-          array (
+          94 =>
+          array(
             'gemid' => 'bb41b8e6-c825-461f-b09a-73e7c2b9ad73',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8580,8 +8580,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:04:38.733191',
           ),
-          95 => 
-          array (
+          95 =>
+          array(
             'gemid' => 'e96b7ff6-daa8-491a-82c4-1cd067e401a6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8591,8 +8591,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:06:25.476873',
           ),
-          96 => 
-          array (
+          96 =>
+          array(
             'gemid' => '047ab47b-12e9-4326-b112-94a5bff31c1b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8602,8 +8602,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:06:35.624567',
           ),
-          97 => 
-          array (
+          97 =>
+          array(
             'gemid' => 'c448a98d-2b74-4a9a-8615-2df05858cb7c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8613,8 +8613,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:10:10.983128',
           ),
-          98 => 
-          array (
+          98 =>
+          array(
             'gemid' => 'dd95609d-7ee3-43bd-aced-d8fb639453b3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8624,8 +8624,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:12:05.209074',
           ),
-          99 => 
-          array (
+          99 =>
+          array(
             'gemid' => '1a97bfb8-4cd7-48a2-82ae-66ba144d653a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8635,8 +8635,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:13:31.136051',
           ),
-          100 => 
-          array (
+          100 =>
+          array(
             'gemid' => '1428478e-4405-487b-b680-681d002b5b67',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8646,8 +8646,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:14:40.689643',
           ),
-          101 => 
-          array (
+          101 =>
+          array(
             'gemid' => 'e79c8e1b-9b36-445d-87a5-c4a9bc8b8c5c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8657,8 +8657,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:14:46.722292',
           ),
-          102 => 
-          array (
+          102 =>
+          array(
             'gemid' => 'f1827a9d-3d40-4f30-8ca7-866d4a0cf81c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8668,8 +8668,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:16:13.707585',
           ),
-          103 => 
-          array (
+          103 =>
+          array(
             'gemid' => 'e595eb0f-c050-4e04-8ba4-f12219d0632a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8679,8 +8679,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:17:26.562226',
           ),
-          104 => 
-          array (
+          104 =>
+          array(
             'gemid' => '774da09a-6e8d-4d7d-aaf1-423a3ec41cf8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8690,8 +8690,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:18:27.044342',
           ),
-          105 => 
-          array (
+          105 =>
+          array(
             'gemid' => 'f05119c4-5605-4a3f-8b42-636aad8e7bd0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8701,8 +8701,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:19:41.629239',
           ),
-          106 => 
-          array (
+          106 =>
+          array(
             'gemid' => '2832aaf9-9d0a-479f-9613-90f2d2ab4d3a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8712,8 +8712,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:19:45.994102',
           ),
-          107 => 
-          array (
+          107 =>
+          array(
             'gemid' => 'ef1d251c-299d-4f4e-b3b5-57b02ab6913f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8723,8 +8723,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:20:55.592993',
           ),
-          108 => 
-          array (
+          108 =>
+          array(
             'gemid' => '9e8740b7-989f-432e-a1ce-268079853a02',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8734,8 +8734,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:24:43.704522',
           ),
-          109 => 
-          array (
+          109 =>
+          array(
             'gemid' => '086c85cc-d8c1-4e53-a173-a49ad1d9a615',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8745,8 +8745,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:36.062783',
           ),
-          110 => 
-          array (
+          110 =>
+          array(
             'gemid' => 'b0df8db8-9f98-4489-9482-fd4634859b6a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8756,8 +8756,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 18:55:39.266218',
           ),
-          111 => 
-          array (
+          111 =>
+          array(
             'gemid' => '57465f61-c32a-475a-ab69-206d4682b167',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8767,8 +8767,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 19:53:17.291372',
           ),
-          112 => 
-          array (
+          112 =>
+          array(
             'gemid' => 'cc4a3a27-b508-4d49-bb2d-277a37b53724',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8778,8 +8778,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:02:23.639717',
           ),
-          113 => 
-          array (
+          113 =>
+          array(
             'gemid' => 'c88aca0a-fa9d-4e72-bef5-26c76db8a427',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8789,8 +8789,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:03:56.386365',
           ),
-          114 => 
-          array (
+          114 =>
+          array(
             'gemid' => 'e1a9cd6c-191e-4f38-a30d-094b534594a5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8800,8 +8800,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:04:02.633344',
           ),
-          115 => 
-          array (
+          115 =>
+          array(
             'gemid' => '0945be4a-fea2-4c77-9c4a-2d0f41f92f2a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8811,8 +8811,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:11:03.032554',
           ),
-          116 => 
-          array (
+          116 =>
+          array(
             'gemid' => 'd91761ae-6ce5-4deb-880c-44d0814cd49d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8822,8 +8822,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:12:02.369161',
           ),
-          117 => 
-          array (
+          117 =>
+          array(
             'gemid' => '84e83543-faff-4842-8f70-98f5963d6ef5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8833,8 +8833,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:18:00.938417',
           ),
-          118 => 
-          array (
+          118 =>
+          array(
             'gemid' => 'e1a5cf07-49bc-41de-b469-7c920275a8b5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8844,8 +8844,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:19:07.813802',
           ),
-          119 => 
-          array (
+          119 =>
+          array(
             'gemid' => '0a9a240f-5787-4ecf-ba9c-1348b7262287',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8855,8 +8855,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:19:12.311422',
           ),
-          120 => 
-          array (
+          120 =>
+          array(
             'gemid' => 'be8ac313-2a05-48bc-bb63-c9f5359a0290',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8866,8 +8866,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:19:17.482839',
           ),
-          121 => 
-          array (
+          121 =>
+          array(
             'gemid' => '10fbbe3f-6592-4f9f-9625-dfcb289b8781',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8877,8 +8877,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:20:30.734913',
           ),
-          122 => 
-          array (
+          122 =>
+          array(
             'gemid' => 'cd7cee51-e47b-47e7-b908-e2fc6232035a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8888,8 +8888,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:20:36.775718',
           ),
-          123 => 
-          array (
+          123 =>
+          array(
             'gemid' => '74074c3c-40b1-4e7b-97d0-d8a43f2d4ec9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8899,8 +8899,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:22:04.031006',
           ),
-          124 => 
-          array (
+          124 =>
+          array(
             'gemid' => '0aa17803-c3ad-4548-9073-2c5711f3eb55',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8910,8 +8910,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:22:08.564229',
           ),
-          125 => 
-          array (
+          125 =>
+          array(
             'gemid' => '3944ea27-9b0b-44ef-b70b-0d4624e1b54e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -8921,8 +8921,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:23:23.204112',
           ),
-          126 => 
-          array (
+          126 =>
+          array(
             'gemid' => '46e57d01-1a79-42c6-943d-20bbcc9b676a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8932,8 +8932,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:23:32.513843',
           ),
-          127 => 
-          array (
+          127 =>
+          array(
             'gemid' => 'bfb9b540-81f7-4863-a4ed-2b9e729e5929',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8943,8 +8943,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:26:39.165885',
           ),
-          128 => 
-          array (
+          128 =>
+          array(
             'gemid' => '539dad8c-82cd-4624-944d-e5c2abc9b0db',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8954,8 +8954,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:27:51.528947',
           ),
-          129 => 
-          array (
+          129 =>
+          array(
             'gemid' => '55a0a394-08fe-44e7-a987-9d12d0d7148a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8965,8 +8965,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:29:36.468018',
           ),
-          130 => 
-          array (
+          130 =>
+          array(
             'gemid' => 'f4a8f7c3-9dfc-419b-852e-4757e214aaa1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -8976,8 +8976,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:29:41.061975',
           ),
-          131 => 
-          array (
+          131 =>
+          array(
             'gemid' => 'b98bbb3a-a442-4e8d-9206-8c5e563ba6bc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8987,8 +8987,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:37:42.234027',
           ),
-          132 => 
-          array (
+          132 =>
+          array(
             'gemid' => '39d0f364-499a-41a2-8b08-a6f35ac115dc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -8998,8 +8998,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:52:33.242628',
           ),
-          133 => 
-          array (
+          133 =>
+          array(
             'gemid' => 'ba44273e-3db9-4a4b-91be-865deea737b4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9009,8 +9009,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:55:26.006364',
           ),
-          134 => 
-          array (
+          134 =>
+          array(
             'gemid' => 'f85a38cf-3aac-4ca8-8abb-670e9e3392fd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9020,8 +9020,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:56:31.080808',
           ),
-          135 => 
-          array (
+          135 =>
+          array(
             'gemid' => '9bd1187b-a4aa-4098-97b7-79d0f228f3df',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9031,8 +9031,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:56:40.176179',
           ),
-          136 => 
-          array (
+          136 =>
+          array(
             'gemid' => 'cf7ccc84-3c64-4139-948c-0ceb90b3df14',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9042,8 +9042,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:57:40.541803',
           ),
-          137 => 
-          array (
+          137 =>
+          array(
             'gemid' => '4a14db13-e1ff-406a-8f36-86fd00f45e65',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9053,8 +9053,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:58:54.418843',
           ),
-          138 => 
-          array (
+          138 =>
+          array(
             'gemid' => '498c7f37-c081-4014-9d89-17c3ca4fd7e8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9064,8 +9064,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 21:58:58.232246',
           ),
-          139 => 
-          array (
+          139 =>
+          array(
             'gemid' => '9d9233e7-12e7-4660-8c50-5d6cda3e0e58',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9075,8 +9075,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:00:22.59983',
           ),
-          140 => 
-          array (
+          140 =>
+          array(
             'gemid' => 'a8f048f1-5362-426e-8848-45c6c575df64',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9086,8 +9086,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:00:26.447158',
           ),
-          141 => 
-          array (
+          141 =>
+          array(
             'gemid' => '140cc895-15ec-47c1-99b7-167c582ec320',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9097,8 +9097,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:02:15.593912',
           ),
-          142 => 
-          array (
+          142 =>
+          array(
             'gemid' => '392e9d88-e14f-4fa4-af3a-3229f236d0eb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9108,8 +9108,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:03:40.168853',
           ),
-          143 => 
-          array (
+          143 =>
+          array(
             'gemid' => 'e7da1971-929a-4e01-8e8c-f24fa2d3a16b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9119,8 +9119,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:03:44.049208',
           ),
-          144 => 
-          array (
+          144 =>
+          array(
             'gemid' => '33d90ed5-fb44-42f9-925f-3d8ee86a07d3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9130,8 +9130,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:03.71504',
           ),
-          145 => 
-          array (
+          145 =>
+          array(
             'gemid' => 'f24bc2c4-36e5-438c-a42d-7c80f2c68cd3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9141,8 +9141,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:05.417466',
           ),
-          146 => 
-          array (
+          146 =>
+          array(
             'gemid' => 'b7d0cc29-c8e2-4c68-8b6d-880d01d6f153',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9152,8 +9152,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:43.911537',
           ),
-          147 => 
-          array (
+          147 =>
+          array(
             'gemid' => '09af1be0-80c7-4258-8870-0a4bf75284ff',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9163,8 +9163,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:05:48.439906',
           ),
-          148 => 
-          array (
+          148 =>
+          array(
             'gemid' => 'f91b5735-cff5-4169-9e62-1a37a7dcd86f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9174,8 +9174,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:06:51.762989',
           ),
-          149 => 
-          array (
+          149 =>
+          array(
             'gemid' => '374446be-f474-4920-abcc-a028668fee3e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9185,8 +9185,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:07:00.664427',
           ),
-          150 => 
-          array (
+          150 =>
+          array(
             'gemid' => '21f5871d-ef31-4a1c-bcc9-7b66e9befb4f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9196,8 +9196,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:08:10.256074',
           ),
-          151 => 
-          array (
+          151 =>
+          array(
             'gemid' => '459ed7b7-9467-40a3-a637-fd5fd532afab',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9207,8 +9207,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:08:33.082801',
           ),
-          152 => 
-          array (
+          152 =>
+          array(
             'gemid' => 'd259ad33-33a7-4366-b076-f771be927cd9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9218,8 +9218,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:09:00.128183',
           ),
-          153 => 
-          array (
+          153 =>
+          array(
             'gemid' => '94b9522c-2183-4006-8572-d35ba0d5e744',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9229,8 +9229,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:10:57.806642',
           ),
-          154 => 
-          array (
+          154 =>
+          array(
             'gemid' => '8cd8c71f-8f0b-453d-b5da-5679a3543dd9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9240,8 +9240,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:12:10.651421',
           ),
-          155 => 
-          array (
+          155 =>
+          array(
             'gemid' => '140c53c5-8673-4120-9511-662df80325d7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9251,8 +9251,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:12:48.941283',
           ),
-          156 => 
-          array (
+          156 =>
+          array(
             'gemid' => 'd946b4c2-e756-4179-9b8e-b949cb0846cb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9262,8 +9262,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:12:54.370443',
           ),
-          157 => 
-          array (
+          157 =>
+          array(
             'gemid' => 'e4f64093-48dd-4a81-b664-cf656b05d423',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9273,8 +9273,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:38:39.641878',
           ),
-          158 => 
-          array (
+          158 =>
+          array(
             'gemid' => '43b953e6-0876-42e5-a915-d5b529200776',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9284,8 +9284,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:38:45.410936',
           ),
-          159 => 
-          array (
+          159 =>
+          array(
             'gemid' => '253620aa-a0ec-4d02-9351-783558712697',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9295,8 +9295,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:42:32.628134',
           ),
-          160 => 
-          array (
+          160 =>
+          array(
             'gemid' => '86ca19e7-56fb-453f-9769-e5d707c61ffa',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9306,8 +9306,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:42:36.769151',
           ),
-          161 => 
-          array (
+          161 =>
+          array(
             'gemid' => '7eeee52b-dd3c-414c-a313-aa03d19ef358',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9317,8 +9317,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:42:41.006158',
           ),
-          162 => 
-          array (
+          162 =>
+          array(
             'gemid' => 'ca8022fb-8038-4c27-9b4b-0436ccadb5c7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9328,8 +9328,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:43:59.71572',
           ),
-          163 => 
-          array (
+          163 =>
+          array(
             'gemid' => 'a5e97443-0925-4fb1-9522-b163a8720c90',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9339,8 +9339,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:26.533089',
           ),
-          164 => 
-          array (
+          164 =>
+          array(
             'gemid' => '8c897c85-ac55-46a1-8c95-30df95281745',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9350,8 +9350,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:45:32.027758',
           ),
-          165 => 
-          array (
+          165 =>
+          array(
             'gemid' => '4f14bf4e-d219-401e-a379-381de5f3ba4c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9361,8 +9361,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:47:12.670626',
           ),
-          166 => 
-          array (
+          166 =>
+          array(
             'gemid' => '7b9b4a92-b0fd-49c4-8d82-35ef249a9ed4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9372,8 +9372,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:49:02.777101',
           ),
-          167 => 
-          array (
+          167 =>
+          array(
             'gemid' => '5dbd4fc6-0e2e-4306-ada8-95c2010f24db',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9383,8 +9383,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 22:51:23.852567',
           ),
-          168 => 
-          array (
+          168 =>
+          array(
             'gemid' => '0018c61d-0a20-4096-b087-ab0047dac98a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9394,8 +9394,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:03:20.145188',
           ),
-          169 => 
-          array (
+          169 =>
+          array(
             'gemid' => 'bfa854ee-81f9-4fc3-87a3-25a73cd67696',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9405,8 +9405,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:03:52.701379',
           ),
-          170 => 
-          array (
+          170 =>
+          array(
             'gemid' => '2633cea3-1a3b-4933-8e43-c4862fecc804',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9416,8 +9416,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:06:18.63155',
           ),
-          171 => 
-          array (
+          171 =>
+          array(
             'gemid' => '61bef81e-a67d-4ec4-b3e4-808f15f6079b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9427,8 +9427,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:09:39.669018',
           ),
-          172 => 
-          array (
+          172 =>
+          array(
             'gemid' => 'ee916ae7-dc54-4f93-9998-8e9d266c4592',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9438,8 +9438,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:10:12.791614',
           ),
-          173 => 
-          array (
+          173 =>
+          array(
             'gemid' => '87619254-6216-4933-9376-de9adb0651d0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9449,8 +9449,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:11:41.58806',
           ),
-          174 => 
-          array (
+          174 =>
+          array(
             'gemid' => '7f67a481-20e5-45b7-98fb-34498d7ef01b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9460,8 +9460,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:13:26.020353',
           ),
-          175 => 
-          array (
+          175 =>
+          array(
             'gemid' => '6447e4af-7ea6-48e5-91a1-44352648b0c9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9471,8 +9471,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:13:35.006234',
           ),
-          176 => 
-          array (
+          176 =>
+          array(
             'gemid' => 'b33a20e1-5fb3-48ca-853f-5bb699652ddb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9482,8 +9482,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:14:36.761168',
           ),
-          177 => 
-          array (
+          177 =>
+          array(
             'gemid' => '13791f5a-e049-4918-b035-c27439f2d14b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9493,8 +9493,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:16:04.754467',
           ),
-          178 => 
-          array (
+          178 =>
+          array(
             'gemid' => 'cb145560-6c2c-4a43-a8ba-009511225415',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9504,8 +9504,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:16:09.466749',
           ),
-          179 => 
-          array (
+          179 =>
+          array(
             'gemid' => '3f6e35f2-c44e-482a-91e4-d6296067bc74',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9515,8 +9515,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:17:16.127487',
           ),
-          180 => 
-          array (
+          180 =>
+          array(
             'gemid' => '1c40ce24-9c4c-4c90-93c5-a1e4084fd9f8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9526,8 +9526,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:17:21.456012',
           ),
-          181 => 
-          array (
+          181 =>
+          array(
             'gemid' => '2440f944-010b-479e-9822-43e4feab9431',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9537,8 +9537,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:18:31.742998',
           ),
-          182 => 
-          array (
+          182 =>
+          array(
             'gemid' => '1862fff9-08ea-4bee-a68a-2f1b8df3c75a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9548,8 +9548,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:18:35.862424',
           ),
-          183 => 
-          array (
+          183 =>
+          array(
             'gemid' => '1c5aba12-c7df-418c-8558-4879847210d7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9559,8 +9559,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:19:50.069025',
           ),
-          184 => 
-          array (
+          184 =>
+          array(
             'gemid' => 'f88d7029-1a55-48e7-8c62-97b10f2f2b0f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9570,8 +9570,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:27:15.762479',
           ),
-          185 => 
-          array (
+          185 =>
+          array(
             'gemid' => '4d821e65-3aae-4798-9f5f-85adaaa12c7c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9581,8 +9581,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:28:50.720519',
           ),
-          186 => 
-          array (
+          186 =>
+          array(
             'gemid' => '26f0d48b-7e28-4beb-80a9-815d70f990de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9592,8 +9592,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:30:23.136211',
           ),
-          187 => 
-          array (
+          187 =>
+          array(
             'gemid' => '0b532c5c-ea96-427e-9b24-5f315c6d63a6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9603,8 +9603,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:31:37.561089',
           ),
-          188 => 
-          array (
+          188 =>
+          array(
             'gemid' => 'ba7c48fa-06d3-4ed3-a6a5-dfab268fcf33',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9614,8 +9614,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:32:46.830833',
           ),
-          189 => 
-          array (
+          189 =>
+          array(
             'gemid' => '5e5056df-0477-4c87-a46b-28b61545d577',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9625,8 +9625,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:33:43.382386',
           ),
-          190 => 
-          array (
+          190 =>
+          array(
             'gemid' => '36697a43-bb71-4b7f-9531-5ba3afefccd3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9636,8 +9636,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:33:51.800274',
           ),
-          191 => 
-          array (
+          191 =>
+          array(
             'gemid' => '9899f8c6-218d-4061-96fb-69f655ef90ee',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9647,8 +9647,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:36:58.45038',
           ),
-          192 => 
-          array (
+          192 =>
+          array(
             'gemid' => 'b2c2802a-2ea6-4745-a533-2e66a2b773da',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9658,8 +9658,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:38:05.784238',
           ),
-          193 => 
-          array (
+          193 =>
+          array(
             'gemid' => '2b5425e3-4f67-4c22-94b0-a0fe910bf10f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9669,8 +9669,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:39:57.411688',
           ),
-          194 => 
-          array (
+          194 =>
+          array(
             'gemid' => 'b7985fc0-f012-4a87-b3f2-3264245623e7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9680,8 +9680,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:40:02.061253',
           ),
-          195 => 
-          array (
+          195 =>
+          array(
             'gemid' => '6a05a18f-fd1b-40be-9209-2e6b618c94f2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9691,8 +9691,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:41:28.091368',
           ),
-          196 => 
-          array (
+          196 =>
+          array(
             'gemid' => '3b477745-57c9-4ea2-a386-f626a4277534',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9702,8 +9702,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:42:36.721363',
           ),
-          197 => 
-          array (
+          197 =>
+          array(
             'gemid' => '06f9bbd7-b081-458e-9450-5153461929fb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9713,8 +9713,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:42:40.793912',
           ),
-          198 => 
-          array (
+          198 =>
+          array(
             'gemid' => '1638956f-5c8f-465f-8a51-8657a0592dd2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9724,8 +9724,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:55:12.647922',
           ),
-          199 => 
-          array (
+          199 =>
+          array(
             'gemid' => '7e84f8bf-00fc-4dca-b506-ca5c12905cb9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9735,8 +9735,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:56:35.616528',
           ),
-          200 => 
-          array (
+          200 =>
+          array(
             'gemid' => '7f931b08-a8a5-41cf-b763-069cd51fadcb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9746,8 +9746,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:56:43.056313',
           ),
-          201 => 
-          array (
+          201 =>
+          array(
             'gemid' => '504dfcd1-b5d6-41da-9bfd-8441c11c74ea',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9757,8 +9757,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:57:45.937265',
           ),
-          202 => 
-          array (
+          202 =>
+          array(
             'gemid' => 'fb2f8b40-1722-4156-89b5-068a5407d872',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9768,8 +9768,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:59:01.776749',
           ),
-          203 => 
-          array (
+          203 =>
+          array(
             'gemid' => 'a7732eea-60cf-435e-b56c-75e371a68ca6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '89201163-54fb-4777-8fe6-456c368e347d',
@@ -9779,8 +9779,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:40.104293',
           ),
-          204 => 
-          array (
+          204 =>
+          array(
             'gemid' => '3acd45a4-bccf-46dc-8447-031ec1140e3f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '0977d6aa-9af1-49fe-9d8b-fd3263397e7d',
@@ -9790,8 +9790,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:46.40304',
           ),
-          205 => 
-          array (
+          205 =>
+          array(
             'gemid' => '02d66ae8-51c2-416a-926e-2483935ee14f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '13765061-19bb-4e12-807e-c502dc30a220',
@@ -9801,8 +9801,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:58.582537',
           ),
-          206 => 
-          array (
+          206 =>
+          array(
             'gemid' => '083e4467-e4c5-4170-87cc-46692627de43',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '81e4cd57-44c5-4f43-876e-d9288217e06e',
@@ -9812,8 +9812,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:08.881145',
           ),
-          207 => 
-          array (
+          207 =>
+          array(
             'gemid' => 'dbdcbe56-4504-4b00-a64f-e4d7e81e9f02',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'de339319-152b-4473-a9ef-b73a8c4be26e',
@@ -9823,8 +9823,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:19.204269',
           ),
-          208 => 
-          array (
+          208 =>
+          array(
             'gemid' => '47e4740c-95fb-46d6-b39e-6daa5cdff676',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9834,8 +9834,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:20:59.693649',
           ),
-          209 => 
-          array (
+          209 =>
+          array(
             'gemid' => 'becc127b-386c-4039-8142-34304c6d38e9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9845,8 +9845,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:21:03.952239',
           ),
-          210 => 
-          array (
+          210 =>
+          array(
             'gemid' => '4b689eac-d0b8-469f-91f1-9497284f97ad',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9856,8 +9856,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:22:15.154621',
           ),
-          211 => 
-          array (
+          211 =>
+          array(
             'gemid' => '7eaffae3-e70e-4f50-aa09-3138efc88ea6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9867,8 +9867,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:22:19.481267',
           ),
-          212 => 
-          array (
+          212 =>
+          array(
             'gemid' => '29e7e1c3-979a-49fc-93fb-8a64b7bcc4e7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9878,8 +9878,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:22:23.357443',
           ),
-          213 => 
-          array (
+          213 =>
+          array(
             'gemid' => 'e7a5e384-1d60-42f6-ae05-f930ce887ffe',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9889,8 +9889,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:23:07.536581',
           ),
-          214 => 
-          array (
+          214 =>
+          array(
             'gemid' => 'f2495cb9-cb89-4039-87fa-8c23fdb582c8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9900,8 +9900,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:23:27.073238',
           ),
-          215 => 
-          array (
+          215 =>
+          array(
             'gemid' => 'a30e362f-d6bb-4476-9b82-fd9a62d19a71',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9911,8 +9911,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:23:30.715347',
           ),
-          216 => 
-          array (
+          216 =>
+          array(
             'gemid' => '472c2663-c8f3-417d-8973-64c4f439f0c8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9922,8 +9922,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:24:36.97086',
           ),
-          217 => 
-          array (
+          217 =>
+          array(
             'gemid' => '23be79bb-514c-4ff0-810f-3e6cfe200ee8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9933,8 +9933,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:24:41.63496',
           ),
-          218 => 
-          array (
+          218 =>
+          array(
             'gemid' => '755e1052-d375-43f0-ba63-4612da9f0846',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -9944,8 +9944,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:25:58.868261',
           ),
-          219 => 
-          array (
+          219 =>
+          array(
             'gemid' => '1651e5db-47bc-4847-aa51-d9963b5fa4c9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9955,8 +9955,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:26:02.999189',
           ),
-          220 => 
-          array (
+          220 =>
+          array(
             'gemid' => 'cf7b3e1c-2696-416c-b217-00ba5d470a05',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9966,8 +9966,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:26:06.883794',
           ),
-          221 => 
-          array (
+          221 =>
+          array(
             'gemid' => '883d58ad-9433-4e30-8e2b-20e01d99f707',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -9977,8 +9977,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:27:20.953324',
           ),
-          222 => 
-          array (
+          222 =>
+          array(
             'gemid' => 'b830c9bc-bfb3-4d08-917d-be8edbfbdf18',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9988,8 +9988,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:27:24.960361',
           ),
-          223 => 
-          array (
+          223 =>
+          array(
             'gemid' => 'd6c4c72c-906b-4a05-b160-c06d3a1c7041',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -9999,8 +9999,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:28:56.631854',
           ),
-          224 => 
-          array (
+          224 =>
+          array(
             'gemid' => '90922fd7-83c5-4286-b253-8809781dbc64',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10010,8 +10010,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:30:14.777462',
           ),
-          225 => 
-          array (
+          225 =>
+          array(
             'gemid' => '5cfd86e6-9b32-42a0-b1b2-b29f390cd37b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10021,8 +10021,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:30:19.273266',
           ),
-          226 => 
-          array (
+          226 =>
+          array(
             'gemid' => 'fb4ffaf4-25cf-4b10-843d-f59383546220',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10032,8 +10032,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:31:31.810907',
           ),
-          227 => 
-          array (
+          227 =>
+          array(
             'gemid' => '028bebdc-b9d4-4b5b-9ee0-64e21c458664',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10043,8 +10043,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:31:41.919169',
           ),
-          228 => 
-          array (
+          228 =>
+          array(
             'gemid' => '482ffd27-cd79-4b6a-aefb-666d30676c17',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10054,8 +10054,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:32:43.122548',
           ),
-          229 => 
-          array (
+          229 =>
+          array(
             'gemid' => 'a796e23d-ff74-4ff0-88f1-b20fa07055ee',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10065,8 +10065,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:32:51.124842',
           ),
-          230 => 
-          array (
+          230 =>
+          array(
             'gemid' => 'ea00a42d-8760-47c5-a42e-eb9a9198da73',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10076,8 +10076,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:33:47.8866',
           ),
-          231 => 
-          array (
+          231 =>
+          array(
             'gemid' => '3398d937-1726-400c-9838-537f14e4ecba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10087,8 +10087,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:35:17.227676',
           ),
-          232 => 
-          array (
+          232 =>
+          array(
             'gemid' => '46d14420-e602-462b-a004-c85360f754b9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10098,8 +10098,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:35:18.166621',
           ),
-          233 => 
-          array (
+          233 =>
+          array(
             'gemid' => '10a17bd9-84b6-4d9c-ba35-26a5546673eb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10109,8 +10109,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:35:23.08191',
           ),
-          234 => 
-          array (
+          234 =>
+          array(
             'gemid' => 'f7d3722a-6b09-4ac6-b3b4-f8a030a54fb9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10120,8 +10120,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:37:03.421055',
           ),
-          235 => 
-          array (
+          235 =>
+          array(
             'gemid' => '8777dd8d-2ca3-47d3-a1db-e65f3c778e16',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10131,8 +10131,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:38:00.684233',
           ),
-          236 => 
-          array (
+          236 =>
+          array(
             'gemid' => '20ed679b-676c-461a-aae0-5c62842cad3e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10142,8 +10142,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:38:10.385656',
           ),
-          237 => 
-          array (
+          237 =>
+          array(
             'gemid' => 'c7502d27-c4d7-4967-81f0-b1f46b1b1ad9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10153,8 +10153,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:39:53.239427',
           ),
-          238 => 
-          array (
+          238 =>
+          array(
             'gemid' => '0117a858-9532-4f8f-84d0-57ea2950f7c6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10164,8 +10164,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:41:23.565805',
           ),
-          239 => 
-          array (
+          239 =>
+          array(
             'gemid' => '25ba34db-3666-423c-8874-9341e651a7f8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10175,8 +10175,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:41:36.771173',
           ),
-          240 => 
-          array (
+          240 =>
+          array(
             'gemid' => '2f004a26-0770-4f78-a00f-eaf878ac1fba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10186,8 +10186,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:42:45.088265',
           ),
-          241 => 
-          array (
+          241 =>
+          array(
             'gemid' => '6df3de0e-e739-475c-aabb-38fcbdff180b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10197,8 +10197,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:43:30.669315',
           ),
-          242 => 
-          array (
+          242 =>
+          array(
             'gemid' => 'cb7916f3-a0c8-4128-a9a5-3eadda15b660',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10208,8 +10208,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:55:16.475634',
           ),
-          243 => 
-          array (
+          243 =>
+          array(
             'gemid' => '6c294d3e-3ec7-4adf-9828-7bf4443e355b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10219,8 +10219,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:56:39.303211',
           ),
-          244 => 
-          array (
+          244 =>
+          array(
             'gemid' => 'b3a0fb85-6e93-4ed5-84c0-571be2595aba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10230,8 +10230,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:57:36.329206',
           ),
-          245 => 
-          array (
+          245 =>
+          array(
             'gemid' => '75996450-6edc-44b7-923c-903d9d986a98',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10241,8 +10241,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:57:41.463756',
           ),
-          246 => 
-          array (
+          246 =>
+          array(
             'gemid' => '0d7574a3-4186-4f00-bf11-2b9b3aec0ebf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10252,8 +10252,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 23:59:09.478212',
           ),
-          247 => 
-          array (
+          247 =>
+          array(
             'gemid' => '0336ffaa-5b07-49cf-b505-b4d3adb8fb46',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'e8814c36-c9b6-48d5-87d1-e67d91b4495a',
@@ -10263,8 +10263,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:35.644317',
           ),
-          248 => 
-          array (
+          248 =>
+          array(
             'gemid' => 'f96c43a0-ee02-4776-b5e7-a7dbf4b5f578',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'da24312c-c284-490f-97ab-815bf56eb488',
@@ -10274,8 +10274,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:43.293067',
           ),
-          249 => 
-          array (
+          249 =>
+          array(
             'gemid' => '791c4b76-9ec2-4dd2-8a18-8e14f267d6ca',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'eb59faa7-d18b-43eb-a2ac-0fdfe3518524',
@@ -10285,8 +10285,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:29:49.658985',
           ),
-          250 => 
-          array (
+          250 =>
+          array(
             'gemid' => 'e8b1ece5-1c4c-48e0-ab4d-efe6a4e69c49',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'dc69dcef-8efb-4404-aea7-b68dc869e41e',
@@ -10296,8 +10296,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:02.434251',
           ),
-          251 => 
-          array (
+          251 =>
+          array(
             'gemid' => '9844064e-78e7-4911-9479-a0a4747da79e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '97010451-4be5-48ac-932d-ca57842a3e7e',
@@ -10307,8 +10307,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:10.276463',
           ),
-          252 => 
-          array (
+          252 =>
+          array(
             'gemid' => '8c0bc5dd-1e22-4d46-b82c-4c9001f9ef2b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '099e3d12-75af-4c99-97ad-c097db0de43b',
@@ -10318,8 +10318,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:18.95347',
           ),
-          253 => 
-          array (
+          253 =>
+          array(
             'gemid' => '10767398-6aaf-4e93-97e4-af5d257005c0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '92915146-8cf2-42ce-bd1c-cb7d8f7d9679',
@@ -10329,8 +10329,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:30:21.868174',
           ),
-          254 => 
-          array (
+          254 =>
+          array(
             'gemid' => '93e67109-9016-4c96-8e31-868bf3dc53e7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10340,8 +10340,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:35:29.92856',
           ),
-          255 => 
-          array (
+          255 =>
+          array(
             'gemid' => 'db12ec14-fe33-46d1-b122-457a5e8fe9cc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10351,8 +10351,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:35:33.396874',
           ),
-          256 => 
-          array (
+          256 =>
+          array(
             'gemid' => '29483283-2b97-422d-919d-7733f076b512',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10362,8 +10362,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:35:38.27226',
           ),
-          257 => 
-          array (
+          257 =>
+          array(
             'gemid' => 'b0fc7add-30a0-4068-abb3-778daea0e098',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10373,8 +10373,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:37:11.199728',
           ),
-          258 => 
-          array (
+          258 =>
+          array(
             'gemid' => '092045b4-3ae4-483b-aad2-a2264d68a1ca',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10384,8 +10384,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:37:16.625044',
           ),
-          259 => 
-          array (
+          259 =>
+          array(
             'gemid' => 'aec0952d-da17-49fa-9a98-0613a50add22',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10395,8 +10395,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:37:20.764489',
           ),
-          260 => 
-          array (
+          260 =>
+          array(
             'gemid' => '45b47f34-79ba-4092-880a-2a3c6a5831f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10406,8 +10406,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:39:12.053782',
           ),
-          261 => 
-          array (
+          261 =>
+          array(
             'gemid' => 'd6de5a7a-92fc-4458-9376-4acfa0050535',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10417,8 +10417,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:39:15.784833',
           ),
-          262 => 
-          array (
+          262 =>
+          array(
             'gemid' => '98319cf4-51b7-42cd-bdec-06b79a3e086a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10428,8 +10428,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:39:20.724527',
           ),
-          263 => 
-          array (
+          263 =>
+          array(
             'gemid' => '9165d9ed-021f-4f71-8d72-0e815959af59',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10439,8 +10439,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:40:47.748657',
           ),
-          264 => 
-          array (
+          264 =>
+          array(
             'gemid' => '81d56c02-a65c-432b-83bf-c285ae92f32d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10450,8 +10450,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:40:51.756787',
           ),
-          265 => 
-          array (
+          265 =>
+          array(
             'gemid' => '9d35ff63-4eb6-42d5-bf36-8ff191393b7a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10461,8 +10461,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:40:56.745302',
           ),
-          266 => 
-          array (
+          266 =>
+          array(
             'gemid' => '2aa3fd3a-a291-4cca-baec-6d5a164cf7e1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10472,8 +10472,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:42:12.547939',
           ),
-          267 => 
-          array (
+          267 =>
+          array(
             'gemid' => '56e51fd6-74c3-4e17-9ecf-d58e6e7e07c6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10483,8 +10483,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:42:20.158031',
           ),
-          268 => 
-          array (
+          268 =>
+          array(
             'gemid' => 'e21eca48-5a70-4e44-bb13-218aaab84e20',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10494,8 +10494,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:42:25.270513',
           ),
-          269 => 
-          array (
+          269 =>
+          array(
             'gemid' => 'ead27ac3-81d0-439f-ab65-bb9503229891',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10505,8 +10505,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:43:29.993716',
           ),
-          270 => 
-          array (
+          270 =>
+          array(
             'gemid' => 'af9e5427-c3cf-4d29-9185-8dd5f7a59457',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10516,8 +10516,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:43:34.627404',
           ),
-          271 => 
-          array (
+          271 =>
+          array(
             'gemid' => '3489ff07-5cc3-44c5-82fe-7dd5d72d3566',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10527,8 +10527,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:43:38.830133',
           ),
-          272 => 
-          array (
+          272 =>
+          array(
             'gemid' => '09c161b8-40c3-4d11-a51d-fccc2be55a0b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10538,8 +10538,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:45:02.793714',
           ),
-          273 => 
-          array (
+          273 =>
+          array(
             'gemid' => '842b351a-e40f-436c-a51a-a7e54e3959f6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10549,8 +10549,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:45:07.912047',
           ),
-          274 => 
-          array (
+          274 =>
+          array(
             'gemid' => '1dbe41fc-9691-4f6a-9238-a1fe583b3af9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10560,8 +10560,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:45:13.489424',
           ),
-          275 => 
-          array (
+          275 =>
+          array(
             'gemid' => '46068fee-7fba-46a0-aa9b-9dccd1b39861',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10571,8 +10571,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:46:20.827429',
           ),
-          276 => 
-          array (
+          276 =>
+          array(
             'gemid' => '965975fb-09eb-419d-aec5-ca71d18e5b37',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10582,8 +10582,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:46:26.198448',
           ),
-          277 => 
-          array (
+          277 =>
+          array(
             'gemid' => '63fe23c2-96e3-4e38-afb5-8d061bf975e6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10593,8 +10593,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:46:35.856353',
           ),
-          278 => 
-          array (
+          278 =>
+          array(
             'gemid' => 'c33c7b64-8b55-4c0e-b9e4-5de7006c69cd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10604,8 +10604,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:48:09.818497',
           ),
-          279 => 
-          array (
+          279 =>
+          array(
             'gemid' => 'e0186aee-ed4b-4784-b63b-fcc7535dee7f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10615,8 +10615,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:48:14.739692',
           ),
-          280 => 
-          array (
+          280 =>
+          array(
             'gemid' => 'de594f39-d5f8-4e2c-9f79-5ac959ae1709',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10626,8 +10626,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:48:18.772292',
           ),
-          281 => 
-          array (
+          281 =>
+          array(
             'gemid' => '2f82e404-5822-428e-92c0-e093c255919f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10637,8 +10637,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:49:50.005233',
           ),
-          282 => 
-          array (
+          282 =>
+          array(
             'gemid' => '9a8213b2-1058-4eea-a821-0e4a298b7751',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10648,8 +10648,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:49:54.027291',
           ),
-          283 => 
-          array (
+          283 =>
+          array(
             'gemid' => '5c5ea2d7-21eb-4de9-a88e-b147e68c3507',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10659,8 +10659,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:49:59.357507',
           ),
-          284 => 
-          array (
+          284 =>
+          array(
             'gemid' => '6537e723-c790-457a-ad2c-4ed531c2b707',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10670,8 +10670,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:51:35.954284',
           ),
-          285 => 
-          array (
+          285 =>
+          array(
             'gemid' => '852419dc-7c1b-4283-b66f-e08190083665',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10681,8 +10681,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:51:43.29381',
           ),
-          286 => 
-          array (
+          286 =>
+          array(
             'gemid' => '22e84de2-e379-4b02-ba18-b826d831a0af',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10692,8 +10692,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:51:49.613776',
           ),
-          287 => 
-          array (
+          287 =>
+          array(
             'gemid' => 'd9f02b92-eaf8-4315-b5a8-4c82e15d0fa8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10703,8 +10703,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:53:27.634399',
           ),
-          288 => 
-          array (
+          288 =>
+          array(
             'gemid' => '57ed7c3d-1900-4721-b48e-5c43b45b711c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10714,8 +10714,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:53:32.781447',
           ),
-          289 => 
-          array (
+          289 =>
+          array(
             'gemid' => 'ea628a5a-0bef-4e5f-95dc-e0d53f2d1c6c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10725,8 +10725,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 14:53:44.596276',
           ),
-          290 => 
-          array (
+          290 =>
+          array(
             'gemid' => '858d0bb9-3474-4b52-84a2-9c388e27f6b3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10736,8 +10736,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:02:07.166855',
           ),
-          291 => 
-          array (
+          291 =>
+          array(
             'gemid' => '09e8d02c-65f6-4166-86ba-a5fc4bd990ac',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10747,8 +10747,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:02:11.365706',
           ),
-          292 => 
-          array (
+          292 =>
+          array(
             'gemid' => '9c78a390-8101-4142-951d-dac1b5c71505',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10758,8 +10758,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:02:16.367206',
           ),
-          293 => 
-          array (
+          293 =>
+          array(
             'gemid' => '87c631b8-bdd1-4505-8478-e32460d52965',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10769,8 +10769,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 15:12:22.108911',
           ),
-          294 => 
-          array (
+          294 =>
+          array(
             'gemid' => '85901189-2a8d-446a-b4b0-2ec05af74257',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10780,8 +10780,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:04:00.336202',
           ),
-          295 => 
-          array (
+          295 =>
+          array(
             'gemid' => '501a5087-1649-4516-8bb6-514a9bce4d67',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10791,8 +10791,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:04:05.025216',
           ),
-          296 => 
-          array (
+          296 =>
+          array(
             'gemid' => '455895f6-ed71-4003-a215-5d85d7111edc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10802,8 +10802,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:04:30.865809',
           ),
-          297 => 
-          array (
+          297 =>
+          array(
             'gemid' => 'd9698b92-ff56-47c1-8087-9df8b7cc74d4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10813,8 +10813,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:11:12.529141',
           ),
-          298 => 
-          array (
+          298 =>
+          array(
             'gemid' => '64c431f1-ae7e-4c01-9029-f0a655a03260',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10824,8 +10824,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:11:58.537091',
           ),
-          299 => 
-          array (
+          299 =>
+          array(
             'gemid' => 'a7a88eb3-efb2-4543-93a7-de0f81578239',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10835,8 +10835,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:12:04.755311',
           ),
-          300 => 
-          array (
+          300 =>
+          array(
             'gemid' => '09c4f6c6-0d8f-41cb-bf76-8d8f56a1f7ad',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10846,8 +10846,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:17:58.717205',
           ),
-          301 => 
-          array (
+          301 =>
+          array(
             'gemid' => 'a911a6a5-1343-465c-83af-64a285ead053',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10857,8 +10857,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:18:03.581878',
           ),
-          302 => 
-          array (
+          302 =>
+          array(
             'gemid' => '4b470c0f-00d5-4571-9474-5eef90b767f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10868,8 +10868,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:18:08.561032',
           ),
-          303 => 
-          array (
+          303 =>
+          array(
             'gemid' => 'ed6a6df2-bf0e-4605-a26a-41167a860e86',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10879,8 +10879,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:19:10.28477',
           ),
-          304 => 
-          array (
+          304 =>
+          array(
             'gemid' => 'c655221a-624f-4409-864b-19bf20d57bd8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10890,8 +10890,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:19:15.153499',
           ),
-          305 => 
-          array (
+          305 =>
+          array(
             'gemid' => '29694353-c3d3-4faf-8e0b-f7c6eea61d47',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10901,8 +10901,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:19:19.063726',
           ),
-          306 => 
-          array (
+          306 =>
+          array(
             'gemid' => '6938f9e3-634a-4676-91c9-7eca04650114',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10912,8 +10912,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:20:29.093093',
           ),
-          307 => 
-          array (
+          307 =>
+          array(
             'gemid' => '8412b19d-582f-4e87-a241-ee051b404017',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10923,8 +10923,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:20:33.922343',
           ),
-          308 => 
-          array (
+          308 =>
+          array(
             'gemid' => '694abd11-58bd-4eac-914d-4334cbe6a9c7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10934,8 +10934,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:20:39.812068',
           ),
-          309 => 
-          array (
+          309 =>
+          array(
             'gemid' => '3c04c630-1ac8-4c3c-b3b1-1aa4ac722339',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10945,8 +10945,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:22:02.06384',
           ),
-          310 => 
-          array (
+          310 =>
+          array(
             'gemid' => '24376580-e688-414f-beee-37a75ba546e4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10956,8 +10956,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:22:06.277816',
           ),
-          311 => 
-          array (
+          311 =>
+          array(
             'gemid' => '2bd06661-bd14-4cef-8ea5-8f1231947e01',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -10967,8 +10967,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:22:11.256233',
           ),
-          312 => 
-          array (
+          312 =>
+          array(
             'gemid' => '062155d1-6fcf-4264-a51c-6e77a3d00b8a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -10978,8 +10978,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:23:25.932027',
           ),
-          313 => 
-          array (
+          313 =>
+          array(
             'gemid' => 'a2925d64-83c7-40d1-9403-7d7451d6d17d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -10989,8 +10989,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:23:29.834798',
           ),
-          314 => 
-          array (
+          314 =>
+          array(
             'gemid' => '3a5f2c56-d8bc-4e76-be97-d119b6487b73',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11000,8 +11000,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:23:34.24107',
           ),
-          315 => 
-          array (
+          315 =>
+          array(
             'gemid' => '4d0ab9f6-2a90-40af-9d77-2f03567d19c1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11011,8 +11011,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:26:31.961303',
           ),
-          316 => 
-          array (
+          316 =>
+          array(
             'gemid' => '84fa7525-6778-4ae9-9da7-db174e2db179',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11022,8 +11022,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:26:36.664174',
           ),
-          317 => 
-          array (
+          317 =>
+          array(
             'gemid' => '57deac67-53cf-4722-a54c-2aa47f52c632',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11033,8 +11033,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:26:41.517985',
           ),
-          318 => 
-          array (
+          318 =>
+          array(
             'gemid' => '981c4174-7204-4032-baaf-a1d8751ff097',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11044,8 +11044,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:27:49.469366',
           ),
-          319 => 
-          array (
+          319 =>
+          array(
             'gemid' => 'ff9f959b-4b37-4644-aa93-7643b843895d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11055,8 +11055,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:27:54.781683',
           ),
-          320 => 
-          array (
+          320 =>
+          array(
             'gemid' => '1d8cd20d-0b37-43b6-b434-cd8bfa0e9e1c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11066,8 +11066,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:27:58.632624',
           ),
-          321 => 
-          array (
+          321 =>
+          array(
             'gemid' => 'b8953f31-a130-405f-918f-67143e1496e5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11077,8 +11077,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:29:29.517606',
           ),
-          322 => 
-          array (
+          322 =>
+          array(
             'gemid' => '72a83cfd-1032-4b06-824e-5a6d10ad6f27',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11088,8 +11088,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:29:39.022277',
           ),
-          323 => 
-          array (
+          323 =>
+          array(
             'gemid' => '21ba300b-78af-4cd7-ac01-97a5da9f7c45',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11099,8 +11099,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:29:50.660584',
           ),
-          324 => 
-          array (
+          324 =>
+          array(
             'gemid' => 'c240c566-72cf-42bf-84f1-60231c6c1a9e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '92915146-8cf2-42ce-bd1c-cb7d8f7d9679',
@@ -11110,8 +11110,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:49:34.64793',
           ),
-          325 => 
-          array (
+          325 =>
+          array(
             'gemid' => '24fd7ff8-10bd-471e-b1b5-5d295fc8f3fb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11121,8 +11121,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:52:30.687382',
           ),
-          326 => 
-          array (
+          326 =>
+          array(
             'gemid' => '0043d268-2b58-45ac-b812-4b12cbb0fbe5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11132,8 +11132,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:52:37.40694',
           ),
-          327 => 
-          array (
+          327 =>
+          array(
             'gemid' => '1f7a5e11-b4f7-4d3f-bae3-fb56127f6cb8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11143,8 +11143,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:52:48.243403',
           ),
-          328 => 
-          array (
+          328 =>
+          array(
             'gemid' => '6c60001f-35f0-468b-8dec-cbd05c1a96ae',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11154,8 +11154,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:55:28.082031',
           ),
-          329 => 
-          array (
+          329 =>
+          array(
             'gemid' => 'ceab593b-b8a6-45ad-8d4d-6e9ba105ebd6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11165,8 +11165,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:55:32.049417',
           ),
-          330 => 
-          array (
+          330 =>
+          array(
             'gemid' => '7ddbd1d5-7456-4455-895e-97cd6a69b1de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11176,8 +11176,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:55:35.977814',
           ),
-          331 => 
-          array (
+          331 =>
+          array(
             'gemid' => '4e81e7a6-4f23-464c-9210-0b44efd2e131',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11187,8 +11187,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:56:33.398442',
           ),
-          332 => 
-          array (
+          332 =>
+          array(
             'gemid' => 'b7d923a8-6af3-44e2-ad70-5f9564c23383',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11198,8 +11198,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:56:38.171474',
           ),
-          333 => 
-          array (
+          333 =>
+          array(
             'gemid' => 'a8b489ca-1666-4b8c-830b-e969f8992dc4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11209,8 +11209,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:56:43.609384',
           ),
-          334 => 
-          array (
+          334 =>
+          array(
             'gemid' => '9180fb94-f842-448f-9e38-99e196246ba8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11220,8 +11220,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:57:36.989582',
           ),
-          335 => 
-          array (
+          335 =>
+          array(
             'gemid' => 'f494f1bc-ea40-4548-babd-5d8867f8ad90',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11231,8 +11231,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:57:45.68799',
           ),
-          336 => 
-          array (
+          336 =>
+          array(
             'gemid' => '59ae465d-d5ac-4a62-a50a-adfcbfeb026c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11242,8 +11242,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:57:50.930807',
           ),
-          337 => 
-          array (
+          337 =>
+          array(
             'gemid' => 'd8c3bde6-7c34-41f2-bd59-f59a91131e39',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11253,8 +11253,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:58:56.419019',
           ),
-          338 => 
-          array (
+          338 =>
+          array(
             'gemid' => '8b21d39f-dea5-4df6-a449-4b1b68515bb4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11264,8 +11264,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:59:00.93524',
           ),
-          339 => 
-          array (
+          339 =>
+          array(
             'gemid' => '38e11db6-100e-4519-8f1f-7007879f1710',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11275,8 +11275,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 21:59:14.344952',
           ),
-          340 => 
-          array (
+          340 =>
+          array(
             'gemid' => 'b46818fd-7483-43d3-ba01-42be11ce973a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11286,8 +11286,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:00:20.829924',
           ),
-          341 => 
-          array (
+          341 =>
+          array(
             'gemid' => '32458bf6-217d-4520-9822-8d862f7c6f12',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11297,8 +11297,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:00:24.523961',
           ),
-          342 => 
-          array (
+          342 =>
+          array(
             'gemid' => '1cd8c15d-88fd-4528-b725-5148df320c00',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11308,8 +11308,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:00:28.852515',
           ),
-          343 => 
-          array (
+          343 =>
+          array(
             'gemid' => '752738cb-ca87-4d12-8db9-30ed12b7fef6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11319,8 +11319,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:02:13.25858',
           ),
-          344 => 
-          array (
+          344 =>
+          array(
             'gemid' => '17245254-d41c-4183-944f-d0875410521a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11330,8 +11330,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:02:17.749923',
           ),
-          345 => 
-          array (
+          345 =>
+          array(
             'gemid' => 'f687f59e-ae4e-440f-8138-83f11fa174a9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11341,8 +11341,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:02:21.954379',
           ),
-          346 => 
-          array (
+          346 =>
+          array(
             'gemid' => '4a7e74b8-cbcf-4aba-aa1e-ae21db94a817',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11352,8 +11352,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:03:42.322871',
           ),
-          347 => 
-          array (
+          347 =>
+          array(
             'gemid' => '0ae01786-71cc-4e66-b87e-5e92a04729a2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11363,8 +11363,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:03:47.405432',
           ),
-          348 => 
-          array (
+          348 =>
+          array(
             'gemid' => '56b15b0a-4202-4e48-b503-fe0d21fedb46',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11374,8 +11374,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:03:51.444501',
           ),
-          349 => 
-          array (
+          349 =>
+          array(
             'gemid' => 'bc246d6d-b852-481a-a3e3-389e2516497c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11385,8 +11385,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:05:46.443064',
           ),
-          350 => 
-          array (
+          350 =>
+          array(
             'gemid' => 'bb22da27-552c-4025-86d5-9986d2204131',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11396,8 +11396,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:05:52.282538',
           ),
-          351 => 
-          array (
+          351 =>
+          array(
             'gemid' => 'd28c3eb1-ab26-4418-b60b-d70627dac650',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11407,8 +11407,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:05:56.832511',
           ),
-          352 => 
-          array (
+          352 =>
+          array(
             'gemid' => 'bf9959eb-537e-4445-8a29-fae3b7efcda2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11418,8 +11418,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:06:54.238768',
           ),
-          353 => 
-          array (
+          353 =>
+          array(
             'gemid' => '1ae13b3c-65ad-4959-ba63-6054bad55692',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11429,8 +11429,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:06:58.927804',
           ),
-          354 => 
-          array (
+          354 =>
+          array(
             'gemid' => 'b1eee8ca-3c08-4a88-95bf-56925d485f01',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11440,8 +11440,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:07:02.975781',
           ),
-          355 => 
-          array (
+          355 =>
+          array(
             'gemid' => 'ea469111-e852-42df-babf-570bb37d0de1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11451,8 +11451,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:08:31.129342',
           ),
-          356 => 
-          array (
+          356 =>
+          array(
             'gemid' => '26f7a95f-9c6b-4cf9-881e-f77c826430ac',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11462,8 +11462,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:08:35.469472',
           ),
-          357 => 
-          array (
+          357 =>
+          array(
             'gemid' => '67317d5a-5161-47f9-b14e-028ca21d4f98',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11473,8 +11473,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:08:52.038878',
           ),
-          358 => 
-          array (
+          358 =>
+          array(
             'gemid' => 'eac661fd-acea-4db5-bada-06bb84765cc6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11484,8 +11484,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:10:54.083189',
           ),
-          359 => 
-          array (
+          359 =>
+          array(
             'gemid' => '69365841-b723-499a-992e-89f09e32a9f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11495,8 +11495,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:11:02.213351',
           ),
-          360 => 
-          array (
+          360 =>
+          array(
             'gemid' => '2aca717f-664e-4d05-93a7-d271551c4ab5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11506,8 +11506,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:11:06.915599',
           ),
-          361 => 
-          array (
+          361 =>
+          array(
             'gemid' => 'fb6b35a6-f0ac-438a-b3da-d05de732f998',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11517,8 +11517,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:12:46.999411',
           ),
-          362 => 
-          array (
+          362 =>
+          array(
             'gemid' => '10d39a4c-93cf-43ce-9211-1d14edf2dcdf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11528,8 +11528,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:12:51.788651',
           ),
-          363 => 
-          array (
+          363 =>
+          array(
             'gemid' => 'b8d99fd0-af9e-4f35-8e3e-afedbd55154a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11539,8 +11539,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:12:56.495754',
           ),
-          364 => 
-          array (
+          364 =>
+          array(
             'gemid' => 'a4ca1637-53bc-4132-900d-f0df1ad549d2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11550,8 +11550,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:38:37.171003',
           ),
-          365 => 
-          array (
+          365 =>
+          array(
             'gemid' => '377aa7c6-49c1-4221-8354-22e5746f10d8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11561,8 +11561,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:38:43.056245',
           ),
-          366 => 
-          array (
+          366 =>
+          array(
             'gemid' => 'f3591826-1358-44ad-906c-aef2585ee412',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11572,8 +11572,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:39:20.45564',
           ),
-          367 => 
-          array (
+          367 =>
+          array(
             'gemid' => '897adfe7-51dc-4687-a380-315b4f4768d5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11583,8 +11583,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:40:51.906604',
           ),
-          368 => 
-          array (
+          368 =>
+          array(
             'gemid' => 'ebb3791c-ed7b-412b-8aa7-bb8ae7febc59',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11594,8 +11594,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:41:01.622284',
           ),
-          369 => 
-          array (
+          369 =>
+          array(
             'gemid' => '9ed0a258-26ed-4831-8502-105a1a246630',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11605,8 +11605,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:41:12.524691',
           ),
-          370 => 
-          array (
+          370 =>
+          array(
             'gemid' => 'c705e18e-078b-49da-8f6b-4cfcb0166674',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11616,8 +11616,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:42:34.742111',
           ),
-          371 => 
-          array (
+          371 =>
+          array(
             'gemid' => '21b8c742-e78d-40f8-befe-54fe07311777',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11627,8 +11627,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:42:39.079133',
           ),
-          372 => 
-          array (
+          372 =>
+          array(
             'gemid' => '779e2e9f-50da-4a1b-83fb-80bbacb839b8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11638,8 +11638,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:42:45.241904',
           ),
-          373 => 
-          array (
+          373 =>
+          array(
             'gemid' => '02551b1f-57d1-483c-88d0-6ed56c45fa5f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11649,8 +11649,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:44:02.199172',
           ),
-          374 => 
-          array (
+          374 =>
+          array(
             'gemid' => 'e022f051-e725-44a6-8456-1430985758d5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11660,8 +11660,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:44:06.303883',
           ),
-          375 => 
-          array (
+          375 =>
+          array(
             'gemid' => '5563362b-90db-43d5-987c-26c9b3f57acb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11671,8 +11671,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:44:10.34762',
           ),
-          376 => 
-          array (
+          376 =>
+          array(
             'gemid' => 'eb4acbcc-4ffb-40ee-8927-854a0532beb4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11682,8 +11682,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:45:29.899656',
           ),
-          377 => 
-          array (
+          377 =>
+          array(
             'gemid' => '8f7c6319-6866-464f-bf9a-71072da645d5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11693,8 +11693,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:45:34.362743',
           ),
-          378 => 
-          array (
+          378 =>
+          array(
             'gemid' => 'b517a08e-6e00-4597-9664-17ee23118135',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11704,8 +11704,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:45:39.731147',
           ),
-          379 => 
-          array (
+          379 =>
+          array(
             'gemid' => '507db76b-5df8-4935-ba96-2fe7c701acef',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11715,8 +11715,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:47:17.927639',
           ),
-          380 => 
-          array (
+          380 =>
+          array(
             'gemid' => 'f33f3869-7b5c-45cb-b696-9311d942c82a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11726,8 +11726,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:47:22.583248',
           ),
-          381 => 
-          array (
+          381 =>
+          array(
             'gemid' => '15485db5-9706-47b6-a9dd-113d809de868',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11737,8 +11737,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:47:29.980485',
           ),
-          382 => 
-          array (
+          382 =>
+          array(
             'gemid' => '7d42828e-4228-498e-b93d-dd6fe75938ce',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11748,8 +11748,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:48:57.075172',
           ),
-          383 => 
-          array (
+          383 =>
+          array(
             'gemid' => '0f5cfbad-7de4-4b2a-8e77-f4ac9a424ef3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11759,8 +11759,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:49:00.949758',
           ),
-          384 => 
-          array (
+          384 =>
+          array(
             'gemid' => '7968bd54-76b4-447b-9a4a-0833dd3d8418',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11770,8 +11770,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:49:07.357154',
           ),
-          385 => 
-          array (
+          385 =>
+          array(
             'gemid' => '371a52d8-4b73-45e5-bcb3-e5c4196cf405',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11781,8 +11781,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:51:22.694412',
           ),
-          386 => 
-          array (
+          386 =>
+          array(
             'gemid' => 'e2c94046-77e4-4b81-a121-9dcaeb3a876f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11792,8 +11792,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 22:51:26.598107',
           ),
-          387 => 
-          array (
+          387 =>
+          array(
             'gemid' => 'f6ae0d10-2096-4174-a25c-33e44dabcc87',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11803,8 +11803,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:01:55.848275',
           ),
-          388 => 
-          array (
+          388 =>
+          array(
             'gemid' => '23951019-cb3b-4ed5-95ab-88135c112d70',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11814,8 +11814,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:03:26.970782',
           ),
-          389 => 
-          array (
+          389 =>
+          array(
             'gemid' => '974180d6-e52f-4b51-b5ad-ba212dca7a46',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11825,8 +11825,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:04:35.624296',
           ),
-          390 => 
-          array (
+          390 =>
+          array(
             'gemid' => '02289ceb-b2b7-4cc2-b8fb-4052f249d4d7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11836,8 +11836,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:04:45.304961',
           ),
-          391 => 
-          array (
+          391 =>
+          array(
             'gemid' => '4cdf6eef-f19f-4e2f-be8e-5c902c0f8771',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11847,8 +11847,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:06:22.694884',
           ),
-          392 => 
-          array (
+          392 =>
+          array(
             'gemid' => '1778232b-cfa4-48bf-9065-72e67bfa22ea',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11858,8 +11858,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:06:27.924108',
           ),
-          393 => 
-          array (
+          393 =>
+          array(
             'gemid' => '05def7c5-2ec6-4adf-9224-fd52ac86fca0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11869,8 +11869,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:06:32.849727',
           ),
-          394 => 
-          array (
+          394 =>
+          array(
             'gemid' => '79aea322-4bc3-4b5d-b964-9e045fccb044',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11880,8 +11880,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:10:01.620972',
           ),
-          395 => 
-          array (
+          395 =>
+          array(
             'gemid' => '369f2bd8-b5e8-4702-9af5-edee2ec681ad',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11891,8 +11891,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:10:09.241104',
           ),
-          396 => 
-          array (
+          396 =>
+          array(
             'gemid' => '34389c37-bf2d-4276-8fbb-7b4f23e7d90f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11902,8 +11902,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:10:27.639829',
           ),
-          397 => 
-          array (
+          397 =>
+          array(
             'gemid' => '59d58bf1-eba8-45e9-8335-aebeb11da121',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11913,8 +11913,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:11:57.871955',
           ),
-          398 => 
-          array (
+          398 =>
+          array(
             'gemid' => 'ef8d9d02-307a-45d9-abc1-3f79f203de91',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11924,8 +11924,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:12:02.779782',
           ),
-          399 => 
-          array (
+          399 =>
+          array(
             'gemid' => '400426fe-e156-43f1-83a7-22ac51732f84',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11935,8 +11935,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:12:07.268044',
           ),
-          400 => 
-          array (
+          400 =>
+          array(
             'gemid' => '7c6d7fad-4510-49e0-826a-c9f2ed8bfa83',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11946,8 +11946,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:13:28.748784',
           ),
-          401 => 
-          array (
+          401 =>
+          array(
             'gemid' => '63cb49ea-2a8c-42bc-9b44-7af9cf0d24ac',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11957,8 +11957,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:13:33.080571',
           ),
-          402 => 
-          array (
+          402 =>
+          array(
             'gemid' => '164fea57-439f-411c-bc1f-4357160dc134',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -11968,8 +11968,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:13:37.186901',
           ),
-          403 => 
-          array (
+          403 =>
+          array(
             'gemid' => '3ed22f0e-1a83-4203-be63-6cb79ce2a96b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -11979,8 +11979,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:14:38.845139',
           ),
-          404 => 
-          array (
+          404 =>
+          array(
             'gemid' => 'fcb55008-ee72-4b1f-9786-922dbe326966',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -11990,8 +11990,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:14:44.268035',
           ),
-          405 => 
-          array (
+          405 =>
+          array(
             'gemid' => '70791b11-a62c-4e66-8a0a-ad863d809c72',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12001,8 +12001,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:14:49.292813',
           ),
-          406 => 
-          array (
+          406 =>
+          array(
             'gemid' => '8959d1cc-c56c-46ec-b792-f2663ad11fa1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12012,8 +12012,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:16:07.340854',
           ),
-          407 => 
-          array (
+          407 =>
+          array(
             'gemid' => '7673b749-1807-470b-8182-19ca2c6fa3a0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12023,8 +12023,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:16:11.79276',
           ),
-          408 => 
-          array (
+          408 =>
+          array(
             'gemid' => '4a5b85ef-d26e-4bd4-b51e-84f4f0e9afa8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12034,8 +12034,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:16:15.524727',
           ),
-          409 => 
-          array (
+          409 =>
+          array(
             'gemid' => 'dfe98067-cf52-49db-bb45-75912b24f94d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12045,8 +12045,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:17:19.09663',
           ),
-          410 => 
-          array (
+          410 =>
+          array(
             'gemid' => '3f1873e3-c3c8-4e01-9ece-43ff39bd7c8c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12056,8 +12056,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:17:24.129192',
           ),
-          411 => 
-          array (
+          411 =>
+          array(
             'gemid' => 'c253e770-cab5-409c-baa9-91c6848851d2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12067,8 +12067,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:17:28.331681',
           ),
-          412 => 
-          array (
+          412 =>
+          array(
             'gemid' => 'b5f27208-2a2b-4a48-9896-c4174a5faa17',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12078,8 +12078,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:18:29.409966',
           ),
-          413 => 
-          array (
+          413 =>
+          array(
             'gemid' => '6c6aaf31-8da6-4277-adc4-79bf02829bf9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12089,8 +12089,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:18:33.71998',
           ),
-          414 => 
-          array (
+          414 =>
+          array(
             'gemid' => 'fecd2895-b3f2-4f1e-87d1-9a33baf09178',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12100,8 +12100,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:18:38.006344',
           ),
-          415 => 
-          array (
+          415 =>
+          array(
             'gemid' => 'a3476ee6-b877-45b1-b9d5-c4c7671fef31',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12111,8 +12111,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:19:44.020706',
           ),
-          416 => 
-          array (
+          416 =>
+          array(
             'gemid' => 'ed031a3b-5196-43eb-b7ad-8e4d2e7f65a3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12122,8 +12122,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:19:48.08041',
           ),
-          417 => 
-          array (
+          417 =>
+          array(
             'gemid' => 'e96e3246-3cc5-4a05-984b-f49be1e72bdf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12133,8 +12133,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:19:52.044875',
           ),
-          418 => 
-          array (
+          418 =>
+          array(
             'gemid' => '0302c924-761e-4d30-a2a6-3d29d88f1d04',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12144,8 +12144,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:20:57.949289',
           ),
-          419 => 
-          array (
+          419 =>
+          array(
             'gemid' => '1273b35d-9ea2-411a-863c-db651b295fd4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12155,8 +12155,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:21:01.721651',
           ),
-          420 => 
-          array (
+          420 =>
+          array(
             'gemid' => '8dc8591a-cd8f-439a-b8a4-d554598090f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12166,8 +12166,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:21:06.027358',
           ),
-          421 => 
-          array (
+          421 =>
+          array(
             'gemid' => '31eff276-6b61-47d4-a751-4971cb0cf907',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12177,8 +12177,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:22:17.912605',
           ),
-          422 => 
-          array (
+          422 =>
+          array(
             'gemid' => '29b90610-7d43-468b-b652-c6a5add98f28',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12188,8 +12188,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:22:21.532765',
           ),
-          423 => 
-          array (
+          423 =>
+          array(
             'gemid' => '6401aa9b-6841-48f7-9311-da2227b8655a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12199,8 +12199,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:22:26.489342',
           ),
-          424 => 
-          array (
+          424 =>
+          array(
             'gemid' => '7b9f349f-a4ed-4b60-a597-9d05c116dd92',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12210,8 +12210,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:23:24.557478',
           ),
-          425 => 
-          array (
+          425 =>
+          array(
             'gemid' => '29cf7936-95dc-4ec8-856c-39df42293ab8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12221,8 +12221,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:23:28.855299',
           ),
-          426 => 
-          array (
+          426 =>
+          array(
             'gemid' => 'f5b3f3c0-16c5-4966-8533-f63cbb5c50c2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12232,8 +12232,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:23:52.948372',
           ),
-          427 => 
-          array (
+          427 =>
+          array(
             'gemid' => '219dcc1a-3755-44de-a980-1ec2d13f4973',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12243,8 +12243,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:24:34.85143',
           ),
-          428 => 
-          array (
+          428 =>
+          array(
             'gemid' => 'a126ff04-010c-4da4-b8ee-0285eed1e01b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12254,8 +12254,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:24:39.673471',
           ),
-          429 => 
-          array (
+          429 =>
+          array(
             'gemid' => '0382bb63-bbbe-451d-a51d-ec8d5ff88902',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12265,8 +12265,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:24:43.69588',
           ),
-          430 => 
-          array (
+          430 =>
+          array(
             'gemid' => '2247e992-bfe3-4df2-8ae1-35e9b86eb189',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12276,8 +12276,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:26:00.979791',
           ),
-          431 => 
-          array (
+          431 =>
+          array(
             'gemid' => 'e6bf2fce-83d3-4887-80e7-4488b8fe9f96',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12287,8 +12287,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:26:04.924036',
           ),
-          432 => 
-          array (
+          432 =>
+          array(
             'gemid' => 'd96bb7d9-612e-4d7b-a203-70efa01c612f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12298,8 +12298,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:26:09.369823',
           ),
-          433 => 
-          array (
+          433 =>
+          array(
             'gemid' => 'a6e6ed96-4e8b-465d-86de-689cc581f847',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12309,8 +12309,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:27:13.542184',
           ),
-          434 => 
-          array (
+          434 =>
+          array(
             'gemid' => '148f1dee-2413-4844-9da5-302546d1e707',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12320,8 +12320,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:27:18.415818',
           ),
-          435 => 
-          array (
+          435 =>
+          array(
             'gemid' => 'cda8ee68-0450-4e36-a77b-368223e6dd6e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12331,8 +12331,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:27:23.262465',
           ),
-          436 => 
-          array (
+          436 =>
+          array(
             'gemid' => 'a0274109-fc55-45ad-89d6-433bff70230e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12342,8 +12342,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:28:49.062968',
           ),
-          437 => 
-          array (
+          437 =>
+          array(
             'gemid' => 'f55ae1fa-c21b-4724-8937-158bd7525002',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12353,8 +12353,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:28:54.567109',
           ),
-          438 => 
-          array (
+          438 =>
+          array(
             'gemid' => 'a7130f82-2e67-458e-9425-1e24cada59e8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12364,8 +12364,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:28:59.254413',
           ),
-          439 => 
-          array (
+          439 =>
+          array(
             'gemid' => '5fdd96e5-67a7-449b-a3bb-9ce2f78bec87',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12375,8 +12375,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:30:17.309491',
           ),
-          440 => 
-          array (
+          440 =>
+          array(
             'gemid' => '678196cc-ffaf-4625-ba12-5f48831f7097',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12386,8 +12386,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:30:21.597983',
           ),
-          441 => 
-          array (
+          441 =>
+          array(
             'gemid' => '6144bf1c-0312-4734-bc98-39682d100b11',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12397,8 +12397,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:30:25.273578',
           ),
-          442 => 
-          array (
+          442 =>
+          array(
             'gemid' => 'b6600dac-b835-44b3-9a4f-4825f89ebd7e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12408,8 +12408,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:31:35.579539',
           ),
-          443 => 
-          array (
+          443 =>
+          array(
             'gemid' => 'dc9c9252-a529-489c-9694-c89abfaedd38',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12419,8 +12419,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:31:39.936525',
           ),
-          444 => 
-          array (
+          444 =>
+          array(
             'gemid' => '70840456-4d57-42f5-8d45-e90184d0cea7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12430,8 +12430,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:31:44.30913',
           ),
-          445 => 
-          array (
+          445 =>
+          array(
             'gemid' => '5ff6a8ea-47e6-4477-9c90-79cd2c0a3e2d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12441,8 +12441,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:32:45.13434',
           ),
-          446 => 
-          array (
+          446 =>
+          array(
             'gemid' => '5439a30b-0a59-4e76-bed5-86e56005523e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12452,8 +12452,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:32:49.326928',
           ),
-          447 => 
-          array (
+          447 =>
+          array(
             'gemid' => '9bb81ed0-4244-4b9d-b14c-6ddc1eea5b60',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12463,8 +12463,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:32:53.226988',
           ),
-          448 => 
-          array (
+          448 =>
+          array(
             'gemid' => 'b90b2812-cad4-41ae-ab62-44bc384bc52d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12474,8 +12474,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:33:45.865518',
           ),
-          449 => 
-          array (
+          449 =>
+          array(
             'gemid' => 'e229f99f-6606-4f02-a633-7f90218810e9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12485,8 +12485,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:33:49.804799',
           ),
-          450 => 
-          array (
+          450 =>
+          array(
             'gemid' => 'b903b948-ec00-436e-884e-5b8dbcc2e800',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12496,8 +12496,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:33:54.020084',
           ),
-          451 => 
-          array (
+          451 =>
+          array(
             'gemid' => '282fafa9-9c3b-4312-9edb-8bd7dfb42aa9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12507,8 +12507,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:35:15.195289',
           ),
-          452 => 
-          array (
+          452 =>
+          array(
             'gemid' => '3daba38d-d2db-46a3-a21e-ab7db53381ee',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12518,8 +12518,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:35:21.002764',
           ),
-          453 => 
-          array (
+          453 =>
+          array(
             'gemid' => '1e280ef0-6611-4665-93e7-b0963b3b23a9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12529,8 +12529,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:35:25.102473',
           ),
-          454 => 
-          array (
+          454 =>
+          array(
             'gemid' => 'ebec7900-2cad-45a9-b05c-3a2a4c2c2920',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12540,8 +12540,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:36:56.523149',
           ),
-          455 => 
-          array (
+          455 =>
+          array(
             'gemid' => '1ef679a2-3170-45d5-b3b9-2519345a3167',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12551,8 +12551,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:37:01.123393',
           ),
-          456 => 
-          array (
+          456 =>
+          array(
             'gemid' => '2ab9ee62-d3c3-4685-a383-5b5e64b31508',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12562,8 +12562,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:37:05.677488',
           ),
-          457 => 
-          array (
+          457 =>
+          array(
             'gemid' => '014d804f-82e5-475f-ba7b-2c9e48389365',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12573,8 +12573,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:38:03.039391',
           ),
-          458 => 
-          array (
+          458 =>
+          array(
             'gemid' => 'd3ec22b8-b7f6-4245-8cac-7688f3271893',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12584,8 +12584,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:38:08.460799',
           ),
-          459 => 
-          array (
+          459 =>
+          array(
             'gemid' => '6776a71d-6f7e-49d8-b675-05861047c988',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12595,8 +12595,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:38:13.105399',
           ),
-          460 => 
-          array (
+          460 =>
+          array(
             'gemid' => '81cabad6-c47a-4f50-aa42-76d62a86e607',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12606,8 +12606,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:39:55.531357',
           ),
-          461 => 
-          array (
+          461 =>
+          array(
             'gemid' => 'a66e1d03-cc15-47ee-8fde-da07c3a3d3bd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12617,8 +12617,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:39:59.8343',
           ),
-          462 => 
-          array (
+          462 =>
+          array(
             'gemid' => '812356a3-edfb-4058-9a42-e931e0d87ac5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12628,8 +12628,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:40:04.404715',
           ),
-          463 => 
-          array (
+          463 =>
+          array(
             'gemid' => '1178deb9-e2d0-41ad-bfa3-fd718c5f98df',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12639,8 +12639,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:41:26.335136',
           ),
-          464 => 
-          array (
+          464 =>
+          array(
             'gemid' => '32873945-674f-4c98-8e11-bca6b0ae0b5f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12650,8 +12650,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:41:30.549759',
           ),
-          465 => 
-          array (
+          465 =>
+          array(
             'gemid' => 'add4d98a-db34-4aa3-980c-455696f70242',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12661,8 +12661,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:41:35.127743',
           ),
-          466 => 
-          array (
+          466 =>
+          array(
             'gemid' => '72f21934-30bd-4852-962a-00b5bf96982d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12672,8 +12672,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:42:39.103186',
           ),
-          467 => 
-          array (
+          467 =>
+          array(
             'gemid' => 'db5ad8c7-8df3-4c85-9d9e-69748ba09416',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12683,8 +12683,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:42:43.183203',
           ),
-          468 => 
-          array (
+          468 =>
+          array(
             'gemid' => 'a56b05a5-bd9d-4bdd-844d-399d750c7859',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12694,8 +12694,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:42:47.259456',
           ),
-          469 => 
-          array (
+          469 =>
+          array(
             'gemid' => '98b5178e-539a-40dd-a286-3d8466b756cd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12705,8 +12705,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:55:11.035702',
           ),
-          470 => 
-          array (
+          470 =>
+          array(
             'gemid' => 'ce332dcc-ce61-426e-88e4-24d62c829df2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12716,8 +12716,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:55:14.741367',
           ),
-          471 => 
-          array (
+          471 =>
+          array(
             'gemid' => '444b313d-5479-48e4-8046-4a2607d69af9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12727,8 +12727,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:55:18.887343',
           ),
-          472 => 
-          array (
+          472 =>
+          array(
             'gemid' => 'c60b4916-8bd7-41eb-9790-86b03bab98e6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12738,8 +12738,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:56:37.602165',
           ),
-          473 => 
-          array (
+          473 =>
+          array(
             'gemid' => '905d79ca-e448-455f-a706-7747bc4d054c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12749,8 +12749,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:56:41.368529',
           ),
-          474 => 
-          array (
+          474 =>
+          array(
             'gemid' => 'ee3b2e75-fff9-422b-92f4-f89366d4f115',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12760,8 +12760,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:56:45.051703',
           ),
-          475 => 
-          array (
+          475 =>
+          array(
             'gemid' => '972152b0-e97c-480f-82c2-b1ff1e9be4b3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12771,8 +12771,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:57:38.885222',
           ),
-          476 => 
-          array (
+          476 =>
+          array(
             'gemid' => '40360c6c-149b-439c-9c46-6314e060188d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12782,8 +12782,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:57:43.373481',
           ),
-          477 => 
-          array (
+          477 =>
+          array(
             'gemid' => 'bacd6db0-a0b8-41ac-926e-0e7ea2e2c303',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12793,8 +12793,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:57:48.20265',
           ),
-          478 => 
-          array (
+          478 =>
+          array(
             'gemid' => '9d82c887-9c90-4b14-863a-794ee0bcb867',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12804,8 +12804,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:59:04.068168',
           ),
-          479 => 
-          array (
+          479 =>
+          array(
             'gemid' => '4116acb7-7782-4823-b29e-d9e34d624e89',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -12815,8 +12815,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:59:07.596521',
           ),
-          480 => 
-          array (
+          480 =>
+          array(
             'gemid' => '90d9b2e1-196a-455a-8258-64c08090b715',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -12826,8 +12826,8 @@ return array (
             'whereby' => 2,
             'createdat' => '2026-01-07 23:59:12.351909',
           ),
-          481 => 
-          array (
+          481 =>
+          array(
             'gemid' => '6fead594-3b77-481d-bb1d-dcf95690d9ba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12837,8 +12837,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:35:45.601244',
           ),
-          482 => 
-          array (
+          482 =>
+          array(
             'gemid' => 'a7747940-d067-4aa2-ab63-9a75a6c0c799',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12848,8 +12848,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:35:51.546758',
           ),
-          483 => 
-          array (
+          483 =>
+          array(
             'gemid' => '570d19f6-089a-48c9-989b-3333718a8e52',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12859,8 +12859,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:35:54.301677',
           ),
-          484 => 
-          array (
+          484 =>
+          array(
             'gemid' => '39397fc0-1653-409e-8038-28777b39bb83',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12870,8 +12870,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:35:59.107805',
           ),
-          485 => 
-          array (
+          485 =>
+          array(
             'gemid' => 'a763c141-0b12-4c01-b9b0-1789522b0ee1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12881,8 +12881,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:37:29.968666',
           ),
-          486 => 
-          array (
+          486 =>
+          array(
             'gemid' => '57bf9d11-c92b-4b35-b1cf-881c2e0f8a5a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12892,8 +12892,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:37:34.953618',
           ),
-          487 => 
-          array (
+          487 =>
+          array(
             'gemid' => '928b7625-aa2b-4e56-b234-f946411a56a5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12903,8 +12903,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:37:38.557824',
           ),
-          488 => 
-          array (
+          488 =>
+          array(
             'gemid' => '17f339d0-a8fc-494a-a79f-3ac9e4b52f3a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12914,8 +12914,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:37:42.150202',
           ),
-          489 => 
-          array (
+          489 =>
+          array(
             'gemid' => 'c37b3823-a5eb-43d4-9b9d-844dae72f185',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12925,8 +12925,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:39:27.428885',
           ),
-          490 => 
-          array (
+          490 =>
+          array(
             'gemid' => '794e5cc9-22e9-4ed0-af1a-fec82d2bed07',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12936,8 +12936,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:39:30.606243',
           ),
-          491 => 
-          array (
+          491 =>
+          array(
             'gemid' => 'f065beef-a75d-475c-8d78-a773fc2db633',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12947,8 +12947,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:39:34.037565',
           ),
-          492 => 
-          array (
+          492 =>
+          array(
             'gemid' => 'e178198e-1d1d-426e-8efb-0d328eda6a26',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12958,8 +12958,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:39:37.155604',
           ),
-          493 => 
-          array (
+          493 =>
+          array(
             'gemid' => 'e3a080f8-0278-4fba-b9f5-871ed3f6d4b7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12969,8 +12969,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:41:08.61754',
           ),
-          494 => 
-          array (
+          494 =>
+          array(
             'gemid' => '1eca6c73-58d7-4187-b008-be5297ec040c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12980,8 +12980,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:41:11.65195',
           ),
-          495 => 
-          array (
+          495 =>
+          array(
             'gemid' => '92bf7387-f2c2-4141-918e-80a905c1016d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -12991,8 +12991,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:41:15.024127',
           ),
-          496 => 
-          array (
+          496 =>
+          array(
             'gemid' => '4edf1e4d-c839-489f-b475-ad0bb548714e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13002,8 +13002,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:41:18.565147',
           ),
-          497 => 
-          array (
+          497 =>
+          array(
             'gemid' => 'b141451e-4e3e-436e-80c6-a886d49943e3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13013,8 +13013,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:42:33.814907',
           ),
-          498 => 
-          array (
+          498 =>
+          array(
             'gemid' => 'ca061d35-dc61-4f53-98b7-a21c42926ec4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13024,8 +13024,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:42:36.735252',
           ),
-          499 => 
-          array (
+          499 =>
+          array(
             'gemid' => '4cb72660-be04-4575-aef6-da1c584c97e7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13035,8 +13035,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:42:42.013661',
           ),
-          500 => 
-          array (
+          500 =>
+          array(
             'gemid' => 'ff9317fb-d2ff-43cf-8501-daa9dcb42d7a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13046,8 +13046,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:42:45.280955',
           ),
-          501 => 
-          array (
+          501 =>
+          array(
             'gemid' => '0ab5068d-8be2-481e-8786-933cb98a7a43',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13057,8 +13057,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:43:46.120362',
           ),
-          502 => 
-          array (
+          502 =>
+          array(
             'gemid' => '49fb88d6-f604-4ad5-8d98-f8f386d33cdb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13068,8 +13068,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:43:49.535936',
           ),
-          503 => 
-          array (
+          503 =>
+          array(
             'gemid' => '148ffbb8-12da-454c-a08f-52c5f3c93e26',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13079,8 +13079,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:43:52.89405',
           ),
-          504 => 
-          array (
+          504 =>
+          array(
             'gemid' => '5ea672b1-f8f3-41d6-841f-3aba39a3f3ed',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13090,8 +13090,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:43:59.500328',
           ),
-          505 => 
-          array (
+          505 =>
+          array(
             'gemid' => 'd745af9e-a017-4d38-904d-5247c4f6755c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13101,8 +13101,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:45:22.264025',
           ),
-          506 => 
-          array (
+          506 =>
+          array(
             'gemid' => '8ebd06cc-157d-4e82-9e99-1bb1fe0456ca',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13112,8 +13112,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:45:25.126902',
           ),
-          507 => 
-          array (
+          507 =>
+          array(
             'gemid' => '0aedef48-b91b-452d-9b3d-d834a37a3e72',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13123,8 +13123,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:45:29.54626',
           ),
-          508 => 
-          array (
+          508 =>
+          array(
             'gemid' => '87194f4e-537a-40d7-be9c-f218d526dc37',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13134,8 +13134,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:45:35.391685',
           ),
-          509 => 
-          array (
+          509 =>
+          array(
             'gemid' => 'f2f63d8f-bcf1-4fb1-8c10-11080e55d868',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13145,8 +13145,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:46:44.584764',
           ),
-          510 => 
-          array (
+          510 =>
+          array(
             'gemid' => 'ae2a527e-1624-4d5c-a6a1-98a6b7e8a316',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13156,8 +13156,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:46:48.198418',
           ),
-          511 => 
-          array (
+          511 =>
+          array(
             'gemid' => 'e99968eb-9f9c-434a-b7d8-87e915fd6db8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13167,8 +13167,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:46:51.358399',
           ),
-          512 => 
-          array (
+          512 =>
+          array(
             'gemid' => 'e50e3ed7-a115-4baf-b60d-66579cfd9f07',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13178,8 +13178,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:46:59.274009',
           ),
-          513 => 
-          array (
+          513 =>
+          array(
             'gemid' => 'd7bce628-6f52-4a77-a986-fe2a284a7e6b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13189,8 +13189,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:48:25.99474',
           ),
-          514 => 
-          array (
+          514 =>
+          array(
             'gemid' => '081ce5d3-1851-4b3e-aab6-6f00997b1ed1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13200,8 +13200,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:48:30.700328',
           ),
-          515 => 
-          array (
+          515 =>
+          array(
             'gemid' => 'a1fcc604-049a-4d90-b616-d5565d35c807',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13211,8 +13211,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:48:34.5113',
           ),
-          516 => 
-          array (
+          516 =>
+          array(
             'gemid' => '70cce48d-7d1e-4694-8173-cf59d7a57833',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13222,8 +13222,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:48:39.394654',
           ),
-          517 => 
-          array (
+          517 =>
+          array(
             'gemid' => 'bef4402a-8438-4a93-bf8f-458aaedc0f74',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13233,8 +13233,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:50:15.500296',
           ),
-          518 => 
-          array (
+          518 =>
+          array(
             'gemid' => '8f67d737-bc96-4b4f-a536-aaa39367bd97',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13244,8 +13244,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:50:18.305359',
           ),
-          519 => 
-          array (
+          519 =>
+          array(
             'gemid' => '45ae80ff-5989-4935-9f8c-650d09e6d384',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13255,8 +13255,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:50:21.685362',
           ),
-          520 => 
-          array (
+          520 =>
+          array(
             'gemid' => 'cb3ed300-ed5a-464d-9e9a-43d4e4b666f5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13266,8 +13266,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:50:27.22255',
           ),
-          521 => 
-          array (
+          521 =>
+          array(
             'gemid' => '89940127-12f0-4580-84ad-b533cf206cdf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13277,8 +13277,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:52:00.860087',
           ),
-          522 => 
-          array (
+          522 =>
+          array(
             'gemid' => 'a4931a0e-f7a5-4837-b129-51a9d5d73bf8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13288,8 +13288,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:52:05.82598',
           ),
-          523 => 
-          array (
+          523 =>
+          array(
             'gemid' => 'c73d0db6-853a-4091-9677-3091e22f7577',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13299,8 +13299,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:52:10.028667',
           ),
-          524 => 
-          array (
+          524 =>
+          array(
             'gemid' => '1a4441f8-7a64-4abe-b3b5-f366e73b8930',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13310,8 +13310,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:52:14.68472',
           ),
-          525 => 
-          array (
+          525 =>
+          array(
             'gemid' => '7d8f52a4-a6b0-4e70-839e-2c11fe9fbcdf',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13321,8 +13321,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:54:05.821407',
           ),
-          526 => 
-          array (
+          526 =>
+          array(
             'gemid' => 'c82629d7-70bb-4a88-b1c1-6b7381f0e870',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13332,8 +13332,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:54:10.307021',
           ),
-          527 => 
-          array (
+          527 =>
+          array(
             'gemid' => 'b1fa625c-651d-49af-9872-d73a4c6137e3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13343,8 +13343,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:54:18.069527',
           ),
-          528 => 
-          array (
+          528 =>
+          array(
             'gemid' => '643bb59d-bc8e-467e-b561-f91b6210aa53',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13354,8 +13354,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 14:54:22.508783',
           ),
-          529 => 
-          array (
+          529 =>
+          array(
             'gemid' => '6531f25d-3c55-4e98-ae15-b96276fd4bb1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13365,8 +13365,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:02:40.115932',
           ),
-          530 => 
-          array (
+          530 =>
+          array(
             'gemid' => 'e66c64e2-711a-4e71-a0bd-7cd4d68abb69',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13376,8 +13376,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:02:43.760002',
           ),
-          531 => 
-          array (
+          531 =>
+          array(
             'gemid' => '865c4a34-98aa-4ec8-8283-d27d5bfea453',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13387,8 +13387,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:02:47.112256',
           ),
-          532 => 
-          array (
+          532 =>
+          array(
             'gemid' => 'c12dcd34-9fde-4c2e-8697-b5a78e2cfe32',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13398,8 +13398,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 15:02:51.088293',
           ),
-          533 => 
-          array (
+          533 =>
+          array(
             'gemid' => '1bfb79ca-6270-405f-a80b-ee1450bdea63',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13409,8 +13409,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:04:48.691951',
           ),
-          534 => 
-          array (
+          534 =>
+          array(
             'gemid' => 'ad1056fe-48cf-400b-938c-71a521d4eadc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13420,8 +13420,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:05:24.977968',
           ),
-          535 => 
-          array (
+          535 =>
+          array(
             'gemid' => '658712d0-01a1-4fef-960d-67f28fc3a383',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13431,8 +13431,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:09:59.90808',
           ),
-          536 => 
-          array (
+          536 =>
+          array(
             'gemid' => '15db92ce-db87-4bab-857d-2ecbe2db0150',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13442,8 +13442,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:10:09.019854',
           ),
-          537 => 
-          array (
+          537 =>
+          array(
             'gemid' => 'aad10463-2bfd-400d-98b8-508dfa26c381',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13453,8 +13453,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:16:54.60646',
           ),
-          538 => 
-          array (
+          538 =>
+          array(
             'gemid' => 'fc874ec0-6933-427d-a466-d40feef02018',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13464,8 +13464,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:17:04.010246',
           ),
-          539 => 
-          array (
+          539 =>
+          array(
             'gemid' => 'abf226ee-b841-4fe2-a0bd-6f4c055f2270',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13475,8 +13475,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:17:08.226476',
           ),
-          540 => 
-          array (
+          540 =>
+          array(
             'gemid' => '23acb0cb-16c8-4fcc-beff-64d171fb94d3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13486,8 +13486,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:17:12.673822',
           ),
-          541 => 
-          array (
+          541 =>
+          array(
             'gemid' => '9b76eb43-f5ea-4154-adb2-750ebb4ae945',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13497,8 +13497,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:18:15.954507',
           ),
-          542 => 
-          array (
+          542 =>
+          array(
             'gemid' => 'c8578f55-3b93-467b-b248-98f47733808c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13508,8 +13508,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:18:19.295797',
           ),
-          543 => 
-          array (
+          543 =>
+          array(
             'gemid' => '0ba7d0a1-d323-4cab-8304-e76d0d6a9c59',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13519,8 +13519,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:18:24.612005',
           ),
-          544 => 
-          array (
+          544 =>
+          array(
             'gemid' => '42cefdcb-de47-431e-a922-9eced311be0d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13530,8 +13530,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:18:27.906651',
           ),
-          545 => 
-          array (
+          545 =>
+          array(
             'gemid' => '580bc0b6-00bb-49ed-b194-a4a62442a111',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13541,8 +13541,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:19:27.259743',
           ),
-          546 => 
-          array (
+          546 =>
+          array(
             'gemid' => '9702f3c4-2588-4e82-9baa-f9693d517352',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13552,8 +13552,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:19:31.457787',
           ),
-          547 => 
-          array (
+          547 =>
+          array(
             'gemid' => 'edc25124-b64b-4e66-b019-5bbdbabcdfd1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13563,8 +13563,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:19:34.357421',
           ),
-          548 => 
-          array (
+          548 =>
+          array(
             'gemid' => 'ea07a18e-efd1-4450-bf7a-bc5251185c52',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13574,8 +13574,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:19:37.569479',
           ),
-          549 => 
-          array (
+          549 =>
+          array(
             'gemid' => '59a647df-0bd5-4e28-ad40-6f9bbc4c2a9e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13585,8 +13585,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:20:47.901162',
           ),
-          550 => 
-          array (
+          550 =>
+          array(
             'gemid' => '00084843-43d6-41fa-b94c-97bb8ca07986',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13596,8 +13596,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:20:51.135542',
           ),
-          551 => 
-          array (
+          551 =>
+          array(
             'gemid' => '520e3e40-cea2-4d53-b275-791951350e77',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13607,8 +13607,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:20:58.133891',
           ),
-          552 => 
-          array (
+          552 =>
+          array(
             'gemid' => '8aef9b6f-5b74-4c37-af19-301c544bf61e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13618,8 +13618,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:21:05.927626',
           ),
-          553 => 
-          array (
+          553 =>
+          array(
             'gemid' => '9257a0ff-5d13-48fc-8962-b90e0af5965f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13629,8 +13629,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:22:20.538288',
           ),
-          554 => 
-          array (
+          554 =>
+          array(
             'gemid' => '5d55f5cc-f3e8-4373-a21f-bfe81a966045',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13640,8 +13640,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:22:24.114263',
           ),
-          555 => 
-          array (
+          555 =>
+          array(
             'gemid' => '9986589e-fffe-4133-a0e3-346ef8fbd90b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13651,8 +13651,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:22:29.848544',
           ),
-          556 => 
-          array (
+          556 =>
+          array(
             'gemid' => 'ff791a98-8847-48e6-843f-021d81010d04',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13662,8 +13662,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:22:46.613369',
           ),
-          557 => 
-          array (
+          557 =>
+          array(
             'gemid' => '84580f6e-563e-4d96-8356-577b0eb8dd69',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13673,8 +13673,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:23:41.538547',
           ),
-          558 => 
-          array (
+          558 =>
+          array(
             'gemid' => 'cd58a846-1944-465d-916e-93d6f682e145',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13684,8 +13684,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:23:45.598561',
           ),
-          559 => 
-          array (
+          559 =>
+          array(
             'gemid' => '500eb13d-8c5c-4fd7-871e-5b3709462fce',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13695,8 +13695,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:23:48.915849',
           ),
-          560 => 
-          array (
+          560 =>
+          array(
             'gemid' => '9a386ba4-9ba5-4e4e-9699-da345a3c5dfb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13706,8 +13706,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:23:52.731043',
           ),
-          561 => 
-          array (
+          561 =>
+          array(
             'gemid' => '514c7599-ec8b-4c76-bee1-a57bee00aec9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13717,8 +13717,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:26:50.097193',
           ),
-          562 => 
-          array (
+          562 =>
+          array(
             'gemid' => 'c41f0283-ea2b-4a24-bea3-c4f5c0b6ed96',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13728,8 +13728,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:26:56.857404',
           ),
-          563 => 
-          array (
+          563 =>
+          array(
             'gemid' => '7042e780-444d-4869-950e-6f7c57769155',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13739,8 +13739,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:27:00.874313',
           ),
-          564 => 
-          array (
+          564 =>
+          array(
             'gemid' => '0563b0d5-4ccd-4ad0-9abd-3c5a875f0547',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13750,8 +13750,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:27:06.542838',
           ),
-          565 => 
-          array (
+          565 =>
+          array(
             'gemid' => '55e5a52c-b26b-4dd9-9356-ad6253c647de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13761,8 +13761,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:28:07.239147',
           ),
-          566 => 
-          array (
+          566 =>
+          array(
             'gemid' => '13727899-7595-4555-9180-7c9c15333676',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13772,8 +13772,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:28:16.999477',
           ),
-          567 => 
-          array (
+          567 =>
+          array(
             'gemid' => '12574875-46bb-49d0-9c47-d3fd7f73f39a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13783,8 +13783,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:28:24.461052',
           ),
-          568 => 
-          array (
+          568 =>
+          array(
             'gemid' => '1e3e5324-3749-4878-8fd3-ff338979a553',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13794,8 +13794,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:28:30.443613',
           ),
-          569 => 
-          array (
+          569 =>
+          array(
             'gemid' => '84bfdf61-41ae-427a-8d61-dd46b07762dc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13805,8 +13805,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:30:00.678823',
           ),
-          570 => 
-          array (
+          570 =>
+          array(
             'gemid' => 'd93f205d-8a1d-409c-bc23-d039ad44195a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13816,8 +13816,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:49:21.693635',
           ),
-          571 => 
-          array (
+          571 =>
+          array(
             'gemid' => '7a277dfd-a39a-4335-bf0c-3bff04a3c13b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13827,8 +13827,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:49:28.574432',
           ),
-          572 => 
-          array (
+          572 =>
+          array(
             'gemid' => 'f701f4e9-62a8-4714-8096-d69decffb8b1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13838,8 +13838,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:49:31.979823',
           ),
-          573 => 
-          array (
+          573 =>
+          array(
             'gemid' => '0b5b5751-cd7b-4963-bf75-8286ca9f9911',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13849,8 +13849,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:53:01.803734',
           ),
-          574 => 
-          array (
+          574 =>
+          array(
             'gemid' => 'ef07784c-91f5-4fc4-afdd-482e3788e2cd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13860,8 +13860,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:53:06.293027',
           ),
-          575 => 
-          array (
+          575 =>
+          array(
             'gemid' => '7ed8454e-65cd-41f7-9341-ba67418fae74',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13871,8 +13871,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:53:12.877511',
           ),
-          576 => 
-          array (
+          576 =>
+          array(
             'gemid' => '34ed9f24-88b2-4591-96a9-3078ef8edfed',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13882,8 +13882,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:53:34.347707',
           ),
-          577 => 
-          array (
+          577 =>
+          array(
             'gemid' => 'eb3e3fe0-b7b6-4b00-9607-fb9444f9f570',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13893,8 +13893,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:55:43.543602',
           ),
-          578 => 
-          array (
+          578 =>
+          array(
             'gemid' => '4d0cfd9a-d984-47d9-b31f-25c6337b3ffe',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13904,8 +13904,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:55:47.196023',
           ),
-          579 => 
-          array (
+          579 =>
+          array(
             'gemid' => 'bbfedba5-ca47-4fb7-bae1-f60e91994257',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13915,8 +13915,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:55:50.771681',
           ),
-          580 => 
-          array (
+          580 =>
+          array(
             'gemid' => 'e3ead327-6b3f-492a-af18-b2fab4de3629',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => '6de5c040-3874-4d8b-9ae2-1f477f46de30',
@@ -13926,8 +13926,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:55:54.06719',
           ),
-          581 => 
-          array (
+          581 =>
+          array(
             'gemid' => '84ac8a04-018f-45bf-a05b-fd10f16a8204',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13937,8 +13937,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:56:49.842977',
           ),
-          582 => 
-          array (
+          582 =>
+          array(
             'gemid' => '2dd4c822-bbd9-4e7c-af64-480454dff945',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13948,8 +13948,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:56:52.588356',
           ),
-          583 => 
-          array (
+          583 =>
+          array(
             'gemid' => '3da1786b-7940-478c-9886-1a98ed38908b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13959,8 +13959,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:56:54.99897',
           ),
-          584 => 
-          array (
+          584 =>
+          array(
             'gemid' => '6f147910-10c8-4f44-97c9-94afec2eb9e1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13970,8 +13970,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:56:57.708421',
           ),
-          585 => 
-          array (
+          585 =>
+          array(
             'gemid' => '1bb6c94e-f981-40f5-9a77-c45c843dfef0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13981,8 +13981,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:57:59.654557',
           ),
-          586 => 
-          array (
+          586 =>
+          array(
             'gemid' => '52bb95eb-6950-41bd-bd1a-16697a0c29eb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -13992,8 +13992,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:58:04.127076',
           ),
-          587 => 
-          array (
+          587 =>
+          array(
             'gemid' => '6449d0c9-a166-4dd3-af6f-dbf8e44e2797',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14003,8 +14003,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:58:07.844284',
           ),
-          588 => 
-          array (
+          588 =>
+          array(
             'gemid' => 'db3f64df-4df7-4461-bb9d-8af2095ae31b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14014,8 +14014,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:58:11.153742',
           ),
-          589 => 
-          array (
+          589 =>
+          array(
             'gemid' => 'ec850839-c6ee-4072-a329-c51a0b8b6f77',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14025,8 +14025,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:59:26.73447',
           ),
-          590 => 
-          array (
+          590 =>
+          array(
             'gemid' => '078f282d-f422-4afa-8e10-46b16d37b368',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14036,8 +14036,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:59:30.868901',
           ),
-          591 => 
-          array (
+          591 =>
+          array(
             'gemid' => 'b03bed1e-f55b-40cc-a06c-6465a41202a4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14047,8 +14047,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:59:34.504173',
           ),
-          592 => 
-          array (
+          592 =>
+          array(
             'gemid' => 'ab357d1b-36c6-47a7-8f6f-43ed31a3bf5b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14058,8 +14058,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 21:59:38.260371',
           ),
-          593 => 
-          array (
+          593 =>
+          array(
             'gemid' => 'd64512ae-2bb2-406c-9ddd-f0f55bebc1e8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14069,8 +14069,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:00:36.201045',
           ),
-          594 => 
-          array (
+          594 =>
+          array(
             'gemid' => '0cce75ac-6083-4e8f-82a6-a6a51d2d76f6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14080,8 +14080,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:00:39.645627',
           ),
-          595 => 
-          array (
+          595 =>
+          array(
             'gemid' => '7e6ba45f-cae2-45eb-a395-84bff90b4cdc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14091,8 +14091,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:00:42.532094',
           ),
-          596 => 
-          array (
+          596 =>
+          array(
             'gemid' => 'faec307d-f566-4f01-8adf-91692c55cfd0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14102,8 +14102,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:00:45.365267',
           ),
-          597 => 
-          array (
+          597 =>
+          array(
             'gemid' => '6d35d478-c100-4c92-aba9-80d5b8f813f5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14113,8 +14113,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:02:27.643623',
           ),
-          598 => 
-          array (
+          598 =>
+          array(
             'gemid' => '554762f4-af46-40b5-bf30-31fd9f334529',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14124,8 +14124,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:02:34.763529',
           ),
-          599 => 
-          array (
+          599 =>
+          array(
             'gemid' => '8f3593b2-e8cd-4f89-9a96-840159b994a7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14135,8 +14135,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:02:38.83611',
           ),
-          600 => 
-          array (
+          600 =>
+          array(
             'gemid' => '2188d016-050b-4a29-bec9-d886c6d8daaa',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14146,8 +14146,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:02:43.236768',
           ),
-          601 => 
-          array (
+          601 =>
+          array(
             'gemid' => '87a1af93-4982-40e4-9b16-3f7a8115bd68',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14157,8 +14157,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:03:57.357745',
           ),
-          602 => 
-          array (
+          602 =>
+          array(
             'gemid' => 'b89d6c8e-8217-4cd3-ac15-1b10bfcb857e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14168,8 +14168,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:04:00.444672',
           ),
-          603 => 
-          array (
+          603 =>
+          array(
             'gemid' => '1ac3ae05-ee97-4114-8f39-5bf444532544',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14179,8 +14179,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:04:04.24657',
           ),
-          604 => 
-          array (
+          604 =>
+          array(
             'gemid' => '6d7aabe3-7047-4b79-a43d-f39ce2ef9754',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14190,8 +14190,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:04:08.882542',
           ),
-          605 => 
-          array (
+          605 =>
+          array(
             'gemid' => '44f6d636-ef01-4a84-aaf6-730293078634',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14201,8 +14201,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:06:03.478758',
           ),
-          606 => 
-          array (
+          606 =>
+          array(
             'gemid' => 'fe2df46c-764b-474d-a9ca-dcc863337657',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14212,8 +14212,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:06:06.114985',
           ),
-          607 => 
-          array (
+          607 =>
+          array(
             'gemid' => 'ff9af43b-bb6f-4d4c-a72a-97d108ae1fdc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14223,8 +14223,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:06:08.805455',
           ),
-          608 => 
-          array (
+          608 =>
+          array(
             'gemid' => '2a0d1039-adee-482f-8485-3b5177034fba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14234,8 +14234,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:06:11.472291',
           ),
-          609 => 
-          array (
+          609 =>
+          array(
             'gemid' => 'e3316bc1-af7f-4944-9d62-c4d306142286',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14245,8 +14245,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:07:10.904784',
           ),
-          610 => 
-          array (
+          610 =>
+          array(
             'gemid' => '8e1fdfd1-3b0a-4f68-a1db-db2f3e0d731c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14256,8 +14256,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:07:14.00438',
           ),
-          611 => 
-          array (
+          611 =>
+          array(
             'gemid' => '12db28f7-9843-4ce5-9b8d-0f49fc37d5e7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14267,8 +14267,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:07:18.430969',
           ),
-          612 => 
-          array (
+          612 =>
+          array(
             'gemid' => 'b31f0f6f-f539-42b2-be7a-a9e6eb8370f9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14278,8 +14278,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:07:21.672721',
           ),
-          613 => 
-          array (
+          613 =>
+          array(
             'gemid' => 'f60d6250-2265-49dc-9a3a-3a95c86f82c5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14289,8 +14289,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:09:05.412501',
           ),
-          614 => 
-          array (
+          614 =>
+          array(
             'gemid' => 'eea1163c-c33b-477b-bb70-824fddc17bca',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14300,8 +14300,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:09:10.312139',
           ),
-          615 => 
-          array (
+          615 =>
+          array(
             'gemid' => '3008bb96-9f2b-4f6e-a216-ac9a4f9bd0fa',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14311,8 +14311,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:09:15.65726',
           ),
-          616 => 
-          array (
+          616 =>
+          array(
             'gemid' => '843b2ec8-a970-4db5-9b1b-44add9bca149',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14322,8 +14322,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:09:19.056018',
           ),
-          617 => 
-          array (
+          617 =>
+          array(
             'gemid' => 'c9d82950-d059-4091-b7e6-e838ad5832de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14333,8 +14333,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:11:13.556589',
           ),
-          618 => 
-          array (
+          618 =>
+          array(
             'gemid' => '91e20743-1efa-408e-aa38-87c6f072f426',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14344,8 +14344,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:11:17.792886',
           ),
-          619 => 
-          array (
+          619 =>
+          array(
             'gemid' => '15d426ee-5f86-449e-9ae3-f122b84334b8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14355,8 +14355,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:11:24.747806',
           ),
-          620 => 
-          array (
+          620 =>
+          array(
             'gemid' => 'c414198a-97b0-4a8f-b88a-f1dc556fa1b9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14366,8 +14366,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:11:30.931661',
           ),
-          621 => 
-          array (
+          621 =>
+          array(
             'gemid' => 'e1aaa312-33c2-4a4c-9130-a0022e9c74a2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14377,8 +14377,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:13:04.850364',
           ),
-          622 => 
-          array (
+          622 =>
+          array(
             'gemid' => '11b2eed6-8398-4ec2-bb42-6e30aab1f2dd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14388,8 +14388,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:13:07.996138',
           ),
-          623 => 
-          array (
+          623 =>
+          array(
             'gemid' => '457552c8-7550-4bcf-a0fc-cd0a58a0f90b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14399,8 +14399,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:13:11.091834',
           ),
-          624 => 
-          array (
+          624 =>
+          array(
             'gemid' => 'f19f69a1-d8e0-4814-a032-eade2f47675b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14410,8 +14410,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:13:15.215793',
           ),
-          625 => 
-          array (
+          625 =>
+          array(
             'gemid' => '2ae11879-ce05-48c6-9924-4e65c91ba45a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14421,8 +14421,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:39:30.42156',
           ),
-          626 => 
-          array (
+          626 =>
+          array(
             'gemid' => 'aa55f0bb-e01d-4c2e-9d5e-ec932f711188',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14432,8 +14432,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:39:34.362339',
           ),
-          627 => 
-          array (
+          627 =>
+          array(
             'gemid' => '4751f6cd-67b9-46d3-8f0c-83f7f9cc62e4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14443,8 +14443,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:39:37.935297',
           ),
-          628 => 
-          array (
+          628 =>
+          array(
             'gemid' => 'cdcc550b-dc2d-4277-a59a-d399da8de862',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14454,8 +14454,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:39:42.239858',
           ),
-          629 => 
-          array (
+          629 =>
+          array(
             'gemid' => '7482218e-99cf-4970-a020-21b2e80ec355',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14465,8 +14465,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:41:25.174609',
           ),
-          630 => 
-          array (
+          630 =>
+          array(
             'gemid' => 'c8b11b67-41b6-47b3-896e-02e887ee33b5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14476,8 +14476,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:41:28.169582',
           ),
-          631 => 
-          array (
+          631 =>
+          array(
             'gemid' => '64ed793e-f826-4c4f-99f1-85712403a318',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14487,8 +14487,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:41:40.878133',
           ),
-          632 => 
-          array (
+          632 =>
+          array(
             'gemid' => 'ec1fa0ab-a63a-4c4d-844b-8b2273e9866a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14498,8 +14498,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:41:45.918274',
           ),
-          633 => 
-          array (
+          633 =>
+          array(
             'gemid' => 'f0c79f0f-c413-4c37-a2bb-f69d1d3fb868',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14509,8 +14509,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:42:58.391338',
           ),
-          634 => 
-          array (
+          634 =>
+          array(
             'gemid' => 'ba88e5b9-0565-428c-93d9-74aa9f7e4ea2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14520,8 +14520,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:43:02.707658',
           ),
-          635 => 
-          array (
+          635 =>
+          array(
             'gemid' => '25787e8b-05be-43da-a015-a7feda506b59',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14531,8 +14531,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:43:06.033851',
           ),
-          636 => 
-          array (
+          636 =>
+          array(
             'gemid' => '4fbec6fe-fc1d-4bd6-a4a2-2ab095497ea9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14542,8 +14542,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:43:10.159009',
           ),
-          637 => 
-          array (
+          637 =>
+          array(
             'gemid' => '111ebc8d-0f83-44c3-b582-9611b7bece43',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14553,8 +14553,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:44:16.055245',
           ),
-          638 => 
-          array (
+          638 =>
+          array(
             'gemid' => '94ee96f7-7ff8-4e3a-a40d-d84f91e158f1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14564,8 +14564,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:44:19.298834',
           ),
-          639 => 
-          array (
+          639 =>
+          array(
             'gemid' => '08a180e6-2e32-40d4-a638-b410ced5e22e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14575,8 +14575,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:44:25.114772',
           ),
-          640 => 
-          array (
+          640 =>
+          array(
             'gemid' => 'c37528e5-0708-488d-9e88-0992d68033a7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14586,8 +14586,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:44:30.838168',
           ),
-          641 => 
-          array (
+          641 =>
+          array(
             'gemid' => 'bc1e3b38-32e9-4e81-803d-2459a131eb26',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14597,8 +14597,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:45:44.942586',
           ),
-          642 => 
-          array (
+          642 =>
+          array(
             'gemid' => 'd02a7f4d-e6d1-4826-a60b-65eeec51c410',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14608,8 +14608,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:45:47.979055',
           ),
-          643 => 
-          array (
+          643 =>
+          array(
             'gemid' => '1f5a6114-f610-4339-a7bb-88f17699c3af',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14619,8 +14619,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:45:52.007552',
           ),
-          644 => 
-          array (
+          644 =>
+          array(
             'gemid' => '82241101-6123-45c0-88f1-0e83600d0f43',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14630,8 +14630,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:45:55.720825',
           ),
-          645 => 
-          array (
+          645 =>
+          array(
             'gemid' => '1f1fe0a5-ed83-48c0-9fde-6e195ccfd446',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14641,8 +14641,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:47:44.317992',
           ),
-          646 => 
-          array (
+          646 =>
+          array(
             'gemid' => 'a410c20e-9776-4970-b810-faf7dde6ee13',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14652,8 +14652,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:47:50.496071',
           ),
-          647 => 
-          array (
+          647 =>
+          array(
             'gemid' => 'eb7033d5-0095-4fcc-a531-a9316012cda0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14663,8 +14663,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:47:54.553364',
           ),
-          648 => 
-          array (
+          648 =>
+          array(
             'gemid' => '1406bcb5-f5b4-4de8-9822-a46ecfc3cd48',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14674,8 +14674,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:48:06.893052',
           ),
-          649 => 
-          array (
+          649 =>
+          array(
             'gemid' => 'd0d7f5d1-e95a-41fd-a70e-f6961782ce41',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14685,8 +14685,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:49:13.934746',
           ),
-          650 => 
-          array (
+          650 =>
+          array(
             'gemid' => '584296f1-38c5-493a-a74d-2638294644e5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14696,8 +14696,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:49:18.12228',
           ),
-          651 => 
-          array (
+          651 =>
+          array(
             'gemid' => '1fad8566-e2e0-43d9-aae4-eff5af83ab5e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14707,8 +14707,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:49:22.07141',
           ),
-          652 => 
-          array (
+          652 =>
+          array(
             'gemid' => '7a89122b-b1f3-433c-8927-cbbd83134b5f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14718,8 +14718,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 22:49:25.609096',
           ),
-          653 => 
-          array (
+          653 =>
+          array(
             'gemid' => '39481bdb-1aff-4e4b-b0f7-b1d878e2ee63',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14729,8 +14729,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:02:09.958529',
           ),
-          654 => 
-          array (
+          654 =>
+          array(
             'gemid' => 'a5cc52e9-1618-48fe-97db-672cb100e862',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14740,8 +14740,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:02:14.558693',
           ),
-          655 => 
-          array (
+          655 =>
+          array(
             'gemid' => '0433e204-b780-4115-b371-3d021e326d92',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14751,8 +14751,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:02:18.500769',
           ),
-          656 => 
-          array (
+          656 =>
+          array(
             'gemid' => '759dbcbb-b04c-4f12-a335-c14e363d2ea5',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14762,8 +14762,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:02:22.974392',
           ),
-          657 => 
-          array (
+          657 =>
+          array(
             'gemid' => '1205ecbd-ecbb-49b2-a755-8570a9217b19',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14773,8 +14773,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:04:59.437347',
           ),
-          658 => 
-          array (
+          658 =>
+          array(
             'gemid' => '43e173df-d851-4af4-8a8a-3180d2b8627e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14784,8 +14784,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:05:04.398108',
           ),
-          659 => 
-          array (
+          659 =>
+          array(
             'gemid' => '8081c6c0-806f-49f9-9e37-32a12ec32697',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14795,8 +14795,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:05:08.691065',
           ),
-          660 => 
-          array (
+          660 =>
+          array(
             'gemid' => '11178fe5-d9f2-46dc-be6c-69cb6b7cd72c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14806,8 +14806,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:05:14.231686',
           ),
-          661 => 
-          array (
+          661 =>
+          array(
             'gemid' => 'bef60fe3-c048-4a7f-a8eb-df7e77b3d9de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14817,8 +14817,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:06:41.296537',
           ),
-          662 => 
-          array (
+          662 =>
+          array(
             'gemid' => '46daf637-18b7-408e-8d49-140d49e3f4d1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14828,8 +14828,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:06:45.022096',
           ),
-          663 => 
-          array (
+          663 =>
+          array(
             'gemid' => 'd50b0a2b-085c-4ec8-9773-2169e150bff4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14839,8 +14839,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:06:48.194429',
           ),
-          664 => 
-          array (
+          664 =>
+          array(
             'gemid' => 'fc5f4404-a924-4dcd-9fe9-047a9284658c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14850,8 +14850,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:06:52.190558',
           ),
-          665 => 
-          array (
+          665 =>
+          array(
             'gemid' => '145ffd90-ace9-4298-8c30-514a5f51679f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14861,8 +14861,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:10:36.47289',
           ),
-          666 => 
-          array (
+          666 =>
+          array(
             'gemid' => '50ff65d0-d766-4ee8-a184-dc4cc14179cb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14872,8 +14872,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:10:41.282486',
           ),
-          667 => 
-          array (
+          667 =>
+          array(
             'gemid' => 'f1a9b099-9dd5-48cf-a8de-1c67574af643',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14883,8 +14883,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:10:44.541639',
           ),
-          668 => 
-          array (
+          668 =>
+          array(
             'gemid' => '173247f0-cd51-475a-a617-1729dfdf6624',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14894,8 +14894,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:10:49.110853',
           ),
-          669 => 
-          array (
+          669 =>
+          array(
             'gemid' => '1632f424-081a-49f8-b83c-2475976b63aa',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14905,8 +14905,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:12:34.181593',
           ),
-          670 => 
-          array (
+          670 =>
+          array(
             'gemid' => '3bbcf0b9-30a3-4f42-8160-af3483f3613a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14916,8 +14916,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:12:37.316836',
           ),
-          671 => 
-          array (
+          671 =>
+          array(
             'gemid' => '5447c411-c223-4d27-b68b-20241b958784',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14927,8 +14927,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:12:40.938148',
           ),
-          672 => 
-          array (
+          672 =>
+          array(
             'gemid' => '1aedde20-0f1b-4acc-88a5-e38c7454f992',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14938,8 +14938,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:12:45.718932',
           ),
-          673 => 
-          array (
+          673 =>
+          array(
             'gemid' => '7877fb65-e80c-4e5c-b60f-be9bd6581a5b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14949,8 +14949,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:13:45.07469',
           ),
-          674 => 
-          array (
+          674 =>
+          array(
             'gemid' => 'b45b1718-68bc-4584-9798-e0ba4e0f0a1f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14960,8 +14960,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:13:49.115979',
           ),
-          675 => 
-          array (
+          675 =>
+          array(
             'gemid' => '19f27bd5-7e52-4989-9636-6a22a5b2daf1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14971,8 +14971,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:13:51.881695',
           ),
-          676 => 
-          array (
+          676 =>
+          array(
             'gemid' => '3b03e25e-05a6-4ee7-948a-39a5295231e0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14982,8 +14982,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:13:55.772409',
           ),
-          677 => 
-          array (
+          677 =>
+          array(
             'gemid' => '133a6247-525e-4778-bfd0-7dcf2fef81ef',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -14993,8 +14993,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:15:00.097766',
           ),
-          678 => 
-          array (
+          678 =>
+          array(
             'gemid' => '31746638-ee63-457e-8684-db0adfd24b2f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -15004,8 +15004,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:15:05.849976',
           ),
-          679 => 
-          array (
+          679 =>
+          array(
             'gemid' => '4c7cedf4-0c78-4f69-8ce7-9733841330a3',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -15015,8 +15015,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:15:09.837396',
           ),
-          680 => 
-          array (
+          680 =>
+          array(
             'gemid' => '620e27db-b426-4638-96f6-4be29a47e2b2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'aac73e1f-8f05-4d4c-a346-1e6fef941563',
@@ -15026,8 +15026,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:15:14.063964',
           ),
-          681 => 
-          array (
+          681 =>
+          array(
             'gemid' => 'b7617f37-c052-4453-bc4f-d258ddde78f8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15037,8 +15037,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:16:26.587327',
           ),
-          682 => 
-          array (
+          682 =>
+          array(
             'gemid' => 'a78116b2-b469-42b1-9c0a-9e2da40529b7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15048,8 +15048,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:16:29.802485',
           ),
-          683 => 
-          array (
+          683 =>
+          array(
             'gemid' => '19959996-cd02-4d6c-b556-3e090139c482',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15059,8 +15059,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:16:32.877913',
           ),
-          684 => 
-          array (
+          684 =>
+          array(
             'gemid' => '4f5d04ef-aa36-43ef-bae1-bd55c752b071',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15070,8 +15070,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:16:35.664756',
           ),
-          685 => 
-          array (
+          685 =>
+          array(
             'gemid' => '8057feda-9bb6-4d47-958e-1ac61cb224ce',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15081,8 +15081,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:17:34.215179',
           ),
-          686 => 
-          array (
+          686 =>
+          array(
             'gemid' => 'a1a36507-7910-453e-8b12-90f046585ec4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15092,8 +15092,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:17:36.949873',
           ),
-          687 => 
-          array (
+          687 =>
+          array(
             'gemid' => 'cec4afe0-53a7-4b50-bed1-4139c1a11430',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15103,8 +15103,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:17:41.221311',
           ),
-          688 => 
-          array (
+          688 =>
+          array(
             'gemid' => '3c50389f-fbe4-4f36-b87c-70add060a448',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15114,8 +15114,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:17:44.075622',
           ),
-          689 => 
-          array (
+          689 =>
+          array(
             'gemid' => 'ccc82707-cf05-4b96-b71a-5976761b6808',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15125,8 +15125,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:18:43.534213',
           ),
-          690 => 
-          array (
+          690 =>
+          array(
             'gemid' => '8374db96-2c28-4766-a48c-57957f1519c4',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15136,8 +15136,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:18:50.977709',
           ),
-          691 => 
-          array (
+          691 =>
+          array(
             'gemid' => 'ed77d53b-9687-4d89-a4f5-c95ada53fc93',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15147,8 +15147,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:18:54.746622',
           ),
-          692 => 
-          array (
+          692 =>
+          array(
             'gemid' => '4492f211-6690-452f-9bd1-f4656229ae4f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15158,8 +15158,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:18:58.018187',
           ),
-          693 => 
-          array (
+          693 =>
+          array(
             'gemid' => '60bc5a79-8675-4663-8465-13545c07be97',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15169,8 +15169,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:19:59.082584',
           ),
-          694 => 
-          array (
+          694 =>
+          array(
             'gemid' => '9b052d70-c576-4384-a245-d60c517381a0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15180,8 +15180,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:20:03.880633',
           ),
-          695 => 
-          array (
+          695 =>
+          array(
             'gemid' => '105675a1-615d-4ba0-a550-ae6ed6aef57e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15191,8 +15191,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:20:07.020723',
           ),
-          696 => 
-          array (
+          696 =>
+          array(
             'gemid' => 'b1e46df8-37b4-4650-8107-dca9ada4e3da',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15202,8 +15202,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:20:10.303355',
           ),
-          697 => 
-          array (
+          697 =>
+          array(
             'gemid' => '25cc8dd9-0104-40b6-8c5b-14ceff67b712',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15213,8 +15213,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:21:12.508896',
           ),
-          698 => 
-          array (
+          698 =>
+          array(
             'gemid' => '00c9c977-2f26-4230-ab65-603d0a23eaa7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15224,8 +15224,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:21:15.492508',
           ),
-          699 => 
-          array (
+          699 =>
+          array(
             'gemid' => '3a2e3ead-d26e-46f4-a8d6-91cd4c0f7f87',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15235,8 +15235,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:21:18.380181',
           ),
-          700 => 
-          array (
+          700 =>
+          array(
             'gemid' => 'b29b6368-bfb5-483a-ac4b-34649430dd34',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15246,8 +15246,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:21:21.520451',
           ),
-          701 => 
-          array (
+          701 =>
+          array(
             'gemid' => '93023358-25ea-4590-9d64-cb96157402ad',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15257,8 +15257,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:22:30.817032',
           ),
-          702 => 
-          array (
+          702 =>
+          array(
             'gemid' => '9536a415-c2c3-4c3d-bf12-8135c02b5606',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15268,8 +15268,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:22:33.83428',
           ),
-          703 => 
-          array (
+          703 =>
+          array(
             'gemid' => '1fc02f69-5f21-46a9-a76f-ed3ca1b2b60d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15279,8 +15279,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:22:37.432369',
           ),
-          704 => 
-          array (
+          704 =>
+          array(
             'gemid' => '389fffde-50b3-4cf6-8fd9-19ca3abf0df1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15290,8 +15290,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:22:40.218132',
           ),
-          705 => 
-          array (
+          705 =>
+          array(
             'gemid' => '6e9df819-89b9-408f-9b8c-65bc37d6219d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15301,8 +15301,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:23:36.840678',
           ),
-          706 => 
-          array (
+          706 =>
+          array(
             'gemid' => '9927bb17-2c78-4908-bb89-c73787e5908a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15312,8 +15312,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:23:39.862369',
           ),
-          707 => 
-          array (
+          707 =>
+          array(
             'gemid' => 'd63a6956-8843-4845-9d5a-88d80a02dc89',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15323,8 +15323,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:23:42.856134',
           ),
-          708 => 
-          array (
+          708 =>
+          array(
             'gemid' => '9e3fa00e-3356-48b0-a7a9-2b1e72834dde',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15334,8 +15334,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:23:45.687645',
           ),
-          709 => 
-          array (
+          709 =>
+          array(
             'gemid' => '2e326966-67c1-43d0-827e-6d0770ece23c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15345,8 +15345,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:24:51.402089',
           ),
-          710 => 
-          array (
+          710 =>
+          array(
             'gemid' => 'e1d41364-f219-4ec8-93e3-e5d9788dfa8a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15356,8 +15356,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:24:54.029284',
           ),
-          711 => 
-          array (
+          711 =>
+          array(
             'gemid' => '1a052181-993a-4c01-abe8-5d2d0b545f4f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15367,8 +15367,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:24:57.308234',
           ),
-          712 => 
-          array (
+          712 =>
+          array(
             'gemid' => '09ea7f65-8128-4559-9aab-93b37d24377d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15378,8 +15378,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:25:00.275607',
           ),
-          713 => 
-          array (
+          713 =>
+          array(
             'gemid' => '37cbbb8c-ecda-4b3e-96f7-8eafa3c48514',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15389,8 +15389,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:26:26.834829',
           ),
-          714 => 
-          array (
+          714 =>
+          array(
             'gemid' => 'a68bbd46-c379-4ecb-aafd-cf8a0e193bc6',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15400,8 +15400,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:26:29.752469',
           ),
-          715 => 
-          array (
+          715 =>
+          array(
             'gemid' => 'eddb8232-ddde-48f6-87f3-5a9daf2f1a16',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15411,8 +15411,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:26:32.708587',
           ),
-          716 => 
-          array (
+          716 =>
+          array(
             'gemid' => '8e91e6fe-9de0-41f3-b165-4523e827de53',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15422,8 +15422,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:26:35.836088',
           ),
-          717 => 
-          array (
+          717 =>
+          array(
             'gemid' => 'e67ea04e-de89-4e9e-9d1d-53ccbba06ad8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15433,8 +15433,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:27:29.75842',
           ),
-          718 => 
-          array (
+          718 =>
+          array(
             'gemid' => '6f5d1793-0126-4955-80a3-9fea458402a1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15444,8 +15444,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:27:32.693569',
           ),
-          719 => 
-          array (
+          719 =>
+          array(
             'gemid' => '874b0f81-8935-4912-bf77-e1d125656308',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15455,8 +15455,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:27:35.506635',
           ),
-          720 => 
-          array (
+          720 =>
+          array(
             'gemid' => '5a0c4b79-0abc-49f3-9321-0804886be22c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15466,8 +15466,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:27:38.52358',
           ),
-          721 => 
-          array (
+          721 =>
+          array(
             'gemid' => '780cd87d-2395-4af2-8ccb-291fe4666130',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15477,8 +15477,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:29:04.639074',
           ),
-          722 => 
-          array (
+          722 =>
+          array(
             'gemid' => 'eae605e6-adb1-4f67-a403-613657351d82',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15488,8 +15488,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:29:07.714551',
           ),
-          723 => 
-          array (
+          723 =>
+          array(
             'gemid' => '9996f951-362d-4d1c-9a79-7383abd9fd24',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15499,8 +15499,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:29:13.918868',
           ),
-          724 => 
-          array (
+          724 =>
+          array(
             'gemid' => '4338351a-4963-4a66-8e22-44b506e4324b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15510,8 +15510,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:29:25.020575',
           ),
-          725 => 
-          array (
+          725 =>
+          array(
             'gemid' => '70fb0bc9-eff5-43f5-9fbf-56c93c953b87',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15521,8 +15521,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:30:30.186244',
           ),
-          726 => 
-          array (
+          726 =>
+          array(
             'gemid' => 'aeb85853-9a83-459f-b28f-76ac8209a7d9',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15532,8 +15532,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:30:34.850132',
           ),
-          727 => 
-          array (
+          727 =>
+          array(
             'gemid' => '790aa336-55a1-4445-8586-8d5225904805',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15543,8 +15543,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:30:38.610399',
           ),
-          728 => 
-          array (
+          728 =>
+          array(
             'gemid' => '50b003e0-703d-4b68-92ac-1bd90a33cf57',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15554,8 +15554,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:30:47.563076',
           ),
-          729 => 
-          array (
+          729 =>
+          array(
             'gemid' => '56a622a8-e433-44bb-9a59-25090596366c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15565,8 +15565,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:31:49.345652',
           ),
-          730 => 
-          array (
+          730 =>
+          array(
             'gemid' => '1f0de47c-d6cb-4a18-991c-f17521881a35',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15576,8 +15576,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:31:53.328705',
           ),
-          731 => 
-          array (
+          731 =>
+          array(
             'gemid' => '1966447e-1669-4b69-ab65-2a67f270e7b8',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15587,8 +15587,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:31:56.566234',
           ),
-          732 => 
-          array (
+          732 =>
+          array(
             'gemid' => 'f5488dbe-98a4-4645-8fe7-f5a08afdfb7b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15598,8 +15598,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:31:59.848285',
           ),
-          733 => 
-          array (
+          733 =>
+          array(
             'gemid' => '6e1ff473-dd34-4dba-9d86-8c0326f50280',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15609,8 +15609,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:32:57.79779',
           ),
-          734 => 
-          array (
+          734 =>
+          array(
             'gemid' => '9f3d425f-35c6-4352-82ea-a236ba7c227e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15620,8 +15620,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:33:01.342113',
           ),
-          735 => 
-          array (
+          735 =>
+          array(
             'gemid' => 'e9d39e8a-7986-4525-8dd5-e6616e79c1de',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15631,8 +15631,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:33:04.63453',
           ),
-          736 => 
-          array (
+          736 =>
+          array(
             'gemid' => 'c00f8dff-da2d-4cdf-970a-a338686bd5ef',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15642,8 +15642,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:33:07.89739',
           ),
-          737 => 
-          array (
+          737 =>
+          array(
             'gemid' => 'dfe11119-80a4-4c70-9b97-a642899866cc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15653,8 +15653,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:33:58.889309',
           ),
-          738 => 
-          array (
+          738 =>
+          array(
             'gemid' => '300ef94b-e7c5-4b7e-a042-1a166ff601ba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15664,8 +15664,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:34:02.463116',
           ),
-          739 => 
-          array (
+          739 =>
+          array(
             'gemid' => '627f7a68-3103-475c-ab1c-b1c3b6b21a4d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15675,8 +15675,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:34:05.634084',
           ),
-          740 => 
-          array (
+          740 =>
+          array(
             'gemid' => 'a6b49111-5130-42a8-a90f-218352b61c22',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15686,8 +15686,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:34:40.370508',
           ),
-          741 => 
-          array (
+          741 =>
+          array(
             'gemid' => '3b86ba9e-d06e-4407-a3b2-7264d20c13df',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15697,8 +15697,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:35:36.459171',
           ),
-          742 => 
-          array (
+          742 =>
+          array(
             'gemid' => '3356e414-268c-4d89-8478-bd49a83a568a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15708,8 +15708,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:35:45.592133',
           ),
-          743 => 
-          array (
+          743 =>
+          array(
             'gemid' => 'bb386a78-3538-4f6d-b451-f9ab87fb7497',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15719,8 +15719,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:35:49.012519',
           ),
-          744 => 
-          array (
+          744 =>
+          array(
             'gemid' => '80f1f71e-1a18-42fe-9086-a06ada19b406',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15730,8 +15730,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:35:52.592585',
           ),
-          745 => 
-          array (
+          745 =>
+          array(
             'gemid' => 'ca4bf685-475a-4c76-83da-847ca5efa059',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15741,8 +15741,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:37:10.758796',
           ),
-          746 => 
-          array (
+          746 =>
+          array(
             'gemid' => '99f88702-03ac-4d77-b9f3-25561e00e90b',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15752,8 +15752,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:37:17.974006',
           ),
-          747 => 
-          array (
+          747 =>
+          array(
             'gemid' => '6bc73d7e-7d1a-4757-96f9-84fdd1a4ef1c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15763,8 +15763,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:37:21.265013',
           ),
-          748 => 
-          array (
+          748 =>
+          array(
             'gemid' => '2f733dbb-cea7-4b77-94d3-218069958a53',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15774,8 +15774,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:37:25.521023',
           ),
-          749 => 
-          array (
+          749 =>
+          array(
             'gemid' => '9b96e0fb-6ff7-441f-b969-c9791793584f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15785,8 +15785,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:38:20.229515',
           ),
-          750 => 
-          array (
+          750 =>
+          array(
             'gemid' => '7c805d4a-657a-4f22-bf23-526bf4bdcedc',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15796,8 +15796,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:38:23.223717',
           ),
-          751 => 
-          array (
+          751 =>
+          array(
             'gemid' => '823f1370-b2d7-43ee-870f-0754b01fe5bd',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15807,8 +15807,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:38:26.208705',
           ),
-          752 => 
-          array (
+          752 =>
+          array(
             'gemid' => 'fdd8b50c-6f82-40ce-94ba-8f6790fa5505',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15818,8 +15818,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:38:30.101299',
           ),
-          753 => 
-          array (
+          753 =>
+          array(
             'gemid' => '7030f31d-d5e9-4e33-8473-9534a05822b1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15829,8 +15829,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:40:11.862997',
           ),
-          754 => 
-          array (
+          754 =>
+          array(
             'gemid' => '166553a3-2037-4170-9939-a79b202e5f2e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15840,8 +15840,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:40:14.779833',
           ),
-          755 => 
-          array (
+          755 =>
+          array(
             'gemid' => 'e1908413-0d02-4ba2-b584-08c87016a254',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15851,8 +15851,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:40:18.532022',
           ),
-          756 => 
-          array (
+          756 =>
+          array(
             'gemid' => 'f0ad2f30-61e3-481d-852c-c23a3818e902',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15862,8 +15862,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:40:22.778247',
           ),
-          757 => 
-          array (
+          757 =>
+          array(
             'gemid' => '9dbda9e3-4876-4a04-8af4-ffd8e4efdc1e',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15873,8 +15873,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:41:40.187204',
           ),
-          758 => 
-          array (
+          758 =>
+          array(
             'gemid' => '4d563b01-81c3-4cf2-ba92-4d1268e7996d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15884,8 +15884,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:41:42.893997',
           ),
-          759 => 
-          array (
+          759 =>
+          array(
             'gemid' => 'a30f573b-b9ea-4a54-bc53-dbe7926cb4d7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15895,8 +15895,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:41:47.130506',
           ),
-          760 => 
-          array (
+          760 =>
+          array(
             'gemid' => '88b6efa2-3446-4c43-9607-350af6ae109a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15906,8 +15906,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:41:52.8285',
           ),
-          761 => 
-          array (
+          761 =>
+          array(
             'gemid' => 'b7e9e255-b3aa-4dcb-99f4-941e7e025366',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15917,8 +15917,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:42:51.548394',
           ),
-          762 => 
-          array (
+          762 =>
+          array(
             'gemid' => 'e26134d3-28fa-4168-bd28-2a1d0186b60f',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15928,8 +15928,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:42:54.931715',
           ),
-          763 => 
-          array (
+          763 =>
+          array(
             'gemid' => '3912e28d-ebc9-4792-98cb-1cc29bc96d6a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15939,8 +15939,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:42:57.409394',
           ),
-          764 => 
-          array (
+          764 =>
+          array(
             'gemid' => '59b5a3ae-4010-4b46-8d17-b44a7511611a',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15950,8 +15950,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:43:00.859653',
           ),
-          765 => 
-          array (
+          765 =>
+          array(
             'gemid' => '169347c0-42e6-4b66-b14f-bcffafae10fb',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15961,8 +15961,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:55:23.750485',
           ),
-          766 => 
-          array (
+          766 =>
+          array(
             'gemid' => '8b5e6949-83cd-4254-9431-d70e259d2729',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15972,8 +15972,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:55:27.360105',
           ),
-          767 => 
-          array (
+          767 =>
+          array(
             'gemid' => '91088265-6148-4a30-8d29-692f6a35af70',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15983,8 +15983,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:55:30.776854',
           ),
-          768 => 
-          array (
+          768 =>
+          array(
             'gemid' => '20d359db-5dba-4023-ab72-89817edf61f0',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -15994,8 +15994,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:55:34.207999',
           ),
-          769 => 
-          array (
+          769 =>
+          array(
             'gemid' => '49710d37-fa5f-4040-bb85-8e9f1530ac69',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16005,8 +16005,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:56:49.913196',
           ),
-          770 => 
-          array (
+          770 =>
+          array(
             'gemid' => 'd63df37d-e59d-4d81-bb50-0cca0e93cdca',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16016,8 +16016,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:56:52.786465',
           ),
-          771 => 
-          array (
+          771 =>
+          array(
             'gemid' => 'd3eded2b-25f8-4605-b9ba-5428888047d7',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16027,8 +16027,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:56:56.304866',
           ),
-          772 => 
-          array (
+          772 =>
+          array(
             'gemid' => '645211a3-af64-4db0-944c-debdbf458fa1',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16038,8 +16038,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:56:58.965046',
           ),
-          773 => 
-          array (
+          773 =>
+          array(
             'gemid' => 'd5001879-85b7-4825-815b-f7ca28f9e3e2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16049,8 +16049,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:57:56.744976',
           ),
-          774 => 
-          array (
+          774 =>
+          array(
             'gemid' => 'aaa44a7f-5357-4c03-a6c8-084e7c62cb39',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16060,8 +16060,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:58:00.699186',
           ),
-          775 => 
-          array (
+          775 =>
+          array(
             'gemid' => '130fe0ae-2e03-4f39-ba8f-35ed14af61d2',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16071,8 +16071,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:58:04.028215',
           ),
-          776 => 
-          array (
+          776 =>
+          array(
             'gemid' => '6abb5e6a-69d7-440a-8b50-b117d5d2490d',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16082,8 +16082,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:58:07.365137',
           ),
-          777 => 
-          array (
+          777 =>
+          array(
             'gemid' => '1d83cf88-e240-4075-8209-a69d46a0c513',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16093,8 +16093,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:59:17.728235',
           ),
-          778 => 
-          array (
+          778 =>
+          array(
             'gemid' => 'a07aebdf-3c5e-49d3-aead-01284f6e8f49',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16104,8 +16104,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:59:20.502257',
           ),
-          779 => 
-          array (
+          779 =>
+          array(
             'gemid' => '0009ba8b-8972-455a-bfb1-6c7f628147ba',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16115,8 +16115,8 @@ return array (
             'whereby' => 4,
             'createdat' => '2026-01-07 23:59:24.410156',
           ),
-          780 => 
-          array (
+          780 =>
+          array(
             'gemid' => '7cf6cd79-a934-430f-870d-925a7727418c',
             'userid' => 'f096107b-ed72-4a2b-9f46-2347a6e4a0b7',
             'postid' => 'd5819181-71c9-40b1-ad9c-698de2cff782',
@@ -16128,16 +16128,16 @@ return array (
           ),
         ),
       ),
-      58 => 
-      array (
+      58 =>
+      array(
         'userid' => 'f0b60587-a950-4ad7-ae1b-8a757e221f52',
         'gems' => 1,
         'tokens' => 2.1195421788,
         'percentage' => 0.0423908435777872,
-        'details' => 
-        array (
-          0 => 
-          array (
+        'details' =>
+        array(
+          0 =>
+          array(
             'gemid' => 'fd66f887-adb9-44b4-9d05-ce1b660ac19a',
             'userid' => 'f0b60587-a950-4ad7-ae1b-8a757e221f52',
             'postid' => '5014a20d-dc1e-4efd-ac2f-f4de2016731c',
@@ -16147,8 +16147,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 01:10:18.731377',
           ),
-          1 => 
-          array (
+          1 =>
+          array(
             'gemid' => '6899dfce-416b-4cbf-a9bb-a50d33f00e1c',
             'userid' => 'f0b60587-a950-4ad7-ae1b-8a757e221f52',
             'postid' => '5014a20d-dc1e-4efd-ac2f-f4de2016731c',
@@ -16158,8 +16158,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 12:19:35.569621',
           ),
-          2 => 
-          array (
+          2 =>
+          array(
             'gemid' => 'c475ad31-7ad8-4e14-8ffd-89c485b573ac',
             'userid' => 'f0b60587-a950-4ad7-ae1b-8a757e221f52',
             'postid' => '5014a20d-dc1e-4efd-ac2f-f4de2016731c',
@@ -16169,8 +16169,8 @@ return array (
             'whereby' => 1,
             'createdat' => '2026-01-07 13:33:03.401873',
           ),
-          3 => 
-          array (
+          3 =>
+          array(
             'gemid' => 'ffbf73dd-21fa-4a3f-8d53-d90c7fb95bbf',
             'userid' => 'f0b60587-a950-4ad7-ae1b-8a757e221f52',
             'postid' => '5014a20d-dc1e-4efd-ac2f-f4de2016731c',

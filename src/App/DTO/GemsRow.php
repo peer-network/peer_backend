@@ -19,5 +19,6 @@ final class GemsRow
         public readonly string $gems,
         public readonly int $whereby,
         public readonly string $createdat
-    ) {}
+    ) {
+    }
 }
