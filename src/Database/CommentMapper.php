@@ -167,7 +167,7 @@ class CommentMapper
 
         $results = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $this->logger->info("Fetched comments for post counter", ['row' => $row]);
+            $this->logger->debug("Fetched comments for post counter", ['row' => $row]);
             // here to decide if to replace comment/user content or not
 
             $results[] = new CommentAdvanced([
@@ -187,7 +187,7 @@ class CommentMapper
             ], [], false);
         }
 
-        $this->logger->info("Fetched comments for post", ['count' => count($results)]);
+        $this->logger->debug("Fetched comments for post", ['count' => count($results)]);
 
         return $results;
     }
@@ -425,7 +425,7 @@ class CommentMapper
                 ], [], false);
             }, $results);
 
-            $this->logger->info("Fetched comments for post", ['count' => count($comments)]);
+            $this->logger->debug("Fetched comments for post", ['count' => count($comments)]);
 
             if (empty($results)) {
                 return $results;

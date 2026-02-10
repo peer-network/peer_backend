@@ -34,6 +34,9 @@
 ### docs (root)
 - [placeholder.txt](docs/placeholder.txt)
 
+### docs/logging
+- [logging.md](docs/logging/logging.md)
+
 ### docs/research
 - [Stateless-app-20251216.md](docs/research/Stateless-app-20251216.md)
 
