@@ -562,6 +562,35 @@ class WalletMapper implements WalletCreditable, WalletDebitable
         }
     }
 
+    public function fetchUserWalletBalanceFromTransactions(string $userId): string
+    {
+        $this->logger->debug('WalletMapper.fetchUserWalletBalanceFromTransactions started');
+
+        $query = "SELECT COALESCE(SUM(
+                    CASE 
+                        WHEN senderid = :userId THEN -tokenamount
+                        WHEN recipientid = :userId THEN tokenamount
+                        ELSE 0
+                    END
+                ), 0) AS balance
+                FROM transactions
+                WHERE senderid = :userId OR recipientid = :userId";
+
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':userId', $userId, PDO::PARAM_STR);
+            $stmt->execute();
+            $balance = $stmt->fetchColumn();
+
+            $this->logger->info('Fetched transactions-based wallet balance', ['balance' => $balance]);
+
+            return $balance !== false ? (string) $balance : '0';
+        } catch (\PDOException $e) {
+            $this->logger->error('Database error in fetchUserWalletBalanceFromTransactions: ' . $e->getMessage());
+            throw new \RuntimeException('Unable to fetch wallet balance from transactions');
+        }
+    }
+
     public function updateUserLiquidity(string $userId, string $liquidity): bool
     {
         try {
