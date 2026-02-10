@@ -1,0 +1,15 @@
+[Unit]
+Description=Notifications Worker
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/peer_backend
+ExecStart=/usr/bin/php src/Services/Notifications/worker.php
+Restart=always
+RestartSec=2
+User=www-data
+Environment=APP_ENV=production
+
+[Install]
+WantedBy=multi-user.target

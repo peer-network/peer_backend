@@ -77,4 +77,5 @@ type Mutation {
   advertisePostBasic(postid: ID!, startday: Date!, durationInDays: AdDuration!, advertisePlan: AdvertisementBasicPlan!): ListAdvertisementData!
   advertisePostPinned(postid: ID!, advertisePlan: AdvertisementPinnedPlan!): ListAdvertisementData!
   performShopOrder(tokenAmount: Decimal!, shopItemId: String!, orderDetails: ShopOrderDetailsInput!): DefaultResponse!
+  updateUserDeviceToken(token: String!, platform: DevicePlatform!, language: String): DefaultResponse!
 }

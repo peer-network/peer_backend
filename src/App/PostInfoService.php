@@ -17,6 +17,10 @@ use Fawaz\Database\UserMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\PeerShopSpec;
 use Fawaz\Services\ContentFiltering\Types\ContentFilteringCases;
 use Fawaz\Services\ContentFiltering\Types\ContentType;
+use Fawaz\Services\Notifications\InitiatorReceiver\UserInitiator;
+use Fawaz\Services\Notifications\InitiatorReceiver\UserReceiver;
+use Fawaz\Services\Notifications\NotificationQueue;
+use Fawaz\Services\Notifications\Strategies\PostLikeNotification;
 use Fawaz\Utils\ResponseHelper;
 
 class PostInfoService
@@ -33,6 +37,7 @@ class PostInfoService
         protected PostMapper $postMapper,
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
+        protected NotificationQueue $notificationQueue,
         protected ModerationMapper $moderationMapper
     ) {
     }
@@ -124,6 +129,14 @@ class PostInfoService
 
             $postInfo->setLikes($postInfo->getLikes() + 1);
             $this->postInfoMapper->update($postInfo);
+
+            // Add Logic for Notification
+            $isQueued = $this->notificationQueue->enqueue(
+                PostLikeNotification::action(),
+                ['contentId' => $postId],
+                new UserInitiator($this->currentUserId),
+                new UserReceiver([$postInfo->getOwnerId()])
+            );
 
             return [
                 'status' => 'success',

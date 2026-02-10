@@ -16,6 +16,7 @@ Follow these steps to set up the backend on your local machine:
 sudo apt install php8.3-cli
 sudo apt-get install php-pgsql php-bcmath php-xml
 sudo apt install php8.3-curl php8.3-gmp
+sudo apt-get install php-redis
 ```
 
 ### **2. Install Composer**

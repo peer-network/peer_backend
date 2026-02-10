@@ -359,6 +359,10 @@
         "comment": "Leaderboard generated successfully.",
         "userFriendlyComment": "Leaderboard generated successfully."
     },
+    "12401": {
+        "comment": "Success: user device token added successfully",
+        "userFriendlyComment": "User device token added successfully."
+    },
 
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",

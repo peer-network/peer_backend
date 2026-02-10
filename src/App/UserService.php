@@ -1411,4 +1411,29 @@ class UserService implements UserServiceInterface
         }
     }
 
+    /**
+     * Add or Update user's device token
+     */
+    public function updateUserDeviceToken(array $args): ?array
+    {
+
+        try {
+            $this->transactionManager->beginTransaction();
+
+            $args['userid'] = $this->currentUserId;
+
+            $this->userMapper->updateUserDeviceToken($args);
+
+            $this->transactionManager->commit();
+
+            return self::createSuccessResponse(12401);
+
+        } catch (\Throwable $e) {
+            $this->transactionManager->rollback();
+            $this->logger->error('Failed to update user device token', ['exception' => $e]);
+            return self::respondWithError(40301);
+        }
+
+
+    }
 }
