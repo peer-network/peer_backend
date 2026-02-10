@@ -57,8 +57,8 @@ class PeerShopService
 
     /**
      * Perform a shop purchase by transferring tokens to a PeerShop account.
-     * 
-     * This will transfer the specified amount of tokens from the current user's wallet to the PeerShop account only.  
+     *
+     * This will transfer the specified amount of tokens from the current user's wallet to the PeerShop account only.
      *
      *
      */
@@ -74,7 +74,7 @@ class PeerShopService
         try {
             $tokenAmount = (string) $args['tokenAmount'];
             $message = isset($args['transferMessage']) ? (string) $args['transferMessage'] : null;
-            
+
             $peerShop = $this->peerShopMapper->initializeWalletAccounts();
 
             $receipientUserObj = $this->userMapper->loadById($peerShop);
@@ -99,7 +99,7 @@ class PeerShopService
             }
             $this->transactionManager->beginTransaction();
 
-        
+
             if ((string) $peerShop === $this->currentUserId) {
                 $this->logger->warning('Send and Receive Same Wallet Error.');
                 return self::respondWithError(31202);
@@ -148,14 +148,14 @@ class PeerShopService
                 $this->logger->error('PeerShopService.performShopOrder failed to create shop order');
                 return self::respondWithError(41223); // Failed to create shop order
             }
-            
+
             if ($response['status'] === 'error' || !$isShopOrder) {
                 $this->transactionManager->rollback();
                 return $response;
             } else {
                 $this->logger->info('PeerShopService.performShopOrder completed successfully', ['response' => $response]);
                 $this->transactionManager->commit();
-                
+
                 return self::createSuccessResponse(12201, [], true); // Product purchased successfully
             }
 
@@ -226,7 +226,7 @@ class PeerShopService
             ];
 
             // Shop Order details fetched successfully
-            return self::createSuccessResponse(12202, $orderDetails); 
+            return self::createSuccessResponse(12202, $orderDetails);
 
         } catch (\Exception $e) {
             $this->logger->error("Error in PeerShopService.shopOrderDetails", ['exception' => $e->getMessage()]);

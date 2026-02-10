@@ -43,9 +43,9 @@ SET
     liquidity = b.transaction_total
 FROM
     balances b
+join users u on b.userid = u.uid
 WHERE
     w.userid = b.userid
-    AND b.transaction_balance_diff > -10
     AND b.transaction_balance_diff <> 0 RETURNING w.userid,
     b.old_liquidity,
     w.liquidity AS new_liquidity,

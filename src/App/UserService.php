@@ -165,7 +165,7 @@ class UserService implements UserServiceInterface
 
     public function loadAllUsersById(string $userId): User|false
     {
-        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);        
+        $this->logger->debug('UserService.loadById started', ['userId' => $userId]);
 
         try {
             return $this->userMapper->loadById($userId);
@@ -757,7 +757,7 @@ class UserService implements UserServiceInterface
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->warning('Profile updates blocked due to moderation',['userid' => $this->currentUserId]);
+            $this->logger->warning('Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
@@ -1004,7 +1004,7 @@ class UserService implements UserServiceInterface
         ]);
 
         try {
-            $users = $this->userMapper->fetchFriends($userId, $specs,$offset,$limit);
+            $users = $this->userMapper->fetchFriends($userId, $specs, $offset, $limit);
 
             if (!empty($users)) {
                 foreach ($users as $profile) {
@@ -1426,7 +1426,7 @@ class UserService implements UserServiceInterface
 
             $this->transactionManager->commit();
             
-            return self::createSuccessResponse(12301);
+            return self::createSuccessResponse(12401);
 
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();

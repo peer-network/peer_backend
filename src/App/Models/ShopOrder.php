@@ -61,7 +61,8 @@ class ShopOrder extends Model
         $this->zipcode = $data['orderDetails']['zipcode'] ?? '';
         $this->country = $data['orderDetails']['country'] ?? '';
         $this->size = $data['orderDetails']['shopItemSpecs']['size'] ?? '';
-        $this->createdat = $data['orderDetails']['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');;
+        $this->createdat = $data['orderDetails']['createdat'] ?? new DateTime()->format('Y-m-d H:i:s.u');
+        ;
     }
 
     public function getArrayCopy(): array
@@ -84,7 +85,7 @@ class ShopOrder extends Model
                     'size' => $this->size,
                 ],
             ],
-            
+
         ];
     }
 

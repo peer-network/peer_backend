@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\App\Repositories;
 
-
 use Fawaz\App\Models\MintAccount;
 use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
@@ -16,7 +15,8 @@ use Fawaz\Services\ContentFiltering\Capabilities\HasWalletId;
  * - If the object is a MintAccount, returns MintAccountRepositoryImpl
  * - Otherwise, returns WalletMapper
  */
-class WalletHandlerFactory {
+class WalletHandlerFactory
+{
     public function __construct(
         private WalletMapper $walletMapper,
         private MintAccountRepositoryImpl $mintAccountRepository,
@@ -31,4 +31,3 @@ class WalletHandlerFactory {
         return $this->walletMapper;
     }
 }
-

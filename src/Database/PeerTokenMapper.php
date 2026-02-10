@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Fawaz\Database;
 
-
 use Fawaz\App\Models\Transaction;
 use Fawaz\App\Models\TransactionCategory;
 use Fawaz\App\Models\TransactionHistoryItem;
@@ -36,13 +35,14 @@ class PeerTokenMapper implements PeerTokenMapperInterface
     private string $inviterId;
 
     public function __construct(
-        protected PeerLoggerInterface $logger, 
-        protected PDO $db, 
-        protected LiquidityPool $pool, 
-        protected WalletMapper $walletMapper, 
+        protected PeerLoggerInterface $logger,
+        protected PDO $db,
+        protected LiquidityPool $pool,
+        protected WalletMapper $walletMapper,
         protected WalletHandlerFactory $WalletHandlerFactory,
         protected UserMapper $userMapper
-    ){}
+    ) {
+    }
 
     /**
      * Check if a transfer already exists with same sender, recipient and amount.
@@ -105,6 +105,23 @@ class PeerTokenMapper implements PeerTokenMapperInterface
         ];
     }
 
+    /**
+     * Check for fees account existence
+     */
+    public function isFeesAccountExist(): bool
+    {
+        $peerAcObj = $this->userMapper->loadById($this->peerWallet);
+        if (empty($peerAcObj)) {
+            return false;
+        }
+
+        $burnAcObj = $this->userMapper->loadById($this->burnWallet);
+        if (empty($burnAcObj)) {
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Receipient should not be any of the fee wallets.
@@ -274,10 +291,10 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $this->lockBalances($handlesToLock);
             $mode = $strategy->getFeePolicyMode();
             [
-                $requiredAmount, 
-                $netRecipientAmount, 
-                $peerFeeAmount, 
-                $burnFeeAmount, 
+                $requiredAmount,
+                $netRecipientAmount,
+                $peerFeeAmount,
+                $burnFeeAmount,
                 $inviteFeeAmount
             ] = $this->calculateAmountsForMode($sender->getWalletId(), $numberOfTokens, $mode);
 
@@ -324,7 +341,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
+                    'transactioncategory' => TransactionCategory::INVITER_FEE_EARN->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
                 // $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
@@ -388,6 +405,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             return self::respondWithError(40301);
         }
     }
+
 
     /**
      * Calculate required (debit) and net (recipient credit) amounts based on fee policy mode.
@@ -631,7 +649,9 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                         tt.*, 
                         ROW_NUMBER() OVER (
                             PARTITION BY tt.operationid 
-                            ORDER BY CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END, tt.createdat DESC
+                            ORDER BY CASE WHEN (tt.senderid = :senderid OR tt.recipientid = :recipientid) THEN 0 ELSE 1 END,
+                                     CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END,
+                                     tt.createdat DESC
                         ) AS rn
                     FROM transactions tt
                     WHERE tt.operationid IN (SELECT operationid FROM ops)
@@ -644,6 +664,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     r.senderid,
                     r.recipientid,
                     r.message,
+                    r.transferaction,
                     r.tokenamount AS net_amount,
                     r.createdat,
                     COALESCE(a.peer_fee,0) AS peer_fee,
@@ -671,9 +692,29 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $inviterFee = (string)($row['inviter_fee'] ?? '0');
             $netTokenAmount = (string)($row['net_amount'] ?? '0');
 
-            $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
-            $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
-            $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+            $isInviterFeeForUser = ($row['transferaction'] ?? '') === 'INVITER_FEE'
+                && (string)($row['recipientid'] ?? '') === $userId;
+
+            if ($isInviterFeeForUser) {
+                $feesTotal = $netTokenAmount;
+                $grossAmount = $netTokenAmount;
+                $feeDetails = [
+                    'total' => 0.0,
+                    'burn' => null,
+                    'peer' => null,
+                    'inviter' => null,
+                ];
+            } else {
+                $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
+                $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
+                $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+                $feeDetails = [
+                    'total' => $feesTotal,
+                    'burn' => (string)$row['burn_fee'] ?: null,
+                    'peer' => (string)$row['peer_fee'] ?: null,
+                    'inviter' => (string)$row['inviter_fee'] ?: null,
+                ];
+            }
 
             $tiData = [
                 'transactionid' => (string)($row['transactionid'] ?? ''),
@@ -686,14 +727,9 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                 'createdat' => (string)($row['createdat'] ?? ''),
                 'senderid' => (string)($row['senderid'] ?? ''),
                 'recipientid' => (string)($row['recipientid'] ?? ''),
-                'fees' => [
-                    'total' => $feesTotal,
-                    'burn' => (string)$row['burn_fee'] ?: null,
-                    'peer' => (string)$row['peer_fee'] ?: null,
-                    'inviter' => (string)$row['inviter_fee'] ?: null,
-                ],
+                'fees' => $feeDetails,
             ];
-            $items[] = new TransactionHistoryItem($tiData,$userId);
+            $items[] = new TransactionHistoryItem($tiData, $userId);
         }
 
         return $items;

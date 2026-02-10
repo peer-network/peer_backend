@@ -10,6 +10,17 @@ namespace Fawaz\App\Validation;
  */
 class ValidationSpec
 {
+    public static function dateOffset(string $field, bool $required = false, int $errorCode = 30223): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validateDateOffsetString', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
     public static function dateMonthYearString(string $field, bool $required = false, int $errorCode = 30258): array
     {
         return [
@@ -116,7 +127,7 @@ class ValidationSpec
         ];
     }
 
-    
+
     public static function addressLine2(string $field = 'addressline2', bool $required = false, int $errorCode = 30279): array
     {
         return [
@@ -177,6 +188,18 @@ class ValidationSpec
         ];
     }
 
+    public static function validatePositiveNumber(string $field, bool $required = false, int $errorCode = 33001): array
+    {
+        return [
+            $field => [
+                'required' => $required,
+                'validators' => [
+                    ['name' => 'validatePositiveNumber', 'options' => ['field' => $field, 'errorCode' => $errorCode]],
+                ],
+            ],
+        ];
+    }
+
     public static function genericUuid(string $field, bool $required = false, int $errorCode = 30272): array
     {
         return [
@@ -190,7 +213,6 @@ class ValidationSpec
     }
 
 
-
     public static function size(string $field, bool $required = false, int $errorCode = 30278): array
     {
         return [
@@ -202,7 +224,7 @@ class ValidationSpec
             ],
         ];
     }
-    
+
     /**
      * Merge multiple partial specs into one spec array.
      */
@@ -255,6 +277,9 @@ class ValidationSpec
             'messageOffset' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
             'messageLimit' => fn (string $f, bool $r) => self::offsetAndLimit($f, $r),
 
+            'dateOffset' => fn (string $f, bool $r) => self::dateOffset($f, $r),
+
+            'dateYYYYMMDD' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'start_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
             'end_date' => fn (string $f, bool $r) => self::dateMonthYearString($f, $r),
 
@@ -268,6 +293,8 @@ class ValidationSpec
             'transactionId' => fn (string $f, bool $r) => self::genericUuid($f, $r),
             'size' => fn (string $f, bool $r) => self::size($f, false),
             'addressline2' => fn (string $f, bool $r) => self::addressLine2($f, false),
+
+            'leaderboardUsersCount' => fn (string $f, bool $r) => self::validatePositiveNumber($f, $r),
         ];
 
         $spec = [];

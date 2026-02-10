@@ -7,11 +7,13 @@ extend type Query {
   dailygemstatus: DailyGemStatusResponse!
   dailygemsresults(day: DayFilterType!): DailyGemsResultsResponse!  
   getMintAccount: MintAccountResponse!
+  generateLeaderboard(leaderboardParams: LeaderboardParamsInput!): LeaderboardResponse!
 }
 
 extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
+  distributeTokensForGems(date: String!): GemstersResponse!
   alphaMint: DefaultResponse!
 }
 

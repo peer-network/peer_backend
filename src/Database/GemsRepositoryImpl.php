@@ -22,7 +22,8 @@ class GemsRepositoryImpl implements GemsRepository
     public function __construct(
         protected PeerLoggerInterface $logger,
         protected PDO $db,
-    ) {}
+    ) {
+    }
 
     /**
      * Aggregated stats for uncollected gems across common time windows.
@@ -169,31 +170,13 @@ class GemsRepositoryImpl implements GemsRepository
     }
 
     /**
-     * Raw uncollected gems rows for a given window, suitable for minting.
+     * Raw uncollected gems rows for a given date, suitable for minting.
      *
-     * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
+     * @param string $dateYYYYMMDD Date filter in YYYY-MM-DD format.
      * @return array List of associative rows including userid, gemid, postid, etc.
      */
-    private function fetchUncollectedGemsForMint(string $day = 'D0'): array
+    private function fetchUncollectedGemsForMint(string $dateYYYYMMDD): array
     {
-        $dayOptionsRaw = [
-            'D0' => "createdat::date = CURRENT_DATE",
-            'D1' => "createdat::date = CURRENT_DATE - INTERVAL '1 day'",
-            'D2' => "createdat::date = CURRENT_DATE - INTERVAL '2 day'",
-            'D3' => "createdat::date = CURRENT_DATE - INTERVAL '3 day'",
-            'D4' => "createdat::date = CURRENT_DATE - INTERVAL '4 day'",
-            'D5' => "createdat::date = CURRENT_DATE - INTERVAL '5 day'",
-            'D6' => "createdat::date = CURRENT_DATE - INTERVAL '6 day'",
-            'D7' => "createdat::date = CURRENT_DATE - INTERVAL '7 day'"
-        ];
-
-        if (!array_key_exists($day, $dayOptionsRaw)) {
-            return [];
-        }
-
-        $whereConditionRaw = $dayOptionsRaw[$day];
-        $whereConditionAliased = preg_replace('/\b(createdat)\b/', 'g.$1', $whereConditionRaw);
-
         $sql = "
             SELECT 
                 g.userid,
@@ -204,23 +187,24 @@ class GemsRepositoryImpl implements GemsRepository
                 g.whereby,
                 g.createdat
             FROM gems g
-            WHERE g.collected = 0 AND {$whereConditionAliased};
+            WHERE g.collected = 0 AND g.createdat::date = :mintDate;
         ";
 
-        $stmt = $this->db->query($sql);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['mintDate' => $dateYYYYMMDD]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     /**
-     * Immutable DTO result for uncollected gems over a time window.
+     * Immutable DTO result for uncollected gems over a date.
      *
-     * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
+     * @param string $dateYYYYMMDD Date filter in YYYY-MM-DD format.
      * @return Gems DTO containing rows
      */
-    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): ?Gems
+    public function fetchUncollectedGemsForMintResult(string $dateYYYYMMDD): ?Gems
     {
-        $this->logger->debug('GemsRepositoryImpl.fetchUncollectedGemsForMintResult started', ['day' => $day]);
-        $rows = $this->fetchUncollectedGemsForMint($day);
+        $this->logger->debug('GemsRepositoryImpl.fetchUncollectedGemsForMintResult started', ['date' => $dateYYYYMMDD]);
+        $rows = $this->fetchUncollectedGemsForMint($dateYYYYMMDD);
         if (empty($rows)) {
             return null;
         }
@@ -330,8 +314,8 @@ class GemsRepositoryImpl implements GemsRepository
      * @return void
      */
     public function applyMintInfo(
-        string $mintId, 
-        Gems $uncollectedGems, 
+        string $mintId,
+        Gems $uncollectedGems,
         array $mintLogItems
     ): void {
 
@@ -364,7 +348,7 @@ class GemsRepositoryImpl implements GemsRepository
                 ':gemid'  => (string)$row->gemid,
             ]);
         }
-        
+
         $this->logger->info('GemsRepositoryImpl.applyMintInfo succeeded');
     }
 }

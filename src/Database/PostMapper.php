@@ -506,7 +506,7 @@ class PostMapper
     //     }
     // }
 
-    public function findPostser(string $currentUserId, array $specifications,?array $args = []): array
+    public function findPostser(string $currentUserId, array $specifications, ?array $args = []): array
     {
         $this->logger->debug("PostMapper.findPostser started");
 
@@ -795,7 +795,7 @@ class PostMapper
             'tags' => $row['tags'],
             'visibility_status' => $row['visibility_status'],
             'reports' => $row['post_reports']
-        ]);
+        ], [], false);
     }
 
     /**

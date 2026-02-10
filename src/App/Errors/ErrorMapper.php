@@ -44,4 +44,3 @@ final class ErrorMapper
         ];
     }
 }
-

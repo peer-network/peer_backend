@@ -24,15 +24,15 @@ interface GemsRepository
      * @return array List of per-user aggregates and totals
      */
     public function fetchAllGemsForDay(string $day = 'D0'): array;
-    
+
     /**
-     * Immutable DTO result for uncollected gems over a time window.
+     * Immutable DTO result for uncollected gems for a specific date.
      *
-     * @param string $day Day filter (e.g., 'D0', 'D1', 'W0', 'M0', 'Y0')
+     * @param string $dateYYYYMMDD Date filter in YYYY-MM-DD format.
      * @return ?Gems DTO containing rows
      */
-    public function fetchUncollectedGemsForMintResult(string $day = 'D0'): ?Gems;
-    
+    public function fetchUncollectedGemsForMintResult(string $dateYYYYMMDD): ?Gems;
+
     /**
      * Apply mint metadata and mark corresponding gems as collected.
      *
