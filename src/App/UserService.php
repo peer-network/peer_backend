@@ -671,7 +671,7 @@ class UserService implements UserServiceInterface
         $user = $this->userMapper->loadById($this->currentUserId);
 
         if (!$user) {
-            $this->logger->error('UserService.setPassword: User not found', ['userId' => $this->currentUserId]);
+            $this->logger->info('UserService.setPassword: User not found', ['userId' => $this->currentUserId]);
             return self::createSuccessResponse(21001);
         }
 
@@ -732,7 +732,7 @@ class UserService implements UserServiceInterface
 
         $user = $this->userMapper->loadById($this->currentUserId);
         if (!$user) {
-            $this->logger->error('UserService.setEmail: User not found', ['userId' => $this->currentUserId]);
+            $this->logger->info('UserService.setEmail: User not found', ['userId' => $this->currentUserId]);
             return self::createSuccessResponse(21001);
         }
 
@@ -1423,7 +1423,7 @@ class UserService implements UserServiceInterface
             $user = $this->userMapper->loadById($request['user_id']);
 
             if (!$user) {
-                $this->logger->error('UserService.resetPassword: User not found', ['userId' => $request['user_id']]);
+                $this->logger->info('UserService.resetPassword: User not found', ['userId' => $request['user_id']]);
                 $this->transactionManager->commit();
                 return self::createSuccessResponse(21001);
             }

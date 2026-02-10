@@ -1906,7 +1906,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            $this->logger->warning('GraphQLSchemaBuilder.resolveFetchWinsLog No records found');
+            $this->logger->info('GraphQLSchemaBuilder.resolveFetchWinsLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
@@ -1938,7 +1938,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($response)) {
-            $this->logger->warning('GraphQLSchemaBuilder.resolveFetchPaysLog No records found');
+            $this->logger->info('GraphQLSchemaBuilder.resolveFetchPaysLog No records found');
             return $this::createSuccessResponse(21202, [], false);
         }
 
@@ -2713,7 +2713,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('GraphQLSchemaBuilder.resolveFriends Users not found');
+        $this->logger->info('GraphQLSchemaBuilder.resolveFriends Users not found');
         return $this::createSuccessResponse(21101);
     }
 
@@ -2738,7 +2738,7 @@ class GraphQLSchemaBuilder
             return $this::respondWithError($results['ResponseCode']);
         }
 
-        $this->logger->warning('GraphQLSchemaBuilder.resolveAllFriends No listFriends found');
+        $this->logger->info('GraphQLSchemaBuilder.resolveAllFriends No listFriends found');
         return $this::createSuccessResponse(21101);
     }
 
