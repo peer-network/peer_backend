@@ -341,7 +341,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
+                    'transactioncategory' => TransactionCategory::INVITER_FEE_EARN->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
                 // $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
@@ -649,7 +649,9 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                         tt.*, 
                         ROW_NUMBER() OVER (
                             PARTITION BY tt.operationid 
-                            ORDER BY CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END, tt.createdat DESC
+                            ORDER BY CASE WHEN (tt.senderid = :senderid OR tt.recipientid = :recipientid) THEN 0 ELSE 1 END,
+                                     CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END,
+                                     tt.createdat DESC
                         ) AS rn
                     FROM transactions tt
                     WHERE tt.operationid IN (SELECT operationid FROM ops)
@@ -662,6 +664,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     r.senderid,
                     r.recipientid,
                     r.message,
+                    r.transferaction,
                     r.tokenamount AS net_amount,
                     r.createdat,
                     COALESCE(a.peer_fee,0) AS peer_fee,
@@ -689,9 +692,29 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $inviterFee = (string)($row['inviter_fee'] ?? '0');
             $netTokenAmount = (string)($row['net_amount'] ?? '0');
 
-            $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
-            $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
-            $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+            $isInviterFeeForUser = ($row['transferaction'] ?? '') === 'INVITER_FEE'
+                && (string)($row['recipientid'] ?? '') === $userId;
+
+            if ($isInviterFeeForUser) {
+                $feesTotal = $netTokenAmount;
+                $grossAmount = $netTokenAmount;
+                $feeDetails = [
+                    'total' => 0.0,
+                    'burn' => null,
+                    'peer' => null,
+                    'inviter' => null,
+                ];
+            } else {
+                $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
+                $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
+                $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+                $feeDetails = [
+                    'total' => $feesTotal,
+                    'burn' => (string)$row['burn_fee'] ?: null,
+                    'peer' => (string)$row['peer_fee'] ?: null,
+                    'inviter' => (string)$row['inviter_fee'] ?: null,
+                ];
+            }
 
             $tiData = [
                 'transactionid' => (string)($row['transactionid'] ?? ''),
@@ -704,12 +727,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                 'createdat' => (string)($row['createdat'] ?? ''),
                 'senderid' => (string)($row['senderid'] ?? ''),
                 'recipientid' => (string)($row['recipientid'] ?? ''),
-                'fees' => [
-                    'total' => $feesTotal,
-                    'burn' => (string)$row['burn_fee'] ?: null,
-                    'peer' => (string)$row['peer_fee'] ?: null,
-                    'inviter' => (string)$row['inviter_fee'] ?: null,
-                ],
+                'fees' => $feeDetails,
             ];
             $items[] = new TransactionHistoryItem($tiData, $userId);
         }
