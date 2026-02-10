@@ -9,6 +9,7 @@ use Fawaz\App\Errors\PermissionDeniedException;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalContentFilterSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\DeletedUserSpec;
 use Fawaz\Services\ContentFiltering\Specs\SpecTypes\User\SystemUserSpec;
@@ -37,7 +38,8 @@ class PeerTokenService
         protected UserService $userService,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected ProfileRepository $profileRepository,
-        protected ProfileEnrichmentAssembler $profileAssembler
+        protected ProfileEnrichmentAssembler $profileAssembler,
+        protected WalletMapper $walletMapper
     ) {
     }
 
@@ -188,8 +190,8 @@ class PeerTokenService
 
             $this->transactionManager->beginTransaction();
 
-            $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
-            if (empty($currentBalance) || $currentBalance < $numberOfTokens) {
+            $currentBalance = (float) $this->walletMapper->fetchUserWalletBalanceFromTransactions($this->currentUserId);
+            if (empty($currentBalance) || $currentBalance < (float) $numberOfTokens) {
                 $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                     'Balance' => $currentBalance,
                 ]);

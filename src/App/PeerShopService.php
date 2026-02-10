@@ -9,6 +9,7 @@ use Fawaz\App\Models\ShopOrder;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\Database\PeerTokenMapper;
 use Fawaz\Database\UserMapper;
+use Fawaz\Database\WalletMapper;
 use Fawaz\Utils\ResponseHelper;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\config\constants\ConstantsConfig;
@@ -37,7 +38,8 @@ class PeerShopService
         protected TransactionManager $transactionManager,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected UserMapper $userMapper,
-        protected ShopOrderPermissionsMapper $shopOrderPermissionsMapper
+        protected ShopOrderPermissionsMapper $shopOrderPermissionsMapper,
+        protected WalletMapper $walletMapper
     ) {
     }
 
@@ -105,8 +107,8 @@ class PeerShopService
                 return self::respondWithError(31202);
             }
 
-            $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
-            if (empty($currentBalance) || $currentBalance < $tokenAmount) {
+            $currentBalance = (float)$this->walletMapper->fetchUserWalletBalanceFromTransactions($this->currentUserId);
+            if (empty($currentBalance) || $currentBalance < (float) $tokenAmount) {
                 $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
                     'Balance' => $currentBalance,
                 ]);

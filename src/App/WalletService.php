@@ -196,7 +196,7 @@ class WalletService
             $whereby = $mapping[$art]['whereby'];
             $text = $mapping[$art]['text'];
 
-            $currentBalance = $this->getUserWalletBalance($userId);
+            $currentBalance = (float) $this->walletMapper->fetchUserWalletBalanceFromTransactions($userId);
             $price = (string) $price;
 
             // Determine required amount per fee policy mode
