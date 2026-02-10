@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "ebd5320a-29f3-449f-85be-3c13e7a3e83b",
+    "_postman_id": "4a1ac21c-b4a8-4b46-ac87-85555ca08dd2",
     "name": "006_shop_graphql",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "43606001",
-    "_collection_link": "https://go.postman.co/collection/43606001-ebd5320a-29f3-449f-85be-3c13e7a3e83b?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/43606001-4a1ac21c-b4a8-4b46-ac87-85555ca08dd2?source=collection_link"
   },
   "item": [
     {
@@ -400,6 +400,63 @@
           "mode": "graphql",
           "graphql": {
             "query": "mutation PerformShopOrder {\n    performShopOrder(\n        tokenAmount: \"{{tokenamount}}\"\n        shopItemId: \"{{shopItemId}}\"\n        orderDetails: {\n            name: \"tester 2\"\n            email: \"{{w_email_t2}}\"\n            addressline1: \"Möckernstrasse 68\"\n            addressline2: null\n            city: \"Berlin\"\n            zipcode: \"10965\"\n            country: GERMANY\n            shopItemSpecs: { size: \"XXXXXL\" }\n        }\n    ) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let liquidity = response.data.balance.currentliquidity;",
+              "pm.environment.set(\"liquidityS\", liquidity);",
+              "console.log(\"Saved liquidity:\", liquidity);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        status\n        ResponseCode\n        currentliquidity\n    }\n}\n",
             "variables": ""
           }
         },
@@ -2170,7 +2227,7 @@
               "    pm.expect(current).to.equal(expected);",
               "});",
               "",
-              "pm.environment.set(\"liquidity\", String(current));"
+              "pm.environment.set(\"liquidity\", Number(current));"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -2237,18 +2294,31 @@
               "    pm.environment.set(\"transactionid\", txid);",
               "}",
               "",
-              "const currentOpIds = rows.map(tx => tx.operationid);",
+              "const opIdsToCheck = rows",
+              "    .filter(tx => {",
+              "        const token = Number(tx.tokenamount);",
+              "",
+              "        if (",
+              "            (tx.transactionCategory === \"SHOP_PURCHASE\" || tx.transactionCategory === \"P2P_TRANSFER\")",
+              "            && token > 0",
+              "        ) {",
+              "            return false;",
+              "        }",
+              "",
+              "        return true;",
+              "    })",
+              "    .map(tx => tx.operationid);",
               "",
               "let prevOpIds = pm.environment.get(\"operationid\");",
               "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
               "",
-              "const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+              "const duplicates = opIdsToCheck.filter(id => prevOpIds.includes(id));",
               "",
               "pm.test(\"No duplicate operationid from previous request\", () => {",
               "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
               "});",
               "",
-              "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...opIdsToCheck]));",
               "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
               "",
               "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
@@ -2533,6 +2603,390 @@
       "response": []
     },
     {
+      "name": "Login shop",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation {\n  login(email: \"{{shop_email}}\",\n    password: \"{{shop_password}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check current liquidity",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11204\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "let newLiquidity = response.data.balance.currentliquidity;",
+              "let oldLiquidity = pm.environment.get(\"liquidityS\");",
+              "",
+              "pm.test(\"Previous liquidity exists\", function () {",
+              "    pm.expect(oldLiquidity).to.not.be.undefined;",
+              "    pm.expect(Number(oldLiquidity)).to.be.a(\"number\");",
+              "});",
+              "",
+              "let expectedDifference = 0.00000097;",
+              "let tolerance = 0.0000001;",
+              "",
+              "let actualDifference = Number(newLiquidity) - Number(oldLiquidity);",
+              "",
+              "pm.test(\"Liquidity should increase by ~0.00000097\", function () {",
+              "    pm.expect(actualDifference).to.be.closeTo(expectedDifference, tolerance);",
+              "});",
+              "",
+              "pm.environment.set(\"liquidityS\", newLiquidity);",
+              "",
+              "console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query Balance {\n    balance {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        currentliquidity\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction history",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+              "",
+              "pm.test(\"affectedRows is non-empty array\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+              "});",
+              "",
+              "const txid = rows[0]?.transactionId;",
+              "if (txid) {",
+              "    pm.environment.set(\"transactionid\", txid);",
+              "}",
+              "",
+              "const opIdsToCheck = rows",
+              "    .filter(tx => {",
+              "        const token = Number(tx.tokenamount);",
+              "",
+              "        if (",
+              "            (tx.transactionCategory === \"SHOP_PURCHASE\" || tx.transactionCategory === \"P2P_TRANSFER\")",
+              "            && token > 0",
+              "        ) {",
+              "            return false;",
+              "        }",
+              "",
+              "        return true;",
+              "    })",
+              "    .map(tx => tx.operationid);",
+              "",
+              "let prevOpIds = pm.environment.get(\"operationid\");",
+              "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
+              "",
+              "const duplicates = opIdsToCheck.filter(id => prevOpIds.includes(id));",
+              "",
+              "pm.test(\"No duplicate operationid from previous request\", () => {",
+              "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
+              "});",
+              "",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...opIdsToCheck]));",
+              "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
+              "",
+              "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
+              "const TOLERANCE = 0.0001;",
+              "",
+              "function num(v) {",
+              "    return Number(v);",
+              "}",
+              "",
+              "function expectNotNull(value, path) {",
+              "    pm.expect(",
+              "        value !== null && value !== undefined && value !== \"\",",
+              "        `${path} is null/empty`",
+              "    ).to.be.true;",
+              "}",
+              "",
+              "function expectPercent(actual, base, percent, path) {",
+              "    const expected = +(base * percent / 100).toFixed(6);",
+              "    pm.expect(",
+              "        actual,",
+              "        `${path} expected ${percent}% (${expected}), got ${actual}`",
+              "    ).to.be.closeTo(expected, TOLERANCE);",
+              "}",
+              "",
+              "rows.forEach((tx, i) => {",
+              "    const p = `affectedRows[${i}]`;",
+              "",
+              "    pm.test(`${p} mandatory fields not null`, () => {",
+              "        [",
+              "            \"operationid\",",
+              "            \"transactionCategory\",",
+              "            \"transactiontype\",",
+              "            \"tokenamount\",",
+              "            \"netTokenAmount\",",
+              "            \"createdat\"",
+              "        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
+              "",
+              "        Object.entries(tx.recipient).forEach(([k, v]) => {",
+              "            if (k !== \"updatedat\") {",
+              "                expectNotNull(v, `${p}.recipient.${k}`);",
+              "            }",
+              "        });",
+              "",
+              "        if (tx.transactionCategory !== \"TOKEN_MINT\") {",
+              "            Object.entries(tx.sender).forEach(([k, v]) => {",
+              "                if (k !== \"updatedat\") {",
+              "                    expectNotNull(v, `${p}.sender.${k}`);",
+              "                }",
+              "            });",
+              "        }",
+              "",
+              "        expectNotNull(tx.fees.total, `${p}.fees.total`);",
+              "    });",
+              "",
+              "    pm.test(`${p} fees calculation`, () => {",
+              "        const base = Math.abs(num(tx.netTokenAmount));",
+              "",
+              "        if (tx.transactionCategory === \"TOKEN_MINT\") {",
+              "            pm.expect(num(tx.fees.total)).to.equal(0);",
+              "            pm.expect(tx.fees.burn).to.equal(null);",
+              "            pm.expect(tx.fees.peer).to.equal(null);",
+              "            pm.expect(tx.fees.inviter).to.equal(null);",
+              "            return;",
+              "        }",
+              "",
+              "        const hasInviter = tx.fees.inviter !== null;",
+              "",
+              "        expectPercent(",
+              "            num(tx.fees.total),",
+              "            base,",
+              "            hasInviter ? 4 : 3,",
+              "            `${p}.fees.total`",
+              "        );",
+              "",
+              "        expectPercent(num(tx.fees.burn), base, 1, `${p}.fees.burn`);",
+              "        expectPercent(num(tx.fees.peer), base, 2, `${p}.fees.peer`);",
+              "",
+              "        if (hasInviter) {",
+              "            expectPercent(",
+              "                num(tx.fees.inviter),",
+              "                base,",
+              "                1,",
+              "                `${p}.fees.inviter`",
+              "            );",
+              "        }",
+              "    });",
+              "",
+              "    pm.test(`${p} tokenamount by transactionCategory`, () => {",
+              "        const token = Math.abs(num(tx.tokenamount));",
+              "",
+              "        switch (tx.transactionCategory) {",
+              "            case \"LIKE\":",
+              "            case \"DISLIKE\":",
+              "                pm.expect(token).to.equal(3);",
+              "                break;",
+              "",
+              "            case \"COMMENT\":",
+              "                pm.expect(token).to.equal(1);",
+              "                break;",
+              "",
+              "            case \"AD_PINNED\":",
+              "                pm.expect(",
+              "                    token === 160 || token % 50 === 0,",
+              "                    `${p}.AD_PINNED token invalid: ${token} (expected 160 or multiple of 50)`",
+              "                ).to.be.true;",
+              "                break;",
+              "",
+              "            case \"POST_CREATE\":",
+              "                pm.expect(token).to.equal(20);",
+              "                break;",
+              "",
+              "            case \"P2P_TRANSFER\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"SHOP_PURCHASE\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"TOKEN_MINT\":",
+              "                pm.expect(token, `${p}.TOKEN_MINT tokenamount must be > 0`).to.be.above(0);",
+              "                pm.expect(",
+              "                    num(tx.tokenamount),",
+              "                    `${p}.TOKEN_MINT tokenamount must equal netTokenAmount`",
+              "                ).to.equal(num(tx.netTokenAmount));",
+              "                break;",
+              "",
+              "            default:",
+              "                pm.test(`${p} transactionCategory is known`, () => {",
+              "                    pm.expect.fail(`Unhandled transactionCategory: ${tx.transactionCategory}`);",
+              "                });",
+              "        }",
+              "    });",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionId\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Pin shops post",
       "event": [
         {
@@ -2545,7 +2999,16 @@
               "pm.test(\"Status is correct\", function () {",
               "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
               "});",
-              ""
+              "",
+              "let response = pm.response.json();",
+              "let adId = response?.data?.advertisePostPinned?.affectedRows?.[0]?.id;",
+              "",
+              "if (adId) {",
+              "    pm.environment.set(\"shopAddId\", adId);",
+              "    console.log(\"Saved advertisementId:\", adId);",
+              "} else {",
+              "    console.warn(\"advertisementId not found in response.\");",
+              "}"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -2612,7 +3075,7 @@
               "",
               "let response = pm.response.json();",
               "let newLiquidity = response.data.balance.currentliquidity;",
-              "let oldLiquidity = pm.environment.get(\"liquidity\");",
+              "let oldLiquidity = pm.environment.get(\"liquidityS\");",
               "",
               "pm.test(\"Previous liquidity exists\", function () {",
               "    pm.expect(oldLiquidity).to.not.be.undefined;",
@@ -2626,7 +3089,7 @@
               "    pm.expect(actualDifference).to.equal(expectedDifference);",
               "});",
               "",
-              "pm.environment.set(\"liquidity\", newLiquidity);",
+              "pm.environment.set(\"liquidityS\", newLiquidity);",
               "",
               "console.log(`Old Liquidity: ${oldLiquidity}, New Liquidity: ${newLiquidity}, Difference: ${actualDifference}`);"
             ],
@@ -2686,6 +3149,15 @@
               "const json = pm.response.json();",
               "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
               "",
+              "pm.test(\"affectedRows is non-empty array\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
+              "});",
+              "",
+              "const txid = rows[0]?.transactionId;",
+              "if (txid) {",
+              "    pm.environment.set(\"transactionid\", txid);",
+              "}",
+              "",
               "const currentOpIds = rows.map(tx => tx.operationid);",
               "",
               "let prevOpIds = pm.environment.get(\"operationid\");",
@@ -2699,10 +3171,6 @@
               "",
               "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
               "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
-              "",
-              "pm.test(\"affectedRows is non-empty array\", () => {",
-              "    pm.expect(rows).to.be.an(\"array\").that.is.not.empty;",
-              "});",
               "",
               "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
               "const TOLERANCE = 0.0001;",
@@ -2739,21 +3207,34 @@
               "            \"createdat\"",
               "        ].forEach(f => expectNotNull(tx[f], `${p}.${f}`));",
               "",
-              "        [\"sender\", \"recipient\"].forEach(role => {",
-              "            Object.entries(tx[role]).forEach(([k, v]) => {",
-              "                if (k !== \"updatedat\") {",
-              "                    expectNotNull(v, `${p}.${role}.${k}`);",
-              "                }",
-              "            });",
+              "        Object.entries(tx.recipient).forEach(([k, v]) => {",
+              "            if (k !== \"updatedat\") {",
+              "                expectNotNull(v, `${p}.recipient.${k}`);",
+              "            }",
               "        });",
               "",
-              "        [\"total\", \"burn\", \"peer\"].forEach(f =>",
-              "            expectNotNull(tx.fees[f], `${p}.fees.${f}`)",
-              "        );",
+              "        if (tx.transactionCategory !== \"TOKEN_MINT\") {",
+              "            Object.entries(tx.sender).forEach(([k, v]) => {",
+              "                if (k !== \"updatedat\") {",
+              "                    expectNotNull(v, `${p}.sender.${k}`);",
+              "                }",
+              "            });",
+              "        }",
+              "",
+              "        expectNotNull(tx.fees.total, `${p}.fees.total`);",
               "    });",
               "",
               "    pm.test(`${p} fees calculation`, () => {",
               "        const base = Math.abs(num(tx.netTokenAmount));",
+              "",
+              "        if (tx.transactionCategory === \"TOKEN_MINT\") {",
+              "            pm.expect(num(tx.fees.total)).to.equal(0);",
+              "            pm.expect(tx.fees.burn).to.equal(null);",
+              "            pm.expect(tx.fees.peer).to.equal(null);",
+              "            pm.expect(tx.fees.inviter).to.equal(null);",
+              "            return;",
+              "        }",
+              "",
               "        const hasInviter = tx.fees.inviter !== null;",
               "",
               "        expectPercent(",
@@ -2804,8 +3285,22 @@
               "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
               "                break;",
               "",
+              "            case \"SHOP_PURCHASE\":",
+              "                pm.expect(token).to.equal(P2P_EXPECTED_TOKEN);",
+              "                break;",
+              "",
+              "            case \"TOKEN_MINT\":",
+              "                pm.expect(token, `${p}.TOKEN_MINT tokenamount must be > 0`).to.be.above(0);",
+              "                pm.expect(",
+              "                    num(tx.tokenamount),",
+              "                    `${p}.TOKEN_MINT tokenamount must equal netTokenAmount`",
+              "                ).to.equal(num(tx.netTokenAmount));",
+              "                break;",
+              "",
               "            default:",
-              "                console.warn(`Unhandled category: ${tx.transactionCategory}`);",
+              "                pm.test(`${p} transactionCategory is known`, () => {",
+              "                    pm.expect.fail(`Unhandled transactionCategory: ${tx.transactionCategory}`);",
+              "                });",
               "        }",
               "    });",
               "});"
@@ -2921,6 +3416,151 @@
           "mode": "graphql",
           "graphql": {
             "query": "query ListAdvertisementPosts {\n    listAdvertisementPosts(userid: \"{{shop}}\") {\n        counter\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            post {\n                id\n                contenttype\n                title\n                media\n                cover\n                mediadescription\n                createdat\n                amountlikes\n                amountviews\n                amountcomments\n                amountdislikes\n                amounttrending\n                isliked\n                isviewed\n                isreported\n                isdisliked\n                issaved\n                tags\n                url\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n            advertisement {\n                advertisementid\n                postid\n                advertisementtype\n                startdate\n                enddate\n                createdat\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n    isfriend\n                }\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Advertisement history shops post",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"12002\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "pm.test(\"Ad and post IDs match env\", function () {",
+              "    const ad = pm.response.json()",
+              "        ?.data?.advertisementHistory?.affectedRows?.advertisements?.[0];",
+              "",
+              "    pm.expect(ad.id).to.eql(pm.environment.get(\"shopAddId\"));",
+              "    pm.expect(ad.post.id).to.eql(pm.environment.get(\"shopItemId_2\"));",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query AdvertisementHistory {\n    advertisementHistory(filter: { userId: \"{{shop}}\" }) {\n        status\n        ResponseCode\n        affectedRows {\n            stats {\n                tokenSpent\n                euroSpent\n                amountAds\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n            }\n            advertisements {\n                id\n                createdAt\n                type\n                timeframeStart\n                timeframeEnd\n                totalTokenCost\n                totalEuroCost\n                gemsEarned\n                amountLikes\n                amountViews\n                amountComments\n                amountDislikes\n                amountReports\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    isfollowed\n                    isfollowing\n                    iFollowThisUser\n                    thisUserFollowsMe\n                    isreported\n                    isfriend\n                }\n                post {\n                    id\n                    contenttype\n                    title\n                    media\n                    cover\n                    mediadescription\n                    createdat\n                    visibilityStatus\n                    isHiddenForUsers\n                    hasActiveReports\n                    amountreports\n                    amountlikes\n                    amountviews\n                    amountcomments\n                    amountdislikes\n                    amounttrending\n                    isliked\n                    isviewed\n                    isreported\n                    isdisliked\n                    issaved\n                    tags\n                    url\n                    user {\n                        id\n                        username\n                        slug\n                        img\n                        visibilityStatus\n                        isHiddenForUsers\n                        hasActiveReports\n                        isfollowed\n                        isfollowing\n                        iFollowThisUser\n                        thisUserFollowsMe\n                        isreported\n                        isfriend\n                    }\n                    comments {\n                        commentid\n                        userid\n                        postid\n                        parentid\n                        content\n                        createdat\n                        visibilityStatus\n                        isHiddenForUsers\n                        hasActiveReports\n                        amountlikes\n                        amountreplies\n                        amountreports\n                        isreported\n                        isliked\n                        user {\n                            id\n                            username\n                            slug\n                            img\n                            visibilityStatus\n                            isHiddenForUsers\n                            hasActiveReports\n                            isfollowed\n                            isfollowing\n                            iFollowThisUser\n                            thisUserFollowsMe\n                            isreported\n                            isfriend\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login tester 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}\n",
             "variables": ""
           }
         },
@@ -3626,18 +4266,31 @@
               "    pm.environment.set(\"transactionid\", txid);",
               "}",
               "",
-              "const currentOpIds = rows.map(tx => tx.operationid);",
+              "const opIdsToCheck = rows",
+              "    .filter(tx => {",
+              "        const token = Number(tx.tokenamount);",
+              "",
+              "        if (",
+              "            (tx.transactionCategory === \"SHOP_PURCHASE\" || tx.transactionCategory === \"P2P_TRANSFER\")",
+              "            && token > 0",
+              "        ) {",
+              "            return false;",
+              "        }",
+              "",
+              "        return true;",
+              "    })",
+              "    .map(tx => tx.operationid);",
               "",
               "let prevOpIds = pm.environment.get(\"operationid\");",
               "prevOpIds = prevOpIds ? JSON.parse(prevOpIds) : [];",
               "",
-              "const duplicates = currentOpIds.filter(id => prevOpIds.includes(id));",
+              "const duplicates = opIdsToCheck.filter(id => prevOpIds.includes(id));",
               "",
               "pm.test(\"No duplicate operationid from previous request\", () => {",
               "    pm.expect(duplicates.length, `Duplicate operationid found: ${duplicates}`).to.equal(0);",
               "});",
               "",
-              "const allOpIds = Array.from(new Set([...prevOpIds, ...currentOpIds]));",
+              "const allOpIds = Array.from(new Set([...prevOpIds, ...opIdsToCheck]));",
               "pm.environment.set(\"operationid\", JSON.stringify(allOpIds));",
               "",
               "const P2P_EXPECTED_TOKEN = Number(pm.environment.get(\"tokenamount\"));",
