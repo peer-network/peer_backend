@@ -1784,11 +1784,6 @@ class GraphQLSchemaBuilder
         ];
     }
 
-    protected function transferTokenV2(array $args): array
-    {
-        return $this->peerTokenService->transferToken($args);
-    }
-
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
         $this->logger->debug('Query.hello started', ['args' => $args]);
