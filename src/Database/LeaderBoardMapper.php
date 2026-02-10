@@ -7,15 +7,18 @@ namespace Fawaz\Database;
 use Fawaz\Utils\PeerLoggerInterface;
 use Fawaz\Utils\ResponseHelper;
 use PDO;
+
 class LeaderBoardMapper
 {
     use ResponseHelper;
 
-    public function __construct(protected PDO $db, protected PeerLoggerInterface $logger){}
+    public function __construct(protected PDO $db, protected PeerLoggerInterface $logger)
+    {
+    }
 
     /**
      * Prepare query and get result from DB
-     * 
+     *
      * @param string $start_date
      * @param string $end_date
      * @param int $leaderboardUsersCount

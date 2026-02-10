@@ -79,43 +79,43 @@ class ModerationMapper
 
         $items['data'] = array_map(function ($item) {
 
-        $userReport = UserReport::query()
-            ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
-            ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
-            ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
-            ->select(
-                'user_reports.reportid',
-                'user_reports.reporter_userid',
-                'user_reports.targetid',
-                'user_reports.targettype',
-                'user_reports.message',
-                'user_reports.moderationid',
-                'posts.postid as post_postid', // Need to refactor this later
-                'posts.userid',
-                'posts.contenttype',
-                'posts.title',
-                'posts.mediadescription',
-                'posts.visibility_status',
-                'posts.media',
-                'posts.cover',
-                'posts.options',
-                'comments.userid',
-                'comments.parentid',
-                'comments.content',
-                'comments.visibility_status',
-                'target_user.uid as target_user_uid',
-                'target_user.username as target_user_username',
-                'target_user.email as target_user_email',
-                'target_user.img as target_user_img',
-                'target_user.slug as target_user_slug',
-                'target_user.status as target_user_status',
-                'target_user.biography as target_user_biography',
-                'target_user.updatedat as target_user_updatedat',
-                'target_user.visibility_status as target_user_visibility_status',
-            )
-            ->where('moderationticketid', $item['uid'])
-            ->latest()
-            ->first();
+            $userReport = UserReport::query()
+                ->join('posts', 'user_reports.targetid', '=', 'posts.postid')
+                ->join('comments', 'user_reports.targetid', '=', 'comments.commentid')
+                ->join('users as target_user', 'user_reports.targetid', '=', 'target_user.uid')
+                ->select(
+                    'user_reports.reportid',
+                    'user_reports.reporter_userid',
+                    'user_reports.targetid',
+                    'user_reports.targettype',
+                    'user_reports.message',
+                    'user_reports.moderationid',
+                    'posts.postid as post_postid', // Need to refactor this later
+                    'posts.userid',
+                    'posts.contenttype',
+                    'posts.title',
+                    'posts.mediadescription',
+                    'posts.visibility_status',
+                    'posts.media',
+                    'posts.cover',
+                    'posts.options',
+                    'comments.userid',
+                    'comments.parentid',
+                    'comments.content',
+                    'comments.visibility_status',
+                    'target_user.uid as target_user_uid',
+                    'target_user.username as target_user_username',
+                    'target_user.email as target_user_email',
+                    'target_user.img as target_user_img',
+                    'target_user.slug as target_user_slug',
+                    'target_user.status as target_user_status',
+                    'target_user.biography as target_user_biography',
+                    'target_user.updatedat as target_user_updatedat',
+                    'target_user.visibility_status as target_user_visibility_status',
+                )
+                ->where('moderationticketid', $item['uid'])
+                ->latest()
+                ->first();
 
 
             $targetContent = $this->mapTargetContent($userReport);
@@ -137,7 +137,7 @@ class ModerationMapper
                     'users.visibility_status',
                 )
                 ->where('moderations.moderationticketid', $item['uid'])
-                ->latest() 
+                ->latest()
                 ->first();
 
             if ($moderationRow) {
@@ -161,7 +161,7 @@ class ModerationMapper
                                     ->latest()
                                     ->all();
 
-            $item['reporters'] = array_map(fn($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
+            $item['reporters'] = array_map(fn ($reporter) => (new User($reporter, [], false))->getArrayCopy(), $reporters);
 
             $item['targetcontent'] = $targetContent['targetcontent'];
             $item['targettype'] = $targetContent['targettype'];
@@ -208,29 +208,29 @@ class ModerationMapper
                 $item['targetcontent']['post'] = $postData;
             }
         } elseif ($item['targettype'] === 'comment') {
-        $commentRow = Comment::query()
-            ->where('commentid', $item['targetid'])
-            ->first();
+            $commentRow = Comment::query()
+                ->where('commentid', $item['targetid'])
+                ->first();
 
-        if ($commentRow) {
-            $commentEntity = new Comment($commentRow, [], false);
-            $commentData = $commentEntity->getArrayCopy();
+            if ($commentRow) {
+                $commentEntity = new Comment($commentRow, [], false);
+                $commentData = $commentEntity->getArrayCopy();
 
-            $authorData = [];
-            if (!empty($commentRow['userid'])) {
-                $authorRow = User::query()
-                    ->where('uid', $commentRow['userid'])
-                    ->first();
+                $authorData = [];
+                if (!empty($commentRow['userid'])) {
+                    $authorRow = User::query()
+                        ->where('uid', $commentRow['userid'])
+                        ->first();
 
-                if ($authorRow) {
-                    $authorEntity = new User($authorRow, [], false);
-                    $authorData = $authorEntity->getArrayCopy();
+                    if ($authorRow) {
+                        $authorEntity = new User($authorRow, [], false);
+                        $authorData = $authorEntity->getArrayCopy();
+                    }
                 }
-            }
 
-            $commentData['user'] = $authorData;
-            $item['targetcontent']['comment'] = $commentData;
-        }
+                $commentData['user'] = $authorData;
+                $item['targetcontent']['comment'] = $commentData;
+            }
         } elseif ($item['targettype'] === 'user') {
             $item['targetcontent']['user'] = new User([
                 'uid' => $item['uid'],

@@ -130,4 +130,3 @@ class MintAccount implements HasWalletId
         return $this->updatedat;
     }
 }
-
