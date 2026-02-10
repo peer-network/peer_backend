@@ -2168,6 +2168,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($comments)) {
+            $this->logger->info("Fetched comments for post", ['count' => count($comments)]);
             return $this::createSuccessResponse(21606, [], false);
         }
 
@@ -2862,7 +2863,15 @@ class GraphQLSchemaBuilder
             },
             $posts
         );
-        $this->logger->info('findAdvertiser', ['data' => $data]);
+
+        $logData = array_map(
+            function (array $row) {
+                // Advertisements Objekt
+                return $row['advertisement']['advertisementid'];
+            },
+            $data
+        );
+        $this->logger->info('findAdvertiser', ['data' => $logData]);
 
         return self::createSuccessResponse(
             empty($data) ? 21501 : 11501,
