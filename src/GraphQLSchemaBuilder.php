@@ -1779,9 +1779,9 @@ class GraphQLSchemaBuilder
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
-            'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
-            'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
-            'updateUserDeviceToken' => fn(mixed $root, array $args) => $this->updateUserDeviceToken($args),
+            'alphaMint' => fn (mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            'performShopOrder' => fn (mixed $root, array $args) => $this->performShopOrder($args),
+            'updateUserDeviceToken' => fn (mixed $root, array $args) => $this->updateUserDeviceToken($args),
         ];
     }
 
@@ -3413,7 +3413,7 @@ class GraphQLSchemaBuilder
 
     /**
      * Update User Device's Token for sending notifications
-     * 
+     *
      */
     public function updateUserDeviceToken(array $args): ?array
     {
@@ -3431,7 +3431,7 @@ class GraphQLSchemaBuilder
         }
     }
 
-    
+
     public function generateLeaderboard(array $args): array
     {
         $this->logger->debug('GraphQLSchemaBuilder.generateLeaderboard started');

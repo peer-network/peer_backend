@@ -10,10 +10,9 @@ use Fawaz\Services\Notifications\Interface\NotificationInitiator;
 
 class UserInitiator implements NotificationInitiator
 {
-
     public $initiator;
 
-    
+
     public function __construct(string $initiator)
     {
         $this->initiator = $initiator;
@@ -27,7 +26,7 @@ class UserInitiator implements NotificationInitiator
     public function initiatorUserObj(): ProfileReplaceable
     {
         $user = User::query()->where('uid', $this->initiator)->first();
-        
+
         return new User($user, [], false);
     }
 }

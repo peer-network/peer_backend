@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Services\Notifications\NotificationApiServices;
 
 use Fawaz\App\Models\UserDeviceToken;
@@ -7,7 +8,9 @@ use Fawaz\Services\Notifications\Interface\NotificationSenderStrategy;
 
 final class AndroidNotificationSender implements NotificationSenderStrategy
 {
-    public function __construct(private AndroidApiService $androidApi) {}
+    public function __construct(private AndroidApiService $androidApi)
+    {
+    }
 
     public function supports(UserDeviceToken $receiver): bool
     {

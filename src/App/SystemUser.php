@@ -85,23 +85,24 @@ class SystemUser implements ProfileReplaceable
         return '';
     }
 
-    
+
     public function visibilityStatusForUser(): string
     {
         return '';
     }
 
-    function setVisibilityStatus(string $status): void
+    public function setVisibilityStatus(string $status): void
     {
 
     }
 
-    function getActiveReports(): ?int{
+    public function getActiveReports(): ?int
+    {
         return 0;
     }
 
-    function getUserId(): string
+    public function getUserId(): string
     {
         return $this->uid;
-    } 
-} 
+    }
+}

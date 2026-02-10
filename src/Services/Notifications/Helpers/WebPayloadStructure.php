@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Services\Notifications\Helpers;
 
 use Fawaz\Services\Notifications\Interface\NotificationPayload;

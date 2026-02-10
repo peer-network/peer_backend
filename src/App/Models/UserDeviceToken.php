@@ -22,7 +22,8 @@ class UserDeviceToken extends Model
     protected string $createdat;
     protected User $userObj;
 
-    public function __construct(array $data = []){
+    public function __construct(array $data = [])
+    {
 
         $this->userid = $data['userid'] ?? '';
         $this->token = $data['token'] ?? '';

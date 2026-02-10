@@ -10,11 +10,11 @@ interface InitiatorObj
 {
     /**
      * Notification Initiator refernce to trigger's action
-     * 
+     *
      * Currently initiator can be:
      *  1. Normal
-     *  2. System User 
-     * 
+     *  2. System User
+     *
      * @return string
      */
     public function initiator(): string;

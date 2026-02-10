@@ -18,11 +18,11 @@ class ConstantsNotification
 
     /**
      * NOTIFICATIONS
-     * 
+     *
      * Each notification must contain title and body.
-     * 
+     *
      * If you want to some text, to be dynamic please wrap it like {{variableName}}
-     * 
+     *
      * Currently it replces:
      *  {{initiator.username}} -> it will replace with username of sender
      *  {{receiver.username}} -> it will replace with username of receiver

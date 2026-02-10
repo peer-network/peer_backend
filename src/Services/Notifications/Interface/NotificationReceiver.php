@@ -8,9 +8,9 @@ interface NotificationReceiver
 {
     /**
      * Receiver refers to who will receive the notification
-     * 
+     *
      * Can be delivered to multiple users
-     * 
+     *
      * @return array
      */
     public function receiver(): array;

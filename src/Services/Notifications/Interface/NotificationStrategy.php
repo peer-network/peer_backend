@@ -25,9 +25,9 @@ interface NotificationStrategy
 
     /**
      * This is the body content, which will sent to users
-     * 
+     *
      * Replaceable text should follow structure
-     * 
+     *
      * - User
      *      - {{initiator.username}} -> if username replace by Initiator
      *      - {{receiver.username}} -> if username replace by Receiver

@@ -10,8 +10,10 @@ use RuntimeException;
 
 final class IosApiService
 {
-    public function __construct(protected PeerLoggerInterface $logger){}
-    
+    public function __construct(protected PeerLoggerInterface $logger)
+    {
+    }
+
     public function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
         $apnsPayload = (new IosPayloadStructure())->payload($payload);
@@ -45,7 +47,7 @@ final class IosApiService
             throw new RuntimeException('Failed to generate APNs JWT.');
         }
 
-        $host = $config['use_sandbox'] ? 'https://api.sandbox.push.apple.com' :  'https://api.push.apple.com';
+        $host = $config['use_sandbox'] ? 'https://api.sandbox.push.apple.com' : 'https://api.push.apple.com';
 
         // Device token must be hex, no spaces
         $deviceToken = preg_replace('/\s+/', '', $deviceToken);
@@ -175,7 +177,9 @@ final class IosApiService
         $bin = $der;
         $pos = 0;
 
-        if (ord($bin[$pos++]) !== 0x30) return null;
+        if (ord($bin[$pos++]) !== 0x30) {
+            return null;
+        }
         $seqLen = ord($bin[$pos++]);
         if ($seqLen & 0x80) { // long form length
             $bytes = $seqLen & 0x7F;
@@ -185,12 +189,16 @@ final class IosApiService
             }
         }
 
-        if (ord($bin[$pos++]) !== 0x02) return null;
+        if (ord($bin[$pos++]) !== 0x02) {
+            return null;
+        }
         $rLen = ord($bin[$pos++]);
         $r = substr($bin, $pos, $rLen);
         $pos += $rLen;
 
-        if (ord($bin[$pos++]) !== 0x02) return null;
+        if (ord($bin[$pos++]) !== 0x02) {
+            return null;
+        }
         $sLen = ord($bin[$pos++]);
         $s = substr($bin, $pos, $sLen);
 

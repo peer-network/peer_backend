@@ -22,16 +22,15 @@ use Fawaz\Utils\PeerLoggerInterface;
 
 class NotificationMapperImpl implements NotificationsMapper
 {
-
     public function __construct(protected PeerLoggerInterface $logger)
     {
     }
 
-    private function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor,  NotificationReceiver $notificationReceivers): bool
+    private function notify(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceivers): bool
     {
         $this->logger->debug("NotificationMapperImpl.notify started");
 
-        
+
         // Prepare receivers
         $receivers = $notificationReceivers->receiver();
 
@@ -44,7 +43,7 @@ class NotificationMapperImpl implements NotificationsMapper
 
         $senderResolver = new NotificationSenderResolver(
             new AndroidNotificationSender(new AndroidApiService($this->logger)),
-                    new IosNotificationSender(new IosApiService($this->logger))
+            new IosNotificationSender(new IosApiService($this->logger))
         );
         // Send Push in application
         $this->sendNotification($notificationStrategy, $notificationInititor, $allReceivers, $senderResolver);
@@ -65,7 +64,7 @@ class NotificationMapperImpl implements NotificationsMapper
     private function prepareContent(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, UserDeviceToken $receiverObj): NotificationPayload
     {
         $notificationStrategy = $this->contentReplacer($notificationStrategy, $notificationInititor, $receiverObj);
-        $notificationContent = new NotificationContentStructure( $notificationStrategy, $notificationInititor);
+        $notificationContent = new NotificationContentStructure($notificationStrategy, $notificationInititor);
 
         return $notificationContent;
     }
@@ -76,7 +75,7 @@ class NotificationMapperImpl implements NotificationsMapper
      */
     private function sendNotification(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInititor, array $receivers, NotificationSenderResolver $senderResolver): bool
     {
-        foreach($receivers as $key => $receiver){
+        foreach ($receivers as $key => $receiver) {
             $receiverObj = new UserDeviceToken($receiver);
             $notificationPayload = $this->prepareContent($notificationStrategy, $notificationInititor, $receiverObj);
 
@@ -93,16 +92,16 @@ class NotificationMapperImpl implements NotificationsMapper
 
         return true;
     }
-    
+
     private function contentReplacer(NotificationStrategy $notificationStrategy, NotificationInitiator $notificationInitiator, UserDeviceToken $receiverObj): NotificationStrategy
     {
         $bodyTemplate = $notificationStrategy->bodyContent(); // must exist in your class
 
         // replace initiator
-        if(!empty($notificationInitiator) && str_contains($bodyTemplate, 'initiator.username')){
+        if (!empty($notificationInitiator) && str_contains($bodyTemplate, 'initiator.username')) {
             $initiator = $notificationInitiator->initiatorUserObj()->getName();
 
-            if(empty($initiator)){
+            if (empty($initiator)) {
                 return $notificationStrategy;
             }
             $username = $initiator;
@@ -116,9 +115,9 @@ class NotificationMapperImpl implements NotificationsMapper
 
         $receiverArray = $receiverObj->getArrayCopy();
         // replace receiver
-        if(!empty($receiverArray) && str_contains($bodyTemplate, 'receiver.username')){
-            
-            if(empty($receiverArray)){
+        if (!empty($receiverArray) && str_contains($bodyTemplate, 'receiver.username')) {
+
+            if (empty($receiverArray)) {
                 return $notificationStrategy;
             }
 

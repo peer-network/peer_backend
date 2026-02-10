@@ -1425,7 +1425,7 @@ class UserService implements UserServiceInterface
             $this->userMapper->updateUserDeviceToken($args);
 
             $this->transactionManager->commit();
-            
+
             return self::createSuccessResponse(12401);
 
         } catch (\Throwable $e) {
@@ -1434,6 +1434,6 @@ class UserService implements UserServiceInterface
             return self::respondWithError(40301);
         }
 
-        
+
     }
 }

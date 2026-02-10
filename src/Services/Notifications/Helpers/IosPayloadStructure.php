@@ -9,7 +9,7 @@ class IosPayloadStructure implements PayloadStructure
 {
     /**
      * iOS payload sturcture
-     * 
+     *
      */
     public function payload(NotificationPayload $contentType): array
     {

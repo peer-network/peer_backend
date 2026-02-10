@@ -10,8 +10,10 @@ use RuntimeException;
 
 final class AndroidApiService
 {
-    public function __construct(protected PeerLoggerInterface $logger){}
-    
+    public function __construct(protected PeerLoggerInterface $logger)
+    {
+    }
+
     public function sendNotification(NotificationPayload $payload, UserDeviceToken $receiver): bool
     {
         $payload = (new AndroidPayloadStructure())->payload($payload);
@@ -72,7 +74,7 @@ final class AndroidApiService
     {
         try {
 
-            // Put the real service account JSON here 
+            // Put the real service account JSON here
             $serviceAccountPath = __DIR__ . '/../../../ServerConfigKeys/' . $_ENV['ANDROID_SERVER_KEY_JSON'];
 
             if (!is_file($serviceAccountPath)) {

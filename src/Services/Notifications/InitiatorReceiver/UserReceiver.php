@@ -8,7 +8,6 @@ use Fawaz\Services\Notifications\Interface\NotificationReceiver;
 
 class UserReceiver implements NotificationReceiver
 {
-
     protected array $receivers = [];
 
     public function __construct(array $receivers = [])

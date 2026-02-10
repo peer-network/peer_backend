@@ -1968,20 +1968,21 @@ class UserMapper implements UserMapperInterface
 
     /**
      * Store device information for notification
-     * 
+     *
      * Check if user has already registered the device token
      *    if Yes, Update user's token
      *      No, Insert new records
-     * 
-     * 
+     *
+     *
      * Needs to be discussed about multiple user's device token
-     * 
+     *
      * @return void
      */
-    public function updateUserDeviceToken(array $args){
+    public function updateUserDeviceToken(array $args)
+    {
 
-        try{
-            if(!UserDeviceToken::query()->where('userid', $args['userid'])->exists()){
+        try {
+            if (!UserDeviceToken::query()->where('userid', $args['userid'])->exists()) {
                 UserDeviceToken::insert([
                     'userid' => $args['userid'],
                     'token' => $args['token'],
@@ -1989,7 +1990,7 @@ class UserMapper implements UserMapperInterface
                     'language' => $args['language'],
                     'createdat' => (new DateTime())->format('Y-m-d H:i:s.u'),
                 ]);
-            }else{
+            } else {
                 UserDeviceToken::query()->where('userid', $args['userid'])->updateColumns([
                     'token' => $args['token'],
                     'platform' => $args['platform'],

@@ -10,10 +10,9 @@ use Fawaz\Services\Notifications\Interface\NotificationInitiator;
 
 class SystemInitiator implements NotificationInitiator
 {
-
     public $initiator;
 
-    
+
     public function __construct(string $initiator)
     {
         $this->initiator = $initiator;

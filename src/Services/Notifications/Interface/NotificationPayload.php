@@ -1,12 +1,11 @@
 <?php
-namespace Fawaz\Services\Notifications\Interface;
 
+namespace Fawaz\Services\Notifications\Interface;
 
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 
 interface NotificationPayload
 {
- 
     public function getTitle(): string;
 
     public function getBodyContent(): string;

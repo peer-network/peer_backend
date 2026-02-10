@@ -11,17 +11,16 @@ use Fawaz\Services\Notifications\Interface\NotificationStrategy;
 
 class PostLikeNotification implements NotificationStrategy
 {
-
     public $initiator;
 
     public $receiver;
 
     // should be set by default
     public $bodyContent = ConstantsNotification::NOTIFICATIONS['POST_LIKE']['BODY'];
-    
+
     public function __construct(public string $contentId)
     {
-        
+
     }
 
     public static function action(): NotificationAction

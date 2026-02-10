@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Services\Notifications\NotificationApiServices;
 
 use Fawaz\App\Models\UserDeviceToken;
@@ -7,7 +8,9 @@ use Fawaz\Services\Notifications\Interface\NotificationSenderStrategy;
 
 final class IosNotificationSender implements NotificationSenderStrategy
 {
-    public function __construct(private IosApiService $iosApi) {}
+    public function __construct(private IosApiService $iosApi)
+    {
+    }
 
     public function supports(UserDeviceToken $receiver): bool
     {

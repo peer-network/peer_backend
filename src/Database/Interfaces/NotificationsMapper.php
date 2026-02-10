@@ -13,4 +13,3 @@ interface NotificationsMapper
 {
     public function notifyByType(NotificationAction $action, array $payload, NotificationInitiator $notificationInititor, NotificationReceiver $notificationReceiver): bool;
 }
-    

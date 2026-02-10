@@ -1,4 +1,5 @@
 <?php
+
 namespace Fawaz\Services\Notifications\NotificationApiServices;
 
 use Fawaz\App\Models\UserDeviceToken;
