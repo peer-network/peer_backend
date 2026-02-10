@@ -1,10 +1,10 @@
 {
   "info": {
-    "_postman_id": "28466a3f-b1a8-4e1a-b9d4-9b21f841bcc5",
+    "_postman_id": "ae672529-7f9b-4425-a01f-9d78377f26ce",
     "name": "007_mint_graphql",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "43606001",
-    "_collection_link": "https://go.postman.co/collection/43606001-28466a3f-b1a8-4e1a-b9d4-9b21f841bcc5?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/43606001-ae672529-7f9b-4425-a01f-9d78377f26ce?source=collection_link"
   },
   "item": [
     {
@@ -189,6 +189,66 @@
       "response": []
     },
     {
+      "name": "Registration t3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10601\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "pm.environment.set(\"userid_t3\", response.data.register.userid);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// generate random email",
+              "let randomEmail = `user_${Math.floor(Math.random() * 1000000)}@example.com`;",
+              "",
+              "// save",
+              "pm.environment.set(\"email_t3\", randomEmail);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation Register {\n  register(input: {\n    email: \"{{email_t3}}\",\n    password: \"{{password_T}}\",\n    username: \"{{username}}\",\n    referralUuid: \"{{referralUuid}}\"\n  }) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    userid\n  }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Verification t1",
       "event": [
         {
@@ -263,6 +323,62 @@
           "mode": "graphql",
           "graphql": {
             "query": "mutation VerifyAccount {\n    verifyAccount(userid: \"{{userid_t2}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verification t3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10701\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation VerifiedAccount {\n    verifyAccount(userid: \"{{userid_t3}}\") {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
             "variables": ""
           }
         },
@@ -576,7 +692,7 @@
       "response": []
     },
     {
-      "name": "Login tester 2",
+      "name": "Login t3",
       "event": [
         {
           "listen": "test",
@@ -608,7 +724,155 @@
               ""
             ],
             "type": "text/javascript",
-            "packages": {}
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11513\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let postResponse = {};",
+              "try {",
+              "    postResponse = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse response as JSON:\", err);",
+              "}",
+              "",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const postId = postResponse?.data?.createPost?.affectedRows?.id;",
+              "        if (postId) {",
+              "            pm.environment.set(\"postid_t3\", postId);",
+              "            console.log(\"postid set to:\", postId);",
+              "        } else {",
+              "            console.log(\"No postid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Couldn't access post ID:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping postid set.\");",
+              "}",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation CreatePost {\n    createPost(action: POST, input: { title: \"text's\", mediadescription: \"text's\", contenttype: text, media: [\"{{new_bio}}\"], cover: \"{{base64_photo1}}\", tags: [\"{{Camelcasetag}}\", \"{{Lowercasetag}}\", \"{{Uppercasetag}}\"]  }) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            id\n            contenttype\n            title\n            media\n            cover\n            mediadescription\n            createdat\n            amountlikes\n            amountviews\n            amountcomments\n            amountdislikes\n            amounttrending\n            isliked\n            isviewed\n            isreported\n            isdisliked\n            issaved\n            tags\n            user {\n                id\n                username\n                slug\n                img\n                isfollowed\n                isfollowing\n            }\n            comments {\n                commentid\n                userid\n                postid\n                parentid\n                content\n                createdat\n                amountlikes\n                amountreplies\n                isliked\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n                isreported\n                user {\n                    id\n                    username\n                    slug\n                    img\n                    isfollowed\n                    isfollowing\n                isreported\n                visibilityStatus\n          isHiddenForUsers\n                hasActiveReports\n}\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login tester 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
           }
         }
       ],
@@ -621,7 +885,7 @@
         "body": {
           "mode": "graphql",
           "graphql": {
-            "query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+            "query": "mutation {\n  login(email: \"{{w_email_t3}}\",\n    password: \"{{w_password_t3}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
             "variables": ""
           }
         },
@@ -778,6 +1042,469 @@
           "mode": "graphql",
           "graphql": {
             "query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid_t2}}\" , action: DISLIKE) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dislike post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11504\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid_t3}}\" , action: DISLIKE) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Comment post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let commentResponse = {};",
+              "try {",
+              "    commentResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let commentResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+              "    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (commentResponseCode === \"11608\") {",
+              "    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+              "    console.log(\"This was a Daily Free Comment.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeComment\");",
+              "    console.log(\"Not a Daily Free Comment.\");",
+              "}",
+              "let response = {};",
+              "try {",
+              "    response = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse JSON:\", err);",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+              "        if (commentId) {",
+              "            pm.environment.set(\"commentid\", commentId);",
+              "            console.log(\"commentid set to:\", commentId);",
+              "        } else {",
+              "            console.log(\"No commentid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Error extracting commentid:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping commentid set.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid_t3}}\", content: \"mint_comment\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Comment post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let commentResponse = {};",
+              "try {",
+              "    commentResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let commentResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+              "    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (commentResponseCode === \"11608\") {",
+              "    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+              "    console.log(\"This was a Daily Free Comment.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeComment\");",
+              "    console.log(\"Not a Daily Free Comment.\");",
+              "}",
+              "let response = {};",
+              "try {",
+              "    response = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse JSON:\", err);",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+              "        if (commentId) {",
+              "            pm.environment.set(\"commentid\", commentId);",
+              "            console.log(\"commentid set to:\", commentId);",
+              "        } else {",
+              "            console.log(\"No commentid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Error extracting commentid:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping commentid set.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid_t3}}\", content: \"mint_comment\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Comment post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let commentResponse = {};",
+              "try {",
+              "    commentResponse = pm.response.json();",
+              "} catch (e) {",
+              "    console.log(\"Failed to parse JSON:\", e);",
+              "}",
+              "",
+              "let commentResponseCode = \"\";",
+              "let status = \"\";",
+              "",
+              "try {",
+              "    status = commentResponse?.data?.createComment?.meta?.status || \"\";",
+              "    commentResponseCode = commentResponse?.data?.createComment?.meta?.ResponseCode || \"\";",
+              "} catch (e) {",
+              "    console.log(\"Error accessing response properties:\", e);",
+              "}",
+              "",
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect([\"11605\", \"11608\"]).to.include(commentResponseCode);",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(status).to.eql(\"success\");",
+              "});",
+              "",
+              "if (commentResponseCode === \"11608\") {",
+              "    pm.environment.set(\"isDailyFreeComment\", \"true\");",
+              "    console.log(\"This was a Daily Free Comment.\");",
+              "} else {",
+              "    pm.environment.unset(\"isDailyFreeComment\");",
+              "    console.log(\"Not a Daily Free Comment.\");",
+              "}",
+              "let response = {};",
+              "try {",
+              "    response = pm.response.json();",
+              "} catch (err) {",
+              "    console.log(\"Failed to parse JSON:\", err);",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    try {",
+              "        const commentId = response?.data?.createComment?.affectedRows?.[0]?.commentid;",
+              "        if (commentId) {",
+              "            pm.environment.set(\"commentid\", commentId);",
+              "            console.log(\"commentid set to:\", commentId);",
+              "        } else {",
+              "            console.log(\"No commentid found in response.\");",
+              "        }",
+              "    } catch (err) {",
+              "        console.log(\"Error extracting commentid:\", err);",
+              "    }",
+              "} else {",
+              "    console.log(\"Error detected in response, skipping commentid set.\");",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation createComment {\n    createComment(action: COMMENT, postid: \"{{postid_t3}}\", content: \"mint_comment\") {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            commentid\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login tester 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation {\n  login(email: \"{{w_email_t2}}\",\n    password: \"{{w_password_t2}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dislike post 3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"11504\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation ResolveActionPost {\n    resolvePostAction(postid:\"{{postid_t3}}\" , action: DISLIKE) {\n        status\n        RequestId\n        ResponseCode\n        ResponseMessage\n    }\n}\n",
             "variables": ""
           }
         },
@@ -1423,6 +2150,138 @@
           "mode": "graphql",
           "graphql": {
             "query": "mutation Login {\n  login(email: \"{{email_t2}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transaction history (empty)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"ResponseCode\":\"11215\"');",
+              "});",
+              "",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "const rows = json?.data?.transactionHistory?.affectedRows ?? [];",
+              "",
+              "pm.test(\"affectedRows is empty\", () => {",
+              "    pm.expect(rows).to.be.an(\"array\").that.is.empty;",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "query TransactionHistory {\n    transactionHistory(limit: 1) {\n        meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n        affectedRows {\n            operationid\n            transactionId\n            transactionCategory\n            transactiontype\n            tokenamount\n            netTokenAmount\n            message\n            createdat\n            sender {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            recipient {\n                userid\n                img\n                username\n                slug\n                biography\n                visibilityStatus\n                isHiddenForUsers\n                hasActiveReports\n                updatedat\n            }\n            fees {\n                total\n                burn\n                peer\n                inviter\n            }\n        }\n    }\n}\n",
+            "variables": ""
+          }
+        },
+        "url": {
+          "raw": "{{test-backend}}/graphql",
+          "host": [
+            "{{test-backend}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login t3",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"ResponseCode is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"10801\");",
+              "});",
+              "pm.test(\"Status is correct\", function () {",
+              "    pm.expect(pm.response.text()).to.include('\"status\":\"success\"');",
+              "});",
+              "",
+              "let response = pm.response.json();",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"accessToken\", response.data.login.accessToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "if (!pm.response.text().includes(\"error\")) {",
+              "    pm.environment.set(\"refreshToken\", response.data.login.refreshToken);",
+              "} else {",
+              "    console.log(\"Error detected in response, environment variable not set.\");",
+              "}",
+              "let token = pm.environment.get(\"accessToken\");",
+              "pm.test(\"Access token exists\", function () {",
+              "    pm.expect(token).to.be.a(\"string\");",
+              "});",
+              "",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "graphql",
+          "graphql": {
+            "query": "mutation Login {\n  login(email: \"{{email_t3}}\",\n    password: \"{{password_T}}\"\n  ) {\n    meta {\n            status\n            RequestId\n            ResponseCode\n            ResponseMessage\n        }\n    accessToken\n    refreshToken\n  }\n}",
             "variables": ""
           }
         },
