@@ -699,7 +699,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                 $feesTotal = $netTokenAmount;
                 $grossAmount = $netTokenAmount;
                 $feeDetails = [
-                    'total' => $feesTotal,
+                    'total' => 0.0,
                     'burn' => null,
                     'peer' => null,
                     'inviter' => null,
