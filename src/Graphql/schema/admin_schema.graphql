@@ -14,7 +14,6 @@ extend type Mutation {
   globalwins: DefaultResponse!
   gemsters(day: DayFilterType!): GemstersResponse!
   distributeTokensForGems(date: String!): GemstersResponse!
-  alphaMint: DefaultResponse!
 }
 
 

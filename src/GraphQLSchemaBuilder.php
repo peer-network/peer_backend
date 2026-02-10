@@ -57,7 +57,6 @@ use Fawaz\Services\ContentFiltering\Specs\SpecTypes\IllegalContent\IllegalConten
 use Fawaz\Services\ContentFiltering\Replaceables\ProfileReplaceable;
 use Fawaz\Database\Interfaces\InteractionsPermissionsMapper;
 use Fawaz\App\Models\TransactionHistoryItem;
-use Fawaz\App\AlphaMintService;
 use Fawaz\App\LeaderBoardService;
 use Fawaz\Database\Interfaces\TransactionManager;
 use Fawaz\App\PeerShopService;
@@ -100,7 +99,6 @@ class GraphQLSchemaBuilder
         protected ModerationService $moderationService,
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
-        protected AlphaMintService $alphaMintService,
         protected TransactionManager $transactionManager
     ) {
         $this->resolvers = $this->buildResolvers();
@@ -217,7 +215,6 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
-        $this->alphaMintService->setCurrentUserId($userid);
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->profileService->setCurrentUserId($userid);
@@ -1779,7 +1776,6 @@ class GraphQLSchemaBuilder
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
-            'alphaMint' => fn (mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
             'performShopOrder' => fn (mixed $root, array $args) => $this->performShopOrder($args),
         ];
     }
