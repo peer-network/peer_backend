@@ -9,6 +9,3 @@ parameters:
 
     ignoreErrors:
         - '#(Comparison operation .+ is always false|Strict comparison using .+ will always evaluate to .+|Negated boolean expression is always false|Result of .+ is always (true|false)|Dead catch .+ is never thrown|Strict comparison using .+ will always evaluate to true)#'
-        - '#Offset .+ in (isset|empty)\(\) always exists and is not (nullable|falsy)#'
-        
-        
