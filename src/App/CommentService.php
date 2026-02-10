@@ -67,7 +67,7 @@ class CommentService
     {
         foreach ($requiredFields as $field) {
             if (empty($args[$field])) {
-                $this->logger->error('CommentService.validateRequiredFields: Missing required field', ['field' => $field]);
+                $this->logger->debug('CommentService.validateRequiredFields: Missing required field', ['field' => $field]);
                 return $this::respondWithError(30265);
             }
         }
@@ -82,7 +82,7 @@ class CommentService
         }
 
         if (empty($args)) {
-            $this->logger->error('CommentService.createComment: Empty arguments provided');
+            $this->logger->debug('CommentService.createComment: Empty arguments provided');
             return $this::respondWithError(30101);
         }
 
@@ -100,17 +100,17 @@ class CommentService
         $parentId = isset($args['parentid']) ? trim($args['parentid']) : null;
 
         if (!$this->validateUUID($postId)) {
-            $this->logger->error('CommentService.createComment: Invalid postId', ['postId' => $postId]);
+            $this->logger->debug('CommentService.createComment: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
         if ($parentId !== null && !$this->validateUUID($parentId)) {
-            $this->logger->error('CommentService.createComment: Invalid parentId', ['parentId' => $parentId]);
+            $this->logger->debug('CommentService.createComment: Invalid parentId', ['parentId' => $parentId]);
             return $this::respondWithError(31603, ['parentId' => $parentId]);
         }
 
         if ($content === '') {
-            $this->logger->error('CommentService.createComment: Empty content');
+            $this->logger->debug('CommentService.createComment: Empty content');
             return $this::respondWithError(30101);
         }
 
@@ -153,7 +153,7 @@ class CommentService
 
             $postInfo = $this->postInfoMapper->loadById($postId);
             if (!$postInfo) {
-                $this->logger->error('CommentService.createComment: PostInfo not found for postId', ['postId' => $postId]);
+                $this->logger->debug('CommentService.createComment: PostInfo not found for postId', ['postId' => $postId]);
                 return $this::respondWithError(31602);
             }
 
@@ -217,7 +217,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($parentId !== null && !self::isValidUUID($parentId)) {
-            $this->logger->error('CommentService.fetchByParentId: Invalid parentId', ['parentId' => $parentId]);
+            $this->logger->debug('CommentService.fetchByParentId: Invalid parentId', ['parentId' => $parentId]);
             return $this::respondWithError(30209);
         }
 
@@ -241,7 +241,7 @@ class CommentService
         $limit = min(max((int)($args['limit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            $this->logger->error('CommentService.fetchAllByPostId: Invalid postId', ['postId' => $postId]);
+            $this->logger->debug('CommentService.fetchAllByPostId: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209);
         }
 

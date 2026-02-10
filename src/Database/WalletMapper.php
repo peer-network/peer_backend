@@ -371,12 +371,12 @@ class WalletMapper implements WalletCreditable, WalletDebitable
         $this->logger->debug("WalletMapper.fetchWinsLog started for type: $type");
 
         if (empty($userid)) {
-            $this->logger->error('WalletMapper.fetchWinsLog: UserID is missing');
+            $this->logger->debug('WalletMapper.fetchWinsLog: UserID is missing');
             return self::respondWithError(30101);
         }
 
         if (!in_array($type, ['win', 'pay'], true)) {
-            $this->logger->error('WalletMapper.fetchWinsLog: Type is not provided');
+            $this->logger->debug('WalletMapper.fetchWinsLog: Type is not provided');
             return self::respondWithError(30105);
         }
 

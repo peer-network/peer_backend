@@ -130,7 +130,7 @@ class TagService
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
-                $this->logger->error("TagService.loadTag: tagName parameter is missing or empty.");
+                $this->logger->debug("TagService.loadTag: tagName parameter is missing or empty.");
                 return $this::respondWithError(30101);
             }
 

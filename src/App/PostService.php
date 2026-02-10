@@ -175,7 +175,7 @@ class PostService
         $freeActions = ['report', 'save', 'share', 'view'];
 
         if (!empty($postId) && !self::isValidUUID($postId)) {
-            $this->logger->error('PostService.resolveActionPost: Invalid postId', ['postId' => $postId]);
+            $this->logger->debug('PostService.resolveActionPost: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
@@ -206,7 +206,7 @@ class PostService
                 $specs,
                 $postId
             ) === false) {
-                $this->logger->error('PostService.resolveActionPost: Interaction not allowed', ['postId' => $postId]);
+                $this->logger->debug('PostService.resolveActionPost: Interaction not allowed', ['postId' => $postId]);
                 return $this::respondWithError(31513, ['postid' => $postId]);
             }
         }
@@ -219,7 +219,7 @@ class PostService
         $paidActions = ['like', 'dislike', 'comment', 'post'];
 
         if (!in_array($action, $paidActions, true)) {
-            $this->logger->error('PostService.resolveActionPost: Invalid paid action', ['action' => $action]);
+            $this->logger->debug('PostService.resolveActionPost: Invalid paid action', ['action' => $action]);
             return $this::respondWithError(30105);
         }
 
@@ -246,7 +246,7 @@ class PostService
 
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
-            $this->logger->error('PostService.resolveActionPost: Invalid action parameter', ['action' => $action]);
+            $this->logger->debug('PostService.resolveActionPost: Invalid action parameter', ['action' => $action]);
             return $this::respondWithError(30105);
         }
 
@@ -286,7 +286,7 @@ class PostService
                         $response['ResponseCode'] = "11514";
                     } else {
                         $this->transactionManager->rollback();
-                        $this->logger->error('PostService.resolveActionPost: Unsupported action in free flow', ['action' => $action]);
+                        $this->logger->debug('PostService.resolveActionPost: Unsupported action in free flow', ['action' => $action]);
                         return $this::respondWithError(30105);
                     }
 
@@ -355,7 +355,7 @@ class PostService
                 $response['ResponseCode'] = "11504";
             } else {
                 $this->transactionManager->rollback();
-                $this->logger->error('PostService.resolveActionPost: Unsupported action in paid flow', ['action' => $action]);
+                $this->logger->debug('PostService.resolveActionPost: Unsupported action in paid flow', ['action' => $action]);
                 return $this::respondWithError(30105);
             }
 
@@ -406,13 +406,13 @@ class PostService
         }
 
         if (empty($args)) {
-            $this->logger->error('PostService.createPost: Empty arguments provided');
+            $this->logger->debug('PostService.createPost: Empty arguments provided');
             return $this::respondWithError(30101);
         }
 
         foreach (['title', 'contenttype'] as $field) {
             if (empty($args[$field])) {
-                $this->logger->error('PostService.createPost: Missing required field', ['field' => $field]);
+                $this->logger->debug('PostService.createPost: Missing required field', ['field' => $field]);
                 return $this::respondWithError(30210);
             }
         }
@@ -449,14 +449,14 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
-                    $this->logger->error('PostService.createPost: Media upload error', ['error' => $mediaPath['error']]);
+                    $this->logger->debug('PostService.createPost: Media upload error', ['error' => $mediaPath['error']]);
                     return $this::respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
-                    $this->logger->error('PostService.createPost: Media path missing after upload', ['mediaPath' => $mediaPath]);
+                    $this->logger->debug('PostService.createPost: Media path missing after upload', ['mediaPath' => $mediaPath]);
                     return $this::respondWithError(30251);
                 }
             } elseif (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
@@ -466,7 +466,7 @@ class PostService
                     $validateSameMediaType = new MultipartPost(['media' => explode(',', $args['uploadedFiles'])], [], false);
 
                     if (!$validateSameMediaType->isFilesExists()) {
-                        $this->logger->error('PostService.createPost: Uploaded files do not exist', ['uploadedFiles' => $args['uploadedFiles']]);
+                        $this->logger->debug('PostService.createPost: Uploaded files do not exist', ['uploadedFiles' => $args['uploadedFiles']]);
                         return $this::respondWithError(31511);
                     }
 
@@ -486,14 +486,14 @@ class PostService
                             if (isset($args['uploadedFiles'])) {
                                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                             }
-                            $this->logger->error('PostService.createPost: Uploaded files missing after move', ['uploadedFiles' => $args['uploadedFiles']]);
+                            $this->logger->debug('PostService.createPost: Uploaded files missing after move', ['uploadedFiles' => $args['uploadedFiles']]);
                             return $this::respondWithError(30101);
                         }
                     } else {
                         if (isset($args['uploadedFiles'])) {
                             $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                         }
-                        $this->logger->error('PostService.createPost: Uploaded files do not share type', ['uploadedFiles' => $args['uploadedFiles']]);
+                        $this->logger->debug('PostService.createPost: Uploaded files do not share type', ['uploadedFiles' => $args['uploadedFiles']]);
                         return $this::respondWithError(30266); // Provided files should have same type
                     }
                 } catch (\Exception $e) {
@@ -509,7 +509,7 @@ class PostService
 
 
             } else {
-                $this->logger->error('PostService.createPost: Missing media input');
+                $this->logger->debug('PostService.createPost: Missing media input');
                 return $this::respondWithError(30101);
             }
 
@@ -588,7 +588,7 @@ class PostService
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
-                $this->logger->error('PostService.createPost: Failed to handle tags', ['exception' => $e]);
+                $this->logger->debug('PostService.createPost: Failed to handle tags', ['exception' => $e]);
                 return $this::respondWithError(30262);
             }
 
@@ -799,33 +799,33 @@ class PostService
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            $this->logger->error('PostService.findPostser: Invalid postId', ['postId' => $postId]);
+            $this->logger->debug('PostService.findPostser: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            $this->logger->error('PostService.findPostser: Invalid userId', ['userId' => $userId]);
+            $this->logger->debug('PostService.findPostser: Invalid userId', ['userId' => $userId]);
             return $this::respondWithError(30201);
         }
 
         if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
-            $this->logger->error('PostService.findPostser: Invalid title length', ['title' => $title]);
+            $this->logger->debug('PostService.findPostser: Invalid title length', ['title' => $title]);
             return $this::respondWithError(30210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
-            $this->logger->error('PostService.findPostser: Invalid from date', ['from' => $from]);
+            $this->logger->debug('PostService.findPostser: Invalid from date', ['from' => $from]);
             return $this::respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
-            $this->logger->error('PostService.findPostser: Invalid to date', ['to' => $to]);
+            $this->logger->debug('PostService.findPostser: Invalid to date', ['to' => $to]);
             return $this::respondWithError(30213);
         }
 
         if ($tag !== null) {
             if (preg_match($controlPattern, $tag) === 1) {
-                $this->logger->error('PostService.findPostser: Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->debug('PostService.findPostser: Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
         }
@@ -836,7 +836,7 @@ class PostService
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
-                $this->logger->error('PostService.findPostser: Invalid filterBy types', ['filterBy' => $filterBy]);
+                $this->logger->debug('PostService.findPostser: Invalid filterBy types', ['filterBy' => $filterBy]);
                 return $this::respondWithError(30103);
             }
         }
@@ -844,7 +844,7 @@ class PostService
         if ($Ignorlist !== null) {
             $Ignorlisten = ['YES', 'NO'];
             if (!in_array($Ignorlist, $Ignorlisten, true)) {
-                $this->logger->error('PostService.findPostser: Invalid IgnorList value', ['IgnorList' => $Ignorlist]);
+                $this->logger->debug('PostService.findPostser: Invalid IgnorList value', ['IgnorList' => $Ignorlist]);
                 return $this::respondWithError(30103);
             }
         }
@@ -898,7 +898,7 @@ class PostService
         try {
             $results = $this->postMapper->findPostser($this->currentUserId, $specs, $args);
             if (empty($results) && $postId != null) {
-                $this->logger->error('PostService.findPostser: Post not found', ['postId' => $postId]);
+                $this->logger->debug('PostService.findPostser: Post not found', ['postId' => $postId]);
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
@@ -1040,12 +1040,12 @@ class PostService
 
 
         if ($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
-            $this->logger->error('PostService.postInteractions: Invalid arguments', ['getOnly' => $getOnly, 'postOrCommentId' => $postOrCommentId]);
+            $this->logger->debug('PostService.postInteractions: Invalid arguments', ['getOnly' => $getOnly, 'postOrCommentId' => $postOrCommentId]);
             return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($postOrCommentId)) {
-            $this->logger->error('PostService.postInteractions: Invalid postOrCommentId', ['postOrCommentId' => $postOrCommentId]);
+            $this->logger->debug('PostService.postInteractions: Invalid postOrCommentId', ['postOrCommentId' => $postOrCommentId]);
             return $this::respondWithError(30201);
         }
 
@@ -1118,7 +1118,7 @@ class PostService
         $postId = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
-            $this->logger->error('PostService.getGuestListPost: Invalid postId', ['postId' => $postId]);
+            $this->logger->debug('PostService.getGuestListPost: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209);
         }
 
@@ -1158,7 +1158,7 @@ class PostService
             );
 
             if (empty($results)) {
-                $this->logger->error('PostService.getGuestListPost: Post not found', ['postId' => $postId]);
+                $this->logger->debug('PostService.getGuestListPost: Post not found', ['postId' => $postId]);
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(

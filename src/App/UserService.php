@@ -69,11 +69,11 @@ class UserService implements UserServiceInterface
         $passwordConfig = ConstantsConfig::user()['PASSWORD'];
 
         if (strlen($password) < $passwordConfig['MIN_LENGTH'] || strlen($password) > $passwordConfig['MAX_LENGTH']) {
-            $this->logger->error('UserService.validatePassword: Invalid password length');
+            $this->logger->debug('UserService.validatePassword: Invalid password length');
             return self::respondWithError(30226);
         }
         if (!preg_match('/' . $passwordConfig['PATTERN'] . '/u', $password)) {
-            $this->logger->error('UserService.validatePassword: Invalid password format');
+            $this->logger->debug('UserService.validatePassword: Invalid password format');
             return self::respondWithError(30226);
         }
 
@@ -215,14 +215,14 @@ class UserService implements UserServiceInterface
 
         if (!empty($referralUuid)) {
             if (!self::isValidUUID($referralUuid)) {
-                $this->logger->error('UserService.createUser: Invalid referral UUID format', ['referralUuid' => $referralUuid]);
+                $this->logger->debug('UserService.createUser: Invalid referral UUID format', ['referralUuid' => $referralUuid]);
                 return self::respondWithError(31007);
             }
 
             $inviter = $this->loadVisibleUsersById($referralUuid);
 
             if (empty($inviter)) {
-                $this->logger->error('UserService.createUser: Invalid referral UUID provided', ['referralUuid' => $referralUuid]);
+                $this->logger->debug('UserService.createUser: Invalid referral UUID provided', ['referralUuid' => $referralUuid]);
                 return self::respondWithError(31007);
             }
 
@@ -231,7 +231,7 @@ class UserService implements UserServiceInterface
 
         $email = trim($args['email']);
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->error('UserService.createUser: Email already taken');
+            $this->logger->debug('UserService.createUser: Email already taken');
             return self::respondWithError(30601);
         }
 
@@ -421,7 +421,7 @@ class UserService implements UserServiceInterface
             $users = $this->userMapper->getValidReferralInfoByLink($referralString, $specs);
 
             if (!$users) {
-                $this->logger->error('UserService.verifyReferral: No valid referral information found', ['referral' => $referralString]);
+                $this->logger->debug('UserService.verifyReferral: No valid referral information found', ['referral' => $referralString]);
                 return self::respondWithError(31007); // No valid referral information found
             }
             $userObj = new User($users, [], false)->getArrayCopy();
@@ -461,7 +461,7 @@ class UserService implements UserServiceInterface
                 $this->logger->info('UserService.uploadMedia mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (empty($mediaPath)) {
-                    $this->logger->error('UserService.uploadMedia: Media upload failed', ['userId' => $userId]);
+                    $this->logger->debug('UserService.uploadMedia: Media upload failed', ['userId' => $userId]);
                     return self::respondWithError(30251);
                 }
 
@@ -491,7 +491,7 @@ class UserService implements UserServiceInterface
     public function verifyAccount(string $userId): array
     {
         if (!self::isValidUUID($userId)) {
-            $this->logger->error('UserService.verifyAccount: Invalid userId', ['userId' => $userId]);
+            $this->logger->debug('UserService.verifyAccount: Invalid userId', ['userId' => $userId]);
             return self::respondWithError(30201);
         }
 
@@ -549,7 +549,7 @@ class UserService implements UserServiceInterface
         }
 
         if (empty($args)) {
-            $this->logger->error('UserService.updateUserPreferences: Empty arguments provided');
+            $this->logger->debug('UserService.updateUserPreferences: Empty arguments provided');
             return self::respondWithError(30101);
         }
         $this->logger->debug('UserService.updateUserPreferences started');
@@ -649,7 +649,7 @@ class UserService implements UserServiceInterface
         }
 
         if (empty($args)) {
-            $this->logger->error('UserService.setPassword: Empty arguments provided');
+            $this->logger->debug('UserService.setPassword: Empty arguments provided');
             return self::respondWithError(30101);
         }
 
@@ -664,7 +664,7 @@ class UserService implements UserServiceInterface
         }
 
         if ($newPassword === $currentPassword) {
-            $this->logger->error('UserService.setPassword: New password matches current');
+            $this->logger->debug('UserService.setPassword: New password matches current');
             return self::respondWithError(31004);
         }
 
@@ -676,7 +676,7 @@ class UserService implements UserServiceInterface
         }
 
         if (!$this->validatePasswordMatch($currentPassword, $user->getPassword())) {
-            $this->logger->error('UserService.setPassword: Password validation failed', ['userId' => $this->currentUserId]);
+            $this->logger->debug('UserService.setPassword: Password validation failed', ['userId' => $this->currentUserId]);
             return self::respondWithError(31001);
         }
 
@@ -706,7 +706,7 @@ class UserService implements UserServiceInterface
         }
 
         if (empty($args)) {
-            $this->logger->error('UserService.setEmail: Empty arguments provided');
+            $this->logger->debug('UserService.setEmail: Empty arguments provided');
             return self::respondWithError(30101);
         }
 
@@ -715,18 +715,18 @@ class UserService implements UserServiceInterface
         $email = $args['email'] ?? null;
         $exPassword = $args['password'] ?? null;
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('UserService.setEmail: Invalid email format');
+            $this->logger->debug('UserService.setEmail: Invalid email format');
             return self::respondWithError(30224);
         }
 
         $user = $this->userMapper->loadById($this->currentUserId);
         if ($email === $user->getMail()) {
-            $this->logger->error('UserService.setEmail: Email unchanged');
+            $this->logger->debug('UserService.setEmail: Email unchanged');
             return self::respondWithError(31005);
         }
 
         if ($this->userMapper->isEmailTaken($email)) {
-            $this->logger->error('UserService.setEmail: Email already in use');
+            $this->logger->debug('UserService.setEmail: Email already in use');
             return self::respondWithError(31003);
         }
 
@@ -741,7 +741,7 @@ class UserService implements UserServiceInterface
         }
 
         if (!$this->validatePasswordMatch($exPassword, $user->getPassword())) {
-            $this->logger->error('UserService.setEmail: Password validation failed', ['userId' => $this->currentUserId]);
+            $this->logger->debug('UserService.setEmail: Password validation failed', ['userId' => $this->currentUserId]);
             return self::respondWithError(31001);
         }
 
@@ -781,12 +781,12 @@ class UserService implements UserServiceInterface
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->error('UserService.setUsername: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
+            $this->logger->debug('UserService.setUsername: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
         if (empty($args['username'])) {
-            $this->logger->error('UserService.setUsername: Empty username');
+            $this->logger->debug('UserService.setUsername: Empty username');
             return self::respondWithError(30101);
         }
 
@@ -806,12 +806,12 @@ class UserService implements UserServiceInterface
             }
 
             if ($username === $user->getName()) {
-                $this->logger->error('UserService.setUsername: Username unchanged', ['username' => $username]);
+                $this->logger->debug('UserService.setUsername: Username unchanged', ['username' => $username]);
                 return self::respondWithError(31006);
             }
 
             if (!$this->validatePasswordMatch($password, $user->getPassword())) {
-                $this->logger->error('UserService.setUsername: Password validation failed', ['userId' => $this->currentUserId]);
+                $this->logger->debug('UserService.setUsername: Password validation failed', ['userId' => $this->currentUserId]);
                 return self::respondWithError(31001);
             }
 
@@ -833,7 +833,7 @@ class UserService implements UserServiceInterface
             return $this::createSuccessResponse(11007, $affectedRows, false);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('UserService.setUsername: Failed to update username', ['exception' => $e]);
+            $this->logger->debug('UserService.setUsername: Failed to update username', ['exception' => $e]);
             return self::respondWithError(30202);
         }
     }
@@ -846,7 +846,7 @@ class UserService implements UserServiceInterface
         }
 
         if (empty($expassword)) {
-            $this->logger->error('UserService.deleteAccount: Empty password');
+            $this->logger->debug('UserService.deleteAccount: Empty password');
             return self::respondWithError(30101);
         }
 
@@ -860,7 +860,7 @@ class UserService implements UserServiceInterface
         }
 
         if (!$this->validatePasswordMatch($expassword, $user->getPassword())) {
-            $this->logger->error('UserService.deleteAccount: Password validation failed', ['userId' => $this->currentUserId]);
+            $this->logger->debug('UserService.deleteAccount: Password validation failed', ['userId' => $this->currentUserId]);
             return self::respondWithError(31001);
         }
 
@@ -1026,7 +1026,7 @@ class UserService implements UserServiceInterface
         ];
 
         if (!$this->userMapper->isUserExistById($userId)) {
-            $this->logger->error('UserService.getFriends: User not found', ['userId' => $userId]);
+            $this->logger->debug('UserService.getFriends: User not found', ['userId' => $userId]);
             return self::respondWithError(31007);
         }
 
@@ -1118,7 +1118,7 @@ class UserService implements UserServiceInterface
                 ];
             }
 
-            $this->logger->error('UserService.fetchAllAdvance: No users found');
+            $this->logger->debug('UserService.fetchAllAdvance: No users found');
             return $this::respondWithError(31007);
         } catch (\Throwable $e) {
             $this->logger->error('UserService.fetchAllAdvance: Failed to fetch users', ['exception' => $e]);
@@ -1206,7 +1206,7 @@ class UserService implements UserServiceInterface
         $expiresAt = $this->getFutureTimestamp('+1 hour');
 
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('UserService.requestPasswordReset: Invalid email format');
+            $this->logger->debug('UserService.requestPasswordReset: Invalid email format');
             return self::respondWithError(30104);
         }
 
@@ -1296,7 +1296,7 @@ class UserService implements UserServiceInterface
         $this->logger->debug('UserService.resetPasswordTokenVerify started');
 
         if (empty($token)) {
-            $this->logger->error('UserService.resetPasswordTokenVerify: Invalid reset token');
+            $this->logger->debug('UserService.resetPasswordTokenVerify: Invalid reset token');
             return self::respondWithError(31904);
         }
 
@@ -1304,7 +1304,7 @@ class UserService implements UserServiceInterface
             $isValidToken = $this->userMapper->getPasswordResetRequest($token);
 
             if (!$isValidToken) {
-                $this->logger->error('UserService.resetPasswordTokenVerify: Invalid or expired reset token');
+                $this->logger->debug('UserService.resetPasswordTokenVerify: Invalid or expired reset token');
                 return self::respondWithError(31904);
             }
 
@@ -1417,7 +1417,7 @@ class UserService implements UserServiceInterface
             if (!$request) {
                 $this->userMapper->deletePasswordResetToken($args['token']);
                 $this->transactionManager->rollback();
-                $this->logger->error('UserService.resetPassword: Invalid reset token');
+                $this->logger->debug('UserService.resetPassword: Invalid reset token');
                 return self::respondWithError(31904);
             }
             $user = $this->userMapper->loadById($request['user_id']);

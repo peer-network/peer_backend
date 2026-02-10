@@ -68,7 +68,7 @@ class TagPostService
 
         $maxTags = min(max($maxTags, 1), 10);
         if (count($tags) > $maxTags) {
-            $this->logger->error('TagPostService.handleTags: Tag count exceeds limit', ['tagCount' => count($tags), 'maxTags' => $maxTags]);
+            $this->logger->debug('TagPostService.handleTags: Tag count exceeds limit', ['tagCount' => count($tags), 'maxTags' => $maxTags]);
             return $this::respondWithError(30211);
         }
 
@@ -82,7 +82,7 @@ class TagPostService
             $seenTags[$tagName] = true;
             // Validate tagName
             if (!$this->isValidTagName($tagName)) {
-                $this->logger->error('TagPostService.handleTags: Invalid tag name', ['tagName' => $tagName]);
+                $this->logger->debug('TagPostService.handleTags: Invalid tag name', ['tagName' => $tagName]);
                 return $this::respondWithError(30255);
             }
 
@@ -112,7 +112,7 @@ class TagPostService
 
         $tagName = strtolower(trim($tagName));
         if (!$this->isValidTagName($tagName)) {
-            $this->logger->error('TagPostService.createTag: Invalid tag name', ['tagName' => $tagName]);
+            $this->logger->debug('TagPostService.createTag: Invalid tag name', ['tagName' => $tagName]);
             return $this::respondWithError(30255);
         }
 

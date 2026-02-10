@@ -142,7 +142,7 @@ class PoolMapper
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            $this->logger->error('PoolMapper.fetchAllGemsForDay: Invalid day option', ['day' => $day]);
+            $this->logger->debug('PoolMapper.fetchAllGemsForDay: Invalid day option', ['day' => $day]);
             return $this::respondWithError(30223);
         }
 

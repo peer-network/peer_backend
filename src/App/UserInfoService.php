@@ -111,12 +111,12 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($followedUserId)) {
-            $this->logger->error('UserInfoService.toggleUserFollow: Invalid followedUserId', ['followedUserId' => $followedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserFollow: Invalid followedUserId', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $followedUserId) {
-            $this->logger->error('UserInfoService.toggleUserFollow: Cannot follow self', ['followedUserId' => $followedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserFollow: Cannot follow self', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31102);
         }
 
@@ -127,7 +127,7 @@ class UserInfoService
         }
 
         if (!$this->userInfoMapper->isUserExistById($followedUserId)) {
-            $this->logger->error('UserInfoService.toggleUserFollow: Followed user not found', ['followedUserId' => $followedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserFollow: Followed user not found', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31003);
         }
 
@@ -146,7 +146,7 @@ class UserInfoService
             $specs,
             $followedUserId
         ) === false) {
-            $this->logger->error('UserInfoService.toggleUserFollow: Interaction not allowed', ['followedUserId' => $followedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserFollow: Interaction not allowed', ['followedUserId' => $followedUserId]);
             return $this::respondWithError(31107, ['followedUserId' => $followedUserId]);
         }
 
@@ -173,12 +173,12 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($blockedUserId)) {
-            $this->logger->error('UserInfoService.toggleUserBlock: Invalid blockedUserId', ['blockedUserId' => $blockedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserBlock: Invalid blockedUserId', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $blockedUserId) {
-            $this->logger->error('UserInfoService.toggleUserBlock: Cannot block self', ['blockedUserId' => $blockedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserBlock: Cannot block self', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31104);
         }
 
@@ -189,7 +189,7 @@ class UserInfoService
         }
 
         if (!$this->userInfoMapper->isUserExistById($blockedUserId)) {
-            $this->logger->error('UserInfoService.toggleUserBlock: Blocked user not found', ['blockedUserId' => $blockedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserBlock: Blocked user not found', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31106);
         }
 
@@ -214,7 +214,7 @@ class UserInfoService
             $specs,
             $blockedUserId
         ) === false) {
-            $this->logger->error('UserInfoService.toggleUserBlock: Interaction not allowed', ['blockedUserId' => $blockedUserId]);
+            $this->logger->debug('UserInfoService.toggleUserBlock: Interaction not allowed', ['blockedUserId' => $blockedUserId]);
             return $this::respondWithError(31107, ['blockedUserId' => $blockedUserId]);
         }
 
@@ -371,14 +371,14 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->error('UserInfoService.updateBio: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
+            $this->logger->debug('UserInfoService.updateBio: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
         $bioConfig = ConstantsConfig::user()['BIOGRAPHY'];
 
         if (trim($biography) === '' || grapheme_strlen($biography) < $bioConfig['MIN_LENGTH'] || grapheme_strlen($biography) > $bioConfig['MAX_LENGTH']) {
-            $this->logger->error('UserInfoService.updateBio: Invalid biography length');
+            $this->logger->debug('UserInfoService.updateBio: Invalid biography length');
             return $this::respondWithError(30228);
         }
 
@@ -397,7 +397,7 @@ class UserInfoService
                 $this->logger->info('UserInfoService.updateBio biography', ['mediaPath' => $mediaPath]);
 
                 if (empty($mediaPath)) {
-                    $this->logger->error('UserInfoService.updateBio: Biography upload failed');
+                    $this->logger->debug('UserInfoService.updateBio: Biography upload failed');
                     return $this::respondWithError(30251);
                 }
 
@@ -451,12 +451,12 @@ class UserInfoService
             $specs,
             $this->currentUserId
         ) === false) {
-            $this->logger->error('UserInfoService.setProfilePicture: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
+            $this->logger->debug('UserInfoService.setProfilePicture: Profile updates blocked due to moderation', ['userid' => $this->currentUserId]);
             return $this::respondWithError(31013);
         }
 
         if (trim($mediaFile) === '') {
-            $this->logger->error('UserInfoService.setProfilePicture: Empty media file');
+            $this->logger->debug('UserInfoService.setProfilePicture: Empty media file');
             return $this::respondWithError(31102);
         }
 
@@ -472,7 +472,7 @@ class UserInfoService
                 $mediaPath = $this->base64filehandler->handleFileUpload($mediaFile, 'image', $this->currentUserId, 'profile');
 
                 if (empty($mediaPath)) {
-                    $this->logger->error('UserInfoService.setProfilePicture: Media upload failed');
+                    $this->logger->debug('UserInfoService.setProfilePicture: Media upload failed');
                     return $this::respondWithError(30251);
                 }
 
@@ -517,12 +517,12 @@ class UserInfoService
         }
 
         if (!self::isValidUUID($reported_userid)) {
-            $this->logger->error('UserInfoService.reportUser: Invalid userId', ['reported_userid' => $reported_userid]);
+            $this->logger->debug('UserInfoService.reportUser: Invalid userId', ['reported_userid' => $reported_userid]);
             return $this::respondWithError(30201);
         }
 
         if ($this->currentUserId === $reported_userid) {
-            $this->logger->error('UserInfoService.reportUser: Cannot report self', ['reported_userid' => $reported_userid]);
+            $this->logger->debug('UserInfoService.reportUser: Cannot report self', ['reported_userid' => $reported_userid]);
             return $this->respondWithError(31009); // you cant report on yourself
         }
 
@@ -530,7 +530,7 @@ class UserInfoService
             $user = $this->userMapper->loadById($reported_userid);
 
             if (!$user) {
-                $this->logger->error('UserInfoService.reportUser: User not found', ['reported_userid' => $reported_userid]);
+                $this->logger->debug('UserInfoService.reportUser: User not found', ['reported_userid' => $reported_userid]);
                 return $this->respondWithError(31007);
             }
 
@@ -549,12 +549,12 @@ class UserInfoService
                 $specs,
                 $reported_userid
             ) === false) {
-                $this->logger->error('UserInfoService.reportUser: Interaction not allowed', ['reported_userid' => $reported_userid]);
+                $this->logger->debug('UserInfoService.reportUser: Interaction not allowed', ['reported_userid' => $reported_userid]);
                 return $this::respondWithError(32201, ['userid' => $reported_userid]);
             }
 
             if ($this->moderationMapper->wasContentRestored($reported_userid, 'user')) {
-                $this->logger->error('UserInfoService.reportUser: User tries to report a restored user', ['reported_userid' => $reported_userid]);
+                $this->logger->debug('UserInfoService.reportUser: User tries to report a restored user', ['reported_userid' => $reported_userid]);
                 return $this->respondWithError(32104);
             }
 
@@ -578,7 +578,7 @@ class UserInfoService
         try {
             // Moderated items should not be reported again
             if ($this->reportsMapper->isModerated($reported_userid, ReportTargetType::USER->value)) {
-                $this->logger->error('UserInfoService.reportUser: User report already exists', ['reported_userid' => $reported_userid]);
+                $this->logger->debug('UserInfoService.reportUser: User report already exists', ['reported_userid' => $reported_userid]);
                 return $this::respondWithError(32102); // This content has already been reviewed and noderated by our team.
             }
 

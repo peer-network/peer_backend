@@ -72,7 +72,7 @@ class PeerTokenService
         $recipientid =  $args['recipient'];
 
         if (!$this->userService->isVisibleUserExistById($recipientid)) {
-            $this->logger->error('PeerTokenService.transferToken: Recipient not found', ['recipientid' => $recipientid]);
+            $this->logger->debug('PeerTokenService.transferToken: Recipient not found', ['recipientid' => $recipientid]);
             return $this::respondWithError(31007);
         }
 
@@ -88,7 +88,7 @@ class PeerTokenService
         ];
 
         if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $recipientid) === false) {
-            $this->logger->error('PeerTokenService.transferToken: Interaction not allowed', ['recipientid' => $recipientid]);
+            $this->logger->debug('PeerTokenService.transferToken: Interaction not allowed', ['recipientid' => $recipientid]);
             return $this::respondWithError(31203, ['recipientid' => $recipientid]);
         }
 
@@ -125,11 +125,11 @@ class PeerTokenService
                     return self::respondWithError(30270);
                 }
                 if (preg_match($controlPattern, $message) === 1) {
-                    $this->logger->error('PeerTokenService.transferToken: Transfer message contains control characters');
+                    $this->logger->debug('PeerTokenService.transferToken: Transfer message contains control characters');
                     return self::respondWithError(30271);
                 }
                 if (preg_match($urlPattern, $message) === 1) {
-                    $this->logger->error('PeerTokenService.transferToken: Transfer message contains URL/link');
+                    $this->logger->debug('PeerTokenService.transferToken: Transfer message contains URL/link');
                     return self::respondWithError(30271);
                 }
             }
@@ -140,7 +140,7 @@ class PeerTokenService
             $parts = explode('.', (string) $numberOfTokens);
 
             if (isset($parts[1]) && strlen($parts[1]) > $maxDecimals) {
-                $this->logger->error('PeerTokenService.transferToken: Too many decimal places', ['numberOfTokens' => $numberOfTokens]);
+                $this->logger->debug('PeerTokenService.transferToken: Too many decimal places', ['numberOfTokens' => $numberOfTokens]);
                 return self::respondWithError(30264);
             }
 
@@ -153,7 +153,7 @@ class PeerTokenService
             }
 
             if ((string) $recipientId === $this->currentUserId) {
-                $this->logger->error('PeerTokenService.transferToken: Send and Receive Same Wallet Error', ['recipientId' => $recipientId]);
+                $this->logger->debug('PeerTokenService.transferToken: Send and Receive Same Wallet Error', ['recipientId' => $recipientId]);
                 return self::respondWithError(31202);
             }
 
@@ -162,7 +162,7 @@ class PeerTokenService
             // Accepts unsigned decimal numbers with optional fractional part
             $isStrictDecimal = $numberOfTokens !== '' && preg_match('/^(?:\d+)(?:\.\d+)?$/', $numberOfTokens) === 1;
             if (!$isStrictDecimal) {
-                $this->logger->error('PeerTokenService.transferToken: Invalid token amount format');
+                $this->logger->debug('PeerTokenService.transferToken: Invalid token amount format');
                 return self::respondWithError(30264);
             }
 
@@ -170,7 +170,7 @@ class PeerTokenService
             $senderUserObj = $this->userMapper->loadById($this->currentUserId);
 
             if (empty($receipientUserObj)) {
-                $this->logger->error('PeerTokenService.transferToken: Recipient user not found', ['recipientId' => $recipientId]);
+                $this->logger->debug('PeerTokenService.transferToken: Recipient user not found', ['recipientId' => $recipientId]);
                 return self::respondWithError(31007);
             }
             if (empty($senderUserObj)) {
@@ -179,7 +179,7 @@ class PeerTokenService
             }
 
             if (!$this->peerTokenMapper->recipientShouldNotBeFeesAccount($recipientId)) {
-                $this->logger->error('PeerTokenService.transferToken: Unauthorized to send token', ['recipientId' => $recipientId]);
+                $this->logger->debug('PeerTokenService.transferToken: Unauthorized to send token', ['recipientId' => $recipientId]);
                 return self::respondWithError(31203);
             }
 

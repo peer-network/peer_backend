@@ -96,14 +96,14 @@ class PeerShopService
             ];
 
             if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $this->currentUserId) === false) {
-                $this->logger->error('PeerShopService.performShopOrder: Interaction not allowed', ['currentUserId' => $this->currentUserId]);
+                $this->logger->debug('PeerShopService.performShopOrder: Interaction not allowed', ['currentUserId' => $this->currentUserId]);
                 return $this::respondWithError(31205, ['Current User Id' => $this->currentUserId]);
             }
             $this->transactionManager->beginTransaction();
 
 
             if ((string) $peerShop === $this->currentUserId) {
-                $this->logger->error('PeerShopService.performShopOrder: Send and Receive Same Wallet Error', ['currentUserId' => $this->currentUserId]);
+                $this->logger->debug('PeerShopService.performShopOrder: Send and Receive Same Wallet Error', ['currentUserId' => $this->currentUserId]);
                 return self::respondWithError(31202);
             }
 
@@ -183,7 +183,7 @@ class PeerShopService
             $transactionId = (string)($args['transactionId'] ?? $args['transactionId'] ?? '');
 
             if ($transactionId === '') {
-                $this->logger->error('PeerShopService.shopOrderDetails: Missing transactionId');
+                $this->logger->debug('PeerShopService.shopOrderDetails: Missing transactionId');
                 return self::respondWithError(30101);
             }
 

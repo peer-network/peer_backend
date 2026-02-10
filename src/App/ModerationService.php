@@ -104,7 +104,7 @@ class ModerationService
             }
 
             if (empty($args['moderationTicketId']) || empty($args['moderationAction'])) {
-                $this->logger->error('ModerationService.performModerationAction: Missing required fields', ['args' => $args]);
+                $this->logger->debug('ModerationService.performModerationAction: Missing required fields', ['args' => $args]);
                 return self::respondWithError(30101); // Missing required fields
             }
 
@@ -112,7 +112,7 @@ class ModerationService
             $moderationAction = $args['moderationAction'];
 
             if (!$moderationTicketId || !self::isValidUUID($moderationTicketId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
-                $this->logger->error('ModerationService.performModerationAction: Invalid input', ['moderationTicketId' => $moderationTicketId, 'moderationAction' => $moderationAction]);
+                $this->logger->debug('ModerationService.performModerationAction: Invalid input', ['moderationTicketId' => $moderationTicketId, 'moderationAction' => $moderationAction]);
                 return self::respondWithError(32101); // Invalid input
             }
 
@@ -124,7 +124,7 @@ class ModerationService
 
             // If report is an array and already has a moderation id, it's already processed
             if (is_array($report) && array_key_exists('moderationid', $report) && !empty($report['moderationid'])) {
-                $this->logger->error('ModerationService.performModerationAction: Moderation already performed', ['moderationTicketId' => $moderationTicketId]);
+                $this->logger->debug('ModerationService.performModerationAction: Moderation already performed', ['moderationTicketId' => $moderationTicketId]);
                 return self::respondWithError(32103); // Moderation action already performed
             }
 

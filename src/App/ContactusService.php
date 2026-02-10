@@ -88,18 +88,18 @@ class ContactusService
         }
 
         if (!in_array($type, ['id', 'name'], true)) {
-            $this->logger->error('ContactusService.loadById: Invalid type provided', ['type' => $type]);
+            $this->logger->debug('ContactusService.loadById: Invalid type provided', ['type' => $type]);
             return $this::respondWithError(30105);
         }
 
         if (empty($value)) {
-            $this->logger->error('ContactusService.loadById: Empty value provided', ['type' => $type]);
+            $this->logger->debug('ContactusService.loadById: Empty value provided', ['type' => $type]);
             return $this::respondWithError(30102);
         }
 
         if ($type === 'id') {
             if (!ctype_digit($value)) {
-                $this->logger->error('ContactusService.loadById: Invalid id value provided', ['value' => $value]);
+                $this->logger->debug('ContactusService.loadById: Invalid id value provided', ['value' => $value]);
                 return $this::respondWithError(30105);
             }
             $value = (int)$value;
@@ -148,7 +148,7 @@ class ContactusService
         }
 
         if (empty($args)) {
-            $this->logger->error('ContactusService.fetchAll: Empty arguments provided');
+            $this->logger->debug('ContactusService.fetchAll: Empty arguments provided');
             return $this::respondWithError(30101);
         }
 

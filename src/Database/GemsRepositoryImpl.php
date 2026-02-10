@@ -88,7 +88,7 @@ class GemsRepositoryImpl implements GemsRepository
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
-            $this->logger->error('GemsRepositoryImpl.fetchAllGemsForDay failed', ['exception' => "Invalid day filter: $day"]);
+            $this->logger->debug('GemsRepositoryImpl.fetchAllGemsForDay failed', ['exception' => "Invalid day filter: $day"]);
             return $this::respondWithError(30223);
         }
 

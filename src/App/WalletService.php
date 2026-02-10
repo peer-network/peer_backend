@@ -56,17 +56,17 @@ class WalletService
         $fromId = $args['fromid'] ?? null;
 
         if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
-            $this->logger->error('WalletService.fetchWalletById: Invalid userId');
+            $this->logger->debug('WalletService.fetchWalletById: Invalid userId');
             return $this::respondWithError(30102);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
-            $this->logger->error('WalletService.fetchWalletById: Invalid postId');
+            $this->logger->debug('WalletService.fetchWalletById: Invalid postId');
             return $this::respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
-            $this->logger->error('WalletService.fetchWalletById: Invalid fromId');
+            $this->logger->debug('WalletService.fetchWalletById: Invalid fromId');
             return $this::respondWithError(30105);
         }
 
@@ -119,7 +119,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            $this->logger->error('WalletService.callFetchWinsLog: Invalid day parameter');
+            $this->logger->debug('WalletService.callFetchWinsLog: Invalid day parameter');
             return $this::respondWithError(30105);
         }
 
@@ -138,7 +138,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
-            $this->logger->error('WalletService.callFetchPaysLog: Invalid day parameter');
+            $this->logger->debug('WalletService.callFetchPaysLog: Invalid day parameter');
             return $this::respondWithError(30105);
         }
 
@@ -205,7 +205,7 @@ class WalletService
             ];
 
             if (!isset($mapping[$art])) {
-                $this->logger->error('WalletService.performPayment: Invalid art type provided.', ['art' => $art]);
+                $this->logger->debug('WalletService.performPayment: Invalid art type provided.', ['art' => $art]);
                 return self::respondWithError(30105);
             }
 

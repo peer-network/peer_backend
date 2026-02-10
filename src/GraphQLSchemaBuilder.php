@@ -1889,7 +1889,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFetchWinsLog: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveFetchWinsLog: Missing arguments');
             return $this::respondWithError(30101);
         }
 
@@ -1921,7 +1921,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFetchPaysLog: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveFetchPaysLog: Missing arguments');
             return $this::respondWithError(30101);
         }
 
@@ -2160,7 +2160,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveComments: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveComments: Missing arguments');
             return $this::respondWithError(30104);
         }
 
@@ -2196,7 +2196,7 @@ class GraphQLSchemaBuilder
 
         $postId = $args['postid'] ?? null;
         if (empty($postId) || !self::isValidUUID($postId)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveListComments: Missing or invalid postId');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveListComments: Missing or invalid postId');
             return $this::respondWithError(30209);
         }
 
@@ -2279,7 +2279,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolvePostComments: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolvePostComments: Missing arguments');
             return $this::respondWithError(30104);
         }
 
@@ -2413,7 +2413,7 @@ class GraphQLSchemaBuilder
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Missing arguments');
             return $this::respondWithError(30101);
         }
 
@@ -2432,32 +2432,32 @@ class GraphQLSchemaBuilder
         $ip = $args['ip'] ?? null;
 
         if (empty($args['username']) && empty($args['userid']) && empty($args['email']) && !isset($args['status']) && !isset($args['verified']) && !isset($args['ip'])) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Missing arguments');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Missing arguments');
             return $this::respondWithError(30102);
         }
 
         if (!empty($username) && !empty($userId)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Both username and userId provided');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Both username and userId provided');
             return $this::respondWithError(31012);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Invalid userId');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Invalid userId');
             return $this::respondWithError(30201);
         }
 
         if ($username !== null && (strlen($username) < $usernameConfig['MIN_LENGTH'] || strlen($username) > $usernameConfig['MAX_LENGTH'])) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Invalid username length');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Invalid username length');
             return $this::respondWithError(30202);
         }
 
         if ($username !== null && !preg_match('/' . $usernameConfig['PATTERN'] . '/u', $username)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Invalid username format');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Invalid username format');
             return $this::respondWithError(30202);
         }
 
         if (!empty($ip) && !filter_var($ip, FILTER_VALIDATE_IP)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Invalid IP address');
+            $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: Invalid IP address');
             return $this::respondWithError(30257);//"The IP '$ip' is not a valid IP address."
         }
 
@@ -2527,7 +2527,7 @@ class GraphQLSchemaBuilder
                 ];
             } else {
                 if ($userId) {
-                    $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: User not found');
+                    $this->logger->debug('GraphQLSchemaBuilder.resolveSearchUser: User not found');
                     return self::respondWithError(31007);
                 }
                 return self::createSuccessResponse(21001);
@@ -2674,7 +2674,7 @@ class GraphQLSchemaBuilder
         $referralString = $args['referralString'];
 
         if (empty($referralString) || !self::isValidUUID($referralString)) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveVerifyReferral: Invalid referral string', ['referralString' => $referralString]);
+            $this->logger->debug('GraphQLSchemaBuilder.resolveVerifyReferral: Invalid referral string', ['referralString' => $referralString]);
             return self::respondWithError(31010); // Invalid referral string
         }
 
@@ -3017,56 +3017,56 @@ class GraphQLSchemaBuilder
 
         if ($offset !== null) {
             if ($offset < $minOffset || $offset > $maxOffset) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Offset out of range', ['offset' => $offset]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Offset out of range', ['offset' => $offset]);
                 return $this::respondWithError(30203);
             }
         }
 
         if ($limit !== null) {
             if ($limit < $minLimit || $limit > $maxLimit) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Limit out of range', ['limit' => $limit]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Limit out of range', ['limit' => $limit]);
                 return $this::respondWithError(30204);
             }
         }
 
         if ($postOffset !== null) {
             if ($postOffset < $minOffset || $postOffset > $maxOffset) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Post offset out of range', ['postOffset' => $postOffset]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Post offset out of range', ['postOffset' => $postOffset]);
                 return $this::respondWithError(30203);
             }
         }
 
         if ($postLimit !== null) {
             if ($postLimit < $minLimit || $postLimit > $maxLimit) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Post limit out of range', ['postLimit' => $postLimit]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Post limit out of range', ['postLimit' => $postLimit]);
                 return $this::respondWithError(30204);
             }
         }
 
         if ($commentOffset !== null) {
             if ($commentOffset < $minOffset || $commentOffset > $maxOffset) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Comment offset out of range', ['commentOffset' => $commentOffset]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Comment offset out of range', ['commentOffset' => $commentOffset]);
                 return $this::respondWithError(30215);
             }
         }
 
         if ($commentLimit !== null) {
             if ($commentLimit < $minLimit || $commentLimit > $maxLimit) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Comment limit out of range', ['commentLimit' => $commentLimit]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Comment limit out of range', ['commentLimit' => $commentLimit]);
                 return $this::respondWithError(30216);
             }
         }
 
         if ($messageOffset !== null) {
             if ($messageOffset < $minOffset || $messageOffset > $maxOffset) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Message offset out of range', ['messageOffset' => $messageOffset]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Message offset out of range', ['messageOffset' => $messageOffset]);
                 return $this::respondWithError(30219);
             }
         }
 
         if ($messageLimit !== null) {
             if ($messageLimit < $minLimit || $messageLimit > $maxLimit) {
-                $this->logger->error('GraphQLSchemaBuilder.validateOffsetAndLimit: Message limit out of range', ['messageLimit' => $messageLimit]);
+                $this->logger->debug('GraphQLSchemaBuilder.validateOffsetAndLimit: Message limit out of range', ['messageLimit' => $messageLimit]);
                 return $this::respondWithError(30220);
             }
         }
@@ -3089,17 +3089,17 @@ class GraphQLSchemaBuilder
 
         $ip = filter_var($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', FILTER_VALIDATE_IP) ?: '0.0.0.0';
         if ($ip === '0.0.0.0') {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Invalid IP address');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Invalid IP address');
             return $this::respondWithError(30257);
         }
 
         if (!$this->contactusService->checkRateLimit($ip)) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Rate limit exceeded');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Rate limit exceeded');
             return $this::respondWithError(30302);
         }
 
         if (empty($args)) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Mandatory args missing.');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Mandatory args missing.');
             return $this->respondWithError(30101);
         }
 
@@ -3110,27 +3110,27 @@ class GraphQLSchemaBuilder
         $args['createdat'] = new \DateTime()->format('Y-m-d H:i:s.u');
 
         if (empty($email) || empty($name) || empty($message)) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Mandatory fields missing, email, name, or message');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Mandatory fields missing, email, name, or message');
             return $this::respondWithError(30101);
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Invalid email format');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Invalid email format');
             return $this::respondWithError(30224);
         }
 
         if (strlen($name) < 3 || strlen($name) > 33) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Name length out of range');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Name length out of range');
             return $this::respondWithError(30202);
         }
 
         if (!preg_match('/^[a-zA-Z0-9_]+$/', $name)) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Name contains invalid characters');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Name contains invalid characters');
             return $this::respondWithError(30202);
         }
 
         if (grapheme_strlen($message) < 3 || grapheme_strlen($message) > 500) {
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Message length out of range');
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Message length out of range');
             return $this::respondWithError(30103);
         }
 
@@ -3140,7 +3140,7 @@ class GraphQLSchemaBuilder
             $insertedContact = $this->contactusService->insert($contact);
 
             if (!$insertedContact) {
-                $this->logger->error('GraphQLSchemaBuilder.ContactUs: Failed to insert contact');
+                $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Failed to insert contact');
                 return $this::respondWithError(30401);
             }
 
@@ -3152,7 +3152,7 @@ class GraphQLSchemaBuilder
                 'error' => $e->getMessage(),
                 'args' => $args,
             ]);
-            $this->logger->error('GraphQLSchemaBuilder.ContactUs: Failed to create contact', ['error' => $e->getMessage()]);
+            $this->logger->debug('GraphQLSchemaBuilder.ContactUs: Failed to create contact', ['error' => $e->getMessage()]);
             return $this::respondWithError(30401);
         }
     }
@@ -3160,12 +3160,12 @@ class GraphQLSchemaBuilder
     protected function verifyAccount(string $userid = ''): array
     {
         if ($userid === '') {
-            $this->logger->error('GraphQLSchemaBuilder.verifyAccount: User ID is empty');
+            $this->logger->debug('GraphQLSchemaBuilder.verifyAccount: User ID is empty');
             return $this::respondWithError(30101);
         }
 
         if (!self::isValidUUID($userid)) {
-            $this->logger->error('GraphQLSchemaBuilder.verifyAccount: Invalid User ID format', ['userid' => $userid]);
+            $this->logger->debug('GraphQLSchemaBuilder.verifyAccount: Invalid User ID format', ['userid' => $userid]);
             return $this::respondWithError(30201);
         }
 
@@ -3174,7 +3174,7 @@ class GraphQLSchemaBuilder
         try {
             $user = $this->userService->loadAllUsersById($userid);
             if (!$user) {
-                $this->logger->error('GraphQLSchemaBuilder.verifyAccount: User not found at userService.loadAllUsersById', ['userid' => $userid]);
+                $this->logger->debug('GraphQLSchemaBuilder.verifyAccount: User not found at userService.loadAllUsersById', ['userid' => $userid]);
                 return $this::respondWithError(31007);
             }
 
@@ -3214,19 +3214,19 @@ class GraphQLSchemaBuilder
 
         try {
             if (empty($email) || empty($password)) {
-                $this->logger->error('Email and password are required');
+                $this->logger->debug('Email and password are required');
                 return $this::respondWithError(30801);
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->logger->error('Invalid email format');
+                $this->logger->debug('Invalid email format');
                 return $this::respondWithError(30801);
             }
 
             $user = $this->userMapper->loadByEmail($email);
 
             if (!$user) {
-                $this->logger->error('Invalid email or password');
+                $this->logger->debug('Invalid email or password');
                 return $this::respondWithError(30801);
             }
 
@@ -3236,12 +3236,12 @@ class GraphQLSchemaBuilder
             }
 
             if ($user->getStatus() == 6) {
-                $this->logger->error('Account has been deleted', ['userId' => $user->getUserId()]);
+                $this->logger->debug('Account has been deleted', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
             if (!$user->verifyPassword($password)) {
-                $this->logger->error('Invalid password', ['userId' => $user->getUserId()]);
+                $this->logger->debug('Invalid password', ['userId' => $user->getUserId()]);
                 return $this::respondWithError(30801);
             }
 
@@ -3283,20 +3283,20 @@ class GraphQLSchemaBuilder
 
         try {
             if (empty($refreshToken)) {
-                $this->logger->error('GraphQLSchemaBuilder.refreshToken: Refresh token is empty');
+                $this->logger->debug('GraphQLSchemaBuilder.refreshToken: Refresh token is empty');
                 return $this::respondWithError(30101);
             }
 
             $decodedToken = $this->tokenService->validateToken($refreshToken, true);
 
             if (!$decodedToken) {
-                $this->logger->error('GraphQLSchemaBuilder.refreshToken: Invalid refresh token');
+                $this->logger->debug('GraphQLSchemaBuilder.refreshToken: Invalid refresh token');
                 return $this::respondWithError(30901);
             }
 
             $users = $this->userService->loadVisibleUsersById($decodedToken->uid);
             if ($users === false) {
-                $this->logger->error('GraphQLSchemaBuilder.refreshToken: User not found');
+                $this->logger->debug('GraphQLSchemaBuilder.refreshToken: User not found');
                 return $this::respondWithError(30901);
             }
 
@@ -3326,7 +3326,7 @@ class GraphQLSchemaBuilder
                 'exception' => $e->getMessage(),
                 'stackTrace' => $e->getTraceAsString()
             ]);
-            $this->logger->error('GraphQLSchemaBuilder.refreshToken: Validation error during refreshToken', ['exception' => $e->getMessage()]);
+            $this->logger->debug('GraphQLSchemaBuilder.refreshToken: Validation error during refreshToken', ['exception' => $e->getMessage()]);
 
             return $this::respondWithError(30901);
         } catch (\Throwable $e) {

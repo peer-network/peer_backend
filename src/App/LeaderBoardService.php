@@ -61,12 +61,12 @@ class LeaderBoardService
 
             // End date should be not less than start date
             if ($endDate < $startDate) {
-                $this->logger->error("LeaderBoardService.generateLeaderboard: Error in end date is less than start date");
+                $this->logger->debug("LeaderBoardService.generateLeaderboard: Error in end date is less than start date");
                 return $this::respondWithError(33002);
             }
 
             if ($startDate === false || $endDate === false) {
-                $this->logger->error("LeaderBoardService.generateLeaderboard: Error in start or end date parsing");
+                $this->logger->debug("LeaderBoardService.generateLeaderboard: Error in start or end date parsing");
                 return $this::respondWithError(30301);
             }
             $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);

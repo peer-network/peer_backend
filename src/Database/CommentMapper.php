@@ -321,7 +321,7 @@ class CommentMapper
             $parentExists = $parentStmt->fetchColumn();
 
             if (!$parentExists) {
-                $this->logger->error("CommentMapper.fetchByParentId: Parent comment not found", ['parentId' => $parentId]);
+                $this->logger->debug("CommentMapper.fetchByParentId: Parent comment not found", ['parentId' => $parentId]);
                 return $this::respondWithError(31601);
             }
 

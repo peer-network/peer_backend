@@ -65,7 +65,7 @@ class PoolService
         $dayActions = ['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'W0', 'M0', 'Y0'];
 
         if (!in_array($day, $dayActions, true)) {
-            $this->logger->error('PoolService.allGemsForDay: Invalid day parameter', ['day' => $day]);
+            $this->logger->debug('PoolService.allGemsForDay: Invalid day parameter', ['day' => $day]);
             return $this::respondWithError(30223);
         }
 
