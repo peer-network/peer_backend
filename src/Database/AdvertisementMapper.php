@@ -357,7 +357,8 @@ class AdvertisementMapper
             // $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $dataStmt->execute($paramsData);
             $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
-            $this->logger->info('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
+
+            $this->logger->debug('fetchAllWithStats.dataStmt', ['dataStmt' => $rows]);
 
             $ads = array_values(array_filter(array_map(self::mapRowToAdvertisementt(...), $rows)));
 

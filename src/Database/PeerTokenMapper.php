@@ -342,7 +342,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     'recipientid' => $this->inviterId,
                     'tokenamount' => $inviteFeeAmount,
                     'transferaction' => 'INVITER_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
+                    'transactioncategory' => TransactionCategory::INVITER_FEE_EARN->value
                 ]);
                 // To defend against atomicity issues, using credit method. If Not expected then use Default saveWalletEntry method. $this->walletMapper->saveWalletEntry($this->inviterId, $inviteFeeAmount);
                 // $this->walletMapper->credit($this->inviterId, $inviteFeeAmount);
@@ -407,145 +407,6 @@ class PeerTokenMapper implements PeerTokenMapperInterface
         }
     }
 
-    /**
-     * Make PEER to PEER Token Transfer without updating recipient balance.
-     *
-     * This mirrors transferToken but skips the recipient wallet credit step.
-     */
-    public function transferTokenWithoutBalanceUpdate(
-        string $numberOfTokens,
-        TransferStrategy $strategy,
-        HasWalletId $sender,
-        HasWalletId $recipient,
-        ?string $message = null,
-    ): ?array {
-        \ignore_user_abort(true);
-
-        // Build wallet handles so each account has its own handler
-        $senderRepo = $this->WalletHandlerFactory->for($sender);
-        $recipientRepo = $this->WalletHandlerFactory->for($recipient);
-        $inviterRepo = $this->walletMapper;
-        $peerFeeRepo = $this->walletMapper;
-        $burnFeeRepo = $this->walletMapper;
-
-        // These handles can be used for future per-account operations
-        // inviter, peer and burn will be finalized after pool + inviter resolution
-        $this->initializeLiquidityPool();
-
-        if (!$this->validateFeesWalletUUIDs()) {
-            $this->logger->error('PeerTokenMapper.transferTokenWithoutBalanceUpdate: Fee wallet UUID validation failed');
-            return self::respondWithError(41222);
-        }
-
-        try {
-            // Lock balances using wallet handles to ensure proper repository per account
-            $senderHandle = new WalletHandle($sender->getWalletId(), $senderRepo);
-            $recipientHandle = new WalletHandle($recipient->getWalletId(), $recipientRepo);
-            $handlesToLock = [$senderHandle, $recipientHandle];
-            if (!empty($this->inviterId)) {
-                $handlesToLock[] = new WalletHandle($this->inviterId, $inviterRepo);
-            }
-            $this->lockBalances($handlesToLock);
-            $mode = $strategy->getFeePolicyMode();
-            [
-                $requiredAmount,
-                $netRecipientAmount,
-                $peerFeeAmount,
-                $burnFeeAmount,
-                $inviteFeeAmount
-            ] = $this->calculateAmountsForMode($sender->getWalletId(), $numberOfTokens, $mode);
-
-            $operationid = $strategy->getOperationId();
-            $transRepo = new TransactionRepository($this->logger, $this->db);
-            // 1. SENDER: Debit From Account
-            if ($requiredAmount) {
-                $senderHandle->handler()->debitIfSufficient($sender->getWalletId(), $requiredAmount);
-            }
-
-            // 2. RECIPIENT: Create transaction only (no wallet balance update)
-            if ($netRecipientAmount) {
-                $payload = [
-                    'operationid' => $operationid,
-                    'transactiontype' => $strategy->getRecipientTransactionType(),
-                    'senderid' => $sender->getWalletId(),
-                    'recipientid' => $recipient->getWalletId(),
-                    'tokenamount' => $netRecipientAmount,
-                    'message' => $message,
-                    'transferaction' => 'CREDIT',
-                    'transactioncategory' => $strategy->getTransactionCategory()->value
-                ];
-                $transactionId = $strategy->getTransactionId();
-                if (!empty($transactionId)) {
-                    $payload['transactionid'] = $transactionId;
-                }
-                $this->createAndSaveTransaction($transRepo, $payload);
-            }
-
-            // 3. INVITER: Fees To Inviter (if applicable)
-            if (!empty($this->inviterId) && isset($inviteFeeAmount) && $inviteFeeAmount > 0) {
-                $inviterHandle = new WalletHandle($this->inviterId, $inviterRepo);
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => $strategy->getInviterFeeTransactionType(),
-                    'senderid' => $sender->getWalletId(),
-                    'recipientid' => $this->inviterId,
-                    'tokenamount' => $inviteFeeAmount,
-                    'transferaction' => 'INVITER_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
-                ]);
-                $inviterHandle->handler()->credit($this->inviterId, $inviteFeeAmount);
-            }
-
-            // 5. PEERWALLET: Fee To Peer Wallet
-            if (isset($peerFeeAmount) && $peerFeeAmount > 0) {
-                $peerHandle = new WalletHandle($this->peerWallet, $peerFeeRepo);
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => $strategy->getPeerFeeTransactionType(),
-                    'senderid' => $sender->getWalletId(),
-                    'recipientid' => $this->peerWallet,
-                    'tokenamount' => $peerFeeAmount,
-                    'transferaction' => 'PEER_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
-                ]);
-                $peerHandle->handler()->credit($this->peerWallet, $peerFeeAmount);
-            }
-
-            // 6. BURNWALLET: Burn Tokens
-            if (isset($burnFeeAmount) && $burnFeeAmount > 0) {
-                $burnHandle = new WalletHandle($this->burnWallet, $burnFeeRepo);
-                $this->createAndSaveTransaction($transRepo, [
-                    'operationid' => $operationid,
-                    'transactiontype' => $strategy->getBurnFeeTransactionType(),
-                    'senderid' => $sender->getWalletId(),
-                    'recipientid' => $this->burnWallet,
-                    'tokenamount' => $burnFeeAmount,
-                    'transferaction' => 'BURN_FEE',
-                    'transactioncategory' => TransactionCategory::FEE->value
-                ]);
-                $burnHandle->handler()->credit($this->burnWallet, $burnFeeAmount);
-            }
-
-            $this->logger->debug('Token transfer completed successfully (recipient balance not updated)');
-
-            return [
-                'status' => 'success',
-                'ResponseCode' => "11212",
-                'tokenSend' => $netRecipientAmount,
-                'tokensSubstractedFromWallet' => $requiredAmount,
-                'createdat' => date('Y-m-d H:i:s.u')
-            ];
-        } catch (\Throwable $e) {
-            $this->logger->error('PeerTokenMapper.transferTokenWithoutBalanceUpdate failed', [
-                'error' => $e->getMessage(),
-                'senderId' => $sender->getWalletId(),
-                'recipientId' => $recipient->getWalletId(),
-                'numberOfTokens' => $numberOfTokens,
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return self::respondWithError(40301);
-        }
-    }
 
     /**
      * Calculate required (debit) and net (recipient credit) amounts based on fee policy mode.
@@ -789,7 +650,9 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                         tt.*, 
                         ROW_NUMBER() OVER (
                             PARTITION BY tt.operationid 
-                            ORDER BY CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END, tt.createdat DESC
+                            ORDER BY CASE WHEN (tt.senderid = :senderid OR tt.recipientid = :recipientid) THEN 0 ELSE 1 END,
+                                     CASE WHEN tt.transferaction = 'CREDIT' THEN 0 ELSE 1 END,
+                                     tt.createdat DESC
                         ) AS rn
                     FROM transactions tt
                     WHERE tt.operationid IN (SELECT operationid FROM ops)
@@ -802,6 +665,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                     r.senderid,
                     r.recipientid,
                     r.message,
+                    r.transferaction,
                     r.tokenamount AS net_amount,
                     r.createdat,
                     COALESCE(a.peer_fee,0) AS peer_fee,
@@ -829,9 +693,29 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $inviterFee = (string)($row['inviter_fee'] ?? '0');
             $netTokenAmount = (string)($row['net_amount'] ?? '0');
 
-            $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
-            $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
-            $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+            $isInviterFeeForUser = ($row['transferaction'] ?? '') === 'INVITER_FEE'
+                && (string)($row['recipientid'] ?? '') === $userId;
+
+            if ($isInviterFeeForUser) {
+                $feesTotal = $netTokenAmount;
+                $grossAmount = $netTokenAmount;
+                $feeDetails = [
+                    'total' => 0.0,
+                    'burn' => null,
+                    'peer' => null,
+                    'inviter' => null,
+                ];
+            } else {
+                $feesTotal = TokenHelper::addRc($peerFee, $burnFee);
+                $feesTotal = TokenHelper::addRc($feesTotal, $inviterFee);
+                $grossAmount = TokenHelper::addRc($netTokenAmount, $feesTotal);
+                $feeDetails = [
+                    'total' => $feesTotal,
+                    'burn' => (string)$row['burn_fee'] ?: null,
+                    'peer' => (string)$row['peer_fee'] ?: null,
+                    'inviter' => (string)$row['inviter_fee'] ?: null,
+                ];
+            }
 
             $tiData = [
                 'transactionid' => (string)($row['transactionid'] ?? ''),
@@ -844,12 +728,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
                 'createdat' => (string)($row['createdat'] ?? ''),
                 'senderid' => (string)($row['senderid'] ?? ''),
                 'recipientid' => (string)($row['recipientid'] ?? ''),
-                'fees' => [
-                    'total' => $feesTotal,
-                    'burn' => (string)$row['burn_fee'] ?: null,
-                    'peer' => (string)$row['peer_fee'] ?: null,
-                    'inviter' => (string)$row['inviter_fee'] ?: null,
-                ],
+                'fees' => $feeDetails,
             ];
             $items[] = new TransactionHistoryItem($tiData, $userId);
         }
