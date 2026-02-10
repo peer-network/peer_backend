@@ -10,7 +10,6 @@ use Fawaz\Services\TokenTransfer\Strategies\TransferStrategy;
 
 interface PeerTokenMapperInterface
 {
-
     public function hasExistingTransfer(string $senderId, string $recipientId, string $amount): bool;
 
     public function initializeLiquidityPool(): array;
