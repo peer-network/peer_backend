@@ -45,7 +45,8 @@
 - Backend source lives in `src/` (PSR-4: `Fawaz\` → `src/`). Key areas: `src/App`, `src/Graphql`, `src/Services`, `src/Database`, `src/Middleware`, `src/config`.
 - Tests and API collections in `tests/` (PHPUnit, Postman/Newman assets under `tests/postman_collection/`).
 - Docker and local tooling in `docker/`, `Dockerfile*`, and `Makefile`.
-- DB migrations in `sql_files_for_import/`. 
+- DB migrations/import SQL files live in `sql_files_for_import/`.
+- One-time ops scripts live in `db/ops_scripts/`.
 - Runtime artifacts in `runtime-data/`.
 
 ## Build, Test, and Development Commands
