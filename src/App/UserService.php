@@ -58,7 +58,7 @@ class UserService implements UserServiceInterface
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('UserService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('UserService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -520,7 +520,7 @@ class UserService implements UserServiceInterface
     public function deleteUnverifiedUsers(): bool|array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.deleteUnverifiedUsers: Authentication failed');
+            $this->logger->warning('UserService.deleteUnverifiedUsers: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -544,7 +544,7 @@ class UserService implements UserServiceInterface
     {
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.updateUserPreferences: Authentication failed');
+            $this->logger->warning('UserService.updateUserPreferences: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -644,7 +644,7 @@ class UserService implements UserServiceInterface
     public function setPassword(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.setPassword: Authentication failed');
+            $this->logger->warning('UserService.setPassword: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -701,7 +701,7 @@ class UserService implements UserServiceInterface
     public function setEmail(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.setEmail: Authentication failed');
+            $this->logger->warning('UserService.setEmail: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -764,7 +764,7 @@ class UserService implements UserServiceInterface
     public function setUsername(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.setUsername: Authentication failed');
+            $this->logger->warning('UserService.setUsername: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -841,7 +841,7 @@ class UserService implements UserServiceInterface
     public function deleteAccount(string $expassword): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.deleteAccount: Authentication failed');
+            $this->logger->warning('UserService.deleteAccount: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -983,7 +983,7 @@ class UserService implements UserServiceInterface
     public function getFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.getFriends: Authentication failed');
+            $this->logger->warning('UserService.getFriends: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -1066,7 +1066,7 @@ class UserService implements UserServiceInterface
     public function getAllFriends(?array $args = []): array|null
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserService.getAllFriends: Authentication failed');
+            $this->logger->warning('UserService.getAllFriends: Authentication failed');
             return self::respondWithError(60501);
         }
 
@@ -1401,7 +1401,7 @@ class UserService implements UserServiceInterface
         $passwordValidation = $this->validatePassword($newPassword);
 
         if ($passwordValidation['status'] === 'error') {
-            $this->logger->error('UserService.resetPassword: Password validation failed');
+            $this->logger->info('UserService.resetPassword: Password validation failed');
             return $passwordValidation;
         }
 

@@ -74,10 +74,10 @@ class MultipartPostService
                 'ResponseCode' => "11515",
             ];
         } catch (ValidationException $e) {
-            $this->logger->error('MultipartPostService.checkForBasicValidation: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->info('MultipartPostService.checkForBasicValidation: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
-            $this->logger->error("MultipartPostService.checkForBasicValidation: Validation error", ['error' => $e->getMessage()]);
+            $this->logger->info("MultipartPostService.checkForBasicValidation: Validation error", ['error' => $e->getMessage()]);
             return self::respondWithError(41514);
         }
 
@@ -94,7 +94,7 @@ class MultipartPostService
     {
         try {
             if (!self::checkAuthentication($this->currentUserId)) {
-                $this->logger->error('MultipartPostService.handleFileUpload: Authentication failed');
+                $this->logger->warning('MultipartPostService.handleFileUpload: Authentication failed');
                 return self::respondWithError(60501);
             }
             // Check For Wallet Balance
@@ -130,7 +130,7 @@ class MultipartPostService
                 'uploadedFiles' => implode(',', $allMetadata),
             ];
         } catch (ValidationException $e) {
-            $this->logger->error('MultipartPostService.handleFileUpload: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->info('MultipartPostService.handleFileUpload: Validation error', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Exception $e) {
             $this->logger->error("MultipartPostService.handleFileUpload: Exception", ['error' => $e->getMessage()]);

@@ -28,7 +28,7 @@ class ContactusService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('ContactusService.checkAuthentication: Unauthorized action attempted');
+            $this->logger->warning('ContactusService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -83,7 +83,7 @@ class ContactusService
     public function loadById(string $type, string $value): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('ContactusService.loadById: Authentication failed');
+            $this->logger->warning('ContactusService.loadById: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -143,7 +143,7 @@ class ContactusService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('ContactusService.fetchAll: Authentication failed');
+            $this->logger->warning('ContactusService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 

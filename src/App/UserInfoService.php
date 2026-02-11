@@ -57,7 +57,7 @@ class UserInfoService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('UserInfoService.checkAuthentication: Unauthorized action attempted');
+            $this->logger->warning('UserInfoService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -106,7 +106,7 @@ class UserInfoService
     public function toggleUserFollow(string $followedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserInfoService.toggleUserFollow: Authentication failed');
+            $this->logger->warning('UserInfoService.toggleUserFollow: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -168,7 +168,7 @@ class UserInfoService
     public function toggleUserBlock(string $blockedUserId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserInfoService.toggleUserBlock: Authentication failed');
+            $this->logger->warning('UserInfoService.toggleUserBlock: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -354,7 +354,7 @@ class UserInfoService
     public function updateBio(string $biography): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserInfoService.updateBio: Authentication failed');
+            $this->logger->warning('UserInfoService.updateBio: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -434,7 +434,7 @@ class UserInfoService
     public function setProfilePicture(string $mediaFile, string $contentType = 'image'): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserInfoService.setProfilePicture: Authentication failed');
+            $this->logger->warning('UserInfoService.setProfilePicture: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -512,7 +512,7 @@ class UserInfoService
         $this->logger->debug('UserInfoService.reportUser started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('UserInfoService.reportUser: Authentication failed');
+            $this->logger->warning('UserInfoService.reportUser: Authentication failed');
             return $this::respondWithError(60501);
         }
 

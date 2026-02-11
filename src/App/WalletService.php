@@ -47,7 +47,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('WalletService.fetchWalletById: Authentication failed');
+            $this->logger->warning('WalletService.fetchWalletById: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -110,7 +110,7 @@ class WalletService
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('WalletService.callFetchWinsLog: Authentication failed');
+            $this->logger->warning('WalletService.callFetchWinsLog: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -129,7 +129,7 @@ class WalletService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('WalletService.callFetchPaysLog: Authentication failed');
+            $this->logger->warning('WalletService.callFetchPaysLog: Authentication failed');
             return $this::respondWithError(60501);
         }
 

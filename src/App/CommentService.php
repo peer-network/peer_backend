@@ -52,7 +52,7 @@ class CommentService
     protected function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('CommentService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('CommentService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -77,7 +77,7 @@ class CommentService
     public function createComment(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentService.createComment: Authentication failed');
+            $this->logger->warning('CommentService.createComment: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -91,7 +91,7 @@ class CommentService
         $requiredFields = ['content', 'postid'];
         $validationErrors = $this->validateRequiredFields($args, $requiredFields);
         if (!empty($validationErrors)) {
-            $this->logger->error('CommentService.createComment: Validation errors');
+            $this->logger->info('CommentService.createComment: Validation errors');
             return $validationErrors;
         }
 
@@ -206,7 +206,7 @@ class CommentService
     public function fetchByParentId(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentService.fetchByParentId: Authentication failed');
+            $this->logger->warning('CommentService.fetchByParentId: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -230,7 +230,7 @@ class CommentService
     public function fetchAllByPostId(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentService.fetchAllByPostId: Authentication failed');
+            $this->logger->warning('CommentService.fetchAllByPostId: Authentication failed');
             return $this::respondWithError(60501);
         }
 

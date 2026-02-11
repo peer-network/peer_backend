@@ -1804,13 +1804,13 @@ class GraphQLSchemaBuilder
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveAdvertisementHistory: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveAdvertisementHistory: Authentication failed');
             return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.resolveAdvertisementHistory: Validation failed', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveAdvertisementHistory: Validation failed', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -1854,7 +1854,7 @@ class GraphQLSchemaBuilder
     protected function resolveBlocklist(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveBlocklist: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveBlocklist: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -1884,7 +1884,7 @@ class GraphQLSchemaBuilder
     protected function resolveFetchWinsLog(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFetchWinsLog: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveFetchWinsLog: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -1916,7 +1916,7 @@ class GraphQLSchemaBuilder
     protected function resolveFetchPaysLog(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFetchPaysLog: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveFetchPaysLog: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -1948,7 +1948,7 @@ class GraphQLSchemaBuilder
     protected function resolveReferralInfo(): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveReferralInfo: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveReferralInfo: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -1986,7 +1986,7 @@ class GraphQLSchemaBuilder
     protected function resolveReferralList(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveReferralList: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveReferralList: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2070,7 +2070,7 @@ class GraphQLSchemaBuilder
     protected function resolveActionPrices(): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveActionPrices: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveActionPrices: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2155,7 +2155,7 @@ class GraphQLSchemaBuilder
     protected function resolveComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveComments: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveComments: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2189,7 +2189,7 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.resolveListComments started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveListComments: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveListComments: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2274,7 +2274,7 @@ class GraphQLSchemaBuilder
     protected function resolvePostComments(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolvePostComments: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolvePostComments: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2300,7 +2300,7 @@ class GraphQLSchemaBuilder
     protected function resolveTags(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveTags: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveTags: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2330,7 +2330,7 @@ class GraphQLSchemaBuilder
     protected function resolveTagsearch(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveTagsearch: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveTagsearch: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2359,7 +2359,7 @@ class GraphQLSchemaBuilder
     protected function resolveLiquidity(): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveLiquidity: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveLiquidity: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2383,7 +2383,7 @@ class GraphQLSchemaBuilder
     protected function resolveUserInfo(): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveUserInfo: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveUserInfo: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2408,7 +2408,7 @@ class GraphQLSchemaBuilder
     protected function resolveSearchUser(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveSearchUser: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveSearchUser: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2541,7 +2541,7 @@ class GraphQLSchemaBuilder
     protected function resolveFollows(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFollows: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveFollows: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2550,7 +2550,7 @@ class GraphQLSchemaBuilder
         $validation = RequestValidator::validate($args, []);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFollows: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveFollows: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2571,7 +2571,7 @@ class GraphQLSchemaBuilder
     protected function resolveProfile(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveProfile: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveProfile: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2580,7 +2580,7 @@ class GraphQLSchemaBuilder
         $validation = RequestValidator::validate($args);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveProfile: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveProfile: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2605,7 +2605,7 @@ class GraphQLSchemaBuilder
     protected function resolveGemsters(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveGemsters: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveGemsters: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -2616,7 +2616,7 @@ class GraphQLSchemaBuilder
         $validation = RequestValidator::validate($args, ['dateOffset']);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveGemsters: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveGemsters: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2638,7 +2638,7 @@ class GraphQLSchemaBuilder
     protected function resolveMint(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveMint: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveMint: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -2649,7 +2649,7 @@ class GraphQLSchemaBuilder
         $validation = RequestValidator::validate($args, ['dateYYYYMMDD']);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveMint: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveMint: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2686,14 +2686,14 @@ class GraphQLSchemaBuilder
     protected function resolveFriends(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFriends: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveFriends: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
         $validation = RequestValidator::validate($args, []);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveFriends: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveFriends: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2720,7 +2720,7 @@ class GraphQLSchemaBuilder
     protected function resolveAllFriends(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveAllFriends: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveAllFriends: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
@@ -2745,13 +2745,13 @@ class GraphQLSchemaBuilder
     protected function resolveUsers(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveUsers: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveUsers: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.resolveUsers: Validation errors', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveUsers: Validation errors', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -2775,13 +2775,13 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.transactionsHistory: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.transactionsHistory: Unauthenticated');
             return self::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.transactionsHistory: Validation errors', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.transactionsHistory: Validation errors', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -2799,14 +2799,14 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.transactionsHistory started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.transactionsHistoryItems: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.transactionsHistoryItems: Unauthenticated');
             return self::respondWithError(60501);
         }
 
         $validation = RequestValidator::validate($args);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.transactionsHistoryItems: Validation errors', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.transactionsHistoryItems: Validation errors', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -2840,7 +2840,7 @@ class GraphQLSchemaBuilder
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.postInteractions: Validation errors', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.postInteractions: Validation errors', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -2863,13 +2863,13 @@ class GraphQLSchemaBuilder
     protected function resolvePosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolvePosts: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolvePosts: Unauthenticated');
             return $this::respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.resolvePosts: Validation errors', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.resolvePosts: Validation errors', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -2896,13 +2896,13 @@ class GraphQLSchemaBuilder
     protected function resolveAdvertisementsPosts(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.resolveAdvertisementsPosts: Unauthenticated');
+            $this->logger->warning('GraphQLSchemaBuilder.resolveAdvertisementsPosts: Unauthenticated');
             return $this->respondWithError(60501);
         }
 
         $validationResult = $this->validateOffsetAndLimit($args);
         if (isset($validationResult['status']) && $validationResult['status'] === 'error') {
-            $this->logger->error('GraphQLSchemaBuilder.resolveAdvertisementsPosts: Validation errors', ['errors' => $validationResult]);
+            $this->logger->info('GraphQLSchemaBuilder.resolveAdvertisementsPosts: Validation errors', ['errors' => $validationResult]);
             return $validationResult;
         }
 
@@ -3372,7 +3372,7 @@ class GraphQLSchemaBuilder
     protected function moderationStats(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.moderationStats: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.moderationStats: Authentication failed');
             return self::respondWithError(60501);
         }
         $this->logger->debug('GraphQLSchemaBuilder.moderationStats started');
@@ -3394,7 +3394,7 @@ class GraphQLSchemaBuilder
     protected function moderationItems(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.moderationItems: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.moderationItems: Authentication failed');
             return self::respondWithError(60501);
         }
         $this->logger->debug('GraphQLSchemaBuilder.moderationItems started');
@@ -3414,7 +3414,7 @@ class GraphQLSchemaBuilder
     protected function performModerationAction(array $args): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.performModerationAction: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.performModerationAction: Authentication failed');
             return self::respondWithError(60501);
         }
         $this->logger->debug('GraphQLSchemaBuilder.performModerationAction started');
@@ -3432,7 +3432,7 @@ class GraphQLSchemaBuilder
     protected function performShopOrder(array $args): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.performShopOrder: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.performShopOrder: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -3441,7 +3441,7 @@ class GraphQLSchemaBuilder
         $validation = RequestValidator::validate($args, ['tokenAmount', 'shopItemId']);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.performShopOrder: Validation failed', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.performShopOrder: Validation failed', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -3450,7 +3450,7 @@ class GraphQLSchemaBuilder
         $orderValidation = RequestValidator::validate($args['orderDetails'], ['name', 'email', 'addressline1', 'zipcode', 'city','country', 'addressline2']);
 
         if ($orderValidation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.performShopOrder: Order details validation failed', ['errors' => $orderValidation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.performShopOrder: Order details validation failed', ['errors' => $orderValidation->errors]);
             return $this::respondWithError(
                 $orderValidation->errors[0]
             );
@@ -3459,7 +3459,7 @@ class GraphQLSchemaBuilder
         if ($args['orderDetails']['shopItemSpecs'] && !empty($args['orderDetails']['shopItemSpecs'])) {
             $orderValidation = RequestValidator::validate($args['orderDetails']['shopItemSpecs'], ['size']);
             if ($orderValidation instanceof ValidatorErrors) {
-                $this->logger->error('GraphQLSchemaBuilder.performShopOrder: Shop item specs validation failed', ['errors' => $orderValidation->errors]);
+                $this->logger->info('GraphQLSchemaBuilder.performShopOrder: Shop item specs validation failed', ['errors' => $orderValidation->errors]);
                 return $this::respondWithError(
                     $orderValidation->errors[0]
                 );
@@ -3484,14 +3484,14 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.shopOrderDetails started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.shopOrderDetails: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.shopOrderDetails: Authentication failed');
             return self::respondWithError(60501);
         }
 
         $validation = RequestValidator::validate($args, ['transactionId']);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.shopOrderDetails: Validation failed', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.shopOrderDetails: Validation failed', ['errors' => $validation->errors]);
             return $this::respondWithError(
                 $validation->errors[0]
             );
@@ -3511,14 +3511,14 @@ class GraphQLSchemaBuilder
         $this->logger->debug('GraphQLSchemaBuilder.generateLeaderboard started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GraphQLSchemaBuilder.generateLeaderboard: Authentication failed');
+            $this->logger->warning('GraphQLSchemaBuilder.generateLeaderboard: Authentication failed');
             return self::respondWithError(60501);
         }
 
         $validation = RequestValidator::validate($args['leaderboardParams'], ['start_date', 'end_date', 'leaderboardUsersCount']);
 
         if ($validation instanceof ValidatorErrors) {
-            $this->logger->error('GraphQLSchemaBuilder.generateLeaderboard: Validation failed', ['errors' => $validation->errors]);
+            $this->logger->info('GraphQLSchemaBuilder.generateLeaderboard: Validation failed', ['errors' => $validation->errors]);
             return self::respondWithError(
                 $validation->errors[0]
             );

@@ -35,7 +35,7 @@ class PoolService
     public function fetchPool(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PoolService.fetchPool: Unauthorized access attempt');
+            $this->logger->warning('PoolService.fetchPool: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -48,7 +48,7 @@ class PoolService
     public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PoolService.gemsStats: Unauthorized access attempt');
+            $this->logger->warning('PoolService.gemsStats: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -58,7 +58,7 @@ class PoolService
     public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PoolService.allGemsForDay: Unauthorized access attempt');
+            $this->logger->warning('PoolService.allGemsForDay: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 

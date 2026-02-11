@@ -76,7 +76,7 @@ class AdvertisementService
     {
         // Authentifizierung prüfen
         if (!$this->checkAuthentication()) {
-            $this->logger->error('AdvertisementService.resolveAdvertisePost: Authentication failed');
+            $this->logger->warning('AdvertisementService.resolveAdvertisePost: Authentication failed');
             return $this->respondWithError(60501);
         }
 
@@ -330,7 +330,7 @@ class AdvertisementService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('AdvertisementService.checkAuthentication: Unauthorized action attempted.');
+            $this->logger->warning('AdvertisementService.checkAuthentication: Unauthorized action attempted.');
             return false;
         }
         return true;
@@ -375,7 +375,7 @@ class AdvertisementService
     public function createAdvertisement(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('AdvertisementService.createAdvertisement: Unauthorized action attempted.');
+            $this->logger->warning('AdvertisementService.createAdvertisement: Unauthorized action attempted.');
             return self::respondWithError(60501);
         }
 
@@ -521,7 +521,7 @@ class AdvertisementService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('AdvertisementService.fetchAll: Authentication failed.');
+            $this->logger->warning('AdvertisementService.fetchAll: Authentication failed.');
             return self::respondWithError(60501);
         }
 
@@ -707,7 +707,7 @@ class AdvertisementService
     public function findAdvertiser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('AdvertisementService.findAdvertiser: Authentication failed');
+            $this->logger->warning('AdvertisementService.findAdvertiser: Authentication failed');
             return $this->respondWithError(60501);
         }
 

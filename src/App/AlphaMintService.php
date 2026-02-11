@@ -33,7 +33,7 @@ class AlphaMintService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('Unauthorized access attempt');
+            $this->logger->warning('Unauthorized access attempt');
             return false;
         }
         return true;
@@ -48,7 +48,7 @@ class AlphaMintService
     public function alphaMint(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('AlphaMintService.alphaMint: Authentication failed');
+            $this->logger->warning('AlphaMintService.alphaMint: Authentication failed');
             return self::respondWithError(60501);
         }
 

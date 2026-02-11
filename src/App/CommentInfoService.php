@@ -48,7 +48,7 @@ class CommentInfoService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('CommentInfoService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('CommentInfoService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -57,7 +57,7 @@ class CommentInfoService
     public function deleteCommentInfo(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentInfoService.deleteCommentInfo: Authentication failed');
+            $this->logger->warning('CommentInfoService.deleteCommentInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -79,7 +79,7 @@ class CommentInfoService
     public function countLikes(string $commentId): int|array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentInfoService.countLikes: Authentication failed');
+            $this->logger->warning('CommentInfoService.countLikes: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -103,7 +103,7 @@ class CommentInfoService
     public function likeComment(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentInfoService.likeComment: Authentication failed');
+            $this->logger->warning('CommentInfoService.likeComment: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -184,7 +184,7 @@ class CommentInfoService
         $this->logger->debug('CommentInfoService.reportComment started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentInfoService.reportComment: Authentication failed');
+            $this->logger->warning('CommentInfoService.reportComment: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -269,7 +269,7 @@ class CommentInfoService
     public function findCommentInfo(string $commentId): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('CommentInfoService.findCommentInfo: Authentication failed');
+            $this->logger->warning('CommentInfoService.findCommentInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 

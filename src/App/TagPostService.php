@@ -44,7 +44,7 @@ class TagPostService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('TagPostService.checkAuthentication: Unauthorized action attempted');
+            $this->logger->warning('TagPostService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -62,7 +62,7 @@ class TagPostService
     public function handleTags(array $tags, string $postId, int $maxTags = 10): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('TagPostService.handleTags: Authentication failed');
+            $this->logger->warning('TagPostService.handleTags: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -104,7 +104,7 @@ class TagPostService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('TagPostService.createTag: Authentication failed');
+            $this->logger->warning('TagPostService.createTag: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -154,7 +154,7 @@ class TagPostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('TagPostService.fetchAll: Authentication failed');
+            $this->logger->warning('TagPostService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 

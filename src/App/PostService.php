@@ -84,7 +84,7 @@ class PostService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('PostService.checkAuthentication: Unauthorized action attempted');
+            $this->logger->warning('PostService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -163,7 +163,7 @@ class PostService
         $dailyfreeConfig = ConstantsConfig::dailyFree();
         $actions = ConstantsConfig::wallet()['ACTIONS'];
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.resolveActionPost: Authentication failed');
+            $this->logger->warning('PostService.resolveActionPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -401,7 +401,7 @@ class PostService
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.createPost: Authentication failed');
+            $this->logger->warning('PostService.createPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -751,7 +751,7 @@ class PostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.fetchAll: Authentication failed');
+            $this->logger->warning('PostService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -779,7 +779,7 @@ class PostService
     public function findPostser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.findPostser: Authentication failed');
+            $this->logger->warning('PostService.findPostser: Authentication failed');
             return $this::respondWithError(60501);
         }
         $userId = $args['userid'] ?? null;
@@ -932,7 +932,7 @@ class PostService
     public function postEligibility(bool $isTokenGenerationRequired = true): ?array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.postEligibility: Authentication failed');
+            $this->logger->warning('PostService.postEligibility: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -1025,7 +1025,7 @@ class PostService
     public function postInteractions(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.postInteractions: Authentication failed');
+            $this->logger->warning('PostService.postInteractions: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -1282,7 +1282,7 @@ class PostService
     public function postExistsById(string $postId): bool|array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostService.postExistsById: Authentication failed');
+            $this->logger->warning('PostService.postExistsById: Authentication failed');
             return $this->respondWithError(60501);
         }
 

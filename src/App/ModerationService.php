@@ -50,7 +50,7 @@ class ModerationService
         try {
 
             if (!$this->isAuthorized()) {
-                $this->logger->error("ModerationService.getModerationStats: Unauthorized access attempt", ['userId' => $this->currentUserId]);
+                $this->logger->warning("ModerationService.getModerationStats: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to get moderation stats
             }
 
@@ -70,7 +70,7 @@ class ModerationService
     {
         try {
             if (!$this->isAuthorized()) {
-                $this->logger->error("ModerationService.getModerationItems: Unauthorized access attempt", ['userId' => $this->currentUserId]);
+                $this->logger->warning("ModerationService.getModerationItems: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to get moderation items
             }
 
@@ -99,7 +99,7 @@ class ModerationService
     {
         try {
             if (!$this->isAuthorized()) {
-                $this->logger->error("ModerationService.performModerationAction: Unauthorized access attempt", ['userId' => $this->currentUserId]);
+                $this->logger->warning("ModerationService.performModerationAction: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to perform moderation action
             }
 

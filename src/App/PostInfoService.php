@@ -47,7 +47,7 @@ class PostInfoService
     protected function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('PostInfoService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('PostInfoService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -56,7 +56,7 @@ class PostInfoService
     public function updatePostInfo(PostInfo $postInfo): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.updatePostInfo: Authentication failed');
+            $this->logger->warning('PostInfoService.updatePostInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -80,7 +80,7 @@ class PostInfoService
     public function likePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.likePost: Authentication failed');
+            $this->logger->warning('PostInfoService.likePost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -128,7 +128,7 @@ class PostInfoService
     public function dislikePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.dislikePost: Authentication failed');
+            $this->logger->warning('PostInfoService.dislikePost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -175,7 +175,7 @@ class PostInfoService
     public function reportPost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.reportPost: Authentication failed');
+            $this->logger->warning('PostInfoService.reportPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -278,7 +278,7 @@ class PostInfoService
     public function viewPost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.viewPost: Authentication failed');
+            $this->logger->warning('PostInfoService.viewPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -324,7 +324,7 @@ class PostInfoService
     public function sharePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.sharePost: Authentication failed');
+            $this->logger->warning('PostInfoService.sharePost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -366,7 +366,7 @@ class PostInfoService
     public function savePost(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.savePost: Authentication failed');
+            $this->logger->warning('PostInfoService.savePost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -392,7 +392,7 @@ class PostInfoService
     public function findPostInfo(string $postId): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PostInfoService.findPostInfo: Authentication failed');
+            $this->logger->warning('PostInfoService.findPostInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 

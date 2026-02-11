@@ -52,7 +52,7 @@ class TagService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error("TagService.createTag: Unauthorized action attempted.");
+            $this->logger->warning("TagService.createTag: Unauthorized action attempted.");
             return $this::respondWithError(60501);
         }
 
@@ -86,7 +86,7 @@ class TagService
 
         } catch (ValidationException $e) {
             $this->transactionManager->rollback();
-            $this->logger->error("TagService.createTag: Validation error occurred", ['error' => $e->getMessage()]);
+            $this->logger->info("TagService.createTag: Validation error occurred", ['error' => $e->getMessage()]);
             return $this->respondWithError(40301);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();

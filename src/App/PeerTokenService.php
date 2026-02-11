@@ -49,7 +49,7 @@ class PeerTokenService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('PeerTokenService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('PeerTokenService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -65,7 +65,7 @@ class PeerTokenService
         $this->logger->debug('PeerTokenService.transferToken started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PeerTokenService.transferToken: Unauthorized access attempt');
+            $this->logger->warning('PeerTokenService.transferToken: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized access attempt');
         }
 
@@ -273,7 +273,7 @@ class PeerTokenService
         $this->logger->info('PeerTokenService.transactionsHistoryItems started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PeerTokenService.transactionsHistoryItems: Unauthorized access attempt');
+            $this->logger->warning('PeerTokenService.transactionsHistoryItems: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 

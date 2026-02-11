@@ -197,7 +197,7 @@ class MintServiceImpl implements MintService
     {
         $this->logger->debug('MintServiceImpl.distributeTokensFromGems started', ['day' => $date]);
         if (!$this->checkAuthentication()) {
-            $this->logger->error('MintServiceImpl.distributeTokensFromGems unauthorized access attempt', ['day' => $date]);
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems unauthorized access attempt', ['day' => $date]);
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -390,7 +390,7 @@ class MintServiceImpl implements MintService
     public function getMintAccount(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('MintServiceImpl.getMintAccount: Unauthorized access attempt');
+            $this->logger->warning('MintServiceImpl.getMintAccount: Unauthorized access attempt');
             return self::respondWithError(60501);
         }
 

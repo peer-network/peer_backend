@@ -49,7 +49,7 @@ class PeerShopService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('PeerShopService.checkAuthentication: Unauthorized access attempt');
+            $this->logger->warning('PeerShopService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -68,7 +68,7 @@ class PeerShopService
         $this->logger->debug('PeerShopService.performShopOrder started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PeerShopService.performShopOrder: Unauthorized access attempt');
+            $this->logger->warning('PeerShopService.performShopOrder: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -175,7 +175,7 @@ class PeerShopService
         $this->logger->info('PeerShopService.shopOrderDetails started');
 
         if (!$this->checkAuthentication()) {
-            $this->logger->error('PeerShopService.shopOrderDetails: Unauthorized access attempt');
+            $this->logger->warning('PeerShopService.shopOrderDetails: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -203,7 +203,7 @@ class PeerShopService
             );
 
             if (!$isAllowed) {
-                $this->logger->error('PeerShopService.shopOrderDetails: Unauthorized access attempt', [
+                $this->logger->warning('PeerShopService.shopOrderDetails: Unauthorized access attempt', [
                     'currentUserId' => $this->currentUserId,
                     'orderOwnerId' => $orderOwnerId,
                 ]);

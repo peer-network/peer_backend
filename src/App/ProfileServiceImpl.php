@@ -99,7 +99,7 @@ final class ProfileServiceImpl implements ProfileService
             return $profileData;
 
         } catch (ValidationException $e) {
-            $this->logger->error('ProfileServiceImpl.profile: Validation error: Failed to fetch profile data', [
+            $this->logger->info('ProfileServiceImpl.profile: Validation error: Failed to fetch profile data', [
                 'userid' => $userId,
                 'exception' => $e->getMessage(),
             ]);
@@ -144,7 +144,7 @@ final class ProfileServiceImpl implements ProfileService
     public function listUsers(array $args): array
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('ProfileServiceImpl.listUsers: Authentication failed');
+            $this->logger->warning('ProfileServiceImpl.listUsers: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -259,7 +259,7 @@ final class ProfileServiceImpl implements ProfileService
     public function listUsersAdmin(array $args): array
     {
         if ($this->currentUserId === null) {
-            $this->logger->error('ProfileServiceImpl.listUsersAdmin: Authentication failed');
+            $this->logger->warning('ProfileServiceImpl.listUsersAdmin: Authentication failed');
             return $this::respondWithError(60501);
         }
 

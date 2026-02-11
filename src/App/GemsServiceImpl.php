@@ -41,7 +41,7 @@ class GemsServiceImpl implements GemsService
     public function gemsStats(): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GemsServiceImpl.gemsStats: Unauthorized access attempt');
+            $this->logger->warning('GemsServiceImpl.gemsStats: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
@@ -51,7 +51,7 @@ class GemsServiceImpl implements GemsService
     public function allGemsForDay(string $day = 'D0'): array
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->error('GemsServiceImpl.allGemsForDay: Unauthorized access attempt');
+            $this->logger->warning('GemsServiceImpl.allGemsForDay: Unauthorized access attempt');
             return $this::respondWithError(60501);
         }
 
