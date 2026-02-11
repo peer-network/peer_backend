@@ -277,6 +277,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
         $this->initializeLiquidityPool();
 
         if (!$this->validateFeesWalletUUIDs()) {
+            $this->logger->error('PeerTokenMapper.transferToken: Invalid fees wallet UUIDs');
             return self::respondWithError(41222);
         }
 
@@ -476,7 +477,7 @@ class PeerTokenMapper implements PeerTokenMapperInterface
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->debug('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->debug('Fetched wallet balance');
 
             return $balance;
         } catch (PDOException $e) {

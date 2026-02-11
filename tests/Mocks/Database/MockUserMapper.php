@@ -289,10 +289,6 @@ final class MockUserMapper implements UserMapperInterface
         unset($this->refreshTokens[$userId]);
     }
 
-    public function refreshTokenValidForUser(string $userId, string $refreshToken): bool
-    {
-        return ($this->refreshTokens[$userId] ?? null) === $refreshToken;
-    }
 
     public function fetchAllFriends(int $offset = 0, int $limit = 20): array
     {
@@ -338,10 +334,6 @@ final class MockUserMapper implements UserMapperInterface
         return false;
     }
 
-    public function accessTokenValidForUser(string $userId, string $accessToken): bool
-    {
-        return ($this->accessTokens[$userId] ?? null) === $accessToken;
-    }
 
     public function isFirstAttemptTooSoon(array $attempt): bool
     {

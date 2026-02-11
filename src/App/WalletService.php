@@ -38,7 +38,7 @@ class WalletService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->warning('WalletService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -47,6 +47,7 @@ class WalletService
     public function fetchWalletById(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('WalletService.fetchWalletById: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -55,14 +56,17 @@ class WalletService
         $fromId = $args['fromid'] ?? null;
 
         if ($postId === null && $fromId === null && !self::isValidUUID($userId)) {
+            $this->logger->debug('WalletService.fetchWalletById: Invalid userId');
             return $this::respondWithError(30102);
         }
 
         if ($postId !== null && !self::isValidUUID($postId)) {
+            $this->logger->debug('WalletService.fetchWalletById: Invalid postId');
             return $this::respondWithError(30209);
         }
 
         if ($fromId !== null && !self::isValidUUID($fromId)) {
+            $this->logger->debug('WalletService.fetchWalletById: Invalid fromId');
             return $this::respondWithError(30105);
         }
 
@@ -72,6 +76,7 @@ class WalletService
             $wallets = $this->walletMapper->loadWalletById($this->currentUserId, $args);
 
             if ($wallets === false) {
+                $this->logger->error('WalletService.fetchWalletById: Failed to fetch wallets');
                 return $this::respondWithError(41216);
             }
 
@@ -105,6 +110,7 @@ class WalletService
     public function callFetchWinsLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('WalletService.callFetchWinsLog: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -113,6 +119,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
+            $this->logger->debug('WalletService.callFetchWinsLog: Invalid day parameter');
             return $this::respondWithError(30105);
         }
 
@@ -122,6 +129,7 @@ class WalletService
     public function callFetchPaysLog(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('WalletService.callFetchPaysLog: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -130,6 +138,7 @@ class WalletService
 
         // Validate entry of day
         if (!in_array($day, $dayActions, true)) {
+            $this->logger->debug('WalletService.callFetchPaysLog: Invalid day parameter');
             return $this::respondWithError(30105);
         }
 
@@ -149,6 +158,10 @@ class WalletService
                 'currentliquidity' => $results,
             ];
         } catch (\Exception $e) {
+            $this->logger->error('WalletService.loadLiquidityById: Failed to load liquidity', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
             return $this::respondWithError(41204);
         }
     }
@@ -160,6 +173,10 @@ class WalletService
         try {
             return $this->walletMapper->getUserWalletBalance($userId);
         } catch (Exception $e) {
+            $this->logger->error('WalletService.getUserWalletBalance: Failed to get wallet balance', [
+                'userId' => $userId,
+                'exception' => $e->getMessage(),
+            ]);
             return 0.0;
         }
     }
@@ -188,7 +205,7 @@ class WalletService
             ];
 
             if (!isset($mapping[$art])) {
-                $this->logger->warning('Invalid art type provided.', ['art' => $art]);
+                $this->logger->debug('WalletService.performPayment: Invalid art type provided.', ['art' => $art]);
                 return self::respondWithError(30105);
             }
 
@@ -203,9 +220,8 @@ class WalletService
             $mode = $transferStrategy->getFeePolicyMode();
             $requiredAmount = $this->peerTokenMapper->calculateRequiredAmountByMode($userId, (string)$price, $mode);
             if ($currentBalance < $requiredAmount) {
-                $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                $this->logger->error('WalletService.performPayment: No Coverage Exception: Not enough balance to perform this action.', [
                     'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 return self::respondWithError(51301);
@@ -237,7 +253,7 @@ class WalletService
             $args['gemid'] = $transferStrategy->getOperationId();
             $results = $this->walletMapper->insertWinToLog($userId, $args);
             if ($results === false) {
-                $this->logger->error("Error occurred in performPayment.insertWinToLog", [
+                $this->logger->error("WalletService.performPayment: Error occurred", [
                     'userId' => $userId,
                     'args' => $args,
                 ]);
@@ -251,7 +267,7 @@ class WalletService
             }
 
         } catch (Exception $e) {
-            $this->logger->error('Error while paying for advertisement WalletService.performPayment', ['exception' => $e->getMessage()]);
+            $this->logger->error('WalletService.performPayment: Error while paying for advertisement', ['exception' => $e->getMessage()]);
             return $this::respondWithError(40301);
         }
     }

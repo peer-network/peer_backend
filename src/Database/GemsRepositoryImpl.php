@@ -88,6 +88,7 @@ class GemsRepositoryImpl implements GemsRepository
         ];
 
         if (!array_key_exists($day, $dayOptions)) {
+            $this->logger->debug('GemsRepositoryImpl.fetchAllGemsForDay failed', ['exception' => "Invalid day filter: $day"]);
             return $this::respondWithError(30223);
         }
 
@@ -157,6 +158,7 @@ class GemsRepositoryImpl implements GemsRepository
             ];
 
             if (!isset($mapping[$whereby])) {
+                $this->logger->error('GemsRepositoryImpl.fetchAllGemsForDay: Invalid whereby value', ['whereby' => $whereby]);
                 return $this::respondWithError(41221);
             }
         }
@@ -249,7 +251,7 @@ class GemsRepositoryImpl implements GemsRepository
             $stmt = $this->db->query($sql);
             $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
-            $this->logger->error('Error fetching entries for ' . $tableName, ['exception' => $e]);
+            $this->logger->error('GemsRepositoryImpl.setGlobalWins: Error fetching entries for ' . $tableName, ['exception' => $e->getMessage()]);
             return self::respondWithError(41208);
         }
 
@@ -294,7 +296,7 @@ class GemsRepositoryImpl implements GemsRepository
                 }
 
             } catch (\Throwable $e) {
-                $this->logger->error('Error inserting into gems for ' . $tableName, ['exception' => $e]);
+                $this->logger->error('GemsRepositoryImpl.setGlobalWins: Error inserting into gems for ' . $tableName, ['exception' => $e->getMessage()]);
                 return self::respondWithError(41210);
             }
         }
@@ -339,7 +341,7 @@ class GemsRepositoryImpl implements GemsRepository
             $transactionId = $mintLogItems[$userId]['logItem']->transactionid ?? null;
 
             if (!$transactionId) {
-                $this->logger->info('No mint transaction found for userid. Due to thing, that User has 0 tokens to distribute(because of less than 0 gems). Transactionid will remain empty', ['userId' => $userId]);
+                $this->logger->info('GemsRepositoryImpl.applyMintInfo: No mint transaction found for userid. Due to thing, that User has 0 tokens to distribute(because of less than 0 gems). Transactionid will remain empty', ['userId' => $userId]);
                 // $this->logger->info('mintlogItem for userid not found. Revert.', ['userId' => $userId]);
             }
             $stmt->execute([

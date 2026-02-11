@@ -321,6 +321,7 @@ class CommentMapper
             $parentExists = $parentStmt->fetchColumn();
 
             if (!$parentExists) {
+                $this->logger->debug("CommentMapper.fetchByParentId: Parent comment not found", ['parentId' => $parentId]);
                 return $this::respondWithError(31601);
             }
 
@@ -433,7 +434,7 @@ class CommentMapper
 
             return $comments;
         } catch (\Throwable $e) {
-            $this->logger->error("Error in fetchByParentId", ['message' => $e->getMessage()]);
+            $this->logger->error("CommentMapper.fetchByParentId: Error", ['message' => $e->getMessage()]);
             return $this::respondWithError(41606);
         }
     }
@@ -478,7 +479,7 @@ class CommentMapper
             return new Comment($data);
         }
 
-        $this->logger->warning("No comment found with commentid", ['id' => $commentid]);
+        $this->logger->warning("CommentMapper.loadById: No comment found with commentid", ['id' => $commentid]);
         return false;
     }
 
@@ -495,7 +496,7 @@ class CommentMapper
 
     public function fetchAllByParentId(string $parentId, int $offset = 0, int $limit = 10): array
     {
-        $this->logger->debug("CommentMapper.fetchAllByParentId started");
+        $this->logger->debug("CommentMapper.fetchAllByParentId started", ['parentId' => $parentId, 'offset' => $offset, 'limit' => $limit]);
 
         $sql = "
             SELECT 

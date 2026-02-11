@@ -49,7 +49,7 @@ class PeerShopService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->warning('PeerShopService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -68,6 +68,7 @@ class PeerShopService
         $this->logger->debug('PeerShopService.performShopOrder started');
 
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PeerShopService.performShopOrder: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -79,7 +80,7 @@ class PeerShopService
 
             $receipientUserObj = $this->userMapper->loadById($peerShop);
             if (empty($receipientUserObj)) {
-                $this->logger->warning('Peer Shop Account not found.');
+                $this->logger->error('PeerShopService.performShopOrder: Peer Shop Account not found', ['peerShop' => $peerShop]);
                 return self::respondWithError(41223);
             }
 
@@ -95,30 +96,28 @@ class PeerShopService
             ];
 
             if ($this->interactionsPermissionsMapper->isInteractionAllowed($specs, $this->currentUserId) === false) {
+                $this->logger->debug('PeerShopService.performShopOrder: Interaction not allowed', ['currentUserId' => $this->currentUserId]);
                 return $this::respondWithError(31205, ['Current User Id' => $this->currentUserId]);
             }
             $this->transactionManager->beginTransaction();
 
 
             if ((string) $peerShop === $this->currentUserId) {
-                $this->logger->warning('Send and Receive Same Wallet Error.');
+                $this->logger->debug('PeerShopService.performShopOrder: Send and Receive Same Wallet Error', ['currentUserId' => $this->currentUserId]);
                 return self::respondWithError(31202);
             }
 
             $currentBalance = $this->peerTokenMapper->getUserWalletBalance($this->currentUserId);
             if (empty($currentBalance) || $currentBalance < $tokenAmount) {
-                $this->logger->warning('Incorrect Amount Exception: Insufficient balance', [
-                    'Balance' => $currentBalance,
-                ]);
+                $this->logger->error('PeerShopService.performShopOrder: Insufficient balance');
                 $this->transactionManager->rollback();
                 return self::respondWithError(51301);
             }
 
             $requiredAmount = $this->peerTokenMapper->calculateRequiredAmount($this->currentUserId, $tokenAmount);
             if ($currentBalance < $requiredAmount) {
-                $this->logger->warning('No Coverage Exception: Not enough balance to perform this action.', [
+                $this->logger->error('PeerShopService.performShopOrder: Not enough balance to perform this action', [
                     'senderId' => $this->currentUserId,
-                    'Balance' => $currentBalance,
                     'requiredAmount' => $requiredAmount,
                 ]);
                 $this->transactionManager->rollback();
@@ -151,6 +150,7 @@ class PeerShopService
 
             if ($response['status'] === 'error' || !$isShopOrder) {
                 $this->transactionManager->rollback();
+                $this->logger->error('PeerShopService.performShopOrder: Token transfer failed', ['response' => $response]);
                 return $response;
             } else {
                 $this->logger->info('PeerShopService.performShopOrder completed successfully', ['response' => $response]);
@@ -175,6 +175,7 @@ class PeerShopService
         $this->logger->info('PeerShopService.shopOrderDetails started');
 
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PeerShopService.shopOrderDetails: Unauthorized access attempt');
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -182,12 +183,14 @@ class PeerShopService
             $transactionId = (string)($args['transactionId'] ?? $args['transactionId'] ?? '');
 
             if ($transactionId === '') {
+                $this->logger->debug('PeerShopService.shopOrderDetails: Missing transactionId');
                 return self::respondWithError(30101);
             }
 
             $order = $this->peerShopMapper->getShopOrderDetails($transactionId);
 
             if (empty($order)) {
+                $this->logger->error('PeerShopService.shopOrderDetails: Shop order not found', ['transactionId' => $transactionId]);
                 return self::respondWithError(22101); // Shop Order not found
             }
 
@@ -200,7 +203,7 @@ class PeerShopService
             );
 
             if (!$isAllowed) {
-                $this->logger->warning('Unauthorized shopOrderDetails access attempt', [
+                $this->logger->warning('PeerShopService.shopOrderDetails: Unauthorized access attempt', [
                     'currentUserId' => $this->currentUserId,
                     'orderOwnerId' => $orderOwnerId,
                 ]);

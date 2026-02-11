@@ -52,19 +52,19 @@ class MintServiceImpl implements MintService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->warning('MintServiceImpl.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         // Admin-only: allow ADMIN and SUPER_ADMIN
 
         $user = $this->userService->loadAllUsersById($this->currentUserId);
         if (!$user) {
-            $this->logger->warning('User not found for admin check', ['uid' => $this->currentUserId]);
+            $this->logger->warning('MintServiceImpl.checkAuthentication: User not found for admin check', ['uid' => $this->currentUserId]);
             return false;
         }
         $rolesMask = $user->getRolesmask();
         if ($rolesMask !== Role::ADMIN && $rolesMask !== Role::SUPER_ADMIN) {
-            $this->logger->warning('Forbidden: admin-only endpoint', ['uid' => $this->currentUserId, 'roles' => $rolesMask]);
+            $this->logger->warning('MintServiceImpl.checkAuthentication: Forbidden: admin-only endpoint', ['uid' => $this->currentUserId, 'roles' => $rolesMask]);
             return false;
         }
         return true;
@@ -72,7 +72,7 @@ class MintServiceImpl implements MintService
 
     public function listTodaysInteractions(): ?array
     {
-        $this->logger->debug('MintService.listTodaysInteractions started');
+        $this->logger->debug('MintServiceImpl.listTodaysInteractions started');
 
         try {
             $response = $this->userActionsRepository->listTodaysInteractions($this->currentUserId);
@@ -84,6 +84,7 @@ class MintServiceImpl implements MintService
 
 
         } catch (\Exception $e) {
+            $this->logger->error("MintServiceImpl.listTodaysInteractions: Error listing today's interactions", ['exception' => $e->getMessage()]);
             return $this::respondWithError(41205);
         }
     }
@@ -179,7 +180,7 @@ class MintServiceImpl implements MintService
         UncollectedGemsResult $uncollectedGems,
         GemsInTokenResult $gemsInToken
     ): array {
-        $this->logger->debug('MintService.tokensPerUser started');
+        $this->logger->debug('MintServiceImpl.tokensPerUser started');
         $tokenTotals = [];
 
         foreach ($uncollectedGems->rows as $row) {
@@ -194,8 +195,9 @@ class MintServiceImpl implements MintService
 
     public function distributeTokensFromGems(string $date): array | ErrorResponse
     {
-        $this->logger->debug('MintService.distributeTokensFromGems started', ['day' => $date]);
+        $this->logger->debug('MintServiceImpl.distributeTokensFromGems started', ['day' => $date]);
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems unauthorized access attempt', ['day' => $date]);
             throw new PermissionDeniedException(60501, 'Unauthorized');
         }
 
@@ -203,7 +205,7 @@ class MintServiceImpl implements MintService
         try {
             $mintDate = new DateTime($date);
         } catch (\Exception $e) {
-            $this->logger->warning('Invalid mint date provided', [
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems: Invalid mint date provided', [
                 'day' => $date,
                 'error' => $e->getMessage(),
             ]);
@@ -212,7 +214,7 @@ class MintServiceImpl implements MintService
         $mintDate->setTime(0, 0, 0);
         $today = new DateTime('today');
         if ($mintDate > $today) {
-            $this->logger->warning('Mint date is today or in the future', [
+            $this->logger->warning('MintServiceImpl.distributeTokensFromGems: Mint date is today or in the future', [
                 'day' => $date,
             ]);
             return $this::respondWithErrorObject(30105);
@@ -221,7 +223,7 @@ class MintServiceImpl implements MintService
         try {
             // Prevent duplicate minting for the selected period
             if ($this->mintRepository->getMintForDate($date)) {
-                $this->logger->error('Mint already performed for selected period', ['day' => $date]);
+                $this->logger->error('MintServiceImpl.distributeTokensFromGems: Mint already performed for selected period', ['day' => $date]);
                 return $this::respondWithErrorObject(31204);
             }
 
@@ -233,7 +235,7 @@ class MintServiceImpl implements MintService
             $gems = $this->gemsRepository->fetchUncollectedGemsForMintResult($date);
 
             if ($gems === null || empty($gems->rows)) {
-                $this->logger->info('No uncollected gems found for mint date', [
+                $this->logger->info('MintServiceImpl.distributeTokensFromGems: No uncollected gems found for mint date', [
                     'day' => $date,
                 ]);
                 $this->transactionManager->rollback();
@@ -243,7 +245,7 @@ class MintServiceImpl implements MintService
             $gemsForDistribution = $this->buildUncollectedGemsResult($gems);
 
             if (empty($gemsForDistribution->rows) || (float)$gemsForDistribution->overallTotal <= 0) {
-                $this->logger->info('No distributable gems found after normalization', [
+                $this->logger->info('MintServiceImpl.distributeTokensFromGems: No distributable gems found after normalization', [
                     'day' => $date,
                     'overallTotal' => $gemsForDistribution->overallTotal,
                 ]);
@@ -289,7 +291,7 @@ class MintServiceImpl implements MintService
                 'counter'
             );
         } catch (\Throwable $e) {
-            $this->logger->error('Error during mint distribution transfers', [
+            $this->logger->error('MintServiceImpl.distributeTokensFromGems: Error during mint distribution transfers', [
                 'error' => $e->getMessage(),
             ]);
             return $this::respondWithErrorObject(40301);
@@ -343,7 +345,7 @@ class MintServiceImpl implements MintService
             );
 
             if (!is_array($response) || ($response['status'] ?? 'error') === 'error') {
-                $this->logger->error('Mint distribution transfer failed for user', [
+                $this->logger->error('MintServiceImpl.distributeTokensFromGems: Mint distribution transfer failed for user', [
                     'userId' => $recipientUserId,
                     'amount' => $amountToTransfer,
                     'response' => $response,
@@ -388,22 +390,23 @@ class MintServiceImpl implements MintService
     public function getMintAccount(): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('MintServiceImpl.getMintAccount: Unauthorized access attempt');
             return self::respondWithError(60501);
         }
 
         try {
-            $this->logger->debug('MintService.getMintAccount started');
+            $this->logger->debug('MintServiceImpl.getMintAccount started');
             $account = $this->mintAccountRepository->getDefaultAccount();
             if (!$account) {
-                $this->logger->debug('MintService.getMintAccount result is empty');
+                $this->logger->error('MintServiceImpl.getMintAccount result is empty');
                 return self::respondWithError(40401);
             }
 
-            $this->logger->info('MintService.getMintAccount completed');
+            $this->logger->info('MintServiceImpl.getMintAccount completed');
             // Map to MintAccount GraphQL type and wrap in standard success response (no counter)
             return $this::createSuccessResponse(00000, $account->getArrayCopy(), false);
         } catch (\Throwable $e) {
-            $this->logger->error('MintService.getMintAccount failed', [
+            $this->logger->error('MintServiceImpl.getMintAccount failed', [
                 'error' => $e->getMessage(),
             ]);
             return self::respondWithError(40301);

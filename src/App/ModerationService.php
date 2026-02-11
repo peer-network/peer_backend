@@ -50,7 +50,7 @@ class ModerationService
         try {
 
             if (!$this->isAuthorized()) {
-                $this->logger->warning("Unauthorized access attempt to get moderation stats by user ID: {$this->currentUserId}");
+                $this->logger->warning("ModerationService.getModerationStats: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to get moderation stats
             }
 
@@ -58,7 +58,7 @@ class ModerationService
 
             return self::createSuccessResponse(12101, $statuses, false);
         } catch (\Exception $e) {
-            $this->logger->error("Error getting moderation stats: " . $e->getMessage());
+            $this->logger->error("ModerationService.getModerationStats: Error getting moderation stats: " . $e->getMessage());
             return self::respondWithError(40301);
         }
     }
@@ -70,7 +70,7 @@ class ModerationService
     {
         try {
             if (!$this->isAuthorized()) {
-                $this->logger->warning("Unauthorized access attempt to get moderation items by user ID: {$this->currentUserId}");
+                $this->logger->warning("ModerationService.getModerationItems: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to get moderation items
             }
 
@@ -81,7 +81,7 @@ class ModerationService
             return self::createSuccessResponse(12102, $results, true); // Moderation items retrieved successfully
 
         } catch (\Exception $e) {
-            $this->logger->error("Error getting moderation items: " . $e->getMessage());
+            $this->logger->error("ModerationService.getModerationItems: Error getting moderation items: " . $e->getMessage());
             return self::respondWithError(40301);
         }
     }
@@ -99,11 +99,12 @@ class ModerationService
     {
         try {
             if (!$this->isAuthorized()) {
-                $this->logger->warning("Unauthorized access attempt to perform moderation action by user ID: {$this->currentUserId}");
+                $this->logger->warning("ModerationService.performModerationAction: Unauthorized access attempt", ['userId' => $this->currentUserId]);
                 return self::respondWithError(62101); // Unauthorized access attempt to perform moderation action
             }
 
             if (empty($args['moderationTicketId']) || empty($args['moderationAction'])) {
+                $this->logger->debug('ModerationService.performModerationAction: Missing required fields', ['args' => $args]);
                 return self::respondWithError(30101); // Missing required fields
             }
 
@@ -111,16 +112,19 @@ class ModerationService
             $moderationAction = $args['moderationAction'];
 
             if (!$moderationTicketId || !self::isValidUUID($moderationTicketId) || !in_array($moderationAction, array_keys(ConstantsModeration::contentModerationStatus()))) {
+                $this->logger->debug('ModerationService.performModerationAction: Invalid input', ['moderationTicketId' => $moderationTicketId, 'moderationAction' => $moderationAction]);
                 return self::respondWithError(32101); // Invalid input
             }
 
             $report = $this->moderationMapper->findModerationAction($moderationTicketId);
             if (empty($report)) {
+                $this->logger->error('ModerationService.performModerationAction: Report not found', ['moderationTicketId' => $moderationTicketId]);
                 return self::respondWithError(22103); // Report not found
             }
 
             // If report is an array and already has a moderation id, it's already processed
             if (is_array($report) && array_key_exists('moderationid', $report) && !empty($report['moderationid'])) {
+                $this->logger->debug('ModerationService.performModerationAction: Moderation already performed', ['moderationTicketId' => $moderationTicketId]);
                 return self::respondWithError(32103); // Moderation action already performed
             }
 
@@ -131,6 +135,7 @@ class ModerationService
 
             if (!$result) {
                 $this->transactionManager->rollBack();
+                $this->logger->error('ModerationService.performModerationAction: Failed to perform moderation action', ['moderationTicketId' => $moderationTicketId]);
                 return self::respondWithError(42101); // Error performing moderation action
             }
 
@@ -139,7 +144,7 @@ class ModerationService
             return self::createSuccessResponse(12103, [], false); // Moderation action performed successfully
         } catch (\Exception $e) {
             $this->transactionManager->rollBack();
-            $this->logger->error("Error performing moderation action: " . $e->getMessage());
+            $this->logger->error("ModerationService.performModerationAction: Error performing moderation action: " . $e->getMessage());
             return self::respondWithError(42101);
         }
     }

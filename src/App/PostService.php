@@ -84,7 +84,7 @@ class PostService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized action attempted.');
+            $this->logger->warning('PostService.checkAuthentication: Unauthorized action attempted');
             return false;
         }
         return true;
@@ -163,6 +163,7 @@ class PostService
         $dailyfreeConfig = ConstantsConfig::dailyFree();
         $actions = ConstantsConfig::wallet()['ACTIONS'];
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.resolveActionPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -174,6 +175,7 @@ class PostService
         $freeActions = ['report', 'save', 'share', 'view'];
 
         if (!empty($postId) && !self::isValidUUID($postId)) {
+            $this->logger->debug('PostService.resolveActionPost: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209, ['postid' => $postId]);
         }
 
@@ -204,6 +206,7 @@ class PostService
                 $specs,
                 $postId
             ) === false) {
+                $this->logger->debug('PostService.resolveActionPost: Interaction not allowed', ['postId' => $postId]);
                 return $this::respondWithError(31513, ['postid' => $postId]);
             }
         }
@@ -216,6 +219,7 @@ class PostService
         $paidActions = ['like', 'dislike', 'comment', 'post'];
 
         if (!in_array($action, $paidActions, true)) {
+            $this->logger->debug('PostService.resolveActionPost: Invalid paid action', ['action' => $action]);
             return $this::respondWithError(30105);
         }
 
@@ -242,7 +246,7 @@ class PostService
 
         // Validations
         if (!isset($dailyLimits[$action]) || !isset($actionPrices[$action])) {
-            $this->logger->warning('Invalid action parameter', ['action' => $action]);
+            $this->logger->debug('PostService.resolveActionPost: Invalid action parameter', ['action' => $action]);
             return $this::respondWithError(30105);
         }
 
@@ -282,6 +286,7 @@ class PostService
                         $response['ResponseCode'] = "11514";
                     } else {
                         $this->transactionManager->rollback();
+                        $this->logger->debug('PostService.resolveActionPost: Unsupported action in free flow', ['action' => $action]);
                         return $this::respondWithError(30105);
                     }
 
@@ -289,7 +294,7 @@ class PostService
                         $incrementResult = $this->dailyFreeService->incrementUserDailyUsage($this->currentUserId, $actionMap);
 
                         if ($incrementResult === false) {
-                            $this->logger->error('Failed to increment daily usage', ['userId' => $this->currentUserId]);
+                            $this->logger->error('PostService.resolveActionPost: Failed to increment daily usage', ['userId' => $this->currentUserId]);
                             $this->transactionManager->rollback();
                             return $this::respondWithError(40301);
                         }
@@ -309,7 +314,7 @@ class PostService
             // Return ResponseCode with Daily Free Code
 
             if ($balance < $price) {
-                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->logger->error('PostService.resolveActionPost: Insufficient wallet balance', ['userId' => $this->currentUserId, 'price' => $price]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
@@ -350,6 +355,7 @@ class PostService
                 $response['ResponseCode'] = "11504";
             } else {
                 $this->transactionManager->rollback();
+                $this->logger->debug('PostService.resolveActionPost: Unsupported action in paid flow', ['action' => $action]);
                 return $this::respondWithError(30105);
             }
 
@@ -370,7 +376,7 @@ class PostService
                 }
 
                 if (!$deducted) {
-                    $this->logger->error('Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
+                    $this->logger->error('PostService.resolveActionPost: Failed to perform payment', ['userId' => $this->currentUserId, 'action' => $action]);
                     $this->transactionManager->rollback();
                     return $this::respondWithError(40301);
                 }
@@ -383,7 +389,7 @@ class PostService
             $this->transactionManager->rollback();
             return $response;
         } catch (\Throwable $e) {
-            $this->logger->error('Unexpected error in resolveActionPost', [
+            $this->logger->error('PostService.resolveActionPost: Unexpected error', [
                 'exception' => $e->getMessage(),
                 'args' => $args,
             ]);
@@ -395,15 +401,18 @@ class PostService
     public function createPost(array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.createPost: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (empty($args)) {
+            $this->logger->debug('PostService.createPost: Empty arguments provided');
             return $this::respondWithError(30101);
         }
 
         foreach (['title', 'contenttype'] as $field) {
             if (empty($args[$field])) {
+                $this->logger->debug('PostService.createPost: Missing required field', ['field' => $field]);
                 return $this::respondWithError(30210);
             }
         }
@@ -432,6 +441,7 @@ class PostService
             if (isset($args['media']) && $this->isValidMedia($args['media'])) {
                 $validateContentCountResult = $this->validateContentCount($args);
                 if (isset($validateContentCountResult['error'])) {
+                    $this->logger->error('PostService.createPost: Invalid content count', ['error' => $validateContentCountResult['error']]);
                     return $this::respondWithError($validateContentCountResult['error']);
                 }
 
@@ -439,12 +449,14 @@ class PostService
                 $this->logger->info('PostService.createPost mediaPath', ['mediaPath' => $mediaPath]);
 
                 if (!empty($mediaPath['error'])) {
+                    $this->logger->debug('PostService.createPost: Media upload error', ['error' => $mediaPath['error']]);
                     return $this::respondWithError(30251);
                 }
 
                 if (!empty($mediaPath['path'])) {
                     $postData['media'] = $this->argsToJsString($mediaPath['path']);
                 } else {
+                    $this->logger->debug('PostService.createPost: Media path missing after upload', ['mediaPath' => $mediaPath]);
                     return $this::respondWithError(30251);
                 }
             } elseif (isset($args['uploadedFiles']) && !empty($args['uploadedFiles'])) {
@@ -454,6 +466,7 @@ class PostService
                     $validateSameMediaType = new MultipartPost(['media' => explode(',', $args['uploadedFiles'])], [], false);
 
                     if (!$validateSameMediaType->isFilesExists()) {
+                        $this->logger->debug('PostService.createPost: Uploaded files do not exist', ['uploadedFiles' => $args['uploadedFiles']]);
                         return $this::respondWithError(31511);
                     }
 
@@ -473,12 +486,14 @@ class PostService
                             if (isset($args['uploadedFiles'])) {
                                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                             }
+                            $this->logger->debug('PostService.createPost: Uploaded files missing after move', ['uploadedFiles' => $args['uploadedFiles']]);
                             return $this::respondWithError(30101);
                         }
                     } else {
                         if (isset($args['uploadedFiles'])) {
                             $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                         }
+                        $this->logger->debug('PostService.createPost: Uploaded files do not share type', ['uploadedFiles' => $args['uploadedFiles']]);
                         return $this::respondWithError(30266); // Provided files should have same type
                     }
                 } catch (\Exception $e) {
@@ -494,6 +509,7 @@ class PostService
 
 
             } else {
+                $this->logger->debug('PostService.createPost: Missing media input');
                 return $this::respondWithError(30101);
             }
 
@@ -508,6 +524,7 @@ class PostService
                     if (isset($args['uploadedFiles'])) {
                         $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                     }
+                    $this->logger->error('PostService.createPost: Cover upload failed', ['coverPath' => $coverPath]);
                     return $this::respondWithError(40306);
                 }
             } elseif ($args['contenttype'] === 'video') {
@@ -525,7 +542,7 @@ class PostService
                 // Post speichern
                 $post = new Post($postData);
             } catch (\Throwable $e) {
-                $this->logger->error('Failed to create post', [
+                $this->logger->error('PostService.createPost: Failed to create post', [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
@@ -571,6 +588,7 @@ class PostService
                 if (isset($args['uploadedFiles'])) {
                     $this->postMapper->revertFileToTmp($args['uploadedFiles']);
                 }
+                $this->logger->debug('PostService.createPost: Failed to handle tags', ['exception' => $e]);
                 return $this::respondWithError(30262);
             }
 
@@ -597,7 +615,7 @@ class PostService
             if (isset($args['uploadedFiles'])) {
                 $this->postMapper->revertFileToTmp($args['uploadedFiles']);
             }
-            $this->logger->error('Failed to create post', ['exception' => $e]);
+            $this->logger->error('PostService.createPost: Failed to create post', ['exception' => $e]);
             return $this::respondWithError(41508);
         }
     }
@@ -733,6 +751,7 @@ class PostService
     public function fetchAll(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.fetchAll: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -749,7 +768,7 @@ class PostService
             return $this::createSuccessResponse(11502, [$result]);
 
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching Posts", [
+            $this->logger->error('PostService.fetchAll: Error fetching posts', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -760,6 +779,7 @@ class PostService
     public function findPostser(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.findPostser: Authentication failed');
             return $this::respondWithError(60501);
         }
         $userId = $args['userid'] ?? null;
@@ -779,28 +799,33 @@ class PostService
         $commentLimit = min(max((int)($args['commentLimit'] ?? 10), 1), 20);
 
         if ($postId !== null && !self::isValidUUID($postId)) {
+            $this->logger->debug('PostService.findPostser: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209);
         }
 
         if ($userId !== null && !self::isValidUUID($userId)) {
+            $this->logger->debug('PostService.findPostser: Invalid userId', ['userId' => $userId]);
             return $this::respondWithError(30201);
         }
 
         if ($title !== null && (grapheme_strlen((string)$title) < $titleConfig['MIN_LENGTH'] || grapheme_strlen((string)$title) > $titleConfig['MAX_LENGTH'])) {
+            $this->logger->debug('PostService.findPostser: Invalid title length', ['title' => $title]);
             return $this::respondWithError(30210);
         }
 
         if ($from !== null && !self::validateDate($from)) {
+            $this->logger->debug('PostService.findPostser: Invalid from date', ['from' => $from]);
             return $this::respondWithError(30212);
         }
 
         if ($to !== null && !self::validateDate($to)) {
+            $this->logger->debug('PostService.findPostser: Invalid to date', ['to' => $to]);
             return $this::respondWithError(30213);
         }
 
         if ($tag !== null) {
             if (preg_match($controlPattern, $tag) === 1) {
-                $this->logger->warning('Invalid tag format provided', ['tag' => $tag]);
+                $this->logger->debug('PostService.findPostser: Invalid tag format provided', ['tag' => $tag]);
                 return $this->respondWithError(30211);
             }
         }
@@ -811,6 +836,7 @@ class PostService
             $invalidTypes = array_diff(array_map('strtoupper', $filterBy), $allowedTypes);
 
             if (!empty($invalidTypes)) {
+                $this->logger->debug('PostService.findPostser: Invalid filterBy types', ['filterBy' => $filterBy]);
                 return $this::respondWithError(30103);
             }
         }
@@ -818,6 +844,7 @@ class PostService
         if ($Ignorlist !== null) {
             $Ignorlisten = ['YES', 'NO'];
             if (!in_array($Ignorlist, $Ignorlisten, true)) {
+                $this->logger->debug('PostService.findPostser: Invalid IgnorList value', ['IgnorList' => $Ignorlist]);
                 return $this::respondWithError(30103);
             }
         }
@@ -871,6 +898,7 @@ class PostService
         try {
             $results = $this->postMapper->findPostser($this->currentUserId, $specs, $args);
             if (empty($results) && $postId != null) {
+                $this->logger->debug('PostService.findPostser: Post not found', ['postId' => $postId]);
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
@@ -904,6 +932,7 @@ class PostService
     public function postEligibility(bool $isTokenGenerationRequired = true): ?array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.postEligibility: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -955,7 +984,7 @@ class PostService
             $balance = $this->walletService->getUserWalletBalance($this->currentUserId);
             // Return ResponseCode with Daily Free Code
             if ($balance < $price && !$hasFreeDaily) {
-                $this->logger->warning('Insufficient wallet balance', ['userId' => $this->currentUserId, 'balance' => $balance, 'price' => $price]);
+                $this->logger->error('PostService.postEligibility: Insufficient wallet balance', ['userId' => $this->currentUserId, 'price' => $price]);
                 $this->transactionManager->rollback();
                 return $this::respondWithError(51301);
             }
@@ -978,11 +1007,11 @@ class PostService
 
         } catch (ValidationException $e) {
             $this->transactionManager->rollback();
-            $this->logger->warning("PostService.postEligibility Limit exceeded: You can only create 5 records within 1 hour while status is NO_FILE or FILE_UPLOADED", ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
+            $this->logger->error('PostService.postEligibility: Limit exceeded', ['error' => $e->getMessage(), 'mess' => $e->getErrors()]);
             return self::respondWithError($e->getErrors()[0]);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
-            $this->logger->error('PostService.postEligibility exception', [
+            $this->logger->error('PostService.postEligibility: Exception', [
                 'message' => $e->getMessage(),
                 'trace'   => $e->getTraceAsString(),
             ]);
@@ -996,7 +1025,7 @@ class PostService
     public function postInteractions(?array $args = []): array|false
     {
         if (!$this->checkAuthentication()) {
-            $this->logger->info("PostService.postInteractions failed due to authentication");
+            $this->logger->warning('PostService.postInteractions: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -1011,12 +1040,12 @@ class PostService
 
 
         if ($getOnly == null || $postOrCommentId == null || !in_array($getOnly, ['VIEW', 'LIKE', 'DISLIKE', 'COMMENTLIKE'])) {
-            $this->logger->info("PostService.postInteractions failed due to empty or invalid arguments");
+            $this->logger->debug('PostService.postInteractions: Invalid arguments', ['getOnly' => $getOnly, 'postOrCommentId' => $postOrCommentId]);
             return $this::respondWithError(30103);
         }
 
         if (!self::isValidUUID($postOrCommentId)) {
-            $this->logger->info("PostService.postInteractions failed due to invalid postOrCommentId");
+            $this->logger->debug('PostService.postInteractions: Invalid postOrCommentId', ['postOrCommentId' => $postOrCommentId]);
             return $this::respondWithError(30201);
         }
 
@@ -1072,7 +1101,7 @@ class PostService
             return $this::createSuccessResponse(11205, $usersArray);
 
         } catch (\Throwable $e) {
-            $this->logger->error("Error fetching Posts", [
+            $this->logger->error('PostService.postInteractions: Error fetching interactions', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -1089,6 +1118,7 @@ class PostService
         $postId = $args['postid'] ?? null;
 
         if (!self::isValidUUID($postId)) {
+            $this->logger->debug('PostService.getGuestListPost: Invalid postId', ['postId' => $postId]);
             return $this::respondWithError(30209);
         }
 
@@ -1128,6 +1158,7 @@ class PostService
             );
 
             if (empty($results)) {
+                $this->logger->debug('PostService.getGuestListPost: Post not found', ['postId' => $postId]);
                 return $this::respondWithError(31510);
             }
             $postsEnriched = $this->enrichWithProfileAndComment(
@@ -1251,6 +1282,7 @@ class PostService
     public function postExistsById(string $postId): bool|array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('PostService.postExistsById: Authentication failed');
             return $this->respondWithError(60501);
         }
 

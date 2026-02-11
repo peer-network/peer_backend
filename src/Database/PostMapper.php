@@ -969,7 +969,6 @@ class PostMapper
         try {
             $this->logger->debug("PostMapper.addOrUpdateEligibilityToken started", [
                 'userId' => $userId,
-                'token'  => $eligibilityToken,
                 'status' => $status,
             ]);
 

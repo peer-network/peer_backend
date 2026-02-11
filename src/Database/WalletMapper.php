@@ -217,12 +217,12 @@ class WalletMapper implements WalletCreditable, WalletDebitable
             }
 
             if ($results) {
-                $this->logger->info('Fetched transactions for filters from database', [
+                $this->logger->info('WalletMapper.loadWalletById: Fetched transactions for filters from database', [
                     'count' => count($results),
                     'filters' => $args,
                 ]);
             } else {
-                $this->logger->warning('No transactions found for filters in database', [
+                $this->logger->warning('WalletMapper.loadWalletById: No transactions found for filters in database', [
                     'filters' => $args,
                 ]);
             }
@@ -230,7 +230,7 @@ class WalletMapper implements WalletCreditable, WalletDebitable
             return $results;
 
         } catch (\Throwable $e) {
-            $this->logger->error('Database error occurred in loadWalletById', [
+            $this->logger->error('WalletMapper.loadWalletById: Database error occurred', [
                 'error' => $e->getMessage(),
             ]);
             return false;
@@ -247,12 +247,11 @@ class WalletMapper implements WalletCreditable, WalletDebitable
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($data !== false) {
-            $this->logger->info('transaction found with', ['data' => $data]);
+            $this->logger->info('WalletMapper.loadLiquidityById: transaction found with', ['data' => $data]);
             return (float)$data['currentliquidity'];
         }
 
-        $this->logger->warning('No transaction found with', ['userid' => $userid]);
-
+        $this->logger->warning('WalletMapper.loadLiquidityById: No transaction found with', ['userid' => $userid]);
         return 0.0;
     }
 
@@ -280,11 +279,11 @@ class WalletMapper implements WalletCreditable, WalletDebitable
 
             $stmt->execute();
 
-            $this->logger->info('Inserted new transaction into database', ['data' => $data]);
+            $this->logger->info('WalletMapper.insert: Inserted new transaction into database', ['data' => $data]);
 
             return new Wallet($data);
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to insert transaction into database', [
+            $this->logger->error('WalletMapper.insert: Failed to insert transaction into database', [
                 'data' => $data,
                 'exception' => $e->getMessage(),
             ]);
@@ -314,11 +313,11 @@ class WalletMapper implements WalletCreditable, WalletDebitable
 
             $stmt->execute();
 
-            $this->logger->info('Inserted new transaction into database', ['data' => $data]);
+            $this->logger->info('WalletMapper.insertt: Inserted new transaction into database', ['data' => $data]);
 
             return new Wallett($data);
         } catch (\Throwable $e) {
-            $this->logger->error('Failed to insert transaction into database', [
+            $this->logger->error('WalletMapper.insertt: Failed to insert transaction into database', [
                 'data' => $data,
                 'exception' => $e->getMessage(),
             ]);
@@ -372,12 +371,12 @@ class WalletMapper implements WalletCreditable, WalletDebitable
         $this->logger->debug("WalletMapper.fetchWinsLog started for type: $type");
 
         if (empty($userid)) {
-            $this->logger->warning('UserID is missing');
+            $this->logger->debug('WalletMapper.fetchWinsLog: UserID is missing');
             return self::respondWithError(30101);
         }
 
         if (!in_array($type, ['win', 'pay'], true)) {
-            $this->logger->warning('Type is not provided');
+            $this->logger->debug('WalletMapper.fetchWinsLog: Type is not provided');
             return self::respondWithError(30105);
         }
 
@@ -553,7 +552,7 @@ class WalletMapper implements WalletCreditable, WalletDebitable
             $stmt->execute();
             $balance = $stmt->fetchColumn();
 
-            $this->logger->info('Fetched wallet balance', ['balance' => $balance]);
+            $this->logger->info('Fetched wallet balance');
 
             return (float) $balance;
         } catch (\PDOException $e) {

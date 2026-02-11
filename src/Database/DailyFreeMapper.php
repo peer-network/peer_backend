@@ -204,7 +204,7 @@ class DailyFreeMapper
         ];
 
         if (!isset($columnMap[$artType])) {
-            $this->logger->error('Invalid art type provided', ['artType' => $artType]);
+            $this->logger->info('Invalid art type provided', ['artType' => $artType]);
             throw new InvalidArgumentException('Invalid art type provided.');
         }
 

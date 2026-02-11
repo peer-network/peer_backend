@@ -61,17 +61,18 @@ class LeaderBoardService
 
             // End date should be not less than start date
             if ($endDate < $startDate) {
-                $this->logger->error("Error in LeaderBoardService.generateLeaderboard: end date is less than start date");
+                $this->logger->debug("LeaderBoardService.generateLeaderboard: Error in end date is less than start date");
                 return $this::respondWithError(33002);
             }
 
             if ($startDate === false || $endDate === false) {
-                $this->logger->error("Error in LeaderBoardService.generateLeaderboard start or end date parsing");
+                $this->logger->debug("LeaderBoardService.generateLeaderboard: Error in start or end date parsing");
                 return $this::respondWithError(30301);
             }
             $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
 
             if (empty($getResult)) {
+                $this->logger->info("LeaderBoardService.generateLeaderboard: No leaderboard results found");
                 return $this::respondWithError(22201);
             }
 
@@ -88,7 +89,7 @@ class LeaderBoardService
             return self::createSuccessResponse(12301, ['leaderboardResultLink' => $leaderboardResultLink], false);
 
         } catch (\Exception $e) {
-            $this->logger->error("Error in LeaderBoardService.generateLeaderboard", ['exception' => $e->getMessage()]);
+            $this->logger->error("LeaderBoardService.generateLeaderboard: Error in generateLeaderboard", ['exception' => $e->getMessage()]);
             return $this::respondWithError(42201);
         }
     }
@@ -109,7 +110,7 @@ class LeaderBoardService
         $targetDir = $basePath . DIRECTORY_SEPARATOR . $relativeDir;
 
         if (!is_dir($targetDir) && !mkdir($targetDir, 0775, true) && !is_dir($targetDir)) {
-            $this->logger->error("Error in LeaderBoardService.generateCsv creating leaderboard directory");
+            $this->logger->error("LeaderBoardService.generateCsv: Error creating leaderboard directory");
 
             throw new \RuntimeException('Failed to create leaderboard directory');
         }
@@ -118,7 +119,7 @@ class LeaderBoardService
         $handle = fopen($filePath, 'wb');
 
         if ($handle === false) {
-            $this->logger->error("Error in LeaderBoardService.generateCsv opening leaderboard CSV file");
+            $this->logger->error("LeaderBoardService.generateCsv: Error opening leaderboard CSV file");
             throw new \RuntimeException('Failed to open leaderboard CSV file');
         }
 
@@ -147,7 +148,7 @@ class LeaderBoardService
 
         fclose($handle);
 
-        $this->logger->info('LeaderBoardService.generateLeaderboard completed successfully');
+        $this->logger->info('LeaderBoardService.generateCsv completed successfully');
 
         $mediaServer = $_ENV['MEDIA_SERVER_URL'];
 

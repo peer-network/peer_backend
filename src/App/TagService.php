@@ -52,6 +52,7 @@ class TagService
     public function createTag(string $tagName): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning("TagService.createTag: Unauthorized action attempted.");
             return $this::respondWithError(60501);
         }
 
@@ -65,6 +66,7 @@ class TagService
 
             if ($tag) {
                 $this->transactionManager->rollback();
+                $this->logger->error('TagService.createTag: Tag already exists', ['tagName' => $tagName]);
                 return $this::respondWithError(21702);//'Tag already exists.'
             }
 
@@ -75,6 +77,7 @@ class TagService
 
             if (!$this->tagMapper->insert($tag)) {
                 $this->transactionManager->rollback();
+                $this->logger->error("TagService.createTag: Failed to insert tag into database", ['tagName' => $tagName]);
                 return $this->respondWithError(41703);
             }
 
@@ -83,12 +86,14 @@ class TagService
 
         } catch (ValidationException $e) {
             $this->transactionManager->rollback();
+            $this->logger->info("TagService.createTag: Validation error occurred", ['error' => $e->getMessage()]);
             return $this->respondWithError(40301);
         } catch (\Throwable $e) {
             $this->transactionManager->rollback();
+            $this->logger->error("TagService.createTag: Error occurred while creating tag", ['error' => $e->getMessage()]);
             return $this->respondWithError(40301);
         } finally {
-            $this->logger->debug('createTag function execution completed');
+            $this->logger->debug('TagService.createTag: createTag function execution completed');
         }
     }
 
@@ -106,6 +111,10 @@ class TagService
             return $this::createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
+            $this->logger->error("TagService.fetchAll: Error fetching tags", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return $this::respondWithError(41702);
         }
     }
@@ -121,6 +130,7 @@ class TagService
                 $tagData = ['name' => $args['tagName']];
                 $tag = new Tag($tagData, ['name']);
             } else {
+                $this->logger->debug("TagService.loadTag: tagName parameter is missing or empty.");
                 return $this::respondWithError(30101);
             }
 
@@ -139,8 +149,9 @@ class TagService
             return $this::createSuccessResponse(11701, $result);
 
         } catch (\Throwable $e) {
-            $this->logger->error("Error occurred in TagService.loadTag", [
+            $this->logger->error("TagService.loadTag: Error occurred while loading tags", [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return $this::respondWithError(40301);
         }

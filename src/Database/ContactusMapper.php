@@ -17,7 +17,7 @@ class ContactusMapper
     public function checkLimit(string $email): bool
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->warning('Invalid email format in checkLimit', ['email' => $email]);
+            $this->logger->warning('Invalid email format in checkLimit');
             throw new \InvalidArgumentException('Invalid email format.');
         }
 
@@ -35,7 +35,7 @@ class ContactusMapper
             $exists = (bool) $stmt->fetchColumn();
 
             if ($exists) {
-                $this->logger->warning('Submission limit reached for email.', ['email' => $email]);
+                $this->logger->warning('Submission limit reached for email.');
                 return false;
             }
 
@@ -43,7 +43,6 @@ class ContactusMapper
         } catch (\Throwable $e) {
             $this->logger->error('Database error in checkLimit', [
                 'error' => $e->getMessage(),
-                'email' => $email,
                 'query' => $query // Hilft bei Debugging
             ]);
 
@@ -53,7 +52,7 @@ class ContactusMapper
 
     public function checkRateLimit(string $ip): bool
     {
-        $this->logger->debug("ContactusMapper.Rate limit check started for IP: {$ip}");
+        $this->logger->debug("ContactusMapper.Rate limit check started for IP");
 
         try {
             $query = "SELECT request_count, last_request FROM contactus_rate_limit WHERE ip = :ip";
@@ -69,7 +68,7 @@ class ContactusMapper
                 $interval = $now->diff($lastRequest);
 
                 if ($interval->i < 1 && $result['request_count'] >= 5) {
-                    $this->logger->warning("Rate limit exceeded for IP: {$ip}");
+                    $this->logger->warning("Rate limit exceeded for IP");
                     return false;
                 }
 

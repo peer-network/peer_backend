@@ -48,7 +48,7 @@ class CommentInfoService
     private function checkAuthentication(): bool
     {
         if ($this->currentUserId === null) {
-            $this->logger->warning('Unauthorized access attempt');
+            $this->logger->warning('CommentInfoService.checkAuthentication: Unauthorized access attempt');
             return false;
         }
         return true;
@@ -57,10 +57,12 @@ class CommentInfoService
     public function deleteCommentInfo(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('CommentInfoService.deleteCommentInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
+            $this->logger->debug('CommentInfoService.deleteCommentInfo: Invalid commentId', ['commentId' => $commentId]);
             return $this::respondWithError(30201);
         }
 
@@ -69,6 +71,7 @@ class CommentInfoService
         if ($this->commentMapper->delete($commentId)) {
             return ['status' => 'success', 'ResponseCode' => "11606"];
         } else {
+            $this->logger->error('CommentInfoService.deleteCommentInfo: Failed to delete comment', ['commentId' => $commentId]);
             return $this::respondWithError(41603);
         }
     }
@@ -76,10 +79,12 @@ class CommentInfoService
     public function countLikes(string $commentId): int|array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('CommentInfoService.countLikes: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
+            $this->logger->debug('CommentInfoService.countLikes: Invalid commentId', ['commentId' => $commentId]);
             return $this::respondWithError(30103);
         }
 
@@ -88,6 +93,7 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
+            $this->logger->debug('CommentInfoService.countLikes: Comment info not found', ['commentId' => $commentId]);
             return $this::respondWithError(31601);
         }
 
@@ -97,10 +103,12 @@ class CommentInfoService
     public function likeComment(string $commentId): array
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('CommentInfoService.likeComment: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
+            $this->logger->debug('CommentInfoService.likeComment: Invalid commentId', ['commentId' => $commentId]);
             return $this::respondWithError(30201);
         }
 
@@ -109,10 +117,12 @@ class CommentInfoService
         $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentInfo) {
+            $this->logger->debug('CommentInfoService.likeComment: Comment info not found', ['commentId' => $commentId]);
             return $this::respondWithError(31601);
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
+            $this->logger->debug('CommentInfoService.likeComment: User cannot like own comment', ['commentId' => $commentId]);
             return $this::respondWithError(31606);
         }
 
@@ -143,6 +153,7 @@ class CommentInfoService
             $specs,
             $commentId
         ) === false) {
+            $this->logger->debug('CommentInfoService.likeComment: Interaction not allowed', ['commentId' => $commentId]);
             return $this::respondWithError(31608, ['commentid' => $commentId]);
         }
         try {
@@ -151,6 +162,7 @@ class CommentInfoService
             $exists = $this->commentInfoMapper->addUserActivity('likeComment', $this->currentUserId, $commentId);
 
             if (!$exists) {
+                $this->logger->debug('CommentInfoService.likeComment: Failed to add user activity', ['commentId' => $commentId]);
                 return $this::respondWithError(31604);
             }
 
@@ -172,29 +184,31 @@ class CommentInfoService
         $this->logger->debug('CommentInfoService.reportComment started');
 
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('CommentInfoService.reportComment: Authentication failed');
             return $this::respondWithError(60501);
         }
 
         if (!self::isValidUUID($commentId)) {
+            $this->logger->debug('CommentInfoService.reportComment: Invalid commentId', ['commentId' => $commentId]);
             return $this::respondWithError(30201);
         }
 
         try {
             $comment = $this->commentMapper->loadById($commentId);
             if (!$comment) {
-                $this->logger->warning('Comment not found');
+                $this->logger->debug('CommentInfoService.reportComment: Comment not found', ['commentId' => $commentId]);
                 return $this->respondWithError(31601);
             }
 
             if ($this->moderationMapper->wasContentRestored($commentId, 'comment')) {
-                $this->logger->warning('CommentInfoService: reportComment: User tries to report a restored comment');
+                $this->logger->debug('CommentInfoService.reportComment: User tries to report a restored comment', ['commentId' => $commentId]);
                 return $this->respondWithError(32104);
             }
 
             $commentInfo = $this->commentInfoMapper->loadById($commentId);
 
             if (!$commentInfo) {
-                $this->logger->warning('Error while fetching comment data from db');
+                $this->logger->debug('CommentInfoService.reportComment: Error while fetching comment data from db', ['commentId' => $commentId]);
                 return $this->respondWithError(31601);
             }
         } catch (\Exception $e) {
@@ -203,7 +217,7 @@ class CommentInfoService
         }
 
         if ($commentInfo->getOwnerId() === $this->currentUserId) {
-            $this->logger->warning("User tries to report on his own comment");
+            $this->logger->debug('CommentInfoService.reportComment: User tries to report own comment', ['commentId' => $commentId]);
             return $this::respondWithError(31607);
         }
 
@@ -216,7 +230,7 @@ class CommentInfoService
         try {
             // User Should NOT be possible to report the same
             if ($this->reportsMapper->isModerated($commentId, ReportTargetType::COMMENT->value)) {
-                $this->logger->warning("PostInfoService: reportComment: User tries to report a moderated comment");
+                $this->logger->debug('CommentInfoService.reportComment: User tries to report a moderated comment', ['commentId' => $commentId]);
                 return $this::respondWithError(32102); // This content has already been reviewed and moderated by our team.
             }
 
@@ -235,7 +249,7 @@ class CommentInfoService
             }
 
             if ($exists === true) {
-                $this->logger->warning('Comment report already exists');
+                $this->logger->debug('CommentInfoService.reportComment: Comment report already exists', ['commentId' => $commentId]);
                 return $this->respondWithError(31605);
             }
 
@@ -255,6 +269,7 @@ class CommentInfoService
     public function findCommentInfo(string $commentId): array|false
     {
         if (!$this->checkAuthentication()) {
+            $this->logger->warning('CommentInfoService.findCommentInfo: Authentication failed');
             return $this::respondWithError(60501);
         }
 
@@ -263,6 +278,7 @@ class CommentInfoService
         $commentinfo = $this->commentInfoMapper->loadById($commentId);
 
         if (!$commentinfo) {
+            $this->logger->debug('CommentInfoService.findCommentInfo: Comment info not found', ['commentId' => $commentId]);
             return $this::respondWithError(31601);
         }
 
