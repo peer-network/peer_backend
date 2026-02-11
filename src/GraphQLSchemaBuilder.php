@@ -1778,7 +1778,7 @@ class GraphQLSchemaBuilder
 
     protected function resolveHello(mixed $root, array $args, mixed $context): array
     {
-        $this->logger->debug('Query.hello started', ['args' => $args]);
+        $this->logger->info('Query.hello started', ['args' => $args]);
 
         /**
          * Map Role Mask
@@ -2102,7 +2102,7 @@ class GraphQLSchemaBuilder
                     'commentPrice' => isset($result['comment_price']) ? (float)$result['comment_price'] : 0.0,
                 ];
             }
-            $this->logger->info('resolveActionPrices: Successfully fetched prices', $affectedRows);
+            $this->logger->info('resolveActionPrices: Successfully fetched prices');
             return $this::createSuccessResponse(11304, $affectedRows, false);
         } catch (\Throwable $e) {
             $this->logger->error('GraphQLSchemaBuilder.resolveActionPrices exception', [
@@ -2149,7 +2149,7 @@ class GraphQLSchemaBuilder
             ],
         ];
 
-        $this->logger->info('GraphQLSchemaBuilder.getTokenomics finished', ['payload' => $payload]);
+        $this->logger->info('GraphQLSchemaBuilder.getTokenomics finished');
         return $payload;
     }
     protected function resolveComments(array $args): array
@@ -3306,7 +3306,6 @@ class GraphQLSchemaBuilder
                 'rol' => $decodedToken->rol,
                 'uid' => $decodedToken->uid
             ];
-            $this->logger->info('GraphQLSchemaBuilder.refreshToken See my payload:', ['payload' => $payload]);
 
             $accessToken = $this->tokenService->createAccessToken($payload);
             $newRefreshToken = $this->tokenService->createRefreshToken($payload);

@@ -183,7 +183,6 @@ class CommentService
             $commentResponse = $result->getArrayCopy();
             $commentResponse['user'] = $this->userMapper->loadUserInfoById($this->currentUserId);
 
-            $this->logger->info('Comment created successfully', ['commentResponse' => $commentResponse]);
             $response = [$commentResponse];
 
             $this->logger->info('CommentService.createComment completed successfully');

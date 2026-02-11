@@ -72,7 +72,7 @@ class LeaderBoardService
             $getResult = $this->leaderBoardMapper->getLeaderboardResult($start_date, $end_date, $leaderboardUsersCount);
 
             if (empty($getResult)) {
-                $this->logger->error("LeaderBoardService.generateLeaderboard: No leaderboard results found");
+                $this->logger->info("LeaderBoardService.generateLeaderboard: No leaderboard results found");
                 return $this::respondWithError(22201);
             }
 

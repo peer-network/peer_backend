@@ -157,7 +157,7 @@ class MultipartPostService
             $updateStmt->bindValue(':status', 'FILE_UPLOADED', PDO::PARAM_STR);
             $updateStmt->bindValue(':token', $eligibilityToken, PDO::PARAM_STR);
             $updateStmt->execute();
-            $this->logger->info("MultipartPostService.updateTokenStatus: Updated token status to FILE_UPLOADED", ['eligibilityToken' => $eligibilityToken]);
+            $this->logger->info("MultipartPostService.updateTokenStatus: Updated token status to FILE_UPLOADED");
 
         } catch (\Throwable $e) {
             $this->logger->error("MultipartPostService.updateTokenStatus: Exception occurred while inserting token", [

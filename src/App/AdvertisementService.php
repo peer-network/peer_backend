@@ -464,7 +464,7 @@ class AdvertisementService
                 'tokencost' => $tokencost,
                 'eurocost' => $eurocost,
             ];
-            $this->logger->info('Post advertisementData', ['advertisementData' => $advertisementData]);
+            $this->logger->info('Post advertisementData', ['advertisementid' => $advertisementId]);
 
             try {
                 $advertisement = new Advertisements($advertisementData);
@@ -509,7 +509,7 @@ class AdvertisementService
             }
 
             $data = $resp->getArrayCopy();
-            $this->logger->info('AdvertisementService.createAdvertisement: Successfully created advertisement.', ['data' => $data]);
+            $this->logger->info('AdvertisementService.createAdvertisement: Successfully created advertisement.', ['advertisementid' => $data['advertisementid']]);
             return self::createSuccessResponse($rescode, [$data]);
 
         } catch (\Throwable $e) {
