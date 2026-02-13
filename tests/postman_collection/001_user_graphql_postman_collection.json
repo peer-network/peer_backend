@@ -2728,7 +2728,7 @@
       "response": []
     },
 		{
-			"name": "Listposts (confirm tags)",
+			"name": "Listposts (confirm tags and link)",
 			"event": [
 				{
 					"listen": "test",
@@ -2771,7 +2771,27 @@
 							"",
 							"    console.log(\"Tags for post\", postId, \":\", tags);",
 							"});",
-							""
+							"pm.test(\"Post URL matches postid\", function () {",
+							"    const response = pm.response.json();",
+							"    const posts = response?.data?.listPosts?.affectedRows || [];",
+							"    const expectedPostId = pm.environment.get(\"postid\");",
+							"",
+							"    if (!expectedPostId) {",
+							"        throw new Error(\"Environment variable 'postid' is not set.\");",
+							"    }",
+							"",
+							"    pm.expect(posts.length, \"Posts list should not be empty\").to.be.above(0);",
+							"",
+							"    const post = posts.find(p => p.id === expectedPostId);",
+							"",
+							"    if (!post) {",
+							"        throw new Error(`Post with ID ${expectedPostId} not found.`);",
+							"    }",
+							"",
+							"    const expectedUrl = `http://localhost:8888/post/${expectedPostId}`;",
+							"",
+							"    pm.expect(post.url, \"Post URL should match expected format\").to.eql(expectedUrl);",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {},
