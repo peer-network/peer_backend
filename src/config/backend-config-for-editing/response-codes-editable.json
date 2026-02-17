@@ -359,6 +359,17 @@
         "comment": "Leaderboard generated successfully.",
         "userFriendlyComment": "Leaderboard generated successfully."
     },
+<<<<<<< Updated upstream
+=======
+    "12401": {
+        "comment": "Success: user device token added successfully",
+        "userFriendlyComment": "User device token added successfully."
+    },
+    "12501": {
+        "comment": "Success: field validation passed",
+        "userFriendlyComment": "Field validation passed."
+    },
+>>>>>>> Stashed changes
 
     "21001": {
         "comment": "Information Not Found: No users found. Please refine your search or try a different query",
@@ -832,6 +843,14 @@
         "comment": "addressLine2 must be a valid street address.",
         "userFriendlyComment": "Please enter a valid street address."
     },
+    "30280": {
+        "comment": "The 'apprequestid' field is required.",
+        "userFriendlyComment": "App request ID is required."
+    },
+    "30281": {
+        "comment": "The 'apprequestid' field must be a valid UUID v4.",
+        "userFriendlyComment": "App request ID must be a valid UUID v4."
+    },
     "30301": {
         "comment": "Input Required: Input is required to proceed. Please provide the necessary information and try again",
         "userFriendlyComment": "Input required. Please provide the needed information."
@@ -859,6 +878,10 @@
     "30601": {
         "comment": "Already Exists: Email is already registered. Please use a different email",
         "userFriendlyComment": "Email already registered. Use a different one."
+    },
+    "30602": {
+        "comment": "Already Exists: Username is already registered. Please use a different username",
+        "userFriendlyComment": "Username already registered. Use a different one."
     },
     "30701": {
         "comment": "Information: Account is already verified. No further action is required",

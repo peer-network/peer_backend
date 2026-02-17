@@ -5,6 +5,11 @@ type DefaultResponse {
   ResponseMessage: String!
 }
 
+type ValidationResponse {
+  apprequestid: String!
+  response: DefaultResponse!
+}
+
 type TransactionHistoryResponse {
   meta: DefaultResponse
   affectedRows: [TransactionHistoryItem!]

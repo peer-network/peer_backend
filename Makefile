@@ -150,12 +150,23 @@ dev: check-hooks reset-db-and-backend init ## Full setup: env.ci, DB reset, vend
 		echo "Waiting for DB..."; sleep 2; \
 	done
 
+	@echo "Starting Redis..."
+	$(MAKE) redis
+
 	@echo "Starting backend..."
 	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d backend
 	
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
+	done
+
+	@echo "Starting notifications worker..."
+	docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml up -d notifications-worker
+
+	@echo "Waiting for notifications worker healthcheck..."
+	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose --env-file "./.env.ci" -f docker-compose.yml -f docker-compose.override.local.yml ps -q notifications-worker))" = "healthy" ]; do \
+		echo "Waiting for notifications worker..."; sleep 2; \
 	done
 
 	@echo "Backend is healthy and ready!"
@@ -178,6 +189,14 @@ restart: ## Soft restart with fresh DB but keep current code & vendors
 	@echo "Waiting for backend to be healthy..."
 	until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
 		echo "Waiting for Backend..."; sleep 2; \
+	done
+
+	@echo "Starting notifications worker..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d notifications-worker
+
+	@echo "Waiting for notifications worker healthcheck..."
+	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose --env-file .env.ci $(COMPOSE_FILES) ps -q notifications-worker))" = "healthy" ]; do \
+		echo "Waiting for notifications worker..."; sleep 2; \
 	done
 
 	@echo "Soft restart completed. DB is clean and current code is live!"
@@ -405,7 +424,7 @@ phpstan-fast: env-ci ## Run PHPStan using already built backend & local vendor (
 		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
 
 # ---- Developer Shortcuts ----
-.PHONY: logs db bash-backend
+.PHONY: logs db bash-backend redis redis-logs redis-cli restart-redis worker worker-logs worker-restart worker-stop
 
 logs: ## Tail backend container logs
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f backend
@@ -416,6 +435,44 @@ db: ## Open psql shell into Postgres
 
 bash-backend: ## Open interactive shell in backend container
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) exec backend bash
+
+redis: ## Start Redis and wait until healthy
+	@echo "Starting Redis..."
+	docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) up -d redis
+
+	@echo "Waiting for Redis healthcheck..."
+	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose --env-file "./.env.ci" $(COMPOSE_FILES) ps -q redis))" = "healthy" ]; do \
+		echo "Waiting for Redis..."; sleep 2; \
+	done
+	@echo "Redis is healthy and ready!"
+
+redis-logs: ## Tail Redis logs
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f redis
+
+redis-cli: ## Open redis-cli in Redis container
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) exec redis redis-cli
+
+restart-redis: ## Restart Redis service
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) restart redis
+
+worker: ## Start notifications worker and wait until healthy
+	@echo "Starting notifications worker..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d notifications-worker
+
+	@echo "Waiting for notifications worker healthcheck..."
+	until [ "$$(docker inspect --format='{{.State.Health.Status}}' $$(docker-compose --env-file .env.ci $(COMPOSE_FILES) ps -q notifications-worker))" = "healthy" ]; do \
+		echo "Waiting for notifications worker..."; sleep 2; \
+	done
+	@echo "Notifications worker is healthy and ready!"
+
+worker-logs: ## Tail notifications worker logs
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f notifications-worker
+
+worker-restart: ## Restart notifications worker service
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) restart notifications-worker
+
+worker-stop: ## Stop notifications worker service
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) stop notifications-worker
 
 help: ## Show available make targets
 	@echo "Available targets:"

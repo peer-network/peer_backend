@@ -58,3 +58,9 @@ input LeaderboardParamsInput {
   end_date: String!,
   leaderboardUsersCount: Int!
 }
+
+enum ValidationKey {
+  EMAIL
+  USERNAME
+  PASSWORD
+}

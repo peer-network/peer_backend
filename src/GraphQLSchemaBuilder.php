@@ -42,6 +42,7 @@ use Fawaz\App\Errors\ErrorMapper;
 use Fawaz\Utils\ArrayNormalizer;
 use Fawaz\App\ValidationException;
 use Fawaz\App\ModerationService;
+use Fawaz\App\FieldValidationService;
 use Fawaz\App\Status;
 use Fawaz\App\Validation\RequestValidator;
 use Fawaz\App\Validation\ValidatorErrors;
@@ -101,7 +102,8 @@ class GraphQLSchemaBuilder
         protected ResponseMessagesProvider $responseMessagesProvider,
         protected InteractionsPermissionsMapper $interactionsPermissionsMapper,
         protected AlphaMintService $alphaMintService,
-        protected TransactionManager $transactionManager
+        protected TransactionManager $transactionManager,
+        protected FieldValidationService $fieldValidationService
     ) {
         $this->resolvers = $this->buildResolvers();
     }
@@ -845,6 +847,10 @@ class GraphQLSchemaBuilder
                 'ResponseCode' => fn (array $root): string => $root['ResponseCode'] ?? "",
                 'ResponseMessage' => fn (array $root): string => $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '',
                 'RequestId' => fn (array $root): string => $this->logger->getRequestUid(),
+            ],
+            'ValidationResponse' => [
+                'apprequestid' => fn (array $root): string => $root['apprequestid'] ?? '',
+                'response' => fn (array $root): array => $root['response'] ?? self::respondWithError(40301),
             ],
             'AuthPayload' => [
                 'meta' => fn (array $root): array => [
@@ -1740,7 +1746,8 @@ class GraphQLSchemaBuilder
             'moderationItems' => fn (mixed $root, array $args) => $this->moderationItems($args),
             'shopOrderDetails' => fn (mixed $root, array $args) => $this->shopOrderDetails($args),
             'getMintAccount' => fn (mixed $root, array $args) => $this->mintService->getMintAccount(),
-            'generateLeaderboard' => fn (mixed $root, array $args) => $this->generateLeaderboard($args)
+            'generateLeaderboard' => fn (mixed $root, array $args) => $this->generateLeaderboard($args),
+            'validate' => fn (mixed $root, array $args) => $this->resolveValidate($args)
         ];
     }
 
@@ -1805,6 +1812,38 @@ class GraphQLSchemaBuilder
             'lastMergedPullRequestNumber' => "thingy is replaced with 'currentVersion' field",
             'companyAccountId' => FeesAccountHelper::getAccounts()['PEER_BANK'],
         ];
+    }
+
+    protected function resolveValidate(array $args): array
+    {
+        $appRequestId = trim((string)($args['apprequestid'] ?? ''));
+        if ($appRequestId === '') {
+            return [
+                'apprequestid' => '',
+                'response' => $this::respondWithError(30280),
+            ];
+        }
+
+        if (!$this->isUuidV4($appRequestId)) {
+            return [
+                'apprequestid' => $appRequestId,
+                'response' => $this::respondWithError(30281),
+            ];
+        }
+
+        return $this->fieldValidationService->validateField(
+            (string)($args['key'] ?? ''),
+            (string)($args['value'] ?? ''),
+            $appRequestId
+        );
+    }
+
+    private function isUuidV4(string $uuid): bool
+    {
+        return preg_match(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
+            $uuid
+        ) === 1;
     }
 
     // Werbeanzeige historie abrufen
