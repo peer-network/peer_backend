@@ -26,42 +26,31 @@ trait ResponseHelper
         return [];
     }
 
-    private static function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function createSuccessResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?string $clientRequestId = null): array
     {
         return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
             $countKey,
-            false
+            false,
+            $clientRequestId
         );
     }
 
-    private static function createSuccessResponseObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): SuccessResponse
-    {
-        return new SuccessResponse(
-            self::createResponse(
-                $responseCode,
-                $data,
-                $countEnabled,
-                $countKey,
-                true
-            )
-        );
-    }
-
-    private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): array
+    private static function respondWithError(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null,?string $clientRequestId = null): array
     {
         return self::createResponse(
             $responseCode,
             $data,
             $countEnabled,
             $countKey,
-            true
+            true,
+            $clientRequestId
         );
     }
 
-    private static function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null): ErrorResponse
+    private static function respondWithErrorObject(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?string $clientRequestId = null): ErrorResponse
     {
         return new ErrorResponse(
             self::createResponse(
@@ -69,12 +58,13 @@ trait ResponseHelper
                 $data,
                 $countEnabled,
                 $countKey,
-                true
+                true,
+                $clientRequestId
             )
         );
     }
 
-    private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null): array
+    private static function createResponse(int $responseCode, array|object $data = [], bool $countEnabled = true, ?string $countKey = null, ?bool $isError = null,?string $clientRequestId = null): array
     {
         // Determine if it is success (codes starting with 1 or 2) or error (3,4,5,6)
         $firstDigit = (int)substr((string)$responseCode, 0, 1);
@@ -86,6 +76,7 @@ trait ResponseHelper
 
         $response = [
             'status' => $isSuccess ? 'success' : 'error',
+            'clientRequestId' => $clientRequestId ?? "",
             'ResponseCode' => (string)$responseCode
         ];
 
