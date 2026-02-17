@@ -6,7 +6,7 @@ schema {
 type Query {
   hello: HelloResponse
   guestListPost(postid: ID!): PostResponse!
-  validate(key: ValidationKey!, value: String!, apprequestid: String!): ValidationResponse!
+  validate(key: String!, value: String!, clientRequestId: String!): DefaultResponse!
 }
 
 type Mutation {

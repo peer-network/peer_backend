@@ -846,11 +846,8 @@ class GraphQLSchemaBuilder
                 },
                 'ResponseCode' => fn (array $root): string => $root['ResponseCode'] ?? "",
                 'ResponseMessage' => fn (array $root): string => $this->responseMessagesProvider->getMessage($root['ResponseCode']) ?? '',
+                'clientRequestId' => fn (array $root): string => $root['clientRequestId'] ?? "",
                 'RequestId' => fn (array $root): string => $this->logger->getRequestUid(),
-            ],
-            'ValidationResponse' => [
-                'apprequestid' => fn (array $root): string => $root['apprequestid'] ?? '',
-                'response' => fn (array $root): array => $root['response'] ?? self::respondWithError(40301),
             ],
             'AuthPayload' => [
                 'meta' => fn (array $root): array => [
@@ -1816,25 +1813,19 @@ class GraphQLSchemaBuilder
 
     protected function resolveValidate(array $args): array
     {
-        $appRequestId = trim((string)($args['apprequestid'] ?? ''));
-        if ($appRequestId === '') {
-            return [
-                'apprequestid' => '',
-                'response' => $this::respondWithError(30280),
-            ];
+        $clientRequestId = trim((string)($args['clientRequestId'] ?? ''));
+        if ($clientRequestId === '') {
+            return $this::respondWithError(30280);
         }
 
-        if (!$this->isUuidV4($appRequestId)) {
-            return [
-                'apprequestid' => $appRequestId,
-                'response' => $this::respondWithError(30281),
-            ];
+        if (!$this->isUuidV4($clientRequestId)) {
+            return $this::respondWithError(30281, clientRequestId: $clientRequestId);
         }
 
         return $this->fieldValidationService->validateField(
             (string)($args['key'] ?? ''),
             (string)($args['value'] ?? ''),
-            $appRequestId
+            $clientRequestId
         );
     }
 

@@ -18,20 +18,23 @@ class FieldValidationService
     ) {
     }
 
-    public function validateField(string $key, string $value, string $appRequestId): array
+    public function validateField(string $key, string $value, string $clientRequestId): array
     {
         $normalizedKey = strtoupper(trim($key));
+        if ($normalizedKey === '') {
+            return [
+                'response' => self::respondWithError(30105, clientRequestId: $clientRequestId),
+            ];
+        }
+
         $result = match ($normalizedKey) {
             'EMAIL' => $this->validateEmail($value),
             'USERNAME' => $this->validateUsername($value),
             'PASSWORD' => $this->validatePassword($value),
-            default => self::respondWithError(30105),
+            default => self::respondWithError(30105,clientRequestId: $clientRequestId),
         };
 
-        return [
-            'apprequestid' => $appRequestId,
-            'response' => $result,
-        ];
+        return $result;
     }
 
     private function validateEmail(string $email): array

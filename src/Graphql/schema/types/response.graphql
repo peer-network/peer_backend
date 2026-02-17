@@ -1,13 +1,9 @@
 type DefaultResponse {
   status: String!
+  clientRequestId: String!
   RequestId: String!
   ResponseCode: String!
   ResponseMessage: String!
-}
-
-type ValidationResponse {
-  apprequestid: String!
-  response: DefaultResponse!
 }
 
 type TransactionHistoryResponse {

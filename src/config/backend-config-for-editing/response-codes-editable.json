@@ -844,11 +844,11 @@
         "userFriendlyComment": "Please enter a valid street address."
     },
     "30280": {
-        "comment": "The 'apprequestid' field is required.",
+        "comment": "The 'clientRequestId' field is required.",
         "userFriendlyComment": "App request ID is required."
     },
     "30281": {
-        "comment": "The 'apprequestid' field must be a valid UUID v4.",
+        "comment": "The 'clientRequestId' field must be a valid UUID v4.",
         "userFriendlyComment": "App request ID must be a valid UUID v4."
     },
     "30301": {
