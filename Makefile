@@ -410,6 +410,24 @@ phpstan-fast: env-ci ## Run PHPStan using already built backend & local vendor (
 logs: ## Tail backend container logs
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) logs -f backend
 
+stop: ## Stop backend and DB containers without removing volumes
+	@if [ ! -f .env.ci ]; then \
+		echo ".env.ci missing. Run 'make dev' first to set up the environment."; \
+		exit 1; \
+	fi
+	@echo "Stopping backend and database containers..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) stop backend db
+	@echo "Containers stopped (volumes preserved)."
+
+start: ## Start backend and DB containers using existing images/config
+	@if [ ! -f .env.ci ]; then \
+		echo ".env.ci missing. Run 'make dev' first to set up the environment."; \
+		exit 1; \
+	fi
+	@echo "Starting database and backend containers..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) up -d db backend
+	@echo "Stack started."
+
 db: ## Open psql shell into Postgres
 	@docker-compose --env-file .env.ci $(COMPOSE_FILES) exec -e PGPASSWORD=$(DB_PASSWORD) db \
 	    psql -h $(DB_HOST) -U $(DB_USERNAME) -d $(DB_DATABASE)
