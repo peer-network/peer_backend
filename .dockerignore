@@ -32,3 +32,6 @@ npm-debug.log
 # Ignore local-only override file if it ever exists
 docker-compose.override.yml
 docker-compose.override.local.yml
+
+# Runtime artifacts are mounted at runtime; skip copying huge local data
+runtime-data/

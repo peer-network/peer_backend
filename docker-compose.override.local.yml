@@ -33,8 +33,7 @@ services:
     volumes:
       - ./src:/var/www/html/src
       - ./docs:/var/www/html/docs
-      - ./runtime-data/logs:/var/www/html/runtime-data/logs
-      - ./runtime-data/media/assets:/var/www/html/runtime-data/media/assets
+      - ./runtime-data:/var/www/html/runtime-data
     networks:
       - my-network
   newman:
