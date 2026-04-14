@@ -386,7 +386,6 @@ class GraphQLSchemaBuilder
                 },
                 'email' => fn(array $root): string => $root['email'] ?? '',
                 'username' => fn(array $root): string => $root['username'] ?? '',
-                'password' => fn(array $root): string => $root['password'] ?? '',
                 'status' => fn(array $root): int => $root['status'] ?? 0,
                 'verified' => fn(array $root): int => $root['verified'] ?? 0,
                 'slug' => fn(array $root): int => $root['slug'] ?? 0,
