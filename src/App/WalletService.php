@@ -166,6 +166,10 @@ class WalletService
     /**
      * Transfer Tokens from User Wallet for Advertisement Actions
      * Add logwins entry
+     *
+     * IMPORTANT: This method does not manage its own database transaction.
+     * Callers must wrap this in a TransactionManager::beginTransaction()/commit()/rollback()
+     * so that the transfer and logwins insert are atomic with the surrounding operation (e.g. post creation).
      */
     public function performPayment(string $userId, TransferStrategy $transferStrategy, ?array $args = []): ?array
     {

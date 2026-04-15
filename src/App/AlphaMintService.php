@@ -40,11 +40,16 @@ class AlphaMintService
     }
 
     /**
+     * @deprecated One-time alpha-to-beta token migration — already executed, no longer in use.
+     * Note: Original implementation lacked transaction wrapping around the transfer loop.
+     * If re-used in the future, wrap the loop in TransactionManager::beginTransaction()/commit().
+     *
      * Run Alpha Minting Process
-     * 
-     * This function is used to mint Alpha Tokens for the Alpha Mint account and
+     *
+     * This function was used to mint Alpha Tokens for the Alpha Mint account and
      * distribute them to the Alpha Users as per the Alpha_tokens_to_Peer_tokens.json file
      */
+    /*
     public function alphaMint(?array $args = []): array
     {
         if (!$this->checkAuthentication()) {
@@ -56,7 +61,7 @@ class AlphaMintService
         try {
 
             $alphaUserAc = $this->userMapper->loadByEmail('alpha_mint@peerapp.de');
-            
+
             // If Alpha Mint account does not exist, create it
             if(!$alphaUserAc){
                 $alphaMintAccount = [
@@ -74,7 +79,7 @@ class AlphaMintService
             if($alphaUserAc && $alphaUserAc->getUserId()){
 
                 $mintUserId = $alphaUserAc->getUserId();
-                
+
                 // Get Alpha Users from Alpha_tokens_to_Peer_tokens.json file
                 $alphaUsers = json_decode(file_get_contents(__DIR__ . '/../../runtime-data/Alpha_tokens_to_Peer_tokens.json'), true);
 
@@ -133,7 +138,7 @@ class AlphaMintService
                     'ResponseCode' => 200,
                 ];
             }
-            
+
             return [
                 'status' => 'error',
                 'ResponseCode' => 500
@@ -143,5 +148,6 @@ class AlphaMintService
             return self::respondWithError(41020);
         }
     }
+    */
 
 }
