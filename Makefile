@@ -404,6 +404,30 @@ phpstan-fast: env-ci ## Run PHPStan using already built backend & local vendor (
 		-v "$(PWD)":/var/www/html \
 		backend sh -c "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G"
 
+# ---- Service Lifecycle ----
+.PHONY: stop start status
+
+stop: ## Stop all services without removing containers or volumes
+	@echo "Stopping services..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) stop
+	@echo "Services stopped. Run 'make start' to bring them back up."
+
+start: ## Start previously stopped services (no rebuild, no volume reset)
+	@echo "Starting services..."
+	docker-compose --env-file .env.ci $(COMPOSE_FILES) start
+	@echo "Waiting for Postgres to be ready..."
+	@until docker-compose --env-file .env.ci $(COMPOSE_FILES) exec -T db pg_isready -U postgres 2>/dev/null | grep -q "accepting connections"; do \
+		echo "Waiting for DB..."; sleep 2; \
+	done
+	@echo "Waiting for backend to be healthy..."
+	@until curl -s -o /dev/null -w "%{http_code}" http://localhost:8888/health | grep -q "200"; do \
+		echo "Waiting for Backend..."; sleep 2; \
+	done
+	@echo "All services are up and healthy!"
+
+status: ## Show the status of all project containers
+	@docker-compose --env-file .env.ci $(COMPOSE_FILES) ps
+
 # ---- Developer Shortcuts ----
 .PHONY: logs db bash-backend
 
