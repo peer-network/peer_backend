@@ -17,7 +17,8 @@ extend type Mutation {
   gemsters(day: DayFilterType!): GemstersResponse!
   distributeTokensForGems(date: String!): GemstersResponse!
   distributeTokensForGemsWithoutBalanceUpdate(date: String!): GemstersResponse!
-  alphaMint: DefaultResponse!
+  # @deprecated One-time alpha-to-beta migration — no longer in use.
+  # alphaMint: DefaultResponse!
 }
 
 

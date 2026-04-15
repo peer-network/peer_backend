@@ -216,7 +216,9 @@ class GraphQLSchemaBuilder
 
     protected function setCurrentUserIdForServices(string $userid): void
     {
+        /* @deprecated One-time alpha-to-beta migration — no longer in use.
         $this->alphaMintService->setCurrentUserId($userid);
+        */
         $this->moderationService->setCurrentUserId($userid);
         $this->userService->setCurrentUserId($userid);
         $this->profileService->setCurrentUserId($userid);
@@ -1780,7 +1782,9 @@ class GraphQLSchemaBuilder
             'advertisePostBasic' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'advertisePostPinned' => fn (mixed $root, array $args) => $this->advertisementService->resolveAdvertisePost($args),
             'performModeration' => fn (mixed $root, array $args) => $this->performModerationAction($args),
+            /* @deprecated One-time alpha-to-beta migration — no longer in use.
             'alphaMint' => fn(mixed $root, array $args) => $this->alphaMintService->alphaMint($args),
+            */
             'performShopOrder' => fn(mixed $root, array $args) => $this->performShopOrder($args),
             'runCompensationTransactionsFromCsv' => fn(mixed $root, array $args) => $this->runCompensationTransactionsFromCsv()
         ];
