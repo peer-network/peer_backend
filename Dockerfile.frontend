@@ -1,0 +1,54 @@
+# Dockerfile.frontend — Stack P PHP-frontend image variant.
+#
+# This image is the same peer_backend codebase as the authoritative
+# backend image, but configured to serve `public/host.php` as the
+# request entrypoint. host.php proxies every request to the PHP backend
+# (PHP_BACKEND_URL) and, when SHADOW_DISPATCH_FLAG=1, forks the same
+# request to peergamma (PEERGAMMA_URL) for parity comparison.
+#
+# Why a separate image rather than the same image with different env:
+# nginx routing is baked at build time. The backend variant serves
+# `index.php` (the full Slim app); the frontend variant serves
+# `host.php` (proxy + shadow fork). Switching at runtime would require
+# templating nginx.conf at container start, which is more moving parts.
+#
+# Build (locally or in CI):
+#
+#   docker build -t peer-frontend:latest -f Dockerfile.frontend .
+#
+# Wired into Stack P via aelix `nix/modules/stack-p.nix` →
+# infra/docker-compose.stack-p.yml's `php-frontend` service.
+
+FROM ghcr.io/peer-network/php-backend-base:latest
+
+WORKDIR /var/www/html
+
+COPY . .
+
+RUN rm -f /usr/local/etc/php/conf.d/ffi.ini \
+ && echo 'ffi.enable=true' > /usr/local/etc/php/conf.d/zz-ffi.ini
+
+# Composer install — host.php has no DB dependencies but does pull
+# in the autoloader for src/ShadowDispatch/*.
+RUN curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer
+
+RUN composer config --global process-timeout 600 \
+ && composer install --no-dev --prefer-dist --no-interaction \
+ && composer dump-autoload -o
+
+# Swap nginx config to the frontend variant so host.php is the entrypoint.
+COPY docker/nginx/frontend.conf /etc/nginx/conf.d/default.conf
+
+# DLQ directory + log directory.
+RUN mkdir -p /var/www/html/runtime-data/logs \
+          /var/www/html/runtime-data/shadow-dlq \
+ && touch /var/www/html/runtime-data/logs/errorlog.txt \
+ && chmod 666 /var/www/html/runtime-data/logs/errorlog.txt \
+ && chown -R www-data:www-data /var/www/html/runtime-data
+
+RUN chown -R www-data:www-data /var/www/
+
+# Same supervisord config as the backend (php-fpm + nginx).
+EXPOSE 80
+CMD ["supervisord", "-c", "/var/www/html/docker/supervisord.conf"]
